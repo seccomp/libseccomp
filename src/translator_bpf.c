@@ -139,7 +139,7 @@ static int _seccomp_bpf_append(struct bpf_filter *bpf,
  * Returns zero on success, negative values on failure.
  *
  */
-static int _seccomp_pbf_syscall_arg(unsigned int sys_num,
+static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 				    struct db_syscall_arg_list *arg,
 				    struct bpf_filter *bpf)
 {
@@ -280,7 +280,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 
 		/* iterate over the arguments */
 		db_list_foreach(a_iter, sys->args) {
-			rc = _seccomp_pbf_syscall_arg(sys->num, a_iter, bpf);
+			rc = _seccomp_bpf_syscall_arg(sys->num, a_iter, bpf);
 			if (rc < 0)
 				return rc;
 		}
