@@ -156,7 +156,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			ARG(arg->num),
 		};
 		rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-		if (rc == 0)
+		if (rc < 0)
 			return -ENOMEM;
 	}
 
@@ -168,7 +168,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else if (v_iter->op == SCMP_CMP_LT) {
 			struct seccomp_filter_block blk[] = {
@@ -176,7 +176,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else if (v_iter->op == SCMP_CMP_LE) {
 			struct seccomp_filter_block blk[] = {
@@ -184,7 +184,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else if (v_iter->op == SCMP_CMP_EQ) {
 			struct seccomp_filter_block blk[] = {
@@ -192,7 +192,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else if (v_iter->op == SCMP_CMP_GE) {
 			struct seccomp_filter_block blk[] = {
@@ -200,7 +200,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else if (v_iter->op == SCMP_CMP_GT) {
 			struct seccomp_filter_block blk[] = {
@@ -208,7 +208,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			};
 			rc = _seccomp_bpf_append(bpf, blk,
 						 _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else
 			return -EFAULT;
@@ -220,7 +220,7 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 			_LABEL(&bpf->lbls, lbl_end),
 		};
 		rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-		if (rc == 0)
+		if (rc < 0)
 			return -ENOMEM;
 	}
 
@@ -256,7 +256,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else {
 			struct seccomp_filter_block blk[] = {
@@ -265,7 +265,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		}
 	} else {
@@ -274,7 +274,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 				_SYSCALL(sys->num, _JUMP(&bpf->lbls, lbl_end)),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		}
 
@@ -292,7 +292,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		} else {
 			struct seccomp_filter_block blk[] = {
@@ -300,7 +300,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc == 0)
+			if (rc < 0)
 				return -ENOMEM;
 		}
 	}
@@ -337,7 +337,7 @@ struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db)
 			LOAD_SYSCALL_NR,
 		};
 		rc = _seccomp_bpf_append(&bpf, blk, _bpf_blk_len(blk));
-		if (rc == 0)
+		if (rc < 0)
 			goto bpf_generate_failure;
 	}
 
@@ -352,14 +352,14 @@ struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db)
 			ALLOW,
 		};
 		rc = _seccomp_bpf_append(&bpf, blk, _bpf_blk_len(blk));
-		if (rc == 0)
+		if (rc < 0)
 			goto bpf_generate_failure;
 	} else {
 		struct seccomp_filter_block blk[] = {
 			DENY,
 		};
 		rc = _seccomp_bpf_append(&bpf, blk, _bpf_blk_len(blk));
-		if (rc == 0)
+		if (rc < 0)
 			goto bpf_generate_failure;
 	}
 
