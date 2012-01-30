@@ -131,7 +131,7 @@ static int _seccomp_bpf_append(struct bpf_filter *bpf,
 
 /**
  * Generate BPF for the syscall argument
- * @param act the filter action
+ * @param sys_num the syscall number
  * @param arg the syscall argument
  * @param bpf the bpf_filter struct
  *
@@ -139,12 +139,16 @@ static int _seccomp_bpf_append(struct bpf_filter *bpf,
  * Returns zero on success, negative values on failure.
  *
  */
-static int _seccomp_pbf_syscall_arg(enum scmp_flt_action act,
+static int _seccomp_pbf_syscall_arg(unsigned int sys_num,
 				    struct db_syscall_arg_list *arg,
 				    struct bpf_filter *bpf)
 {
 	int rc;
+	char lbl_end[256]; /* XXX - ungh */
 	struct db_syscall_arg_val_list *v_iter;
+
+	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
+	snprintf(lbl_end, 256, "syscall_%d_a%d_next", sys_num, arg->num);
 
 	/* load the argument */
 	{
@@ -158,109 +162,66 @@ static int _seccomp_pbf_syscall_arg(enum scmp_flt_action act,
 
 	/* check against our argument value list */
 	db_list_foreach(v_iter, arg->values) {
-		if (act == SCMP_ACT_ALLOW) {
-			if (v_iter->op == SCMP_CMP_NE) {
-				struct seccomp_filter_block blk[] = {
-					JNE(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_LT) {
-				struct seccomp_filter_block blk[] = {
-					JLT(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_LE) {
-				struct seccomp_filter_block blk[] = {
-					JLE(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_EQ) {
-				struct seccomp_filter_block blk[] = {
-					JEQ(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_GE) {
-				struct seccomp_filter_block blk[] = {
-					JGE(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_GT) {
-				struct seccomp_filter_block blk[] = {
-					JGT(v_iter->datum, ALLOW),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else
-				return -EFAULT;
-		} else {
-			if (v_iter->op == SCMP_CMP_NE) {
-				struct seccomp_filter_block blk[] = {
-					JNE(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_LT) {
-				struct seccomp_filter_block blk[] = {
-					JLT(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_LE) {
-				struct seccomp_filter_block blk[] = {
-					JLE(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_EQ) {
-				struct seccomp_filter_block blk[] = {
-					JEQ(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_GE) {
-				struct seccomp_filter_block blk[] = {
-					JGE(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else if (v_iter->op == SCMP_CMP_GT) {
-				struct seccomp_filter_block blk[] = {
-					JGT(v_iter->datum, DENY),
-				};
-				rc = _seccomp_bpf_append(bpf, blk,
-							 _bpf_blk_len(blk));
-				if (rc == 0)
-					return -ENOMEM;
-			} else
-				return -EFAULT;
-		}
+		if (v_iter->op == SCMP_CMP_NE) {
+			struct seccomp_filter_block blk[] = {
+				JNE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else if (v_iter->op == SCMP_CMP_LT) {
+			struct seccomp_filter_block blk[] = {
+				JLT(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else if (v_iter->op == SCMP_CMP_LE) {
+			struct seccomp_filter_block blk[] = {
+				JLE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else if (v_iter->op == SCMP_CMP_EQ) {
+			struct seccomp_filter_block blk[] = {
+				JEQ(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else if (v_iter->op == SCMP_CMP_GE) {
+			struct seccomp_filter_block blk[] = {
+				JGE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else if (v_iter->op == SCMP_CMP_GT) {
+			struct seccomp_filter_block blk[] = {
+				JGT(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _seccomp_bpf_append(bpf, blk,
+						 _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else
+			return -EFAULT;
+	}
+
+	/* jump label for next argument block */
+	{
+		struct seccomp_filter_block blk[] = {
+			_LABEL(&bpf->lbls, lbl_end),
+		};
+		rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
+		if (rc == 0)
+			return -ENOMEM;
 	}
 
 	return 0;
@@ -284,7 +245,7 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 	char lbl_end[256]; /* XXX - ungh */
 	struct db_syscall_arg_list *a_iter;
 
-	/* XXX - not the current limit on labels in bpf_helper.{c,h} */
+	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
 	snprintf(lbl_end, 256, "syscall_%d_end", sys->num); /* XXX - ungh^2 */
 
 	if (sys->args == NULL) {
@@ -319,13 +280,23 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 
 		/* iterate over the arguments */
 		db_list_foreach(a_iter, sys->args) {
-			rc = _seccomp_pbf_syscall_arg(act, a_iter, bpf);
+			rc = _seccomp_pbf_syscall_arg(sys->num, a_iter, bpf);
 			if (rc < 0)
 				return rc;
 		}
 
-		{
+		/* argument action and jump label for next arg block */
+		if (act == SCMP_ACT_ALLOW) {
 			struct seccomp_filter_block blk[] = {
+				ALLOW,
+				_LABEL(&bpf->lbls, lbl_end),
+			};
+			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc == 0)
+				return -ENOMEM;
+		} else {
+			struct seccomp_filter_block blk[] = {
+				DENY,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _seccomp_bpf_append(bpf, blk, _bpf_blk_len(blk));

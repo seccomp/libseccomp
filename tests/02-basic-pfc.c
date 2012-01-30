@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(read));
 	if (rc != 0)
 		return rc;
+
 	rc = seccomp_add_syscall_arg(SCMP_ACT_ALLOW, SCMP_SYS(write),
 				     0, SCMP_CMP_EQ, 1 /* stdout */);
 	if (rc != 0)
@@ -45,13 +46,20 @@ int main(int argc, char *argv[])
 				     0, SCMP_CMP_EQ, 2 /* stderr */);
 	if (rc != 0)
 		return rc;
+	rc = seccomp_add_syscall_arg(SCMP_ACT_ALLOW, SCMP_SYS(write),
+				     1, SCMP_CMP_NE, 0);
+	if (rc != 0)
+		return rc;
+
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(close));
 	if (rc != 0)
 		return rc;
+	
 	rc = seccomp_add_syscall(SCMP_ACT_DENY, SCMP_SYS(open)); 
 	if (rc != 0)
 		return rc;
 
+	
 	rc = seccomp_gen_pfc(STDOUT_FILENO);
 	if (rc != 0)
 		return rc;

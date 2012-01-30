@@ -92,15 +92,19 @@ static int _seccomp_str_syscall(enum scmp_flt_action act,
 					default:
 						op_str = op_str_un;
 				}
-				fprintf(fds, " if (a%d %s 0x%lx) action %s;\n",
+				fprintf(fds, " if (a%d %s 0x%lx) "
+					     "goto syscall_%d_a%d_next;\n",
 					a_iter->num,
 					op_str,
 					v_iter->datum,
-					_str_action(act));
+					sys_num,
+					a_iter->num);
 			}
+			fprintf(fds, " syscall_%d_a%d_next:\n",
+				sys_num, a_iter->num);
 		}
-	} else
-		fprintf(fds, " action %s;\n", _str_action(act));
+	}
+	fprintf(fds, " action %s;\n", _str_action(act));
 	fprintf(fds, " syscall_%d_end:\n", sys_num);
 
 	return 0;
@@ -125,6 +129,7 @@ int seccomp_str_generate(const struct db_filter *db, int fd)
 	if (fds == NULL)
 		return errno;
 
+	fprintf(fds, "#\n");
 	fprintf(fds, "# filter pseudo code start\n");
 	fprintf(fds, "#\n");
 	db_list_foreach(iter, db->sys_deny)
@@ -135,6 +140,7 @@ int seccomp_str_generate(const struct db_filter *db, int fd)
 	fprintf(fds, " action %s;\n", _str_action(db->def_action));
 	fprintf(fds, "#\n");
 	fprintf(fds, "# filter pseudo code end\n");
+	fprintf(fds, "#\n");
 
 	fflush(fds);
 	return 0;
