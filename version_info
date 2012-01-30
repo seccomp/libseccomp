@@ -1,0 +1,6 @@
+#
+# version_info - version information for the various netlabel tool components
+#
+
+# release
+VERSION_RELEASE=X.XX
