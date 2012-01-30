@@ -1,0 +1,6 @@
+*.a
+*.o
+*.swp
+*.orig
+.stgit-*
+cscope.*
