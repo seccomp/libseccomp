@@ -48,6 +48,9 @@ static struct db_filter *filter = NULL;
  */
 int seccomp_init(enum scmp_flt_action def_action)
 {
+	if (def_action != SCMP_ACT_ALLOW && def_action != SCMP_ACT_DENY)
+		return -EINVAL;
+
 	if (filter != NULL)
 		return -EEXIST;
 	filter = seccomp_db_new(def_action);
@@ -67,6 +70,9 @@ int seccomp_init(enum scmp_flt_action def_action)
  */
 int seccomp_reset(enum scmp_flt_action def_action)
 {
+	if (def_action != SCMP_ACT_ALLOW && def_action != SCMP_ACT_DENY)
+		return -EINVAL;
+
 	if (filter != NULL)
 		seccomp_db_destroy(filter);
 	filter = seccomp_db_new(def_action);
