@@ -327,7 +327,7 @@ struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db)
 	bpf.prog = malloc(sizeof(*bpf.prog));
 	if (bpf.prog == NULL)
 		return NULL;
-	memset(&bpf.prog, 0, sizeof(*bpf.prog));
+	memset(bpf.prog, 0, sizeof(*bpf.prog));
 
 	/* XXX - assume we can get away with LOAD_SYSCALL_NR just at the top,
 	 *       which may be wrong */
