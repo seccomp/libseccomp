@@ -149,7 +149,9 @@ static int _seccomp_bpf_syscall_arg(unsigned int sys_num,
 	struct db_syscall_arg_val_list *v_iter;
 
 	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
-	snprintf(lbl_end, 256, "syscall_%d_a%d_next", sys_num, arg->num);
+	rc = snprintf(lbl_end, 256, "syscall_%d_a%d_next", sys_num, arg->num);
+	if (rc >= 256)
+		return -E2BIG;
 
 	/* load the argument */
 	{
@@ -247,7 +249,9 @@ static int _seccomp_bpf_syscall(enum scmp_flt_action act,
 	struct db_syscall_arg_list *a_iter;
 
 	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
-	snprintf(lbl_end, 256, "syscall_%d_end", sys->num); /* XXX - ungh^2 */
+	rc = snprintf(lbl_end, 256, "syscall_%d_end", sys->num); /* XXX - ungh^2 */
+	if (rc >= 256)
+		return -E2BIG;
 
 	if (sys->args == NULL) {
 		if (act == SCMP_ACT_ALLOW) {
