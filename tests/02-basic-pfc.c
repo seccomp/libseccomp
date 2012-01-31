@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 
-	rc = seccomp_reset(SCMP_ACT_DENY);
+	rc = seccomp_init(SCMP_ACT_DENY);
 	if (rc != 0)
 		return rc;
 

@@ -43,6 +43,7 @@ enum scmp_compare {
 	SCMP_CMP_GT,		/* greater than */
 };
 
+int seccomp_init(enum scmp_flt_action def_action);
 int seccomp_reset(enum scmp_flt_action def_action);
 void seccomp_release(void);
 

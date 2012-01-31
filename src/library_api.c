@@ -38,12 +38,29 @@
 static struct db_filter *filter = NULL;
 
 /**
- * Initialize or reset the filter state
+ * Initialize the filter state
  * @param def_action the default filter action
- * 
- * This function initializes or resets the internal seccomp filter state and
- * should be called before any other functions in this library to ensure the
- * filter state is initialized.  This function does not reset any seccomp
+ *
+ * This function initializes the internal seccomp filter state and should
+ * be called before any other functions in this library to ensure the filter
+ * state is initialized.  Returns zero on success, negative values on failure.
+ *
+ */
+int seccomp_init(enum scmp_flt_action def_action)
+{
+	if (filter != NULL)
+		return -EEXIST;
+	filter = seccomp_db_new(def_action);
+
+	return (filter ? 0 : -ENOMEM);
+}
+
+/**
+ * Reset the filter state
+ * @param def_action the default filter action
+ *
+ * This function resets the internal seccomp filter state and ensures the
+ * filter state is reinitialized.  This function does not reset any seccomp
  * filters already loaded into the kernel.  Returns zero on success, negative
  * values on failure.
  *

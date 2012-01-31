@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 
-	rc = seccomp_reset(SCMP_ACT_ALLOW);
+	rc = seccomp_init(SCMP_ACT_ALLOW);
 	if (rc != 0)
 		return rc;
 
