@@ -348,7 +348,7 @@ struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db)
 
 	db_list_foreach(iter, db->sys_deny)
 		_seccomp_bpf_syscall(SCMP_ACT_DENY, iter, &bpf);
-	db_list_foreach(iter, db->sys_deny)
+	db_list_foreach(iter, db->sys_allow)
 		_seccomp_bpf_syscall(SCMP_ACT_ALLOW, iter, &bpf);
 
 	/* default action */
