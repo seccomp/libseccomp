@@ -194,7 +194,7 @@ void seccomp_bpf_print(struct seccomp_filter_block *filter, size_t count);
 	jt
 
 #define JLE32(value, jt) \
-	BPF_JUMP(BPF_JMP+BPF_JGT+BPF_K, (value), 0, 1), \
+	BPF_JUMP(BPF_JMP+BPF_JGT+BPF_K, (value), 1, 0), \
 	jt
 
 /* Check hi > args.hi first, then do the GE checking */
