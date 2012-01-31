@@ -60,7 +60,7 @@ struct bpf_filter {
 	(sizeof(x) / sizeof(x[0]))
 
 #define _bpf_next(x) \
-	((x)->prog->filter[(x)->prog->len])
+	(&((x)->prog->filter[(x)->prog->len]))
 
 /**
  * Append a new block of instructions to the BPF
@@ -70,7 +70,7 @@ struct bpf_filter {
  */
 #define _bpf_append(x,y,l) \
 	do { \
-		memcpy(&_bpf_next(x), (y), (l)*sizeof(*y)); \
+		memcpy(_bpf_next(x), (y), (l)*sizeof(*y)); \
 		(x)->prog->len += (l); \
 	} while (0)
 
