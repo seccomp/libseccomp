@@ -66,11 +66,12 @@ struct bpf_filter {
  * Append a new block of instructions to the BPF
  * @param x pointer to a bpf_filter struct
  * @param y new instruction block
+ * @param l number of blocks in the y pointer
  */
-#define _bpf_append(x,y) \
+#define _bpf_append(x,y,l) \
 	do { \
-		memcpy(&_bpf_next(x), (y), sizeof(y)); \
-		(x)->prog->len += _bpf_blk_len(y); \
+		memcpy(&_bpf_next(x), (y), (l)*sizeof(*y)); \
+		(x)->prog->len += (l); \
 	} while (0)
 
 /**
@@ -125,7 +126,7 @@ static int _seccomp_bpf_append(struct bpf_filter *bpf,
 	int rc = _seccomp_bpf_grow(bpf, blk_len);
 	if (rc < 0)
 		return rc;
-	_bpf_append(bpf, blk);
+	_bpf_append(bpf, blk, blk_len);
 	return 0;
 }
 
