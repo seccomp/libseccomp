@@ -69,7 +69,7 @@ struct bpf_filter {
  */
 #define _bpf_append(x,y) \
 	do { \
-		memcpy(&_bpf_next(x), &(y), sizeof(y)); \
+		memcpy(&_bpf_next(x), (y), sizeof(y)); \
 		(x)->prog->len += _bpf_blk_len(y); \
 	} while (0)
 
