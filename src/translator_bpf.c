@@ -32,7 +32,7 @@
 
 #include "translator_bpf.h"
 #include "bpf_helper.h"
-#include "filter_db.h"
+#include "db.h"
 
 #if 1
 /* XXX - provide our own macros for the following BPF statements, we probably

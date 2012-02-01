@@ -25,7 +25,7 @@
 
 #include <seccomp.h>
 
-#include "filter_db.h"
+#include "db.h"
 #include "translator_str.h"
 
 /* XXX - we should check the fprintf() return values */

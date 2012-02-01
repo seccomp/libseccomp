@@ -22,7 +22,7 @@
 #ifndef _TRANSLATOR_STR_H
 #define _TRANSLATOR_STR_H
 
-#include "filter_db.h"
+#include "db.h"
 
 int seccomp_str_generate(const struct db_filter *db, int fd);
 

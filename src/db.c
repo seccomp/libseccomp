@@ -26,7 +26,7 @@
 
 #include <seccomp.h>
 
-#include "filter_db.h"
+#include "db.h"
 
 /**
  * Free each item in the DB list

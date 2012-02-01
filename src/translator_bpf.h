@@ -29,7 +29,7 @@
 #include <seccomp_filter.h>
 #endif
 
-#include "filter_db.h"
+#include "db.h"
 
 struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db);
 
