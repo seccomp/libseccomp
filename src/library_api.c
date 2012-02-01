@@ -27,7 +27,7 @@
 #include <seccomp.h>
 
 #include "db.h"
-#include "translator_str.h"
+#include "gen_pfc.h"
 #include "translator_bpf.h"
 
 /* XXX - we need a way to handle things like socketcall() so devs don't have

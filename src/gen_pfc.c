@@ -26,7 +26,7 @@
 #include <seccomp.h>
 
 #include "db.h"
-#include "translator_str.h"
+#include "gen_pfc.h"
 
 /* XXX - we should check the fprintf() return values */
 
