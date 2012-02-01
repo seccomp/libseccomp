@@ -31,6 +31,6 @@
 
 #include "db.h"
 
-struct seccomp_fprog *seccomp_bpf_generate(const struct db_filter *db);
+struct seccomp_fprog *gen_bpf_generate(const struct db_filter *db);
 
 #endif

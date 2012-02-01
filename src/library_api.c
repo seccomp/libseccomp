@@ -115,7 +115,7 @@ int seccomp_enable(void)
 	if (filter == NULL)
 		return -EFAULT;
 
-	fprog = seccomp_bpf_generate(filter);
+	fprog = gen_bpf_generate(filter);
 	if (fprog == NULL)
 		return -ENOMEM;
 	if (prctl(PR_ATTACH_SECCOMP_FILTER, fprog) < 0)
@@ -204,7 +204,7 @@ int seccomp_gen_bpf(int fd)
 	if (filter == NULL)
 		return -EFAULT;
 
-	fprog = seccomp_bpf_generate(filter);
+	fprog = gen_bpf_generate(filter);
 	if (fprog == NULL)
 		return -ENOMEM;
 	if (write(fd, fprog->filter, fprog->len * sizeof(fprog->filter[0])) < 0)
