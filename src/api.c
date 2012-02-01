@@ -144,7 +144,7 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall)
 	 *       here to convert these pseudo syscalls into real filters (check
 	 * 	 the a0 value, etc.) */
 
-	return db_add_syscall(filter, action, syscall, 0);
+	return db_add_syscall(filter, 0, action, syscall);
 }
 
 /**
@@ -170,7 +170,8 @@ int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
 	/* XXX - see note in seccomp_add_syscall() about negative syscall
 	 *       numbers */
 
-	return db_add_syscall_arg(filter, action, syscall, arg, op, datum, 0);
+	return db_add_syscall_arg(filter, 0, action, syscall, 1,
+				  arg, op, datum);
 }
 
 /**

@@ -120,89 +120,102 @@ static int _gen_bpf_append(struct bpf_filter *bpf,
 }
 
 /**
- * Generate BPF for the syscall argument
+ * Generate BPF for the syscall argument chain
+ * @param act the filter action
  * @param sys_num the syscall number
- * @param arg the syscall argument
+ * @param chain_num the chain number
+ * @param arg the syscall argument chain
  * @param bpf the bpf_filter struct
  *
- * This function generates BPF for the given syscall argument and action.
- * Returns zero on success, negative values on failure.
+ * This function generates BPF for the given syscall argument chain. Returns
+ * zero on success, negative values on failure.
  *
  */
-static int _gen_bpf_syscall_arg(unsigned int sys_num,
-				struct db_syscall_arg_list *arg,
-				struct bpf_filter *bpf)
+static int _gen_bpf_syscall_chain(enum scmp_flt_action act,
+				  unsigned int sys_num,
+				  unsigned int chain_num,
+				  struct db_syscall_arg_chain_list *chain,
+				  struct bpf_filter *bpf)
 {
 	int rc;
 	char lbl_end[256]; /* XXX - ungh */
-	struct db_syscall_arg_val_list *v_iter;
+	struct db_syscall_arg_list *a_iter;
 
 	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
-	rc = snprintf(lbl_end, 256, "syscall_%d_a%d_next", sys_num, arg->num);
+	rc = snprintf(lbl_end, 256, "syscall_%d_c%d_next", sys_num, chain_num);
 	if (rc >= 256)
 		return -E2BIG;
 
-	/* load the argument */
-	{
+	/* run through the argument chains */
+	db_list_foreach(a_iter, chain->args) {
+		/* load the argument */
+		{
+			struct seccomp_filter_block blk[] = {
+				ARG(a_iter->num),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		}
+
+		/* do the comparison */
+		if (a_iter->op == SCMP_CMP_NE) {
+			struct seccomp_filter_block blk[] = {
+				JEQ(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		} else if (a_iter->op == SCMP_CMP_LT) {
+			struct seccomp_filter_block blk[] = {
+				JGE(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		} else if (a_iter->op == SCMP_CMP_LE) {
+			struct seccomp_filter_block blk[] = {
+				JGT(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		} else if (a_iter->op == SCMP_CMP_EQ) {
+			struct seccomp_filter_block blk[] = {
+				JNE(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		} else if (a_iter->op == SCMP_CMP_GE) {
+			struct seccomp_filter_block blk[] = {
+				JLT(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		} else if (a_iter->op == SCMP_CMP_GT) {
+			struct seccomp_filter_block blk[] = {
+				JLE(a_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
+			};
+			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+			if (rc < 0)
+				return -ENOMEM;
+		}
+	}
+	
+	/* matching action and jump label for next chain */
+	if (act == SCMP_ACT_ALLOW) {
 		struct seccomp_filter_block blk[] = {
-			ARG(arg->num),
+			ALLOW,
+			_LABEL(&bpf->lbls, lbl_end),
 		};
 		rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
 		if (rc < 0)
 			return -ENOMEM;
-	}
-
-	/* check against our argument value list */
-	db_list_foreach(v_iter, arg->values) {
-		if (v_iter->op == SCMP_CMP_NE) {
-			struct seccomp_filter_block blk[] = {
-				JNE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else if (v_iter->op == SCMP_CMP_LT) {
-			struct seccomp_filter_block blk[] = {
-				JLT(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else if (v_iter->op == SCMP_CMP_LE) {
-			struct seccomp_filter_block blk[] = {
-				JLE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else if (v_iter->op == SCMP_CMP_EQ) {
-			struct seccomp_filter_block blk[] = {
-				JEQ(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else if (v_iter->op == SCMP_CMP_GE) {
-			struct seccomp_filter_block blk[] = {
-				JGE(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else if (v_iter->op == SCMP_CMP_GT) {
-			struct seccomp_filter_block blk[] = {
-				JGT(v_iter->datum, _JUMP(&bpf->lbls, lbl_end)),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else
-			return -EFAULT;
-	}
-
-	/* jump label for next argument block */
-	{
+	} else {
 		struct seccomp_filter_block blk[] = {
+			DENY,
 			_LABEL(&bpf->lbls, lbl_end),
 		};
 		rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
@@ -229,14 +242,15 @@ static int _gen_bpf_syscall(enum scmp_flt_action act,
 {
 	int rc;
 	char lbl_end[256]; /* XXX - ungh */
-	struct db_syscall_arg_list *a_iter;
+	struct db_syscall_arg_chain_list *c_iter;
+	unsigned int c_count = 0;
 
 	/* XXX - note the current limit on labels in bpf_helper.{c,h} */
 	rc = snprintf(lbl_end, 256, "syscall_%d_end", sys->num); /* XXX - ungh^2 */
 	if (rc >= 256)
 		return -E2BIG;
 
-	if (sys->args == NULL) {
+	if (sys->chains == NULL) {
 		if (act == SCMP_ACT_ALLOW) {
 			struct seccomp_filter_block blk[] = {
 				_SYSCALL(sys->num, _JUMP(&bpf->lbls, lbl_end)),
@@ -267,24 +281,16 @@ static int _gen_bpf_syscall(enum scmp_flt_action act,
 		}
 
 		/* iterate over the arguments */
-		db_list_foreach(a_iter, sys->args) {
-			rc = _gen_bpf_syscall_arg(sys->num, a_iter, bpf);
+		db_list_foreach(c_iter, sys->chains) {
+			rc = _gen_bpf_syscall_chain(act, sys->num,
+						    c_count++, c_iter, bpf);
 			if (rc < 0)
 				return rc;
 		}
 
-		/* argument action and jump label for next arg block */
-		if (act == SCMP_ACT_ALLOW) {
+		/* jump label for next syscall block */
+		{
 			struct seccomp_filter_block blk[] = {
-				ALLOW,
-				_LABEL(&bpf->lbls, lbl_end),
-			};
-			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
-			if (rc < 0)
-				return -ENOMEM;
-		} else {
-			struct seccomp_filter_block blk[] = {
-				DENY,
 				_LABEL(&bpf->lbls, lbl_end),
 			};
 			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));

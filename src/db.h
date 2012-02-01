@@ -26,7 +26,9 @@
 
 /* XXX - need to provide doxygen comments for the types here */
 
-struct db_syscall_arg_val_list {
+struct db_syscall_arg_list {
+	/* argument number (a0 = 0, a1 = 1, etc.) */
+	unsigned int num;
 	/* comparison operator */
 	enum scmp_compare op;
 	/* syscall argument value */
@@ -34,23 +36,21 @@ struct db_syscall_arg_val_list {
 	 *       syscall argument */
 	unsigned long datum;
 
-	struct db_syscall_arg_val_list *next;
+	struct db_syscall_arg_list *next;
 };
 
-struct db_syscall_arg_list {
-	/* argument number (a0 = 0, a1 = 1, etc.) */
-	unsigned int num;
-	/* list of permissible values, kept as an unsorted single-linked list */
-	struct db_syscall_arg_val_list *values;
+struct db_syscall_arg_chain_list {
+	/* list of args, kept as a sorted single-linked list */
+	struct db_syscall_arg_list *args;
 
-	struct db_syscall_arg_list *next;
+	struct db_syscall_arg_chain_list *next;
 };
 
 struct db_syscall_list {
 	/* native syscall number */
 	unsigned int num;
-	/* list of args, kept as a sorted single-linked list (optional) */
-	struct db_syscall_arg_list *args;
+	/* list of arg chains, kept as an unsorted single-linked list (opt) */
+	struct db_syscall_arg_chain_list *chains;
 
 	struct db_syscall_list *next;
 };
@@ -79,15 +79,13 @@ struct db_filter {
 struct db_filter *db_new(enum scmp_flt_action def_action);
 void db_destroy(struct db_filter *db);
 
-int db_add_syscall(struct db_filter *db,
-		   enum scmp_flt_action action, unsigned int syscall,
-		   unsigned int override);
-int db_add_syscall_arg(struct db_filter *db,
+int db_add_syscall(struct db_filter *db, unsigned int override,
+		   enum scmp_flt_action action, unsigned int syscall);
+int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 		       enum scmp_flt_action action,
 		       unsigned int syscall,
-		       unsigned int arg,
-		       enum scmp_compare op, unsigned long datum,
-		       unsigned int override);
+		       unsigned int chain_len,
+		       ...);
 
 struct db_syscall_list *db_find_syscall(const struct db_filter *db,
 					enum scmp_flt_action action,

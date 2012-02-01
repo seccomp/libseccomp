@@ -52,8 +52,9 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 			    const struct db_syscall_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
+	struct db_syscall_arg_chain_list *c_iter;
 	struct db_syscall_arg_list *a_iter;
-	struct db_syscall_arg_val_list *v_iter;
+	unsigned int c_count = 0;
 	char *op_str;
 
 	char op_str_ne[] = "!=";
@@ -67,44 +68,46 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 	fprintf(fds, "# filter code for syscall #%d\n", sys_num);
 	fprintf(fds, " if (syscall != %d) goto syscall_%d_end;\n",
 		sys_num, sys_num);
-	if (sys->args != NULL) {
-		db_list_foreach(a_iter, sys->args) {
-			db_list_foreach(v_iter, a_iter->values) {
-				switch (v_iter->op) {
+	if (sys->chains != NULL) {
+		db_list_foreach(c_iter, sys->chains) {
+			db_list_foreach(a_iter, c_iter->args) {
+				switch (a_iter->op) {
 					case SCMP_CMP_NE:
-						op_str = op_str_ne;
-						break;
-					case SCMP_CMP_LT:
-						op_str = op_str_lt;
-						break;
-					case SCMP_CMP_LE:
-						op_str = op_str_le;
-						break;
-					case SCMP_CMP_EQ:
 						op_str = op_str_eq;
 						break;
-					case SCMP_CMP_GE:
+					case SCMP_CMP_LT:
 						op_str = op_str_ge;
 						break;
-					case SCMP_CMP_GT:
+					case SCMP_CMP_LE:
 						op_str = op_str_gt;
+						break;
+					case SCMP_CMP_EQ:
+						op_str = op_str_ne;
+						break;
+					case SCMP_CMP_GE:
+						op_str = op_str_lt;
+						break;
+					case SCMP_CMP_GT:
+						op_str = op_str_le;
 						break;
 					default:
 						op_str = op_str_un;
 				}
 				fprintf(fds, " if (a%d %s 0x%lx) "
-					     "goto syscall_%d_a%d_next;\n",
+					     "goto syscall_%d_c%d_next;\n",
 					a_iter->num,
 					op_str,
-					v_iter->datum,
+					a_iter->datum,
 					sys_num,
-					a_iter->num);
+					c_count);
 			}
-			fprintf(fds, " syscall_%d_a%d_next:\n",
-				sys_num, a_iter->num);
+			fprintf(fds, " action %s;\n", _gen_pfc_action(act));
+			fprintf(fds, " syscall_%d_c%d_next:\n",
+				sys_num, c_count);
+			c_count++;
 		}
-	}
-	fprintf(fds, " action %s;\n", _gen_pfc_action(act));
+	} else
+		fprintf(fds, " action %s;\n", _gen_pfc_action(act));
 	fprintf(fds, " syscall_%d_end:\n", sys_num);
 
 	return 0;

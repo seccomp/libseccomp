@@ -37,12 +37,14 @@ enum scmp_flt_action {
 };
 
 enum scmp_compare {
-	SCMP_CMP_NE = 0,	/* not equal */
+	_SCMP_CMP_MIN = 0,	/* sentinel */
+	SCMP_CMP_NE,		/* not equal */
 	SCMP_CMP_LT,		/* less than */
 	SCMP_CMP_LE,		/* less than or equal */
 	SCMP_CMP_EQ,		/* equal */
 	SCMP_CMP_GE,		/* greater than or equal */
 	SCMP_CMP_GT,		/* greater than */
+	_SCMP_CMP_MAX,		/* sentinel */
 };
 
 int seccomp_init(enum scmp_flt_action def_action);
