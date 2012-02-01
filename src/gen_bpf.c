@@ -354,7 +354,7 @@ struct seccomp_fprog *gen_bpf_generate(const struct db_filter *db)
 	/* resolve the labels/jumps */
 	rc = bpf_resolve_jumps(&bpf.lbls,
 			       bpf.prog->filter,
-			       _bpf_blk_len(bpf.prog->filter));
+			       bpf.prog->len);
 	if (rc != 0)
 		goto bpf_generate_failure;
 
