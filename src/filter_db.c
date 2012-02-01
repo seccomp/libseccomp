@@ -143,6 +143,7 @@ int seccomp_db_add_syscall(struct db_filter *db,
 		memset(sys_new, 0, sizeof(*sys_new));
 		sys_new->num = syscall;
 		if (sys_prev == NULL) {
+			sys_new->next = sys;
 			if (action == SCMP_ACT_ALLOW)
 				db->sys_allow = sys_new;
 			else
