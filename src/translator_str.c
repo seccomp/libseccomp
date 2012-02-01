@@ -1,5 +1,5 @@
 /**
- * Seccomp String Translator
+ * Seccomp Pseudo Filter Code (PFC) Generator
  * 
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -34,7 +34,7 @@
  * Display a string representation of the filter action
  * @param action the action
  */
-#define _str_action(action) \
+#define _gen_pfc_action(action) \
 	((action) == SCMP_ACT_ALLOW ? "ALLOW" : "DENY")
 
 /**
@@ -48,8 +48,8 @@
  * negative values on failure.
  * 
  */
-static int _seccomp_str_syscall(enum scmp_flt_action act,
-				const struct db_syscall_list *sys, FILE *fds)
+static int _gen_pfc_syscall(enum scmp_flt_action act,
+			    const struct db_syscall_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
 	struct db_syscall_arg_list *a_iter;
@@ -104,7 +104,7 @@ static int _seccomp_str_syscall(enum scmp_flt_action act,
 				sys_num, a_iter->num);
 		}
 	}
-	fprintf(fds, " action %s;\n", _str_action(act));
+	fprintf(fds, " action %s;\n", _gen_pfc_action(act));
 	fprintf(fds, " syscall_%d_end:\n", sys_num);
 
 	return 0;
@@ -120,7 +120,7 @@ static int _seccomp_str_syscall(enum scmp_flt_action act,
  * values on failure.
  * 
  */
-int seccomp_str_generate(const struct db_filter *db, int fd)
+int gen_pfc_generate(const struct db_filter *db, int fd)
 {
 	FILE *fds;
 	struct db_syscall_list *iter;
@@ -133,11 +133,11 @@ int seccomp_str_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "# filter pseudo code start\n");
 	fprintf(fds, "#\n");
 	db_list_foreach(iter, db->sys_deny)
-		_seccomp_str_syscall(SCMP_ACT_DENY, iter, fds);
+		_gen_pfc_syscall(SCMP_ACT_DENY, iter, fds);
 	db_list_foreach(iter, db->sys_allow)
-		_seccomp_str_syscall(SCMP_ACT_ALLOW, iter, fds);
+		_gen_pfc_syscall(SCMP_ACT_ALLOW, iter, fds);
 	fprintf(fds, "# default action\n");
-	fprintf(fds, " action %s;\n", _str_action(db->def_action));
+	fprintf(fds, " action %s;\n", _gen_pfc_action(db->def_action));
 	fprintf(fds, "#\n");
 	fprintf(fds, "# filter pseudo code end\n");
 	fprintf(fds, "#\n");

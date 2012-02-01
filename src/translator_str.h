@@ -24,6 +24,6 @@
 
 #include "db.h"
 
-int seccomp_str_generate(const struct db_filter *db, int fd);
+int gen_pfc_generate(const struct db_filter *db, int fd);
 
 #endif

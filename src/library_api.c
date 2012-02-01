@@ -186,7 +186,7 @@ int seccomp_gen_pfc(int fd)
 	if (filter == NULL)
 		return -EFAULT;
 
-	return seccomp_str_generate(filter, fd);
+	return gen_pfc_generate(filter, fd);
 }
 
 /**
