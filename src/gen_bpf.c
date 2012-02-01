@@ -30,7 +30,7 @@
 
 #include <seccomp.h>
 
-#include "translator_bpf.h"
+#include "gen_bpf.h"
 #include "bpf_helper.h"
 #include "db.h"
 

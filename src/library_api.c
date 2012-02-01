@@ -28,7 +28,7 @@
 
 #include "db.h"
 #include "gen_pfc.h"
-#include "translator_bpf.h"
+#include "gen_bpf.h"
 
 /* XXX - we need a way to handle things like socketcall() so devs don't have
  *       to worry about underlying arch/platform oddities */
