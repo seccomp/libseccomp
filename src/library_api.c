@@ -53,7 +53,7 @@ int seccomp_init(enum scmp_flt_action def_action)
 
 	if (filter != NULL)
 		return -EEXIST;
-	filter = seccomp_db_new(def_action);
+	filter = db_new(def_action);
 
 	return (filter ? 0 : -ENOMEM);
 }
@@ -74,8 +74,8 @@ int seccomp_reset(enum scmp_flt_action def_action)
 		return -EINVAL;
 
 	if (filter != NULL)
-		seccomp_db_destroy(filter);
-	filter = seccomp_db_new(def_action);
+		db_destroy(filter);
+	filter = db_new(def_action);
 
 	return (filter ? 0 : -ENOMEM);
 }
@@ -95,7 +95,7 @@ void seccomp_release(void)
 	if (filter == NULL)
 		return;
 
-	seccomp_db_destroy(filter);
+	db_destroy(filter);
 	filter = NULL;
 }
 
@@ -144,7 +144,7 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall)
 	 *       here to convert these pseudo syscalls into real filters (check
 	 * 	 the a0 value, etc.) */
 
-	return seccomp_db_add_syscall(filter, action, syscall, 0);
+	return db_add_syscall(filter, action, syscall, 0);
 }
 
 /**
@@ -170,8 +170,7 @@ int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
 	/* XXX - see note in seccomp_add_syscall() about negative syscall
 	 *       numbers */
 
-	return seccomp_db_add_syscall_arg(filter, action, syscall,
-					  arg, op, datum, 0);
+	return db_add_syscall_arg(filter, action, syscall, arg, op, datum, 0);
 }
 
 /**

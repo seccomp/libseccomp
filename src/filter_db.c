@@ -67,7 +67,7 @@ static void _db_sys_arg_list_free(struct db_syscall_arg_list *list)
  * Returns a pointer to the DB on success, NULL on failure.
  * 
  */
-struct db_filter *seccomp_db_new(enum scmp_flt_action def_action)
+struct db_filter *db_new(enum scmp_flt_action def_action)
 {
 	struct db_filter *db;
 
@@ -88,7 +88,7 @@ struct db_filter *seccomp_db_new(enum scmp_flt_action def_action)
  * the filter should no longer be referenced.
  * 
  */
-void seccomp_db_destroy(struct db_filter *db)
+void db_destroy(struct db_filter *db)
 {
 	struct db_syscall_list *s_iter;
 
@@ -113,9 +113,9 @@ void seccomp_db_destroy(struct db_filter *db)
  * reset/replaced.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_db_add_syscall(struct db_filter *db,
-			   enum scmp_flt_action action, unsigned int syscall,
-			   unsigned int override)
+int db_add_syscall(struct db_filter *db,
+		   enum scmp_flt_action action, unsigned int syscall,
+		   unsigned int override)
 {
 	struct db_syscall_list *sys;
 	struct db_syscall_list *sys_prev = NULL;
@@ -178,12 +178,12 @@ int seccomp_db_add_syscall(struct db_filter *db,
  * Returns zero on success, negative values on failure.
  * 
  */
-int seccomp_db_add_syscall_arg(struct db_filter *db,
-			       enum scmp_flt_action action,
-			       unsigned int syscall,
-			       unsigned int arg,
-			       enum scmp_compare op, unsigned long datum,
-			       unsigned int override)
+int db_add_syscall_arg(struct db_filter *db,
+		       enum scmp_flt_action action,
+		       unsigned int syscall,
+		       unsigned int arg,
+		       enum scmp_compare op, unsigned long datum,
+		       unsigned int override)
 {
 	int rc;
 	struct db_syscall_list *sys;
@@ -325,9 +325,9 @@ db_add_syscall_args_failure:
  * syscall filter exists.
  * 
  */
-struct db_syscall_list *seccomp_db_find_syscall(const struct db_filter *db,
-						enum scmp_flt_action action,
-						unsigned int syscall)
+struct db_syscall_list *db_find_syscall(const struct db_filter *db,
+					enum scmp_flt_action action,
+					unsigned int syscall)
 {
 	struct db_syscall_list *iter;
 
@@ -352,15 +352,15 @@ struct db_syscall_list *seccomp_db_find_syscall(const struct db_filter *db,
  * no matching syscall filter exists.
  *
  */
-struct db_syscall_list *seccomp_db_find_syscall_all(const struct db_filter *db,
-						    unsigned int syscall)
+struct db_syscall_list *db_find_syscall_all(const struct db_filter *db,
+					    unsigned int syscall)
 {
 	struct db_syscall_list *iter;
 
 	assert(db != NULL);
 
-	iter = seccomp_db_find_syscall(db, SCMP_ACT_ALLOW, syscall);
+	iter = db_find_syscall(db, SCMP_ACT_ALLOW, syscall);
 	if (iter != NULL)
 		return iter;
-	return seccomp_db_find_syscall(db, SCMP_ACT_DENY, syscall);
+	return db_find_syscall(db, SCMP_ACT_DENY, syscall);
 }

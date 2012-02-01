@@ -76,23 +76,23 @@ struct db_filter {
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
 
-struct db_filter *seccomp_db_new(enum scmp_flt_action def_action);
-void seccomp_db_destroy(struct db_filter *db);
+struct db_filter *db_new(enum scmp_flt_action def_action);
+void db_destroy(struct db_filter *db);
 
-int seccomp_db_add_syscall(struct db_filter *db,
-			   enum scmp_flt_action action, unsigned int syscall,
-			   unsigned int override);
-int seccomp_db_add_syscall_arg(struct db_filter *db,
-			       enum scmp_flt_action action,
-			       unsigned int syscall,
-			       unsigned int arg,
-			       enum scmp_compare op, unsigned long datum,
-			       unsigned int override);
+int db_add_syscall(struct db_filter *db,
+		   enum scmp_flt_action action, unsigned int syscall,
+		   unsigned int override);
+int db_add_syscall_arg(struct db_filter *db,
+		       enum scmp_flt_action action,
+		       unsigned int syscall,
+		       unsigned int arg,
+		       enum scmp_compare op, unsigned long datum,
+		       unsigned int override);
 
-struct db_syscall_list *seccomp_db_find_syscall(const struct db_filter *db,
-						enum scmp_flt_action action,
-						unsigned int syscall);
-struct db_syscall_list *seccomp_db_find_syscall_all(const struct db_filter *db,
-						    unsigned int syscall);
+struct db_syscall_list *db_find_syscall(const struct db_filter *db,
+					enum scmp_flt_action action,
+					unsigned int syscall);
+struct db_syscall_list *db_find_syscall_all(const struct db_filter *db,
+					    unsigned int syscall);
 
 #endif
