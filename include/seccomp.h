@@ -30,8 +30,10 @@
 #define SCMP_SYS(x)	__NR_##x
 
 enum scmp_flt_action {
-	SCMP_ACT_ALLOW = 0,
+	_SCMP_ACT_MIN = 0,	/* sentinel */
+	SCMP_ACT_ALLOW,
 	SCMP_ACT_DENY,
+	_SCMP_ACT_MAX,		/* sentinel */
 };
 
 enum scmp_compare {

@@ -48,7 +48,7 @@ static struct db_filter *filter = NULL;
  */
 int seccomp_init(enum scmp_flt_action def_action)
 {
-	if (def_action != SCMP_ACT_ALLOW && def_action != SCMP_ACT_DENY)
+	if (def_action <= _SCMP_ACT_MIN || def_action >= _SCMP_ACT_MAX)
 		return -EINVAL;
 
 	if (filter != NULL)
