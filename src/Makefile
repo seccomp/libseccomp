@@ -34,7 +34,7 @@ include ../version_info
 LIB_STATIC = libseccomp.a
 LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
-OBJS = library_api.o db.o gen_pfc.o gen_bpf.o bpf_helper.o
+OBJS = api.o db.o gen_pfc.o gen_bpf.o bpf_helper.o
 
 INCFLAGS := $(INCFLAGS) -I../include
 
