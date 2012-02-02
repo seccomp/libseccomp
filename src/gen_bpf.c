@@ -260,7 +260,7 @@ static int _gen_bpf_syscall(enum scmp_flt_action act,
 				return -ENOMEM;
 		} else {
 			struct seccomp_filter_block blk[] = {
-				_SYSCALL(sys->num, DENY),
+				SYSCALL(sys->num, DENY),
 			};
 			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
 			if (rc < 0)
