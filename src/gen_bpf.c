@@ -253,18 +253,14 @@ static int _gen_bpf_syscall(enum scmp_flt_action act,
 	if (sys->chains == NULL) {
 		if (act == SCMP_ACT_ALLOW) {
 			struct seccomp_filter_block blk[] = {
-				_SYSCALL(sys->num, _JUMP(&bpf->lbls, lbl_end)),
-				ALLOW,
-				_LABEL(&bpf->lbls, lbl_end),
+				SYSCALL(sys->num, ALLOW),
 			};
 			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
 			if (rc < 0)
 				return -ENOMEM;
 		} else {
 			struct seccomp_filter_block blk[] = {
-				_SYSCALL(sys->num, _JUMP(&bpf->lbls, lbl_end)),
-				DENY,
-				_LABEL(&bpf->lbls, lbl_end),
+				_SYSCALL(sys->num, DENY),
 			};
 			rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
 			if (rc < 0)

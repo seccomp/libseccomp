@@ -66,9 +66,12 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 	char op_str_un[] = "??";
 
 	fprintf(fds, "# filter code for syscall #%d\n", sys_num);
-	fprintf(fds, " if (syscall != %d) goto syscall_%d_end;\n",
-		sys_num, sys_num);
-	if (sys->chains != NULL) {
+	if (sys->chains == NULL) {
+		fprintf(fds, " if (syscall == %d) action %s;\n",
+			sys_num, _gen_pfc_action(act));
+	} else {
+		fprintf(fds, " if (syscall != %d) goto syscall_%d_end;\n",
+			sys_num, sys_num);
 		db_list_foreach(c_iter, sys->chains) {
 			db_list_foreach(a_iter, c_iter->args) {
 				switch (a_iter->op) {
@@ -106,9 +109,8 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 				sys_num, c_count);
 			c_count++;
 		}
-	} else
-		fprintf(fds, " action %s;\n", _gen_pfc_action(act));
-	fprintf(fds, " syscall_%d_end:\n", sys_num);
+		fprintf(fds, " syscall_%d_end:\n", sys_num);
+	}
 
 	return 0;
 }
