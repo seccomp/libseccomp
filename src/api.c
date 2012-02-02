@@ -100,17 +100,6 @@ void seccomp_release(void)
 }
 
 /**
- * Free memory associated with an fprog
- */
-static void seccomp_free_fprog(struct seccomp_fprog *fprog)
-{
-	if (fprog == NULL)
-		return;
-	free(fprog->filter);
-	free(fprog);
-}
-
-/**
  * Enables the currently configured seccomp filter
  * 
  * This function loads the currently configured seccomp filter into the kernel.
@@ -121,6 +110,7 @@ static void seccomp_free_fprog(struct seccomp_fprog *fprog)
  */
 int seccomp_enable(void)
 {
+	int rc;
 	struct seccomp_fprog *fprog;
 
 	if (filter == NULL)
@@ -129,10 +119,10 @@ int seccomp_enable(void)
 	fprog = gen_bpf_generate(filter);
 	if (fprog == NULL)
 		return -ENOMEM;
-	if (prctl(PR_ATTACH_SECCOMP_FILTER, fprog) < 0)
+	rc = prctl(PR_ATTACH_SECCOMP_FILTER, fprog);
+	gen_bpf_destroy(fprog);
+	if (rc < 0)
 		return errno;
-
-	seccomp_free_fprog(fprog);
 
 	return 0;
 }
@@ -225,6 +215,7 @@ int seccomp_gen_pfc(int fd)
  */
 int seccomp_gen_bpf(int fd)
 {
+	int rc;
 	struct seccomp_fprog *fprog;
 
 	if (filter == NULL)
@@ -233,9 +224,10 @@ int seccomp_gen_bpf(int fd)
 	fprog = gen_bpf_generate(filter);
 	if (fprog == NULL)
 		return -ENOMEM;
-	if (write(fd, fprog->filter, fprog->len * sizeof(fprog->filter[0])) < 0)
+	rc = write(fd, fprog->filter, fprog->len * sizeof(fprog->filter[0]));
+	gen_bpf_destroy(fprog);
+	if (rc < 0)
 		return errno;
-	seccomp_free_fprog(fprog);
 
 	return 0;
 }
