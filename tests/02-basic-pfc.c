@@ -54,12 +54,7 @@ int main(int argc, char *argv[])
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(close));
 	if (rc != 0)
 		return rc;
-	
-	rc = seccomp_add_syscall(SCMP_ACT_DENY, SCMP_SYS(open)); 
-	if (rc != 0)
-		return rc;
 
-	
 	rc = seccomp_gen_pfc(STDOUT_FILENO);
 	if (rc != 0)
 		return rc;

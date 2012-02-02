@@ -138,6 +138,12 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall)
 	if (filter == NULL)
 		return -EFAULT;
 
+	/* XXX - not sure it still makes sense to have the action as a
+	 *       parameter, but it does help reinforce what should happen
+	 *       when reading the app code which calls us */
+	if (action == filter->def_action)
+		return -EPERM;
+
 	/* XXX - negative syscall values are going to be considered "special",
 	 *       e.g. all the socketcall() syscalls on x86 will be represented
 	 *       with negative syscall numbers - we need a thin shim layer
@@ -164,6 +170,12 @@ int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
 {
 	if (filter == NULL)
 		return -EFAULT;
+
+	/* XXX - not sure it still makes sense to have the action as a
+	 *       parameter, but it does help reinforce what should happen
+	 *       when reading the app code which calls us */
+	if (action == filter->def_action)
+		return -EPERM;
 
 	/* XXX - we should cap the maximum syscall argument? is there one? */
 

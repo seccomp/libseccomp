@@ -60,8 +60,7 @@ struct db_filter {
 	enum scmp_flt_action def_action;
 
 	/* syscall filters, kept as a sorted single-linked list */
-	struct db_syscall_list *sys_allow;
-	struct db_syscall_list *sys_deny;
+	struct db_syscall_list *syscalls;
 };
 
 /**
@@ -88,9 +87,6 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 		       ...);
 
 struct db_syscall_list *db_find_syscall(const struct db_filter *db,
-					enum scmp_flt_action action,
 					unsigned int syscall);
-struct db_syscall_list *db_find_syscall_all(const struct db_filter *db,
-					    unsigned int syscall);
 
 #endif

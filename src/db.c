@@ -96,9 +96,7 @@ void db_destroy(struct db_filter *db)
 	if (db == NULL)
 		return;
 
-	_db_list_foreach_free(s_iter, db->sys_allow)
-		_db_sys_arg_chain_list_free(s_iter->chains);
-	_db_list_foreach_free(s_iter, db->sys_deny)
+	_db_list_foreach_free(s_iter, db->syscalls)
 		_db_sys_arg_chain_list_free(s_iter->chains);
 }
 
@@ -123,15 +121,8 @@ int db_add_syscall(struct db_filter *db, unsigned int override,
 
 	assert(db != NULL);
 
-	/* check the opposite action list first to prevent problems later */
-	sys = (action == SCMP_ACT_ALLOW ? db->sys_deny : db->sys_allow);
-	while (sys != NULL && sys->num < syscall)
-		sys = sys->next;
-	if (sys != NULL && sys->num == syscall)
-		return -EEXIST;
-
-	/* add the filter to the correct list if it isn't already present */
-	sys = (action == SCMP_ACT_ALLOW ? db->sys_allow : db->sys_deny);
+	/* add the filter to the list if it isn't already present */
+	sys = db->syscalls;
 	while (sys != NULL && sys->num < syscall) {
 		sys_prev = sys;
 		sys = sys->next;
@@ -144,10 +135,7 @@ int db_add_syscall(struct db_filter *db, unsigned int override,
 		sys_new->num = syscall;
 		if (sys_prev == NULL) {
 			sys_new->next = sys;
-			if (action == SCMP_ACT_ALLOW)
-				db->sys_allow = sys_new;
-			else
-				db->sys_deny = sys_new;
+			db->syscalls = sys_new;
 		} else {
 			sys_new->next = sys_prev->next;
 			sys_prev->next = sys_new;
@@ -196,14 +184,6 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 	struct db_syscall_arg_list *s_arg_new = NULL;
 
 	assert(db != NULL);
-
-	/* check the opposite action list first to prevent problems later */
-	sys = (action == SCMP_ACT_ALLOW ? db->sys_deny : db->sys_allow);
-	while (sys != NULL && sys->num < syscall)
-		sys = sys->next;
-	if (sys != NULL && sys->num == syscall)
-		return -EEXIST;
-
 	va_start(chain_list, chain_len);
 
 	/* we can't easily (we could do it, but that would be painful) check
@@ -245,7 +225,7 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 	 *       argument chains */
 
 	/* find the syscall, or create one, and add the argument chain to it */
-	sys = (action == SCMP_ACT_ALLOW ? db->sys_allow : db->sys_deny);
+	sys = db->syscalls;
 	while (sys != NULL && sys->num < syscall) {
 		sys_prev = sys;
 		sys = sys->next;
@@ -262,10 +242,7 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 
 		if (sys_prev == NULL) {
 			sys_new->next = sys;
-			if (action == SCMP_ACT_ALLOW)
-				db->sys_allow = sys_new;
-			else
-				db->sys_deny = sys_new;
+			db->syscalls = sys_new;
 		} else {
 			sys_new->next = sys_prev->next;
 			sys_prev->next = sys_new;
@@ -301,50 +278,25 @@ db_add_syscall_args_failure:
 /**
  * Find a syscall filter in the DB
  * @param db the seccomp filter DB
- * @param action the matching filter action
  * @param syscall the syscall number
  * 
- * This function searches the filter DB using the given action and syscall
- * number and returns a pointer to the syscall filter or NULL if no matching
- * syscall filter exists.
+ * This function searches the filter DB using the given syscall number and
+ * returns a pointer to the syscall filter or NULL if no matching syscall
+ * filter exists.
  * 
  */
 struct db_syscall_list *db_find_syscall(const struct db_filter *db,
-					enum scmp_flt_action action,
 					unsigned int syscall)
 {
 	struct db_syscall_list *iter;
 
 	assert(db != NULL);
 
-	iter = (action == SCMP_ACT_ALLOW ? db->sys_allow : db->sys_deny);
+	iter = db->syscalls;
 	while (iter != NULL && iter->num < syscall)
 		iter = iter->next;
 	if (iter != NULL && iter->num == syscall)
 		return iter;
 
 	return NULL;
-}
-
-/**
- * Find a syscall filter in the DB
- * @param db the seccomp filter DB
- * @param syscall the syscall number
- * 
- * This function searches the filter DB for all possible actions using the
- * given syscall number and returns a pointer to the syscall filter or NULL if
- * no matching syscall filter exists.
- *
- */
-struct db_syscall_list *db_find_syscall_all(const struct db_filter *db,
-					    unsigned int syscall)
-{
-	struct db_syscall_list *iter;
-
-	assert(db != NULL);
-
-	iter = db_find_syscall(db, SCMP_ACT_ALLOW, syscall);
-	if (iter != NULL)
-		return iter;
-	return db_find_syscall(db, SCMP_ACT_DENY, syscall);
 }

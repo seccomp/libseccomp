@@ -335,10 +335,10 @@ struct seccomp_fprog *gen_bpf_generate(const struct db_filter *db)
 			goto bpf_generate_failure;
 	}
 
-	db_list_foreach(iter, db->sys_deny)
-		_gen_bpf_syscall(SCMP_ACT_DENY, iter, &bpf);
-	db_list_foreach(iter, db->sys_allow)
-		_gen_bpf_syscall(SCMP_ACT_ALLOW, iter, &bpf);
+	db_list_foreach(iter, db->syscalls)
+		_gen_bpf_syscall((db->def_action == SCMP_ACT_DENY ?
+				  SCMP_ACT_ALLOW : SCMP_ACT_DENY),
+				 iter, &bpf);
 
 	/* default action */
 	if (db->def_action == SCMP_ACT_ALLOW) {
