@@ -100,6 +100,17 @@ void seccomp_release(void)
 }
 
 /**
+ * Free memory associated with an fprog
+ */
+static void seccomp_free_fprog(struct seccomp_fprog *fprog)
+{
+	if (fprog == NULL)
+		return;
+	free(fprog->filter);
+	free(fprog);
+}
+
+/**
  * Enables the currently configured seccomp filter
  * 
  * This function loads the currently configured seccomp filter into the kernel.
@@ -120,6 +131,8 @@ int seccomp_enable(void)
 		return -ENOMEM;
 	if (prctl(PR_ATTACH_SECCOMP_FILTER, fprog) < 0)
 		return errno;
+
+	seccomp_free_fprog(fprog);
 
 	return 0;
 }
@@ -222,6 +235,7 @@ int seccomp_gen_bpf(int fd)
 		return -ENOMEM;
 	if (write(fd, fprog->filter, fprog->len * sizeof(fprog->filter[0])) < 0)
 		return errno;
+	seccomp_free_fprog(fprog);
 
 	return 0;
 }
