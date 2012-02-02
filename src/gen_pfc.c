@@ -96,17 +96,28 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 					default:
 						op_str = op_str_un;
 				}
-				fprintf(fds, " if (a%d %s 0x%lx) "
-					     "goto syscall_%d_c%d_next;\n",
-					a_iter->num,
-					op_str,
-					a_iter->datum,
-					sys_num,
-					c_count);
+				if (c_iter->next != NULL)
+					fprintf(fds,
+						" if (a%d %s 0x%lx) "
+						"goto syscall_%d_c%d_next;\n",
+						a_iter->num,
+						op_str,
+						a_iter->datum,
+						sys_num,
+						c_count);
+				else
+					fprintf(fds,
+						" if (a%d %s 0x%lx) "
+						"goto syscall_%d_end;\n",
+						a_iter->num,
+						op_str,
+						a_iter->datum,
+						sys_num);
 			}
 			fprintf(fds, " action %s;\n", _gen_pfc_action(act));
-			fprintf(fds, " syscall_%d_c%d_next:\n",
-				sys_num, c_count);
+			if (c_iter->next != NULL)
+				fprintf(fds, " syscall_%d_c%d_next:\n",
+					sys_num, c_count);
 			c_count++;
 		}
 		fprintf(fds, " syscall_%d_end:\n", sys_num);

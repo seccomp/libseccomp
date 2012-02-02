@@ -170,11 +170,11 @@ static int _gen_bpf_syscall_chain(enum scmp_flt_action act,
 				  unsigned int sys_num,
 				  unsigned int chain_num,
 				  struct db_syscall_arg_chain_list *chain,
-				  const char *lbl_next_sys;
+				  const char *lbl_next_sys,
 				  struct bpf_filter *bpf)
 {
 	int rc;
-	char *lbl_end;
+	const char *lbl_end;
 	char lbl_next_chain[LBL_LEN]; /* XXX - ungh */
 	struct db_syscall_arg_list *a_iter;
 
@@ -251,11 +251,10 @@ static int _gen_bpf_syscall_chain(enum scmp_flt_action act,
 		}
 	}
 	
-	/* matching action and jump label for next chain */
+	/* matching action for the argument chain */
 	if (act == SCMP_ACT_ALLOW) {
 		struct seccomp_filter_block blk[] = {
 			ALLOW,
-			_LABEL(&bpf->lbls, lbl_end),
 		};
 		rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
 		if (rc < 0)
@@ -263,6 +262,15 @@ static int _gen_bpf_syscall_chain(enum scmp_flt_action act,
 	} else {
 		struct seccomp_filter_block blk[] = {
 			DENY,
+		};
+		rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
+		if (rc < 0)
+			return rc;
+	}
+
+	/* jump label for next chain */
+	if (chain->next != NULL) {
+		struct seccomp_filter_block blk[] = {
 			_LABEL(&bpf->lbls, lbl_end),
 		};
 		rc = _gen_bpf_append(bpf, blk, _bpf_blk_len(blk));
