@@ -39,7 +39,8 @@ INCFLAGS := $(INCFLAGS) -I../include
 LDFLAGS := ../src/libseccomp.a
 
 TESTS = 01-basic \
-	02-basic-pfc
+	02-basic-pfc \
+	03-chains-pfc
 
 #
 # targets
@@ -55,6 +56,9 @@ all: $(TESTS)
 	$(COMPILE_EXEC)
 
 02-basic-pfc: 02-basic-pfc.c
+	$(COMPILE_EXEC)
+
+03-chains-pfc: 03-chains-pfc.c
 	$(COMPILE_EXEC)
 
 clean:

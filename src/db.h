@@ -22,6 +22,8 @@
 #ifndef _FILTER_DB_H
 #define _FILTER_DB_H
 
+#include <stdarg.h>
+
 #include <seccomp.h>
 
 /* XXX - need to provide doxygen comments for the types here */
@@ -79,12 +81,8 @@ struct db_filter *db_new(enum scmp_flt_action def_action);
 void db_destroy(struct db_filter *db);
 
 int db_add_syscall(struct db_filter *db, unsigned int override,
-		   enum scmp_flt_action action, unsigned int syscall);
-int db_add_syscall_arg(struct db_filter *db, unsigned int override,
-		       enum scmp_flt_action action,
-		       unsigned int syscall,
-		       unsigned int chain_len,
-		       ...);
+		   enum scmp_flt_action action, unsigned int syscall,
+		   unsigned int chain_len, va_list chain_list);
 
 struct db_syscall_list *db_find_syscall(const struct db_filter *db,
 					unsigned int syscall);

@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include <sys/prctl.h>
 
 #include <seccomp.h>
@@ -128,49 +129,24 @@ int seccomp_enable(void)
 }
 
 /**
- * Add a syscall to the existing filter
+ * Add a syscall and an optional argument chain to the existing filter
  * @param action the filter action
  * @param syscall the syscall number
+ * @param chain_len the number of argument filters in the argument filter chain
+ * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
  * 
- * This function adds a new syscall to the seccomp filter.  Returns zero on
+ * This function adds a new argument/comparison/value to the seccomp filter for
+ * a syscall; multiple arguments can be specified and they will be chained
+ * together (essentially AND'd together) in the filter.  Returns zero on
  * success, negative values on failure.
  * 
  */
-int seccomp_add_syscall(enum scmp_flt_action action, int syscall)
+int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
+			unsigned int chain_len, ...)
 {
-	if (filter == NULL)
-		return -EFAULT;
+	int rc;
+	va_list chain_list;
 
-	/* XXX - not sure it still makes sense to have the action as a
-	 *       parameter, but it does help reinforce what should happen
-	 *       when reading the app code which calls us */
-	if (action == filter->def_action)
-		return -EPERM;
-
-	/* XXX - negative syscall values are going to be considered "special",
-	 *       e.g. all the socketcall() syscalls on x86 will be represented
-	 *       with negative syscall numbers - we need a thin shim layer
-	 *       here to convert these pseudo syscalls into real filters (check
-	 * 	 the a0 value, etc.) */
-
-	return db_add_syscall(filter, 0, action, syscall);
-}
-
-/**
- * Add a syscall and argument value to the existing filter
- * @param action the filter action
- * @param syscall the syscall number
- * @param arg the argument number
- * @param datum the argument value
- * 
- * This function adds a new syscall/argument/value to the seccomp filter.
- * Returns zero on success, negative values on failure.
- * 
- */
-int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
-			    unsigned int arg,
-			    enum scmp_compare op, unsigned long datum)
-{
 	if (filter == NULL)
 		return -EFAULT;
 
@@ -182,11 +158,17 @@ int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
 
 	/* XXX - we should cap the maximum syscall argument? is there one? */
 
-	/* XXX - see note in seccomp_add_syscall() about negative syscall
-	 *       numbers */
+	/* XXX - negative syscall values are going to be considered "special",
+	 *       e.g. all the socketcall() syscalls on x86 will be represented
+	 *       with negative syscall numbers - we need a thin shim layer
+	 *       here to convert these pseudo syscalls into real filters (check
+	 * 	 the a0 value, etc.) */
 
-	return db_add_syscall_arg(filter, 0, action, syscall, 1,
-				  arg, op, datum);
+	va_start(chain_list, chain_len);
+	rc = db_add_syscall(filter, 0, action, syscall,	chain_len, chain_list);
+	va_end(chain_list);
+
+	return rc;
 }
 
 /**

@@ -101,63 +101,13 @@ void db_destroy(struct db_filter *db)
 }
 
 /**
- * Add a syscall filter
- * @param db the seccomp filter db
- * @param override override existing rules
- * @param action the filter action
- * @param syscall the syscall number
- * 
- * This function adds a new syscall filter to the seccomp filter DB, and if
- * the override argument is true, any existing matching syscall rules are
- * reset/replaced.  Returns zero on success, negative values on failure.
- *
- */
-int db_add_syscall(struct db_filter *db, unsigned int override,
-		   enum scmp_flt_action action, unsigned int syscall)
-{
-	struct db_syscall_list *sys;
-	struct db_syscall_list *sys_prev = NULL;
-	struct db_syscall_list *sys_new;
-
-	assert(db != NULL);
-
-	/* add the filter to the list if it isn't already present */
-	sys = db->syscalls;
-	while (sys != NULL && sys->num < syscall) {
-		sys_prev = sys;
-		sys = sys->next;
-	}
-	if (sys == NULL || sys->num != syscall) {
-		sys_new = malloc(sizeof(*sys_new));
-		if (sys_new == NULL)
-			return -ENOMEM;
-		memset(sys_new, 0, sizeof(*sys_new));
-		sys_new->num = syscall;
-		if (sys_prev == NULL) {
-			sys_new->next = sys;
-			db->syscalls = sys_new;
-		} else {
-			sys_new->next = sys_prev->next;
-			sys_prev->next = sys_new;
-		}
-	} else if (override) {
-		/* if the syscall is already present in the filter with the
-		 * correct action we don't change it unless override is true */
-		_db_sys_arg_chain_list_free(sys->chains);
-		sys->chains = NULL;
-	}
-	
-	return 0;
-}
-
-/**
- * Add a syscall filter with an argument filter
+ * Add a syscall filter with an optional argument chain
  * @param db the seccomp filter db
  * @param override override existing rules
  * @param action the filter action
  * @param syscall the syscall number
  * @param chain_len the number of argument filters in the argument filter chain
- * @param ... argument filter chain, (uint, enum scmp_compare, ulong), repeated
+ * @param chain_list argument filter chain, (uint, enum scmp_compare, ulong)
  * 
  * This function adds a new syscall filter to the seccomp filter DB, adding to
  * the existing filters for the syscall, unless no argument specific filters
@@ -166,14 +116,11 @@ int db_add_syscall(struct db_filter *db, unsigned int override,
  * Returns zero on success, negative values on failure.
  * 
  */
-int db_add_syscall_arg(struct db_filter *db, unsigned int override,
-		       enum scmp_flt_action action,
-		       unsigned int syscall,
-		       unsigned int chain_len,
-		       ...)
+int db_add_syscall(struct db_filter *db, unsigned int override,
+		   enum scmp_flt_action action, unsigned int syscall,
+		   unsigned int chain_len, va_list chain_list)
 {
 	int rc;
-	va_list chain_list;
 	unsigned int iter;
 	struct db_syscall_list *sys;
 	struct db_syscall_list *sys_prev = NULL;
@@ -184,42 +131,44 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 	struct db_syscall_arg_list *s_arg_new = NULL;
 
 	assert(db != NULL);
-	va_start(chain_list, chain_len);
 
 	/* we can't easily (we could do it, but that would be painful) check
 	 * to see if an existing argument chain matches the new addition so
 	 * we always add the new chain to the end of the list - in the future
 	 * we can try to be more clever about this - XXX */
-	c_new = malloc(sizeof(*c_new));
-	if (c_new == NULL) {
-		rc = -ENOMEM;
-		goto db_add_syscall_args_failure;
-	}
-	memset(c_new, 0, sizeof(*c_new));
-	for (iter = 0; iter < chain_len; iter++) {
-		s_arg_new = malloc(sizeof(*s_arg_new));
-		if (s_arg_new == NULL) {
+	if (chain_len > 0) {
+		c_new = malloc(sizeof(*c_new));
+		if (c_new == NULL) {
 			rc = -ENOMEM;
 			goto db_add_syscall_args_failure;
 		}
-		memset(s_arg_new, 0, sizeof(*s_arg_new));
+		memset(c_new, 0, sizeof(*c_new));
+		for (iter = 0; iter < chain_len; iter++) {
+			s_arg_new = malloc(sizeof(*s_arg_new));
+			if (s_arg_new == NULL) {
+				rc = -ENOMEM;
+				goto db_add_syscall_args_failure;
+			}
+			memset(s_arg_new, 0, sizeof(*s_arg_new));
 
-		s_arg_new->num = va_arg(chain_list, unsigned int);
-		/* XXX - sanity check 's_arg_new->num' */
-		s_arg_new->op = va_arg(chain_list, unsigned int);
-		if (s_arg_new->op <= _SCMP_CMP_MIN ||
-		    s_arg_new->op >= _SCMP_CMP_MAX) {
-			rc = -EINVAL;
-			goto db_add_syscall_args_failure;
+			s_arg_new->num = va_arg(chain_list, unsigned int);
+			/* XXX - sanity check 's_arg_new->num' */
+			s_arg_new->op = va_arg(chain_list, unsigned int);
+			if (s_arg_new->op <= _SCMP_CMP_MIN ||
+			s_arg_new->op >= _SCMP_CMP_MAX) {
+				rc = -EINVAL;
+				goto db_add_syscall_args_failure;
+			}
+			s_arg_new->datum = va_arg(chain_list, unsigned long);
+
+			if (s_arg_prev == NULL)
+				c_new->args = s_arg_new;
+			else
+				s_arg_prev->next = s_arg_new;
+			s_arg_prev = s_arg_new;
 		}
-		s_arg_new->datum = va_arg(chain_list, unsigned long);
-
-		if (s_arg_prev == NULL)
-			c_new->args = s_arg_new;
-		else
-			s_arg_prev->next = s_arg_new;
-		s_arg_prev = s_arg_new;
-	}
+	} else
+		c_new = NULL;
 
 	/* XXX - this is where we could compare c_new against the existing
 	 *       argument chains */
@@ -253,17 +202,15 @@ int db_add_syscall_arg(struct db_filter *db, unsigned int override,
 			c_iter = c_iter->next;
 		c_iter->next = c_new;
 	} else if (override) {
-		/* if override is true, we add a argument to filter even though
-		 * the current filter only specifies the syscall */
+		/* if override is true, we add an argument filter if given */
 		sys->chains = c_new;
-	} else {
+	} else if (c_new != NULL) {
 		/* if override is false, we don't want to restrict a syscall
 		 * only filter (no arguments specified) so error out */
 		rc = -EEXIST;
 		goto db_add_syscall_args_failure;
 	}
 
-	va_end(chain_list);
 	return 0;
 
 db_add_syscall_args_failure:

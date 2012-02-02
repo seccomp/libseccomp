@@ -53,10 +53,8 @@ void seccomp_release(void);
 
 int seccomp_enable(void);
 
-int seccomp_add_syscall(enum scmp_flt_action action, int syscall);
-int seccomp_add_syscall_arg(enum scmp_flt_action action, int syscall,
-			    unsigned int arg,
-			    enum scmp_compare op, unsigned long datum);
+int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
+			unsigned int chain_len, ...);
 
 int seccomp_gen_pfc(int fd);
 int seccomp_gen_bpf(int fd);
