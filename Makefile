@@ -43,7 +43,7 @@ INSTALL_GROUP ?= root
 # targets
 #
 
-SUBDIRS = src tests
+SUBDIRS = src tests tools
 
 .PHONY: tarball install clean $(SUBDIRS)
 
