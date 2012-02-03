@@ -70,13 +70,13 @@ struct bpf_filter {
 	(sizeof(x) / sizeof(x[0]))
 
 #define _bpf_next(x) \
-	(&((x)->prog->filter[(x)->prog->len]))
+	(&((x)->prog->filter[(x)->prog->num_blks]))
 
 /**
  * Append BPF instructions to the main BPF program
  * @param bpf the bpf_filter struct
- * @param blk the new BPF instruction block
- * @param blk_len length of the new BPF instruction block
+ * @param blk the new BPF instruction blocks
+ * @param num_blks number of new BPF instruction blocks
  * 
  * This function appends the given set of BPF instructions to the main BPF
  * program, growing the allocated size if necessary.  Returns zero on success,
@@ -85,12 +85,14 @@ struct bpf_filter {
  */
 static int _gen_bpf_append(struct bpf_filter *bpf,
 			   const struct seccomp_filter_block *blk,
-			   size_t blk_len)
+			   size_t num_blks)
 {
 	void *buf;
 	size_t buf_len;
+	size_t blk_len = num_blks * sizeof(*blk);
 
-	if (bpf->prog->len + blk_len > bpf->prog_alen) {
+	buf_len = (bpf->prog->num_blks * sizeof(*blk)) + blk_len;
+	if (buf_len > bpf->prog_alen) {
 		/* XXX - check to make sure the size isn't getting too large */
 		/* XXX - is there a size limit? */
 		buf_len = bpf->prog_alen + _max(BPF_INCR, blk_len);
@@ -98,15 +100,15 @@ static int _gen_bpf_append(struct bpf_filter *bpf,
 		if (buf == NULL) {
 			free(bpf->prog->filter);
 			bpf->prog->filter = NULL;
-			bpf->prog->len = 0;
+			bpf->prog->num_blks = 0;
 			bpf->prog_alen = 0;
 			return -ENOMEM;
 		}
 		bpf->prog->filter = buf;
 		bpf->prog_alen = buf_len;
 	}
-	memcpy(_bpf_next(bpf), blk, blk_len * sizeof(*blk));
-	bpf->prog->len += blk_len;
+	memcpy(_bpf_next(bpf), blk, blk_len);
+	bpf->prog->num_blks += num_blks;
 
 	return 0;
 }
@@ -419,7 +421,7 @@ struct seccomp_fprog *gen_bpf_generate(const struct db_filter *db)
 	}
 
 	/* resolve the labels/jumps */
-	rc = bpf_resolve_jumps(&bpf.lbls, bpf.prog->filter, bpf.prog->len);
+	rc = bpf_resolve_jumps(&bpf.lbls, bpf.prog->filter, bpf.prog->num_blks);
 	if (rc != 0)
 		goto generate_failure;
 

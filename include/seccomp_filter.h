@@ -41,7 +41,7 @@ struct seccomp_filter_block {	/* Filter block */
 };
 
 struct seccomp_fprog {	/* Required for SO_ATTACH_FILTER. */
-	unsigned short		len;	/* Number of filter blocks */
+	unsigned short		num_blks;	/* Number of filter blocks */
 	struct seccomp_filter_block *filter;
 };
 

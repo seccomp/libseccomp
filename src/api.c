@@ -206,7 +206,7 @@ int seccomp_gen_bpf(int fd)
 	fprog = gen_bpf_generate(filter);
 	if (fprog == NULL)
 		return -ENOMEM;
-	rc = write(fd, fprog->filter, fprog->len * sizeof(fprog->filter[0]));
+	rc = write(fd, fprog->filter, fprog->num_blks * sizeof(fprog->filter[0]));
 	gen_bpf_destroy(fprog);
 	if (rc < 0)
 		return errno;
