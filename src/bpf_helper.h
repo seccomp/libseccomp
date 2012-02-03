@@ -39,7 +39,8 @@ struct bpf_labels {
 int bpf_resolve_jumps(struct bpf_labels *labels,
 		      struct seccomp_filter_block *filter, size_t count);
 __u32 seccomp_bpf_label(struct bpf_labels *labels, const char *label);
-void seccomp_bpf_print(struct seccomp_filter_block *filter, size_t count);
+void seccomp_bpf_print(FILE *file, struct seccomp_filter_block *filter,
+			size_t count);
 
 #define JUMP_JT 0xff
 #define JUMP_JF 0xff

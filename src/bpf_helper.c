@@ -80,10 +80,61 @@ __u32 seccomp_bpf_label(struct bpf_labels *labels, const char *label)
 	return id;
 }
 
-void seccomp_bpf_print(struct seccomp_filter_block *filter, size_t count)
+void seccomp_bpf_print(FILE *file, struct seccomp_filter_block *filter,
+			size_t count)
 {
+	int i;
 	struct seccomp_filter_block *end = filter + count;
-	for ( ; filter < end; ++filter)
-		printf("{ code=%u,jt=%u,jf=%u,k=%u },\n",
-			filter->code, filter->jt, filter->jf, filter->k);
+
+	for (i = 0 ; filter < end; ++filter, i++) {
+		fprintf(file, "%04d: { code=%-3u,jt=%-4u,jf=%-4u,k=%-10u }, ",
+			i, filter->code, filter->jt, filter->jf, filter->k);
+
+#if __BITS_PER_LONG == 32
+
+		switch (filter->code) {
+		case BPF_LD+BPF_W+BPF_ABS:
+			if (filter->k == offsetof(struct seccomp_filter_data,
+						syscall_nr))
+				fprintf(file, "%s\n", "LOAD NR");
+			else
+				fprintf(file, "%s%d\n", "LOAD ARG", filter->k /
+					offsetof(struct seccomp_filter_data,
+					args[0].lo32) - 1);
+			break;
+		case BPF_JMP+BPF_JA:
+			if (filter->k > 1)
+				fprintf(file, "%s %d (line %d)\n", "JA",
+						filter->k, filter->k + i + 1);
+			else
+				fprintf(file, "%s %d\n", "JA", filter->k);
+			break;
+		case BPF_JMP+BPF_JEQ+BPF_K:
+			fprintf(file, "%s %d ? %d : %d\n", "JEQ",
+					filter->k, filter->jt, filter->jf);
+			break;
+		case BPF_JMP+BPF_JGE+BPF_K:
+			fprintf(file, "%s %d ? %d : %d\n", "JGE",
+					filter->k, filter->jt, filter->jf);
+			break;
+		case BPF_JMP+BPF_JGT+BPF_K:
+			fprintf(file, "%s %d ? %d : %d\n", "JGT",
+					filter->k, filter->jt, filter->jf);
+			break;
+		case BPF_RET+BPF_K:
+			if (filter->k == 0xFFFFFFFF)
+				fprintf(file, "%s", "ALLOW\n");
+			else if (filter->k == 0)
+				fprintf(file, "%s", "DENY\n");
+			break;
+		default:
+			fprintf(file, "\n");
+			break;
+		}
+
+#elif __BITS_PER_LONG == 64
+		fprintf(file, "\n");
+#endif
+
+	}
 }
