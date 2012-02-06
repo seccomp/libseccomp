@@ -157,6 +157,7 @@ int db_add_syscall(struct db_filter *db, unsigned int override,
 			if (s_arg_new->op <= _SCMP_CMP_MIN ||
 			s_arg_new->op >= _SCMP_CMP_MAX) {
 				rc = -EINVAL;
+				free(s_arg_new);
 				goto db_add_syscall_args_failure;
 			}
 			s_arg_new->datum = va_arg(chain_list, unsigned long);
