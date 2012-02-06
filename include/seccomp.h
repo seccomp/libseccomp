@@ -27,7 +27,11 @@
 /* XXX - see notes in seccomp_add_syscall() about pseudo syscalls, we'll need
  *       to define them here for the arch/platforms that require them */
 
-#define SCMP_SYS(x)	__NR_##x
+/* XXX - this should match the kernel's maximum syscall count */
+/* XXX - we may want to make this arch dependent if it is in the kernel */
+#define SCMP_ARG_MAX		6
+
+#define SCMP_SYS(x)		__NR_##x
 
 enum scmp_flt_action {
 	_SCMP_ACT_MIN = 0,	/* sentinel */
@@ -38,12 +42,13 @@ enum scmp_flt_action {
 
 enum scmp_compare {
 	_SCMP_CMP_MIN = 0,	/* sentinel */
-	SCMP_CMP_NE,		/* not equal */
-	SCMP_CMP_LT,		/* less than */
-	SCMP_CMP_LE,		/* less than or equal */
-	SCMP_CMP_EQ,		/* equal */
-	SCMP_CMP_GE,		/* greater than or equal */
-	SCMP_CMP_GT,		/* greater than */
+	SCMP_CMP_NE = 1,	/* not equal */
+	SCMP_CMP_LT = 2,	/* less than */
+	SCMP_CMP_LE = 3,	/* less than or equal */
+	SCMP_CMP_EQ = 4,	/* equal */
+	SCMP_CMP_GE = 5,	/* greater than or equal */
+	SCMP_CMP_GT = 6,	/* greater than */
+	SCMP_CMP_MASK = 7,	/* masked value equality */
 	_SCMP_CMP_MAX,		/* sentinel */
 };
 

@@ -28,33 +28,48 @@
 
 /* XXX - need to provide doxygen comments for the types here */
 
-struct db_syscall_arg_list {
+struct db_arg_chain_tree {
 	/* argument number (a0 = 0, a1 = 1, etc.) */
-	unsigned int num;
+	unsigned int arg;
+
 	/* comparison operator */
 	enum scmp_compare op;
 	/* syscall argument value */
-	/* XXX - this could change, just need something big enough to hold any
-	 *       syscall argument */
+	/* XXX - need something big enough to hold any syscall argument */
+	/* XXX - should this just be a void ptr? */
+	/* XXX - should we make it a macro or typedef defined at build time? */
 	unsigned long datum;
 
-	struct db_syscall_arg_list *next;
+	/* if non-zero, this is the last node and the value is desired action */
+	enum scmp_flt_action action;
+	unsigned int action_flag;
+
+	/* list of nodes on this level */
+	struct db_arg_chain_tree *lvl_prv, *lvl_nxt;
+
+	/* next node in the chain */
+	struct db_arg_chain_tree *nxt_t;
+	struct db_arg_chain_tree *nxt_f;
+
+	/* number of chains referencing this node */
+	unsigned int refcnt;
 };
+#define db_chain_lt(x,y) \
+	(((x)->arg < (y)->arg) || \
+	 (((x)->arg == (y)->arg) && ((x)->op < (y)->op)))
+#define db_chain_eq(x,y) \
+	(((x)->arg == (y)->arg) && \
+	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum))
+#define db_chain_leaf(x) \
+	((x)->action != 0)
 
-struct db_syscall_arg_chain_list {
-	/* list of args, kept as a sorted single-linked list */
-	struct db_syscall_arg_list *args;
-
-	struct db_syscall_arg_chain_list *next;
-};
-
-struct db_syscall_list {
+struct db_sys_list {
 	/* native syscall number */
 	unsigned int num;
-	/* list of arg chains, kept as an unsorted single-linked list (opt) */
-	struct db_syscall_arg_chain_list *chains;
+	/* the argument chain heads */
+	struct db_arg_chain_tree *chains;
 
-	struct db_syscall_list *next;
+	struct db_sys_list *next;
 };
 
 struct db_filter {
@@ -62,7 +77,7 @@ struct db_filter {
 	enum scmp_flt_action def_action;
 
 	/* syscall filters, kept as a sorted single-linked list */
-	struct db_syscall_list *syscalls;
+	struct db_sys_list *syscalls;
 };
 
 /**
@@ -80,11 +95,11 @@ struct db_filter {
 struct db_filter *db_new(enum scmp_flt_action def_action);
 void db_destroy(struct db_filter *db);
 
-int db_add_syscall(struct db_filter *db, unsigned int override,
-		   enum scmp_flt_action action, unsigned int syscall,
+int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
+		   unsigned int syscall,
 		   unsigned int chain_len, va_list chain_list);
 
-struct db_syscall_list *db_find_syscall(const struct db_filter *db,
-					unsigned int syscall);
+struct db_sys_list *db_find_syscall(const struct db_filter *db,
+				    unsigned int syscall);
 
 #endif

@@ -22,16 +22,27 @@
 #ifndef _TRANSLATOR_BPF_H
 #define _TRANSLATOR_BPF_H
 
-#if 0
-#include <linux/seccomp_filter.h>
-#else
-/* XXX - needed for early development only */
-#include <seccomp_filter.h>
-#endif
+#include <inttypes.h>
 
 #include "db.h"
 
-struct seccomp_fprog *gen_bpf_generate(const struct db_filter *db);
-void gen_bpf_destroy(struct seccomp_fprog *fprog);
+/* XXX - should we just use "sock_filter" in linux/filter.h? the name is
+ *       awkward, but using the standard struct might be a good idea */
+struct bpf_instr_raw {
+	uint16_t op;
+	uint8_t	jt;
+	uint8_t	jf;
+	uint32_t k;
+} __attribute__ ((packed));
+
+struct bpf_program {
+	uint16_t blk_cnt;
+	struct bpf_instr_raw *blks;
+};
+#define BPF_PGM_SIZE(x) \
+	((x)->blk_cnt * sizeof(*((x)->blks)))
+
+struct bpf_program *gen_bpf_generate(const struct db_filter *db);
+void gen_bpf_destroy(struct bpf_program *program);
 
 #endif

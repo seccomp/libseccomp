@@ -34,8 +34,116 @@
  * Display a string representation of the filter action
  * @param action the action
  */
-#define _gen_pfc_action(action) \
+#define _pfc_action(action) \
 	((action) == SCMP_ACT_ALLOW ? "ALLOW" : "DENY")
+
+/**
+ * XXX
+ */
+static void _indent(FILE *fds, unsigned int lvl)
+{
+	while (lvl-- > 0)
+		fprintf(fds, " ");
+}
+
+/**
+ * XXX
+ */
+static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
+			   unsigned int lvl, FILE *fds)
+{
+	const struct db_arg_chain_tree *c_iter;
+
+	/* get to the start */
+	c_iter = node;
+	while (c_iter->lvl_prv != NULL)
+		c_iter = c_iter->lvl_prv;
+
+	while (c_iter != NULL) {
+		_indent(fds, lvl);
+		switch (c_iter->op) {
+			case SCMP_CMP_NE:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d == %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d != %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			case SCMP_CMP_LT:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d >= %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d < %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			case SCMP_CMP_LE:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d > %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d <= %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			case SCMP_CMP_EQ:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d != %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d == %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			case SCMP_CMP_GE:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d < %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d >= %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			case SCMP_CMP_GT:
+				if (c_iter->action != 0 &&
+				    c_iter->action_flag == 0)
+					fprintf(fds, " if ($a%d <= %ld)\n",
+						c_iter->arg, c_iter->datum);
+				else
+					fprintf(fds, " if ($a%d > %ld)\n",
+						c_iter->arg,
+						c_iter->datum);
+				break;
+			default:
+				fprintf(fds, " if ($a%d ??? %ld)\n",
+					c_iter->arg, c_iter->datum);
+		}
+
+		if (c_iter->action != 0) {
+			_indent(fds, lvl + 1);
+			fprintf(fds, " action %s;\n",
+				_pfc_action(c_iter->action));
+		} else {
+			if (c_iter->nxt_t != NULL)
+				_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
+			if (c_iter->nxt_f != NULL) {
+				_indent(fds, lvl);
+				fprintf(fds, " else\n");
+				_gen_pfc_chain(c_iter->nxt_f, lvl + 1, fds);
+			}
+		}
+
+		c_iter = c_iter->lvl_nxt;
+	}
+}
 
 /**
  * Generate pseudo filter code for a syscall
@@ -48,82 +156,21 @@
  * negative values on failure.
  *
  */
-static int _gen_pfc_syscall(enum scmp_flt_action act,
-			    const struct db_syscall_list *sys, FILE *fds)
+static void _gen_pfc_syscall(enum scmp_flt_action act,
+			     const struct db_sys_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
-	struct db_syscall_arg_chain_list *c_iter;
-	struct db_syscall_arg_list *a_iter;
-	unsigned int c_count = 0;
-	char *op_str;
-
-	char op_str_ne[] = "!=";
-	char op_str_lt[] = "<";
-	char op_str_le[] = "<=";
-	char op_str_eq[] = "==";
-	char op_str_ge[] = ">=";
-	char op_str_gt[] = ">";
-	char op_str_un[] = "??";
 
 	fprintf(fds, "# filter code for syscall #%d\n", sys_num);
-	if (sys->chains == NULL) {
-		fprintf(fds, " if (syscall == %d) action %s;\n",
-			sys_num, _gen_pfc_action(act));
-	} else {
-		fprintf(fds, " if (syscall != %d) goto syscall_%d_end;\n",
+	if (sys->chains != NULL) {
+		fprintf(fds, " if ($syscall != %d) goto syscal_%d_end;\n",
 			sys_num, sys_num);
-		db_list_foreach(c_iter, sys->chains) {
-			db_list_foreach(a_iter, c_iter->args) {
-				switch (a_iter->op) {
-					case SCMP_CMP_NE:
-						op_str = op_str_eq;
-						break;
-					case SCMP_CMP_LT:
-						op_str = op_str_ge;
-						break;
-					case SCMP_CMP_LE:
-						op_str = op_str_gt;
-						break;
-					case SCMP_CMP_EQ:
-						op_str = op_str_ne;
-						break;
-					case SCMP_CMP_GE:
-						op_str = op_str_lt;
-						break;
-					case SCMP_CMP_GT:
-						op_str = op_str_le;
-						break;
-					default:
-						op_str = op_str_un;
-				}
-				if (c_iter->next != NULL)
-					fprintf(fds,
-						" if (a%d %s 0x%lx) "
-						"goto syscall_%d_c%d_next;\n",
-						a_iter->num,
-						op_str,
-						a_iter->datum,
-						sys_num,
-						c_count);
-				else
-					fprintf(fds,
-						" if (a%d %s 0x%lx) "
-						"goto syscall_%d_end;\n",
-						a_iter->num,
-						op_str,
-						a_iter->datum,
-						sys_num);
-			}
-			fprintf(fds, " action %s;\n", _gen_pfc_action(act));
-			if (c_iter->next != NULL)
-				fprintf(fds, " syscall_%d_c%d_next:\n",
-					sys_num, c_count);
-			c_count++;
-		}
+		_gen_pfc_chain(sys->chains, 0, fds);
 		fprintf(fds, " syscall_%d_end:\n", sys_num);
+	} else {
+		fprintf(fds, " if ($syscall == %d) action %s;\n",
+			sys_num, _pfc_action(act));
 	}
-
-	return 0;
 }
 
 /**
@@ -139,7 +186,7 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
 int gen_pfc_generate(const struct db_filter *db, int fd)
 {
 	FILE *fds;
-	struct db_syscall_list *iter;
+	struct db_sys_list *s_iter;
 
 	fds = fdopen(fd, "a+");
 	if (fds == NULL)
@@ -148,12 +195,12 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "#\n");
 	fprintf(fds, "# filter pseudo code start\n");
 	fprintf(fds, "#\n");
-	db_list_foreach(iter, db->syscalls)
+	db_list_foreach(s_iter, db->syscalls)
 		_gen_pfc_syscall((db->def_action == SCMP_ACT_DENY ?
 				  SCMP_ACT_ALLOW : SCMP_ACT_DENY ),
-				 iter, fds);
+				 s_iter, fds);
 	fprintf(fds, "# default action\n");
-	fprintf(fds, " action %s;\n", _gen_pfc_action(db->def_action));
+	fprintf(fds, " action %s;\n", _pfc_action(db->def_action));
 	fprintf(fds, "#\n");
 	fprintf(fds, "# filter pseudo code end\n");
 	fprintf(fds, "#\n");

@@ -31,6 +31,11 @@
 #include "gen_pfc.h"
 #include "gen_bpf.h"
 
+/* this is for systems that don't yet have this magic value defined */
+#ifndef PR_ATTACH_SECCOMP_FILTER
+#define PR_ATTACH_SECCOMP_FILTER	37
+#endif
+
 /* XXX - we need a way to handle things like socketcall() so devs don't have
  *       to worry about underlying arch/platform oddities */
 
@@ -112,16 +117,16 @@ void seccomp_release(void)
 int seccomp_enable(void)
 {
 	int rc;
-	struct seccomp_fprog *fprog;
+	struct bpf_program *program;
 
 	if (filter == NULL)
 		return -EFAULT;
 
-	fprog = gen_bpf_generate(filter);
-	if (fprog == NULL)
+	program = gen_bpf_generate(filter);
+	if (program == NULL)
 		return -ENOMEM;
-	rc = prctl(PR_ATTACH_SECCOMP_FILTER, fprog);
-	gen_bpf_destroy(fprog);
+	rc = prctl(PR_ATTACH_SECCOMP_FILTER, program);
+	gen_bpf_destroy(program);
 	if (rc < 0)
 		return errno;
 
@@ -165,7 +170,7 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
 	 * 	 the a0 value, etc.) */
 
 	va_start(chain_list, chain_len);
-	rc = db_add_syscall(filter, 0, action, syscall,	chain_len, chain_list);
+	rc = db_add_syscall(filter, action, syscall, chain_len, chain_list);
 	va_end(chain_list);
 
 	return rc;
@@ -198,16 +203,16 @@ int seccomp_gen_pfc(int fd)
 int seccomp_gen_bpf(int fd)
 {
 	int rc;
-	struct seccomp_fprog *fprog;
+	struct bpf_program *program;
 
 	if (filter == NULL)
 		return -EFAULT;
 
-	fprog = gen_bpf_generate(filter);
-	if (fprog == NULL)
+	program = gen_bpf_generate(filter);
+	if (program == NULL)
 		return -ENOMEM;
-	rc = write(fd, fprog->filter, fprog->num_blks * sizeof(fprog->filter[0]));
-	gen_bpf_destroy(fprog);
+	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
+	gen_bpf_destroy(program);
 	if (rc < 0)
 		return errno;
 
