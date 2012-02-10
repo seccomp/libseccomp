@@ -1,6 +1,6 @@
 /**
  * Seccomp Pseudo Filter Code (PFC) Generator
- * 
+ *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
@@ -42,11 +42,11 @@
  * @param act the filter action
  * @param sys the syscall filter
  * @param fds the file stream to send the output
- * 
+ *
  * This function generates a pseduo filter code representation of the given
  * syscall filter and writes it to the given fd.  Returns zero on success,
  * negative values on failure.
- * 
+ *
  */
 static int _gen_pfc_syscall(enum scmp_flt_action act,
 			    const struct db_syscall_list *sys, FILE *fds)
@@ -130,11 +130,11 @@ static int _gen_pfc_syscall(enum scmp_flt_action act,
  * Generate a pseudo filter code string representation
  * @param db the seccomp filter DB
  * @param fd the fd to send the output
- * 
+ *
  * This function generates a pseudo filter code representation of the given
  * filter DB and writes it to the given fd.  Returns zero on success, negative
  * values on failure.
- * 
+ *
  */
 int gen_pfc_generate(const struct db_filter *db, int fd)
 {

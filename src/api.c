@@ -1,6 +1,6 @@
 /**
  * Seccomp Library API
- * 
+ *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
@@ -83,13 +83,13 @@ int seccomp_reset(enum scmp_flt_action def_action)
 
 /**
  * Destroys the filter state and releases any resources
- * 
+ *
  * This functions destroys the internal seccomp filter state and releases any
  * resources, including memory, associated with the filter state.  This
  * function does not reset any seccomp filters already loaded into the kernel.
  * The function seccomp_reset() must be called before the filter can be
  * reconfigured after calling this function.
- * 
+ *
  */
 void seccomp_release(void)
 {
@@ -102,7 +102,7 @@ void seccomp_release(void)
 
 /**
  * Enables the currently configured seccomp filter
- * 
+ *
  * This function loads the currently configured seccomp filter into the kernel.
  * If the filter was loaded correctly, the kernel will be enforcing the filter
  * when this function returns.  Returns zero on success, negative values on
@@ -134,12 +134,12 @@ int seccomp_enable(void)
  * @param syscall the syscall number
  * @param chain_len the number of argument filters in the argument filter chain
  * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
- * 
+ *
  * This function adds a new argument/comparison/value to the seccomp filter for
  * a syscall; multiple arguments can be specified and they will be chained
  * together (essentially AND'd together) in the filter.  Returns zero on
  * success, negative values on failure.
- * 
+ *
  */
 int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
 			unsigned int chain_len, ...)
@@ -174,7 +174,7 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
 /**
  * Generate seccomp pseudo filter code
  * @param fd the destination fd
- * 
+ *
  * This function generates seccomp pseudo filter code and writes it to the
  * given fd.  Returns zero on success, negative values on failure.
  *
@@ -190,7 +190,7 @@ int seccomp_gen_pfc(int fd)
 /**
  * Generate seccomp Berkley Packet Filter code
  * @param fd the destination fd
- * 
+ *
  * This function generates seccomp Berkley Packer Filter (BPF) code and writes
  * it to the given fd.  Returns zero on success, negative values on failure.
  *

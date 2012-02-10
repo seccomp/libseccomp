@@ -1,6 +1,6 @@
 /**
  * Enhanced Seccomp Filter DB
- * 
+ *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
@@ -69,10 +69,10 @@ struct db_filter {
  * Iterate over each item in the DB list
  * @param iter the iterator
  * @param list the list
- * 
+ *
  * This macro acts as for()/while() conditional and iterates the following
  * statement for each item in the given list.
- * 
+ *
  */
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)

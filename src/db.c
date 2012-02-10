@@ -1,6 +1,6 @@
 /**
  * Enhanced Seccomp Filter DB
- * 
+ *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
@@ -33,10 +33,10 @@
  * Free each item in the DB list
  * @param iter the iterator
  * @param list the list
- * 
+ *
  * This macro acts as for()/while() conditional and iterates the following
  * statement before freeing the list item.
- * 
+ *
  */
 #define _db_list_foreach_free(iter,list) \
 	for (iter = (list); \
@@ -46,9 +46,9 @@
 /**
  * Free a syscall filter argument chain list
  * @param list the argument chain list
- * 
+ *
  * This function frees a syscall argument chain list.
- * 
+ *
  */
 static void _db_sys_arg_chain_list_free(struct db_syscall_arg_chain_list *list)
 {
@@ -63,10 +63,10 @@ static void _db_sys_arg_chain_list_free(struct db_syscall_arg_chain_list *list)
 /**
  * Intitalize a seccomp filter DB
  * @param def_action the default filter action
- * 
+ *
  * This function initializes a seccomp filter DB and readies it for use.
  * Returns a pointer to the DB on success, NULL on failure.
- * 
+ *
  */
 struct db_filter *db_new(enum scmp_flt_action def_action)
 {
@@ -84,10 +84,10 @@ struct db_filter *db_new(enum scmp_flt_action def_action)
 /**
  * Destroy a seccomp filter DB
  * @param db the seccomp filter DB
- * 
+ *
  * This function destroys a seccomp filter DB.  After calling this function,
  * the filter should no longer be referenced.
- * 
+ *
  */
 void db_destroy(struct db_filter *db)
 {
@@ -108,13 +108,13 @@ void db_destroy(struct db_filter *db)
  * @param syscall the syscall number
  * @param chain_len the number of argument filters in the argument filter chain
  * @param chain_list argument filter chain, (uint, enum scmp_compare, ulong)
- * 
+ *
  * This function adds a new syscall filter to the seccomp filter DB, adding to
  * the existing filters for the syscall, unless no argument specific filters
  * are present (filtering only on the syscall).  If override is true, then the
  * argument filter rule is added regardless of what is already present.
  * Returns zero on success, negative values on failure.
- * 
+ *
  */
 int db_add_syscall(struct db_filter *db, unsigned int override,
 		   enum scmp_flt_action action, unsigned int syscall,
@@ -227,11 +227,11 @@ db_add_syscall_args_failure:
  * Find a syscall filter in the DB
  * @param db the seccomp filter DB
  * @param syscall the syscall number
- * 
+ *
  * This function searches the filter DB using the given syscall number and
  * returns a pointer to the syscall filter or NULL if no matching syscall
  * filter exists.
- * 
+ *
  */
 struct db_syscall_list *db_find_syscall(const struct db_filter *db,
 					unsigned int syscall)
