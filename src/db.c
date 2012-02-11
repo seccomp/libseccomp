@@ -295,10 +295,13 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 	}
 	if (s_iter == NULL || s_iter->num != syscall) {
 		/* new syscall, add before s_iter */
-		if (s_prev != NULL)
+		if (s_prev != NULL) {
+			s_new->next = s_prev->next;
 			s_prev->next = s_new;
-		else
+		} else {
+			s_new->next = db->syscalls;
 			db->syscalls = s_new;
+		}
 		return 0;
 	} else if (s_iter->chains == NULL) {
 		/* syscall exists without any chains - existing filter is at
