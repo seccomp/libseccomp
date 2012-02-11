@@ -358,7 +358,7 @@ static int _bpf_append(struct bpf_program *prg, const struct bpf_blk *blk)
 bpf_append_failure:
 	prg->blk_cnt = 0;
 	free(prg->blks);
-	return -ENOMEM;
+	return rc;
 }
 
 /**
