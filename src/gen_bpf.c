@@ -871,11 +871,17 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	 *       the overall program */
 
 	/* link all of the top level blocks together */
-	b_head = state->tg_sys;
+	if (state->tg_sys != NULL)
+		b_head = state->tg_sys;
+	else if (state->tg_chains.grp_cnt > 0)
+		b_head = state->tg_chains.grps[0];
+	else
+		return -ENOENT;
 	b_head->prev = NULL;
 	b_head->next = NULL;
 	b_iter = b_head;
-	for (iter = 0; iter < state->tg_chains.grp_cnt; iter++) {
+	for (iter = (state->tg_sys ? 0 : 1);
+	     iter < state->tg_chains.grp_cnt; iter++) {
 		b_iter->next = state->tg_chains.grps[iter];
 		b_iter->next->prev = b_iter;
 		b_iter->next->next = NULL;

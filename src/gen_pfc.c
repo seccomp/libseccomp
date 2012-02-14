@@ -193,7 +193,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 		return errno;
 
 	fprintf(fds, "#\n");
-	fprintf(fds, "# filter pseudo code start\n");
+	fprintf(fds, "# pseudo filter code start\n");
 	fprintf(fds, "#\n");
 	db_list_foreach(s_iter, db->syscalls)
 		_gen_pfc_syscall((db->def_action == SCMP_ACT_DENY ?
@@ -202,7 +202,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "# default action\n");
 	fprintf(fds, " action %s;\n", _pfc_action(db->def_action));
 	fprintf(fds, "#\n");
-	fprintf(fds, "# filter pseudo code end\n");
+	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");
 
 	fflush(fds);

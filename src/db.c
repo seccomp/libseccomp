@@ -37,6 +37,8 @@ struct db_arg_filter {
 	unsigned long datum;
 };
 
+static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
+
 /**
  * Free each item in the DB list
  * @param iter the iterator
@@ -52,6 +54,23 @@ struct db_arg_filter {
 	     (list) = iter->next, free(iter), iter = (list))
 
 /**
+ * Do not call this function directly, use _db_arg_chain_tree_free() instead
+ */
+static void __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
+{
+	if (tree == NULL)
+		return;
+
+	/* we assume the caller has ensured that 'tree->lvl_prv == NULL' */
+	__db_arg_chain_tree_free(tree->lvl_nxt);
+
+	_db_arg_chain_tree_free(tree->nxt_t);
+	_db_arg_chain_tree_free(tree->nxt_f);
+
+	free(tree);
+}
+
+/**
  * Free a syscall filter argument chain tree
  * @param list the argument chain list
  *
@@ -60,16 +79,16 @@ struct db_arg_filter {
  */
 static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
 {
+	struct db_arg_chain_tree *iter;
+
 	if (tree == NULL)
 		return;
 
-	_db_arg_chain_tree_free(tree->lvl_prv);
-	_db_arg_chain_tree_free(tree->lvl_nxt);
+	iter = tree;
+	while (iter->lvl_prv != NULL)
+		iter = iter->lvl_prv;
 
-	_db_arg_chain_tree_free(tree->nxt_t);
-	_db_arg_chain_tree_free(tree->nxt_f);
-
-	free(tree);
+	__db_arg_chain_tree_free(iter);
 }
 
 /**
@@ -405,12 +424,16 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 			if (db_chain_lt(c_iter, ec_iter)) {
 				if (ec_iter->lvl_prv == NULL) {
 					ec_iter->lvl_prv = c_iter;
+					c_iter->lvl_nxt = ec_iter;
+					if (ec_iter == s_iter->chains)
+						s_iter->chains = c_iter;
 					goto add_free_match;
 				} else
 					ec_iter = ec_iter->lvl_prv;
 			} else {
 				if (ec_iter->lvl_nxt == NULL) {
 					ec_iter->lvl_nxt = c_iter;
+					c_iter->lvl_prv = ec_iter;
 					goto add_free_match;
 				} else
 					ec_iter = ec_iter->lvl_nxt;
