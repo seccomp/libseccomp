@@ -30,8 +30,8 @@
  *       awkward, but using the standard struct might be a good idea */
 struct bpf_instr_raw {
 	uint16_t op;
-	uint8_t	jt;
-	uint8_t	jf;
+	uint8_t jt;
+	uint8_t jf;
 	uint32_t k;
 } __attribute__ ((packed));
 
