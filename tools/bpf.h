@@ -24,10 +24,31 @@
 
 #include <inttypes.h>
 
-/* these structures and values are designed to match the Linux Kernel's BPF
- * interface (see /usr/include/linux/filter.h), but we define our own here so
- * that we can function independent of the host OS */
+/* most of these structures and values are designed to match the Linux Kernel's
+ * BPF interface (see /usr/include/linux/filter.h), but we define our own here
+ * so that we can function independent of the host OS */
 
+/* XXX - need to verify these values */
+#define BPF_SYS_ARG_MAX		6
+#define BPF_SCRATCH_SIZE	6
+
+/**
+ * Syscall record data format used by seccomp
+ */
+struct bpf_syscall_data {
+	uint32_t sys;
+	uint32_t _reserved;
+	union {
+		uint32_t m32[BPF_SYS_ARG_MAX];
+		uint64_t m64[BPF_SYS_ARG_MAX];
+	} args;
+} __attribute__ ((packed));
+#define BPF_SYSCALL_MAX_32	(8 + (4 * BPF_SYS_ARG_MAX))
+#define BPF_SYSCALL_MAX_64	(8 + (8 * BPF_SYS_ARG_MAX))
+
+/**
+ * BPF instruction format
+ */
 struct bpf_instr {
 	uint16_t op;
 	uint8_t jt;
@@ -35,12 +56,9 @@ struct bpf_instr {
 	uint32_t k;
 } __attribute__ ((packed));
 
-struct bpf_program {
-	uint16_t i_cnt;
-	struct bpf_instr *i;
-};
-#define BPF_PGM_SIZE(x) \
-	((x)->blk_cnt * sizeof(*((x)->blks)))
+/* seccomp return values */
+#define BPF_SCMP_DENY		0x00000000
+#define BPF_SCMP_ALLOW		0xffffffff
 
 /* bpf command classes */
 #define BPF_CLASS(code)		((code) & 0x07)

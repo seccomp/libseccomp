@@ -33,7 +33,7 @@ include ../macros.mk
 # configuration
 #
 
-TOOLS = bpf_disasm
+TOOLS = bpf_disasm bpf_sim
 
 #
 # targets
@@ -46,6 +46,9 @@ all: $(TOOLS)
 # XXX - find a better way to do this using $(TOOLS)
 
 bpf_disasm: bpf_disasm.c
+	$(COMPILE_EXEC)
+
+bpf_sim: bpf_sim.c
 	$(COMPILE_EXEC)
 
 clean:
