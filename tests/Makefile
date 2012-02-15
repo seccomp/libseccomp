@@ -40,7 +40,8 @@ LDFLAGS := ../src/libseccomp.a
 
 TESTS = 01-basic \
 	02-basic-pfc \
-	03-chains-pfc
+	03-chains-pfc \
+	04-chains-bpf
 
 #
 # targets
@@ -59,6 +60,9 @@ all: $(TESTS)
 	$(COMPILE_EXEC)
 
 03-chains-pfc: 03-chains-pfc.c
+	$(COMPILE_EXEC)
+
+04-chains-bpf: 04-chains-bpf.c
 	$(COMPILE_EXEC)
 
 clean:
