@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#
+# Syscall resolver
+#
+# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <pmoore@redhat.com>
+#
+
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+syscall_h="/usr/include/asm/unistd.h"
+
+####
+# functions
+
+function verify_deps() {
+	[[ -z "$1" ]] && return
+	if ! which "$1" >& /dev/null; then
+		echo "error: install \"$1\" and include it in your \$PATH"
+		exit 1
+	fi
+}
+
+####
+# main
+
+# verify script dependencies
+verify_deps gcc
+verify_deps grep
+verify_deps awk
+
+# verify the command line
+if [[ "$#" -ne 1 || -z "$1" ]]; then
+	echo "usage: $0 <syscall_name>"
+	exit 1
+fi
+
+# inspect the syscall header file and do the resolution
+sys_def="$(gcc -E -dM "$syscall_h" | grep " __NR_$1 ")"
+if [[ -n "$sys_def" ]]; then
+	echo "$sys_def" | awk '{ print $3 }'
+else
+	echo "error: unknown syscall \"$1\""
+	exit 1
+fi
+
+exit 0
