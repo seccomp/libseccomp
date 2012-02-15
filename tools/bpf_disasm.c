@@ -191,7 +191,7 @@ void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 			break;
 		case BPF_ST:
 		case BPF_STX:
-			printf("$temp[%d]", bpf->k);
+			printf("$temp[%u]", bpf->k);
 			break;
 		case BPF_ALU:
 			printf("%u", bpf->k);
