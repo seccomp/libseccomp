@@ -70,10 +70,14 @@ struct bpf_jump {
 		void *ptr;
 	} tgt;
 };
-#define _BPF_JMP_NO		{ TGT_NONE, { .ptr = 0 } }
-#define _BPF_JMP_NXT		{ TGT_NXT, { .ptr = 0 } }  /* be careful! */
-#define _BPF_JMP_IMM(x)		{ TGT_IMM, { .imm = (x) } }
-#define _BPF_JMP_HSH(x)		{ TGT_PTR_HSH, { .hash = (x) } }
+#define _BPF_JMP_NO \
+	((struct bpf_jump) { TGT_NONE, { .ptr = 0 } })
+#define _BPF_JMP_NXT \
+	((struct bpf_jump) { TGT_NXT, { .ptr = 0 } })  /* be careful! */
+#define _BPF_JMP_IMM(x) \
+	((struct bpf_jump) { TGT_IMM, { .imm = (x) } })
+#define _BPF_JMP_HSH(x) \
+	((struct bpf_jump) { TGT_PTR_HSH, { .hash = (x) } })
 #define _BPF_JMP_MAX		255
 
 struct bpf_instr {
@@ -143,13 +147,9 @@ struct bpf_state {
  */
 #define _BPF_INSTR(_ins,_op,_jt,_jf,_k) \
 	do { \
-		struct bpf_jump __jt = _jt; \
-		struct bpf_jump __jf = _jf; \
 		(_ins).op = (_op); \
-		(_ins).jt.type = __jt.type; \
-		(_ins).jt.tgt.ptr = __jt.tgt.ptr; \
-		(_ins).jf.type = __jf.type; \
-		(_ins).jf.tgt.ptr = __jf.tgt.ptr; \
+		(_ins).jt = _jt; \
+		(_ins).jf = _jf; \
 		(_ins).k = (_k); \
 	} while (0)
 
@@ -813,7 +813,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 
 		/* the last instruction should jump over the default if false */
 		last_instr = &state->tg_sys->blks[state->tg_sys->blk_cnt - 1];
-		last_instr->jf = (struct bpf_jump)_BPF_JMP_IMM(1);
+		last_instr->jf = _BPF_JMP_IMM(1);
 
 		if (state->blk_action == SCMP_ACT_ALLOW)
 			_BPF_INSTR(instr, BPF_RET,
