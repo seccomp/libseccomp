@@ -297,7 +297,7 @@ static int _grp_append(struct bpf_blk_grp *grp, struct bpf_blk *blk)
 /**
  * XXX
  */
-static int _bpf_append(struct bpf_program *prg, const struct bpf_blk *blk)
+static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 {
 	int rc;
 	struct bpf_instr_raw *i_new;
@@ -310,9 +310,11 @@ static int _bpf_append(struct bpf_program *prg, const struct bpf_blk *blk)
 	i_new = realloc(prg->blks, BPF_PGM_SIZE(prg));
 	if (i_new == NULL) {
 		rc = -ENOMEM;
-		goto bpf_append_failure;
+		goto bpf_append_blk_failure;
 	}
 	prg->blks = i_new;
+
+	/* XXX - not sure yet, but we may want to remove the TGT_NXT code */
 
 	/* transfer and translate the blocks to raw instructions */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
@@ -334,7 +336,7 @@ static int _bpf_append(struct bpf_program *prg, const struct bpf_blk *blk)
 		default:
 			/* fatal error - we should never get here */
 			rc = -EFAULT;
-			goto bpf_append_failure;
+			goto bpf_append_blk_failure;
 		}
 		switch (blk->blks[iter].jf.type) {
 		case TGT_NONE:
@@ -351,14 +353,71 @@ static int _bpf_append(struct bpf_program *prg, const struct bpf_blk *blk)
 		default:
 			/* fatal error - we should never get here */
 			rc = -EFAULT;
-			goto bpf_append_failure;
+			goto bpf_append_blk_failure;
 		}
 		i_iter->k = blk->blks[iter].k;
 	}
 
 	return prg->blk_cnt;
 
-bpf_append_failure:
+bpf_append_blk_failure:
+	prg->blk_cnt = 0;
+	free(prg->blks);
+	return rc;
+}
+
+/**
+ * XXX
+ */
+static int _bpf_append_instr(struct bpf_program *prg,
+			     const struct bpf_instr *instr)
+{
+	int rc;
+	struct bpf_instr_raw *i_raw;
+	unsigned int old_cnt = prg->blk_cnt;
+
+	/* (re)allocate the program memory */
+	prg->blk_cnt++;
+	i_raw = realloc(prg->blks, BPF_PGM_SIZE(prg));
+	if (i_raw == NULL) {
+		rc = -ENOMEM;
+		goto bpf_append_instr_failure;
+	}
+	prg->blks = i_raw;
+
+	i_raw = &(prg->blks[old_cnt]);
+	i_raw->op = instr->op;
+	switch (instr->jt.type) {
+		case TGT_NONE:
+			i_raw->jt = 0;
+			break;
+		case TGT_IMM:
+			/* jump to the value specified */
+			i_raw->jt = instr->jt.tgt.imm;
+			break;
+		default:
+			/* fatal error - we should never get here */
+			rc = -EFAULT;
+			goto bpf_append_instr_failure;
+	}
+	switch (instr->jf.type) {
+		case TGT_NONE:
+			i_raw->jf = 0;
+			break;
+		case TGT_IMM:
+			/* jump to the value specified */
+			i_raw->jf = instr->jf.tgt.imm;
+			break;
+		default:
+			/* fatal error - we should never get here */
+			rc = -EFAULT;
+			goto bpf_append_instr_failure;
+	}
+	i_raw->k = instr->k;
+
+	return prg->blk_cnt;
+
+bpf_append_instr_failure:
 	prg->blk_cnt = 0;
 	free(prg->blks);
 	return rc;
@@ -682,15 +741,10 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		if (rc < 0)
 			return rc;
 
-		/* generate syscall check */
-		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL);
-		blk_s = _blk_append(NULL, &instr);
-		if (blk_s == NULL)
-			return -ENOMEM;
+		/* syscall check (should still be in the accumulator) */
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_HSH(h_val), _BPF_JMP_NXT, sys->num);
-		blk_s = _blk_append(blk_s, &instr);
+		blk_s = _blk_append(NULL, &instr);
 		if (blk_s == NULL)
 			return -ENOMEM;
 		rc = _hsh_add(state, blk_s, 1, &h_val);
@@ -702,17 +756,6 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		if (rc < 0)
 			return rc;
 	} else {
-		if (state->tg_sys == NULL) {
-			/* load the syscall into the accumulator */
-			_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL);
-			state->tg_sys = _blk_append(state->tg_sys, &instr);
-			if (state->tg_sys == NULL)
-				return -ENOMEM;
-		}
-
-		/* XXX - check that the jump won't exceed _BPF_JUMP_MAX */
-
 		/* generate the syscall check */
 		/* we fixup the true jump later, not ideal but okay */
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
@@ -733,10 +776,8 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 {
 	int rc;
 	int iter;
-	unsigned int grp_iter;
 	struct db_sys_list *s_iter;
 	struct bpf_instr *i_ptr;
-	struct bpf_blk *b_iter, *b_next;
 	struct bpf_instr instr;
 
 	/* default action */
@@ -772,31 +813,6 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	rc = _grp_append(&(state->tg_chains), state->def_blk);
 	if (rc < 0)
 		goto build_state_failure;
-
-	/* fixup the TGT_NXT jump targets at the top level */
-	for (grp_iter = 0;
-	     grp_iter < (state->tg_chains.grp_cnt - 1); grp_iter++) {
-		b_iter = state->tg_chains.grps[grp_iter];
-		b_next = state->tg_chains.grps[grp_iter + 1];
-		for (iter = b_iter->blk_cnt - 1; iter > 0; iter--) {
-			switch (b_iter->blks[iter].jt.type) {
-			case TGT_NXT:
-				b_iter->blks[iter].jt =
-						    _BPF_JMP_HSH(b_next->hash);
-				break;
-			default:
-				break;
-			}
-			switch (b_iter->blks[iter].jf.type) {
-			case TGT_NXT:
-				b_iter->blks[iter].jf =
-						    _BPF_JMP_HSH(b_next->hash);
-				break;
-			default:
-				break;
-			}
-		}
-	}
 
 	/* fixup the syscall only block if it exists */
 	if (state->tg_sys != NULL) {
@@ -852,6 +868,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	unsigned int h_val;
 	unsigned int res_cnt;
 	unsigned int jmp_len;
+	struct bpf_instr instr;
 	struct bpf_blk *b_head, *b_tail, *b_iter, *b_jmp;
 
 	/* XXX - we use a very simplistic algorithm for "writing out" the
@@ -879,6 +896,29 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 		b_tail = b_iter;
 	}
 
+	/* resolve any TGT_NXT jumps to TGT_PTR_HSH jumps at the top level */
+	b_iter = b_head;
+	while (b_iter != NULL && b_iter->next != NULL) {
+		b_jmp = b_iter->next;
+		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
+			switch (b_iter->blks[iter].jt.type) {
+			case TGT_NXT:
+				b_iter->blks[iter].jt =
+						      _BPF_JMP_HSH(b_jmp->hash);
+			default:
+				break;
+			}
+			switch (b_iter->blks[iter].jf.type) {
+			case TGT_NXT:
+				b_iter->blks[iter].jf =
+						      _BPF_JMP_HSH(b_jmp->hash);
+			default:
+				break;
+			}
+		}
+		b_iter = b_iter->next;
+	}
+
 	/* pull in all of the TGT_PTR_HSH jumps, one layer at a time */
 	/* XXX - this is going to be _really_ slow */
 	/* XXX - we really should make this more intelligent about ordering, it
@@ -898,7 +938,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 				switch (b_iter->blks[iter].jt.type) {
 				case TGT_NONE:
 				case TGT_IMM:
-				case TGT_NXT:
 					break;
 				case TGT_PTR_HSH:
 					b_jmp = _hsh_find_once(state,
@@ -920,7 +959,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 				switch (b_iter->blks[iter].jf.type) {
 				case TGT_NONE:
 				case TGT_IMM:
-				case TGT_NXT:
 					break;
 				case TGT_PTR_HSH:
 					b_jmp = _hsh_find_once(state,
@@ -944,6 +982,13 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 		}
 	} while (res_cnt != 0);
 
+	/* load the syscall into the accumulator */
+	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL);
+	rc = _bpf_append_instr(state->bpf, &instr);
+	if (rc < 0)
+		return rc;
+
 	/* resolve the TGT_PTR_HSH jumps and build the single bpf program */
 	b_iter = b_head;
 	while (b_iter != NULL) {
@@ -952,7 +997,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 			switch (b_iter->blks[iter].jt.type) {
 			case TGT_NONE:
 			case TGT_IMM:
-			case TGT_NXT:
 				break;
 			case TGT_PTR_HSH:
 				h_val = b_iter->blks[iter].jt.tgt.hash;
@@ -977,7 +1021,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 			switch (b_iter->blks[iter].jf.type) {
 			case TGT_NONE:
 			case TGT_IMM:
-			case TGT_NXT:
 				break;
 			case TGT_PTR_HSH:
 				h_val = b_iter->blks[iter].jf.tgt.hash;
@@ -1001,7 +1044,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 			}
 		}
 		/* build the bpf program */
-		rc = _bpf_append(state->bpf, b_iter);
+		rc = _bpf_append_blk(state->bpf, b_iter);
 		if (rc < 0)
 			return rc;
 
