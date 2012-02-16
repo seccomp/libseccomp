@@ -235,12 +235,17 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 	memset(chain, 0, sizeof(chain));
 	for (iter = 0; iter < chain_len; iter++) {
 		arg_num = va_arg(chain_list, unsigned int);
-		if (chain[arg_num].valid == 1)
+		if (arg_num < SCMP_ARG_MAX && chain[arg_num].valid == 0) {
+			chain[arg_num].valid = 1;
+			chain[arg_num].arg = arg_num;
+			chain[arg_num].op = va_arg(chain_list, unsigned int);
+			if (chain[arg_num].op < _SCMP_CMP_MIN ||
+			    chain[arg_num].op > _SCMP_CMP_MAX)
+				return -EINVAL;
+			chain[arg_num].datum = va_arg(chain_list,
+						      unsigned long);
+		} else
 			return -EINVAL;
-		chain[arg_num].valid = 1;
-		chain[arg_num].arg = arg_num;
-		chain[arg_num].op = va_arg(chain_list, unsigned int);
-		chain[arg_num].datum = va_arg(chain_list, unsigned long);
 	}
 
 	/* do all our possible memory allocation up front so we don't have to
@@ -248,7 +253,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 	 * the filter db */
 	s_new = malloc(sizeof(*s_new));
 	if (s_new == NULL)
-		goto add_free;
+		return -ENOMEM;
 	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	/* run through the argument chain */
@@ -264,12 +269,10 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 		c_iter->op = chain[iter].op;
 		c_iter->datum = chain[iter].datum;
 		c_iter->refcnt = 1;
-		/* XXX - sanity check the c_iter->num value (SCMP_ARG_MAX) */
 		/* XXX - sanity check the c_iter->datum value? */
 
 		/* link in the new node and update the chain */
 		if (c_prev != NULL) {
-			c_prev->action = 0;
 			if (tf_flag)
 				c_prev->nxt_t = c_iter;
 			else
