@@ -168,25 +168,38 @@ struct bpf_state {
 #define _hash_bucket_foreach(iter,bucket) \
 	for (iter = (bucket); iter != NULL; iter = iter->next)
 
-static struct bpf_blk *_gen_bpf_chain(const struct bpf_state *state,
-					    struct bpf_blk *blk,
-					    const struct db_arg_chain_tree *c);
+static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
+				      struct bpf_blk *blk,
+				      const struct db_arg_chain_tree *c);
+
+static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val);
 
 /**
  * XXX
  */
-static void _blk_free(struct bpf_blk *blk)
+static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 {
 	int iter;
+	struct bpf_blk *b_iter;
 	struct bpf_instr *i_iter;
 
-	/* run through the block looking for TGT_PTR_BLK jumps and free them */
+	if (blk == NULL)
+		return;
+
+	/* remove this block from the hash table */
+	_hsh_remove(state, blk->hash);
+
+	/* run through the block freeing TGT_PTR_{BLK,HSH} jump targets */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
 		i_iter = &blk->blks[iter];
 		switch (i_iter->jt.type) {
 		case TGT_PTR_BLK:
-			/* free the target block too */
-			_blk_free(i_iter->jt.tgt.ptr);
+			_blk_free(state, i_iter->jt.tgt.ptr);
+			break;
+		case TGT_PTR_HSH:
+			b_iter = _hsh_remove(state, i_iter->jt.tgt.hash);
+			if (b_iter != NULL)
+				_blk_free(state, b_iter);
 			break;
 		default:
 			/* do nothing */
@@ -194,28 +207,28 @@ static void _blk_free(struct bpf_blk *blk)
 		}
 		switch (i_iter->jf.type) {
 		case TGT_PTR_BLK:
-			/* free the target block too */
-			_blk_free(i_iter->jf.tgt.ptr);
+			_blk_free(state, i_iter->jf.tgt.ptr);
+			break;
+		case TGT_PTR_HSH:
+			b_iter = _hsh_remove(state, i_iter->jf.tgt.hash);
+			if (b_iter != NULL)
+				_blk_free(state, b_iter);
 			break;
 		default:
 			/* do nothing */
 			break;
 		}
 	}
-	free(blk->blks);
-
-	/* XXX - just to make life easier during debug */
-	blk->blks = (void *)-1;
-	blk->blk_cnt = -1;
-	blk->blk_alloc = -1;
-
+	if (blk->blks != NULL)
+		free(blk->blks);
 	free(blk);
 }
 
 /**
  * XXX
  */
-static struct bpf_blk *_blk_grow(struct bpf_blk *blk, unsigned int incr)
+static struct bpf_blk *_blk_grow(struct bpf_state *state,
+				 struct bpf_blk *blk, unsigned int incr)
 {
 	unsigned int cnt = _max(AINC_BLK, incr);
 	struct bpf_instr *new;
@@ -231,7 +244,7 @@ static struct bpf_blk *_blk_grow(struct bpf_blk *blk, unsigned int incr)
 	blk->blk_alloc += cnt;
 	new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
 	if (new == NULL) {
-		_blk_free(blk);
+		_blk_free(state, blk);
 		return NULL;
 	}
 	blk->blks = new;
@@ -242,12 +255,13 @@ static struct bpf_blk *_blk_grow(struct bpf_blk *blk, unsigned int incr)
 /**
  * XXX
  */
-static struct bpf_blk *_blk_append(struct bpf_blk *blk,
+static struct bpf_blk *_blk_append(struct bpf_state *state,
+				   struct bpf_blk *blk,
 				   const struct bpf_instr *instr)
 {
 	struct bpf_blk *new;
 
-	new = _blk_grow(blk, 1);
+	new = _blk_grow(state, blk, 1);
 	if (new == NULL)
 		return NULL;
 	memcpy(&new->blks[new->blk_cnt++], instr, sizeof(*instr));
@@ -258,8 +272,27 @@ static struct bpf_blk *_blk_append(struct bpf_blk *blk,
 /**
  * XXX
  */
-static int _grp_grow(struct bpf_blk_grp *grp, unsigned int incr)
+static void _grp_reset(struct bpf_state *state, struct bpf_blk_grp *grp)
 {
+	unsigned int iter;
+
+	if (grp == NULL)
+		return;
+
+	for (iter = 0; iter < grp->grp_cnt; iter++)
+		_blk_free(state, grp->grps[iter]);
+	if (grp->grps != NULL)
+		free(grp->grps);
+	memset(grp, 0, sizeof(*grp));
+}
+
+/**
+ * XXX
+ */
+static int _grp_grow(struct bpf_state *state,
+		     struct bpf_blk_grp *grp, unsigned int incr)
+{
+	int iter;
 	unsigned int cnt = _max(AINC_BLKGRP, incr);
 	struct bpf_blk **new;
 
@@ -269,7 +302,8 @@ static int _grp_grow(struct bpf_blk_grp *grp, unsigned int incr)
 	grp->grp_alloc += cnt;
 	new = realloc(grp->grps, grp->grp_alloc * sizeof(*(grp->grps)));
 	if (new == NULL) {
-		/* XXX - we want to free the blocks themselves */
+		for (iter = 0; iter < grp->grp_cnt; iter++)
+			_blk_free(state, grp->grps[iter]);
 		free(grp->grps);
 		memset(grp, 0, sizeof(*grp));
 		return -ENOMEM;
@@ -282,11 +316,12 @@ static int _grp_grow(struct bpf_blk_grp *grp, unsigned int incr)
 /**
  * XXX
  */
-static int _grp_append(struct bpf_blk_grp *grp, struct bpf_blk *blk)
+static int _grp_append(struct bpf_state *state,
+		       struct bpf_blk_grp *grp, struct bpf_blk *blk)
 {
 	int rc;
 
-	rc = _grp_grow(grp, 1);
+	rc = _grp_grow(state, grp, 1);
 	if (rc < 0)
 		return rc;
 	grp->grps[grp->grp_cnt++] = blk;
@@ -426,12 +461,54 @@ bpf_append_instr_failure:
 /**
  * XXX
  */
-static int _hsh_add(struct bpf_state *state, struct bpf_blk *blk,
+static void _program_free(struct bpf_program *program)
+{
+	if (program == NULL)
+		return;
+
+	if (program->blks != NULL)
+		free(program->blks);
+	free(program);
+}
+
+/**
+ * XXX
+ */
+static void _state_release(struct bpf_state *state)
+{
+	if (state == NULL)
+		return;
+
+	/* block groups */
+	_blk_free(state, state->tg_sys);
+	/* state->def_blk will be freed by the _grp_reset() call (via hash) */
+	_grp_reset(state, &state->tg_chains);
+}
+
+/**
+ * XXX
+ */
+static void _state_reset_all(struct bpf_state *state)
+{
+	if (state == NULL)
+		return;
+
+	_state_release(state);
+	_program_free(state->bpf);
+
+	memset(state, 0, sizeof(*state));
+}
+
+/**
+ * XXX
+ */
+static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		    unsigned int found,
 		    unsigned int *h_val_ret)
 {
 	unsigned int h_val;
 	struct bpf_hash_bkt *h_new, *h_iter;
+	struct bpf_blk *blk = *blk_p;
 
 	h_new = malloc(sizeof(*h_new));
 	if (h_new == NULL)
@@ -451,8 +528,9 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk *blk,
 		while (h_iter->next != NULL) {
 			if (h_iter->blk->hash == h_val) {
 				/* duplicate block */
-				/* XXX - check on free'ing the block */
+				_blk_free(state, blk);
 				h_iter->refcnt++;
+				*blk_p = h_iter->blk;
 				*h_val_ret = h_val;
 				return 0;
 			}
@@ -464,6 +542,37 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk *blk,
 
 	*h_val_ret = h_val;
 	return 0;
+}
+
+/**
+ * XXX
+ */
+static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
+{
+	unsigned int bkt = h_val & _BPF_HASH_MASK;
+	struct bpf_blk *blk;
+	struct bpf_hash_bkt *h_iter, *h_prev = NULL;
+
+	h_iter = state->htbl[bkt];
+	if (h_iter != NULL) {
+		while (h_iter->next != NULL) {
+			if (h_iter->blk->hash == h_val) {
+				if (--h_iter->refcnt > 0)
+					return NULL;
+
+				if (h_prev != NULL)
+					h_prev->next = h_iter->next;
+				else
+					state->htbl[bkt] = h_iter->next;
+				blk = h_iter->blk;
+				free(h_iter);
+				return blk;
+			}
+			h_iter =  h_iter->next;
+		}
+	}
+
+	return NULL;
 }
 
 /**
@@ -492,7 +601,7 @@ static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
 /**
  * XXX
  */
-static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
+static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 					  struct bpf_blk *blk,
 					  const struct db_arg_chain_tree *node)
 {
@@ -522,7 +631,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
 			acc_arg = l_iter->arg;
 			_BPF_INSTR(instr, BPF_LD+BPF_ABS,
 				_BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARG(acc_arg));
-			blk = _blk_append(blk, &instr);
+			blk = _blk_append(state, blk, &instr);
 			if (blk == NULL)
 				goto chain_lvl_failure;
 		}
@@ -570,7 +679,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
 			instr.jt = _BPF_JMP_IMM(1);
 		else if (last_flag)
 			instr.jf = _BPF_JMP_HSH(state->def_hsh);
-		blk = _blk_append(blk, &instr);
+		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto chain_lvl_failure;
 
@@ -584,7 +693,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
 				_BPF_INSTR(instr, BPF_RET,
 					   _BPF_JMP_NO, _BPF_JMP_NO,
 					   _BPF_DENY);
-			blk = _blk_append(blk, &instr);
+			blk = _blk_append(state, blk, &instr);
 			if (blk == NULL)
 				goto chain_lvl_failure;
 		}
@@ -595,15 +704,14 @@ static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
 	return blk;
 
 chain_lvl_failure:
-	if (blk != NULL)
-		_blk_free(blk);
+	_blk_free(state, blk);
 	return NULL;
 }
 
 /**
  * XXX
  */
-static struct bpf_blk *_gen_bpf_chain_lvl_res(const struct bpf_state *state,
+static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 					      struct bpf_blk *blk)
 {
 	struct bpf_blk *b_new;
@@ -635,7 +743,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(const struct bpf_state *state,
 /**
  * XXX
  */
-static struct bpf_blk *_gen_bpf_chain(const struct bpf_state *state,
+static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      struct bpf_blk *blk,
 				      const struct db_arg_chain_tree *c)
 {
@@ -648,12 +756,13 @@ static struct bpf_blk *_gen_bpf_chain(const struct bpf_state *state,
 /**
  * XXX
  */
-static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
+static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk **blk_p,
 			    unsigned int *h_val_ret)
 {
 	int rc;
 	int iter;
 	struct bpf_instr *i_iter;
+	struct bpf_blk *blk = *blk_p, *b_iter;
 	unsigned int h_val;
 
 	/* run through the block looking for jumps */
@@ -668,8 +777,8 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
 			break;
 		case TGT_PTR_BLK:
 			/* start at the leaf nodes */
-			rc = _gen_bpf_blk_hsh(state, i_iter->jt.tgt.ptr,
-					      &h_val);
+			b_iter = i_iter->jt.tgt.ptr;
+			rc = _gen_bpf_blk_hsh(state, &b_iter, &h_val);
 			if (rc < 0)
 				return rc;
 			i_iter->jt = _BPF_JMP_HSH(h_val);
@@ -687,8 +796,8 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
 			break;
 		case TGT_PTR_BLK:
 			/* start at the leaf nodes */
-			rc = _gen_bpf_blk_hsh(state, i_iter->jf.tgt.ptr,
-					      &h_val);
+			b_iter = i_iter->jf.tgt.ptr;
+			rc = _gen_bpf_blk_hsh(state, &b_iter, &h_val);
 			if (rc < 0)
 				return rc;
 			i_iter->jf = _BPF_JMP_HSH(h_val);
@@ -700,9 +809,10 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
 	}
 
 	/* insert the block into the hash table */
-	rc = _hsh_add(state, blk, 0, &h_val);
+	rc = _hsh_add(state, &blk, 0, &h_val);
 	if (rc < 0)
 		return rc;
+	*blk_p = blk;
 	*h_val_ret = h_val;
 
 	return 0;
@@ -737,22 +847,22 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		/* XXX - we can probably move this down into the
 		 *       _gen_bpf_chain_lvl_res() function with a little work
 		 *       which would save us some time */
-		rc = _gen_bpf_blk_hsh(state, blk_c, &h_val);
+		rc = _gen_bpf_blk_hsh(state, &blk_c, &h_val);
 		if (rc < 0)
 			return rc;
 
-		/* syscall check (should still be in the accumulator) */
+		/* syscall check (syscall is still in the accumulator) */
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_HSH(h_val), _BPF_JMP_NXT, sys->num);
-		blk_s = _blk_append(NULL, &instr);
+		blk_s = _blk_append(state, NULL, &instr);
 		if (blk_s == NULL)
 			return -ENOMEM;
-		rc = _hsh_add(state, blk_s, 1, &h_val);
+		rc = _hsh_add(state, &blk_s, 1, &h_val);
 		if (rc < 0)
 			return rc;
 
 		/* add to the top level block group */
-		rc = _grp_append(&(state->tg_chains), blk_s);
+		rc = _grp_append(state, &(state->tg_chains), blk_s);
 		if (rc < 0)
 			return rc;
 	} else {
@@ -760,7 +870,7 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		/* we fixup the true jump later, not ideal but okay */
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_NO, _BPF_JMP_NO, sys->num);
-		state->tg_sys = _blk_append(state->tg_sys, &instr);
+		state->tg_sys = _blk_append(state, state->tg_sys, &instr);
 		if (state->tg_sys == NULL)
 			return -ENOMEM;
 	}
@@ -788,16 +898,15 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 		_BPF_INSTR(instr, BPF_RET,
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
 	else {
-		/* XXX - big error */
 		rc = -EFAULT;
 		goto build_state_failure;
 	}
-	state->def_blk = _blk_append(state->def_blk, &instr);
+	state->def_blk = _blk_append(state, state->def_blk, &instr);
 	if (state->def_blk == NULL) {
 		rc = -ENOMEM;
 		goto build_state_failure;
 	}
-	rc = _hsh_add(state, state->def_blk, 1, &state->def_hsh);
+	rc = _hsh_add(state, &state->def_blk, 1, &state->def_hsh);
 	if (rc < 0)
 		goto build_state_failure;
 
@@ -810,7 +919,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	}
 
 	/* tack on a default action at the end */
-	rc = _grp_append(&(state->tg_chains), state->def_blk);
+	rc = _grp_append(state, &(state->tg_chains), state->def_blk);
 	if (rc < 0)
 		goto build_state_failure;
 
@@ -829,11 +938,10 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 			_BPF_INSTR(instr, BPF_RET,
 				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
 		else {
-			/* XXX - big error */
 			rc = -EFAULT;
 			goto build_state_failure;
 		}
-		state->tg_sys = _blk_append(state->tg_sys, &instr);
+		state->tg_sys = _blk_append(state, state->tg_sys, &instr);
 		if (state->tg_sys == NULL) {
 			rc = -ENOMEM;
 			goto build_state_failure;
@@ -854,7 +962,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	return 0;
 
 build_state_failure:
-	/* XXX - cleanup */
+	_state_reset_all(state);
 	return rc;
 }
 
@@ -1088,11 +1196,10 @@ struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 		goto bpf_generate_end;
 
 bpf_generate_end:
-	/* XXX - cleanup the general state, minus state.bpf */
-	if (rc < 0) {
-		/* XXX - cleanup state.bpf */
-		return NULL;
-	}
+	if (rc < 0)
+		_state_reset_all(&state);
+	else
+		_state_release(&state);
 	return state.bpf;
 }
 
@@ -1106,6 +1213,5 @@ bpf_generate_end:
  */
 void gen_bpf_destroy(struct bpf_program *program)
 {
-	/* XXX - fix this, we just leak the memory */
-	return;
+	_program_free(program);
 }
