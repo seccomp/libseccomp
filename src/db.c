@@ -151,7 +151,7 @@ static void _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 			c_iter->nxt_f = NULL;
 			return;
 		} else
-			_db_arg_chain_tree_remove(&(c_iter->nxt_t), node);
+			_db_arg_chain_tree_remove(&(c_iter->nxt_f), node);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
