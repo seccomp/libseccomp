@@ -231,13 +231,13 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 
 /**
  * Perform a simple decoding of the BPF program
- * @param fd the BPF program
+ * @param file the BPF program
  *
  * Read the BPF program and display the instructions.  Returns zero on success,
  * negative values on failure.
  *
  */
-static int bpf_decode(int fd)
+static int bpf_decode(FILE *file)
 {
 	unsigned int line = 0;
 	size_t len;
@@ -247,12 +247,7 @@ static int bpf_decode(int fd)
 	printf(" line  OP   JT   JF   K\n");
 	printf("=================================\n");
 
-	do {
-		/* XXX - need to account for partial reads */
-		len = read(fd, &bpf, sizeof(bpf));
-		if (len < sizeof(bpf))
-			return (errno == EOF ? 0 : errno);
-
+	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
 		printf(" %.4u: 0x%.2x 0x%.2x 0x%.2x 0x%.8x",
 		       line, bpf.op, bpf.jt, bpf.jf, bpf.k);
 
@@ -263,8 +258,10 @@ static int bpf_decode(int fd)
 		printf("\n");
 
 		line++;
-	} while(len > 0);
+	}
 
+	if (ferror(file))
+		return errno;
 	return 0;
 }
 
@@ -274,20 +271,20 @@ static int bpf_decode(int fd)
 int main(int argc, char *argv[])
 {
 	int rc;
-	int fd;
+	FILE *file;
 
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <bpf_file>\n", argv[0]);
 		return EINVAL;
 	}
 
-	fd = open(argv[1], 0);
-	if (fd < 0) {
+	file = fopen(argv[1], "r");
+	if (file == NULL) {
 		fprintf(stderr, "error: unable to open \"%s\"\n", argv[1]);
 		return errno;
 	}
-	rc = bpf_decode(fd);
-	close(fd);
+	rc = bpf_decode(file);
+	fclose(file);
 
 	return rc;
 }
