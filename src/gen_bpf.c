@@ -56,7 +56,6 @@ enum bpf_jump_type {
 	TGT_NONE = 0,
 	TGT_NXT,		/* fall through to the next block */
 	TGT_IMM,		/* resolved immediate value */
-	TGT_ACT,		/* internal to _gen_bpf_chain_lvl() */
 	TGT_PTR_DB,		/* pointer to part of the filter db */
 	TGT_PTR_BLK,		/* pointer to an instruction block */
 	TGT_PTR_HSH,		/* pointer to a block hash table */
@@ -76,6 +75,10 @@ struct bpf_jump {
 	((struct bpf_jump) { TGT_NXT, { .ptr = 0 } })  /* be careful! */
 #define _BPF_JMP_IMM(x) \
 	((struct bpf_jump) { TGT_IMM, { .imm = (x) } })
+#define _BPF_JMP_DB(x) \
+	((struct bpf_jump) { TGT_PTR_DB, { .ptr = (x) } })
+#define _BPF_JMP_BLK(x) \
+	((struct bpf_jump) { TGT_PTR_BLK, { .ptr = (x) } })
 #define _BPF_JMP_HSH(x) \
 	((struct bpf_jump) { TGT_PTR_HSH, { .hash = (x) } })
 #define _BPF_JMP_MAX		255
@@ -494,28 +497,20 @@ static struct bpf_blk *_gen_bpf_chain_lvl(const struct bpf_state *state,
 		}
 
 		/* fixup the jump targets */
-		if (l_iter->nxt_t != NULL) {
-			instr.jt.type = TGT_PTR_DB;
-			instr.jt.tgt.ptr = l_iter->nxt_t;
-		} else if ((l_iter->action != 0) && (l_iter->action_flag)) {
+		if (l_iter->nxt_t != NULL)
+			instr.jt = _BPF_JMP_DB(l_iter->nxt_t);
+		else if ((l_iter->action != 0) && (l_iter->action_flag))
 			/* true falls through to the action by default */
-			instr.jf.type = TGT_IMM;
-			instr.jf.tgt.imm = 1;
-		} else if (last_flag) {
-			instr.jt.type = TGT_PTR_HSH;
-			instr.jt.tgt.hash = state->def_hsh;
-		}
-		if (l_iter->nxt_f != NULL) {
-			instr.jf.type = TGT_PTR_DB;
-			instr.jf.tgt.ptr = l_iter->nxt_f;
-		} else if ((l_iter->action != 0) && (!l_iter->action_flag)) {
+			instr.jf = _BPF_JMP_IMM(1);
+		else if (last_flag)
+			instr.jt = _BPF_JMP_HSH(state->def_hsh);
+		if (l_iter->nxt_f != NULL)
+			instr.jf = _BPF_JMP_DB(l_iter->nxt_f);
+		else if ((l_iter->action != 0) && (!l_iter->action_flag))
 			/* false falls through to the action by default */
-			instr.jt.type = TGT_IMM;
-			instr.jt.tgt.imm = 1;
-		} else if (last_flag) {
-			instr.jf.type = TGT_PTR_HSH;
-			instr.jf.tgt.hash = state->def_hsh;
-		}
+			instr.jt = _BPF_JMP_IMM(1);
+		else if (last_flag)
+			instr.jf = _BPF_JMP_HSH(state->def_hsh);
 		blk = _blk_append(blk, &instr);
 		if (blk == NULL)
 			goto chain_lvl_failure;
@@ -563,8 +558,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(const struct bpf_state *state,
 					       blk->blks[iter].jt.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
-			blk->blks[iter].jt.type = TGT_PTR_BLK;
-			blk->blks[iter].jt.tgt.ptr = b_new;
+			blk->blks[iter].jt = _BPF_JMP_BLK(b_new);
 		}
 		if (blk->blks[iter].jf.type == TGT_PTR_DB) {
 			/* dive down the rabbit hole */
@@ -572,8 +566,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(const struct bpf_state *state,
 					       blk->blks[iter].jf.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
-			blk->blks[iter].jf.type = TGT_PTR_BLK;
-			blk->blks[iter].jf.tgt.ptr = b_new;
+			blk->blks[iter].jf = _BPF_JMP_BLK(b_new);
 		}
 	}
 
@@ -620,8 +613,7 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
 					      &h_val);
 			if (rc < 0)
 				return rc;
-			i_iter->jt.type = TGT_PTR_HSH;
-			i_iter->jt.tgt.hash = h_val;
+			i_iter->jt = _BPF_JMP_HSH(h_val);
 			break;
 		default:
 			/* we should not be here */
@@ -640,8 +632,7 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk *blk,
 					      &h_val);
 			if (rc < 0)
 				return rc;
-			i_iter->jf.type = TGT_PTR_HSH;
-			i_iter->jf.tgt.hash = h_val;
+			i_iter->jf = _BPF_JMP_HSH(h_val);
 			break;
 		default:
 			/* we should not be here */
@@ -790,16 +781,16 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 		for (iter = b_iter->blk_cnt - 1; iter > 0; iter--) {
 			switch (b_iter->blks[iter].jt.type) {
 			case TGT_NXT:
-				b_iter->blks[iter].jt.type = TGT_PTR_HSH;
-				b_iter->blks[iter].jt.tgt.hash = b_next->hash;
+				b_iter->blks[iter].jt =
+						    _BPF_JMP_HSH(b_next->hash);
 				break;
 			default:
 				break;
 			}
 			switch (b_iter->blks[iter].jf.type) {
 			case TGT_NXT:
-				b_iter->blks[iter].jf.type = TGT_PTR_HSH;
-				b_iter->blks[iter].jf.tgt.hash = b_next->hash;
+				b_iter->blks[iter].jf =
+						    _BPF_JMP_HSH(b_next->hash);
 				break;
 			default:
 				break;
@@ -837,9 +828,9 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 		for (iter = 0; iter < state->tg_sys->blk_cnt; iter++) {
 			/* XXX - this is not pretty, but it works */
 			if (i_ptr[iter].op == BPF_JMP+BPF_JEQ) {
-				i_ptr[iter].jt.type = TGT_IMM;
-				i_ptr[iter].jt.tgt.imm = state->tg_sys->blk_cnt
-							 - (iter + 1) - 1;
+				i_ptr[iter].jt =
+					  _BPF_JMP_IMM(state->tg_sys->blk_cnt -
+						       (iter + 1) - 1);
 			}
 		}
 	}
@@ -977,8 +968,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 					/* XXX - we can fix this by inserting
 					 *       long jumps */
 					return -EFAULT;
-				b_iter->blks[iter].jt.type = TGT_IMM;
-				b_iter->blks[iter].jt.tgt.imm = jmp_len;
+				b_iter->blks[iter].jt = _BPF_JMP_IMM(jmp_len);
 				break;
 			default:
 				/* fatal error */
@@ -1003,8 +993,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 					/* XXX - we can fix this by inserting
 					 *       long jumps */
 					return -EFAULT;
-				b_iter->blks[iter].jf.type = TGT_IMM;
-				b_iter->blks[iter].jf.tgt.imm = jmp_len;
+				b_iter->blks[iter].jf = _BPF_JMP_IMM(jmp_len);
 				break;
 			default:
 				/* fatal error */
