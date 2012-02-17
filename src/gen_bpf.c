@@ -809,13 +809,12 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 
 	/* fixup the syscall only block if it exists */
 	if (state->tg_sys != NULL) {
-		/* add the end cap to the syscall only top level block */
-		_BPF_INSTR(instr, BPF_JMP, _BPF_JMP_NO, _BPF_JMP_NO, 1);
-		state->tg_sys = _blk_append(state->tg_sys, &instr);
-		if (state->tg_sys == NULL) {
-			rc = -ENOMEM;
-			goto build_state_failure;
-		}
+		struct bpf_instr *last_instr;
+
+		/* the last instruction should jump over the default if false */
+		last_instr = &state->tg_sys->blks[state->tg_sys->blk_cnt - 1];
+		last_instr->jf = (struct bpf_jump)_BPF_JMP_IMM(1);
+
 		if (state->blk_action == SCMP_ACT_ALLOW)
 			_BPF_INSTR(instr, BPF_RET,
 				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ALLOW);
