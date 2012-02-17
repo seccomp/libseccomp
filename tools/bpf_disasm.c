@@ -41,7 +41,7 @@
  * Decode the BPF operand and print it to stdout.
  *
  */
-void bpf_decode_op(const struct bpf_instr *bpf)
+static void bpf_decode_op(const struct bpf_instr *bpf)
 {
 	switch (bpf->op) {
 		case BPF_LD+BPF_W+BPF_IMM:
@@ -175,7 +175,7 @@ void bpf_decode_op(const struct bpf_instr *bpf)
  * to stdout based on the operand.
  *
  */
-void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
+static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 {
 	switch (BPF_CLASS(bpf->op)) {
 		case BPF_LD:
@@ -237,7 +237,7 @@ void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
  * negative values on failure.
  *
  */
-int bpf_decode(int fd)
+static int bpf_decode(int fd)
 {
 	unsigned int line = 0;
 	size_t len;
