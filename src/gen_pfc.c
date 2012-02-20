@@ -38,7 +38,12 @@
 	((action) == SCMP_ACT_ALLOW ? "ALLOW" : "DENY")
 
 /**
- * XXX
+ * Indent the output stream
+ * @param fds the file stream to send the output
+ * @param lvl the indentation level
+ *
+ * This function indents the output stream with whitespace based on the
+ * requested indentation level.
  */
 static void _indent(FILE *fds, unsigned int lvl)
 {
@@ -47,7 +52,14 @@ static void _indent(FILE *fds, unsigned int lvl)
 }
 
 /**
- * XXX
+ * Generate the pseudo filter code for an argument chain
+ * @param node the head of the argument chain
+ * @param lvl the indentation level
+ * @param fds the file stream to send the output
+ *
+ * This function generates the pseudo filter code representation of the given
+ * argument chain and writes it to the given output stream.
+ *
  */
 static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 			   unsigned int lvl, FILE *fds)
@@ -60,85 +72,63 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 		c_iter = c_iter->lvl_prv;
 
 	while (c_iter != NULL) {
+		/* comparison operation */
 		_indent(fds, lvl);
 		switch (c_iter->op) {
 			case SCMP_CMP_NE:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d == %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d != %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d != %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			case SCMP_CMP_LT:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d >= %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d < %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d < %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			case SCMP_CMP_LE:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d > %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d <= %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d <= %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			case SCMP_CMP_EQ:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d != %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d == %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d == %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			case SCMP_CMP_GE:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d < %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d >= %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d >= %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			case SCMP_CMP_GT:
-				if (c_iter->action != 0 &&
-				    c_iter->action_flag == 0)
-					fprintf(fds, " if ($a%d <= %ld)\n",
-						c_iter->arg, c_iter->datum);
-				else
-					fprintf(fds, " if ($a%d > %ld)\n",
-						c_iter->arg,
-						c_iter->datum);
+				fprintf(fds, " if ($a%d > %ld)\n",
+					c_iter->arg,
+					c_iter->datum);
 				break;
 			default:
 				fprintf(fds, " if ($a%d ??? %ld)\n",
 					c_iter->arg, c_iter->datum);
 		}
 
-		if (c_iter->action != 0) {
+		/* true result */
+		if ((c_iter->action != 0) && (c_iter->action_flag)) {
 			_indent(fds, lvl + 1);
 			fprintf(fds, " action %s;\n",
 				_pfc_action(c_iter->action));
-		} else {
-			if (c_iter->nxt_t != NULL)
-				_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
-			if (c_iter->nxt_f != NULL) {
-				_indent(fds, lvl);
-				fprintf(fds, " else\n");
-				_gen_pfc_chain(c_iter->nxt_f, lvl + 1, fds);
-			}
+		} else if (c_iter->nxt_t != NULL)
+			_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
+
+		/* false result */
+		if ((c_iter->action != 0) && (!c_iter->action_flag)) {
+			_indent(fds, lvl);
+			fprintf(fds, " else\n");
+			_indent(fds, lvl + 1);
+			fprintf(fds, " action %s;\n",
+				_pfc_action(c_iter->action));
+		} else if (c_iter->nxt_f != NULL) {
+			_indent(fds, lvl);
+			fprintf(fds, " else\n");
+			_gen_pfc_chain(c_iter->nxt_f, lvl + 1, fds);
 		}
 
 		c_iter = c_iter->lvl_nxt;
@@ -152,8 +142,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
  * @param fds the file stream to send the output
  *
  * This function generates a pseduo filter code representation of the given
- * syscall filter and writes it to the given fd.  Returns zero on success,
- * negative values on failure.
+ * syscall filter and writes it to the given output stream.
  *
  */
 static void _gen_pfc_syscall(enum scmp_flt_action act,
