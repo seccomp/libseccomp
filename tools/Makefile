@@ -33,7 +33,10 @@ include ../macros.mk
 # configuration
 #
 
-TOOLS = bpf_disasm bpf_sim
+TOOLS = bpf_disasm \
+	bpf_sim
+
+DEPS = $(TOOLS:%=%.d)
 
 #
 # targets
@@ -43,13 +46,13 @@ TOOLS = bpf_disasm bpf_sim
 
 all: $(TOOLS)
 
-# XXX - find a better way to do this using $(TOOLS)
+-include $(DEPS)
 
-bpf_disasm: bpf_disasm.c
-	$(COMPILE_EXEC)
+$(DEPS):
+	$(MAKEDEP_EXEC)
 
-bpf_sim: bpf_sim.c
+$(TOOLS):
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) -f $(TOOLS)
+	$(RM) -f $(DEPS) $(TOOLS)

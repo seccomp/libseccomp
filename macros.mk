@@ -45,6 +45,18 @@ CFLAGS  ?= -O0 -g -Wall
 LDFLAGS ?= -g
 
 #
+# auto dependencies
+#
+
+# we require gcc specific functionality (see the MAKEDEP* definitions below)
+GCC ?= gcc
+
+MAKEDEP = @$(GCC) $(INCFLAGS) -MM -MF $(patsubst %.o,%.d,$@) $<;
+MAKEDEP_EXEC = \
+	@$(GCC) $(INCFLAGS) -MM -MT $(patsubst %.d,%,$@) \
+		-MF $@ $(patsubst %.d,%.c,$@);
+
+#
 # build constants
 #
 
@@ -54,8 +66,8 @@ VERSION_HDR = src/version.h
 # build macros
 #
 
-ARCHIVE   = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
-COMPILE   = @echo " CC $@"; $(CC) $(CFLAGS) $(INCFLAGS) -o $*.o -c $<;
+ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
+COMPILE = @echo " CC $@"; $(CC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
 COMPILE_EXEC = @echo " CC $@"; $(CC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
 LINK_EXEC = @echo " LD $@"; $(CC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
 LINK_LIB  = @echo " LD $@ "; $(CC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
@@ -64,8 +76,6 @@ LINK_LIB  = @echo " LD $@ "; $(CC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
 # default build targets
 #
 
-.c.o:
+%.o: %.c
+	$(MAKEDEP)
 	$(COMPILE)
-
-
-

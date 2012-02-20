@@ -35,6 +35,7 @@ LIB_STATIC = libseccomp.a
 LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
 OBJS = api.o db.o hash.o gen_pfc.o gen_bpf.o
+DEPS = $(OBJS:%.o=%.d)
 
 INCFLAGS := $(INCFLAGS) -I../include
 
@@ -46,8 +47,10 @@ INCFLAGS := $(INCFLAGS) -I../include
 
 all: $(LIB_STATIC)
 
+-include $(DEPS)
+
 $(LIB_STATIC): $(OBJS)
 	$(ARCHIVE)
 
 clean:
-	$(RM) -f $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
+	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)

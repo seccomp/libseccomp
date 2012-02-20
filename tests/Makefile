@@ -43,6 +43,8 @@ TESTS = 01-basic \
 	03-chains-pfc \
 	04-chains-bpf
 
+DEPS = $(TESTS:%=%.d)
+
 #
 # targets
 #
@@ -51,19 +53,13 @@ TESTS = 01-basic \
 
 all: $(TESTS)
 
-# XXX - find a better way to do this using $(TESTS)
+-include $(DEPS)
 
-01-basic: 01-basic.c
-	$(COMPILE_EXEC)
+$(DEPS):
+	$(MAKEDEP_EXEC)
 
-02-basic-pfc: 02-basic-pfc.c
-	$(COMPILE_EXEC)
-
-03-chains-pfc: 03-chains-pfc.c
-	$(COMPILE_EXEC)
-
-04-chains-bpf: 04-chains-bpf.c
+$(TESTS):
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) -f $(TESTS)
+	$(RM) -f $(DEPS) $(TESTS)
