@@ -29,6 +29,12 @@
 
 #include "db.h"
 
+/* the priority field is fairly simple - without any user hints, or in the case
+ * of a hint "tie", we give higher priority to syscalls with less chain nodes
+ * (filter is easier to evaluate) */
+#define _DB_PRI_MASK_CHAIN		0x0000FFFF
+#define _DB_PRI_MASK_USER		0x00FF0000
+
 struct db_arg_filter {
 	int valid;
 
@@ -37,7 +43,7 @@ struct db_arg_filter {
 	unsigned long datum;
 };
 
-static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
+static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
 
 /**
  * Free each item in the DB list
@@ -56,39 +62,42 @@ static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
 /**
  * Do not call this function directly, use _db_arg_chain_tree_free() instead
  */
-static void __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
+static unsigned int __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
 {
+	int cnt;
+
 	if (tree == NULL)
-		return;
+		return 0;
 
 	/* we assume the caller has ensured that 'tree->lvl_prv == NULL' */
-	__db_arg_chain_tree_free(tree->lvl_nxt);
-
-	_db_arg_chain_tree_free(tree->nxt_t);
-	_db_arg_chain_tree_free(tree->nxt_f);
+	cnt = __db_arg_chain_tree_free(tree->lvl_nxt);
+	cnt += _db_arg_chain_tree_free(tree->nxt_t);
+	cnt += _db_arg_chain_tree_free(tree->nxt_f);
 
 	free(tree);
+	return cnt + 1;
 }
 
 /**
  * Free a syscall filter argument chain tree
  * @param list the argument chain list
  *
- * This function frees a syscall argument chain list.
+ * This function frees a syscall argument chain list and returns the number of
+ * nodes freed.
  *
  */
-static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
+static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
 {
 	struct db_arg_chain_tree *iter;
 
 	if (tree == NULL)
-		return;
+		return 0;
 
 	iter = tree;
 	while (iter->lvl_prv != NULL)
 		iter = iter->lvl_prv;
 
-	__db_arg_chain_tree_free(iter);
+	return __db_arg_chain_tree_free(iter);
 }
 
 /**
@@ -98,16 +107,17 @@ static void _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
  *
  * This function searches the tree looking for the node and removes it once
  * found.  The function also removes any other nodes that are no longer needed
- * as a result of removing the given node.
+ * as a result of removing the given node.  Returns the number of nodes freed.
  *
  */
-static void _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
-				      struct db_arg_chain_tree *node)
+static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
+					      struct db_arg_chain_tree *node)
 {
+	int cnt = 0;
 	struct db_arg_chain_tree *c_iter;
 
 	if (tree == NULL || *tree == NULL || node == NULL)
-		return;
+		return 0;
 
 	c_iter = *tree;
 	while (c_iter->lvl_prv != NULL)
@@ -131,30 +141,34 @@ static void _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 			/* free and return */
 			c_iter->lvl_prv = NULL;
 			c_iter->lvl_nxt = NULL;
-			_db_arg_chain_tree_free(c_iter);
-			return;
+			cnt += _db_arg_chain_tree_free(c_iter);
+			return cnt;
 		}
 
 		/* check the true sub-tree */
 		if (c_iter->nxt_t == node) {
 			/* free and return */
-			_db_arg_chain_tree_free(c_iter->nxt_t);
+			cnt += _db_arg_chain_tree_free(c_iter->nxt_t);
 			c_iter->nxt_t = NULL;
-			return;
+			return cnt;
 		} else
-			_db_arg_chain_tree_remove(&(c_iter->nxt_t), node);
+			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_t),
+							 node);
 
 		/* check the false sub-tree */
 		if (c_iter->nxt_f == node) {
 			/* free and return */
-			_db_arg_chain_tree_free(c_iter->nxt_f);
+			cnt += _db_arg_chain_tree_free(c_iter->nxt_f);
 			c_iter->nxt_f = NULL;
-			return;
+			return cnt;
 		} else
-			_db_arg_chain_tree_remove(&(c_iter->nxt_f), node);
+			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_f),
+							 node);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
+
+	return cnt;
 }
 
 /**
@@ -224,6 +238,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	struct db_arg_chain_tree *ec_iter;
 	unsigned int tf_flag;
+	unsigned int n_cnt;
 
 	assert(db != NULL);
 
@@ -279,6 +294,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 				c_prev->nxt_f = c_iter;
 		} else
 			s_new->chains = c_iter;
+		s_new->node_cnt++;
 
 		/* rewrite the op to reduce the op/datum combos */
 		switch (c_iter->op) {
@@ -305,6 +321,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 		c_iter->action = action;
 		c_iter->action_flag = tf_flag;
 	}
+	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
 
 	/* no more failures allowed after this point that would result in the
 	 * stored filter being in an inconsistent state */
@@ -337,6 +354,8 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 		 * so we need to clear the existing chains and exit */
 		_db_arg_chain_tree_free(s_iter->chains);
 		s_iter->chains = NULL;
+		s_iter->node_cnt = 0;
+		s_iter->priority |= _DB_PRI_MASK_CHAIN;
 		rc = 0;
 		goto add_free;
 	}
@@ -350,13 +369,16 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 			/* found a matching node on this chain level */
 			ec_iter->refcnt++;
 			if (db_chain_leaf(ec_iter) && db_chain_leaf(c_iter)) {
-				if (ec_iter->action_flag != c_iter->action_flag)
+				if (ec_iter->action_flag !=
+				    c_iter->action_flag) {
 					/* drop this node entirely as we take
 					 * an action regardless of the op's
 					 * result (true or false) */
-					_db_arg_chain_tree_remove(
+					n_cnt = _db_arg_chain_tree_remove(
 							&(s_iter->chains),
 							ec_iter);
+					s_iter->node_cnt += n_cnt;
+				}
 				rc = 0;
 				goto add_free;
 			} else if (db_chain_leaf(ec_iter)) {
@@ -367,6 +389,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 						goto add_free;
 					}
 					ec_iter->nxt_f = c_iter->nxt_f;
+					s_iter->node_cnt -= (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					if (c_iter->nxt_f != NULL) {
@@ -375,6 +398,7 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 						goto add_free;
 					}
 					ec_iter->nxt_t = c_iter->nxt_t;
+					s_iter->node_cnt -= (s_new->node_cnt-1);
 					goto add_free_match;
 				}
 			} else if (db_chain_leaf(c_iter)) {
@@ -386,36 +410,43 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 
 				/* cleanup and return */
 				if (ec_iter->action_flag) {
-					_db_arg_chain_tree_free(ec_iter->nxt_t);
+					n_cnt = _db_arg_chain_tree_free(
+								ec_iter->nxt_t);
 					ec_iter->nxt_t = NULL;
 				} else {
-					_db_arg_chain_tree_free(ec_iter->nxt_f);
+					n_cnt = _db_arg_chain_tree_free(
+								ec_iter->nxt_f);
 					ec_iter->nxt_f = NULL;
 				}
+				s_iter->node_cnt += n_cnt;
 				return 0;
 			} else if (c_iter->nxt_t != NULL) {
 				/* moving down the chain */
 				if (ec_iter->nxt_t == NULL) {
 					/* add on to the existing */
 					ec_iter->nxt_t = c_iter->nxt_t;
+					s_iter->node_cnt -= (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_t;
 					ec_iter = ec_iter->nxt_t;
+					s_new->node_cnt--;
 				}
 			} else if (c_iter->nxt_f != NULL) {
 				/* moving down the chain */
 				if (ec_iter->nxt_f == NULL) {
 					/* add on to the existing */
 					ec_iter->nxt_f = c_iter->nxt_f;
+					s_iter->node_cnt -= (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_f;
 					ec_iter = ec_iter->nxt_f;
+					s_new->node_cnt--;
 				}
 			} else {
 				/* we should never be here! */

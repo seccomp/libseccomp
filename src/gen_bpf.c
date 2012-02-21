@@ -99,6 +99,9 @@ struct bpf_blk {
 	unsigned int blk_cnt;
 	unsigned int blk_alloc;
 
+	/* priority - higher is better */
+	unsigned int priority;
+
 	/* used during final block assembly */
 	unsigned int hash;
 	struct bpf_blk *prev, *next;
@@ -524,6 +527,12 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		while (h_iter->next != NULL) {
 			if (h_iter->blk->hash == h_val) {
 				/* duplicate block */
+
+				/* update the priority if needed */
+				if (h_iter->blk->priority < blk->priority)
+					h_iter->blk->priority = blk->priority;
+
+				/* free the block */
 				_blk_free(state, blk);
 				h_iter->refcnt++;
 				*blk_p = h_iter->blk;
@@ -865,6 +874,7 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 	blk_s = _blk_append(state, NULL, &instr);
 	if (blk_s == NULL)
 		return -ENOMEM;
+	blk_s->priority = sys->priority;
 	rc = _hsh_add(state, &blk_s, 1, &h_val);
 	if (rc < 0)
 		return rc;
@@ -934,7 +944,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	unsigned int res_cnt;
 	unsigned int jmp_len;
 	struct bpf_instr instr;
-	struct bpf_blk *b_head, *b_tail, *b_iter, *b_jmp;
+	struct bpf_blk *b_head, *b_tail, *b_iter, *b_new, *b_jmp;
 
 	/* XXX - we use a very simplistic algorithm for "writing out" the
 	 *       final bpf program, we should factor into account jump lengths
@@ -942,18 +952,39 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	 *       possible heuristics to optimize the block placement within
 	 *       the overall program */
 
-	/* link all of the top level blocks together */
+	/* link the top level blocks together while considering priority */
 	b_head = state->tg_chains.grps[0];
 	b_head->prev = NULL;
 	b_head->next = NULL;
-	b_iter = b_head;
 	for (iter = 1; iter < state->tg_chains.grp_cnt; iter++) {
-		b_iter->next = state->tg_chains.grps[iter];
-		b_iter->next->prev = b_iter;
-		b_iter->next->next = NULL;
-		b_iter = b_iter->next;
-		b_tail = b_iter;
+		b_new = state->tg_chains.grps[iter];
+		b_iter = b_head;
+		do {
+			if (b_new->priority > b_iter->priority) {
+				if (b_iter == b_head) {
+					b_new->next = b_head;
+					b_head->prev = b_new;
+					b_head = b_new;
+				} else {
+					b_iter->prev->next = b_new;
+					b_new->prev = b_iter->prev;
+					b_new->next = b_iter;
+					b_iter->prev = b_new;
+				}
+				b_iter = NULL;
+			} else {
+				if (b_iter->next == NULL) {
+					b_iter->next = b_new;
+					b_new->prev = b_iter;
+					b_iter = NULL;
+				} else
+					b_iter = b_iter->next;
+			}
+		} while (b_iter != NULL);
 	}
+	b_tail = b_head;
+	while (b_tail->next != NULL)
+		b_tail = b_tail->next;
 
 	/* resolve any TGT_NXT jumps to TGT_PTR_HSH jumps at the top level */
 	b_iter = b_head;
@@ -1109,9 +1140,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 
 		b_iter = b_iter->next;
 	}
-
-	/* XXX - we may need to add a default action if we don't have any
-	 *       chains */
 
 	return 0;
 }

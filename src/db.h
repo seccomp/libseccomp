@@ -68,6 +68,10 @@ struct db_sys_list {
 	unsigned int num;
 	/* the argument chain heads */
 	struct db_arg_chain_tree *chains;
+	unsigned int node_cnt;
+
+	/* priority - higher is better */
+	unsigned int priority;
 
 	struct db_sys_list *next;
 };
