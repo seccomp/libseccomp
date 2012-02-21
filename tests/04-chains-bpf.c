@@ -34,6 +34,14 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
+	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+	if (rc != 0)
+		return rc;
+
+	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	if (rc != 0)
+		return rc;
+
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(read), 2,
 				 0, SCMP_CMP_EQ, 0, /* stdin */
 				 1, SCMP_CMP_NE, NULL);

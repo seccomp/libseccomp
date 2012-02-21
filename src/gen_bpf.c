@@ -130,7 +130,6 @@ struct bpf_state {
 	enum scmp_flt_action blk_action;
 
 	/* top level block groups */
-	struct bpf_blk *tg_sys;
 	struct bpf_blk_grp tg_chains;
 	struct bpf_blk *def_blk;
 	unsigned int def_hsh;
@@ -479,9 +478,6 @@ static void _state_release(struct bpf_state *state)
 	if (state == NULL)
 		return;
 
-	/* block groups */
-	_blk_free(state, state->tg_sys);
-	/* state->def_blk will be freed by the _grp_reset() call (via hash) */
 	_grp_reset(state, &state->tg_chains);
 }
 
@@ -610,8 +606,20 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 	int acc_arg = -1;
 	int last_flag = 0;
 
-	if (node == NULL)
+	if (node == NULL) {
+		if (state->blk_action == SCMP_ACT_ALLOW)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO,
+				   _BPF_ALLOW);
+		else if (state->blk_action == SCMP_ACT_DENY)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO,
+				   _BPF_DENY);
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto chain_lvl_failure;
 		return blk;
+	}
 
 	/* find the starting node of the level */
 	l_iter = node;
@@ -837,45 +845,32 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		return 0;
 
 	/* generate the syscall and chain instruction block */
-	if (sys->chains != NULL) {
-		/* generate the chains */
-		blk_c = _gen_bpf_chain(state, NULL, sys->chains);
-		if (blk_c == NULL)
-			return -ENOMEM;
 
-		/* add the chain to the hash table */
-		/* XXX - we can probably move this down into the
-		 *       _gen_bpf_chain_lvl_res() function with a little work
-		 *       which would save us some time */
-		rc = _gen_bpf_blk_hsh(state, &blk_c, &h_val);
-		if (rc < 0)
-			return rc;
+	/* generate the chains */
+	blk_c = _gen_bpf_chain(state, NULL, sys->chains);
+	if (blk_c == NULL)
+		return -ENOMEM;
 
-		/* syscall check (syscall is still in the accumulator) */
-		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_HSH(h_val), _BPF_JMP_NXT, sys->num);
-		blk_s = _blk_append(state, NULL, &instr);
-		if (blk_s == NULL)
-			return -ENOMEM;
-		rc = _hsh_add(state, &blk_s, 1, &h_val);
-		if (rc < 0)
-			return rc;
+	/* add the chain to the hash table */
+	/* XXX - we can probably move this down into the
+	 *       _gen_bpf_chain_lvl_res() function with a little work
+	 *       which would save us some time */
+	rc = _gen_bpf_blk_hsh(state, &blk_c, &h_val);
+	if (rc < 0)
+		return rc;
 
-		/* add to the top level block group */
-		rc = _grp_append(state, &(state->tg_chains), blk_s);
-		if (rc < 0)
-			return rc;
-	} else {
-		/* generate the syscall check */
-		/* we fixup the true jump later, not ideal but okay */
-		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_NO, _BPF_JMP_NO, sys->num);
-		state->tg_sys = _blk_append(state, state->tg_sys, &instr);
-		if (state->tg_sys == NULL)
-			return -ENOMEM;
-	}
+	/* syscall check (syscall is still in the accumulator) */
+	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+		   _BPF_JMP_HSH(h_val), _BPF_JMP_NXT, sys->num);
+	blk_s = _blk_append(state, NULL, &instr);
+	if (blk_s == NULL)
+		return -ENOMEM;
+	rc = _hsh_add(state, &blk_s, 1, &h_val);
+	if (rc < 0)
+		return rc;
 
-	return 0;
+	/* add to the top level block group */
+	return _grp_append(state, &(state->tg_chains), blk_s);
 }
 
 /**
@@ -885,9 +880,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 				const struct db_filter *db)
 {
 	int rc;
-	int iter;
 	struct db_sys_list *s_iter;
-	struct bpf_instr *i_ptr;
 	struct bpf_instr instr;
 
 	/* default action */
@@ -923,42 +916,6 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	if (rc < 0)
 		goto build_state_failure;
 
-	/* fixup the syscall only block if it exists */
-	if (state->tg_sys != NULL) {
-		struct bpf_instr *last_instr;
-
-		/* the last instruction should jump over the default if false */
-		last_instr = &state->tg_sys->blks[state->tg_sys->blk_cnt - 1];
-		last_instr->jf = _BPF_JMP_IMM(1);
-
-		if (state->blk_action == SCMP_ACT_ALLOW)
-			_BPF_INSTR(instr, BPF_RET,
-				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ALLOW);
-		else if (state->blk_action == SCMP_ACT_DENY)
-			_BPF_INSTR(instr, BPF_RET,
-				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
-		else {
-			rc = -EFAULT;
-			goto build_state_failure;
-		}
-		state->tg_sys = _blk_append(state, state->tg_sys, &instr);
-		if (state->tg_sys == NULL) {
-			rc = -ENOMEM;
-			goto build_state_failure;
-		}
-
-		/* fixup all the jumps in the syscall only top level block */
-		i_ptr = state->tg_sys->blks;
-		for (iter = 0; iter < state->tg_sys->blk_cnt; iter++) {
-			/* XXX - this is not pretty, but it works */
-			if (i_ptr[iter].op == BPF_JMP+BPF_JEQ) {
-				i_ptr[iter].jt =
-					  _BPF_JMP_IMM(state->tg_sys->blk_cnt -
-						       (iter + 1) - 1);
-			}
-		}
-	}
-
 	return 0;
 
 build_state_failure:
@@ -986,17 +943,11 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	 *       the overall program */
 
 	/* link all of the top level blocks together */
-	if (state->tg_sys != NULL)
-		b_head = state->tg_sys;
-	else if (state->tg_chains.grp_cnt > 0)
-		b_head = state->tg_chains.grps[0];
-	else
-		return -ENOENT;
+	b_head = state->tg_chains.grps[0];
 	b_head->prev = NULL;
 	b_head->next = NULL;
 	b_iter = b_head;
-	for (iter = (state->tg_sys ? 0 : 1);
-	     iter < state->tg_chains.grp_cnt; iter++) {
+	for (iter = 1; iter < state->tg_chains.grp_cnt; iter++) {
 		b_iter->next = state->tg_chains.grps[iter];
 		b_iter->next->prev = b_iter;
 		b_iter->next->next = NULL;
