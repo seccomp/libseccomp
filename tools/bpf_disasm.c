@@ -273,16 +273,21 @@ int main(int argc, char *argv[])
 	int rc;
 	FILE *file;
 
-	if (argc != 2) {
-		fprintf(stderr, "usage: %s <bpf_file>\n", argv[0]);
+	if (argc > 2) {
+		fprintf(stderr, "usage: %s [<bpf_file>]\n", argv[0]);
 		return EINVAL;
 	}
 
-	file = fopen(argv[1], "r");
-	if (file == NULL) {
-		fprintf(stderr, "error: unable to open \"%s\"\n", argv[1]);
-		return errno;
-	}
+	if (argc == 2) {
+		file = fopen(argv[1], "r");
+		if (file == NULL) {
+			fprintf(stderr, "error: unable to open \"%s\" (%s)\n",
+				argv[1], strerror(errno));
+			return errno;
+		}
+	} else
+		file = stdin;
+
 	rc = bpf_decode(file);
 	fclose(file);
 
