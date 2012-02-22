@@ -209,6 +209,7 @@ void db_destroy(struct db_filter *db)
 
 	_db_list_foreach_free(s_iter, db->syscalls)
 		_db_arg_chain_tree_free(s_iter->chains);
+	free(db);
 }
 
 /**
