@@ -42,7 +42,6 @@ struct sim_state {
 
 struct bpf_program {
 	size_t i_cnt;
-	size_t i_alloc;
 	struct bpf_instr *i;
 };
 
@@ -303,8 +302,7 @@ int main(int argc, char *argv[])
 	/* allocate space for the bpf program */
 	/* XXX - we should make this dynamic */
 	bpf_prg.i_cnt = 0;
-	bpf_prg.i_alloc = BPF_PRG_MAX_LEN;
-	bpf_prg.i = malloc(sizeof(struct bpf_instr) * bpf_prg.i_alloc);
+	bpf_prg.i = calloc(BPF_PRG_MAX_LEN, sizeof(*bpf_prg.i));
 	if (bpf_prg.i == NULL)
 		exit_fault(ENOMEM);
 
@@ -320,7 +318,7 @@ int main(int argc, char *argv[])
 			bpf_prg.i_cnt++;
 
 		/* check the size */
-		if (bpf_prg.i_cnt == bpf_prg.i_alloc)
+		if (bpf_prg.i_cnt == BPF_PRG_MAX_LEN)
 			exit_fault(E2BIG);
 	} while (fd_read_len > 0);
 	close(fd);
