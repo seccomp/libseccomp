@@ -42,23 +42,31 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(read), 2,
-				 0, SCMP_CMP_EQ, 0, /* stdin */
-				 1, SCMP_CMP_NE, NULL);
-	if (rc != 0)
-		return rc;
-	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(read), 2,
-				 0, SCMP_CMP_EQ, 0, /* stdin */
-				 2, SCMP_CMP_GT, SSIZE_MAX);
+	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
+				 0, SCMP_CMP_EQ, STDIN_FILENO,
+				 1, SCMP_CMP_NE, NULL,
+				 2, SCMP_CMP_LT, SSIZE_MAX);
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
-				 0, SCMP_CMP_EQ, 1 /* stdout */);
+				 0, SCMP_CMP_EQ, STDOUT_FILENO,
+				 1, SCMP_CMP_NE, NULL,
+				 2, SCMP_CMP_LT, SSIZE_MAX);
 	if (rc != 0)
 		return rc;
 	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
-				 0, SCMP_CMP_EQ, 2 /* stderr */);
+				 0, SCMP_CMP_EQ, STDERR_FILENO,
+				 1, SCMP_CMP_NE, NULL,
+				 2, SCMP_CMP_LT, SSIZE_MAX);
+	if (rc != 0)
+		return rc;
+
+	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	if (rc != 0)
+		return rc;
+
+	rc = seccomp_add_syscall(SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
 	if (rc != 0)
 		return rc;
 
