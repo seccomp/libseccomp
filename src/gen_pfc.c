@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <seccomp.h>
 
@@ -174,12 +175,18 @@ static void _gen_pfc_syscall(enum scmp_flt_action act,
  */
 int gen_pfc_generate(const struct db_filter *db, int fd)
 {
+	int newfd;
 	FILE *fds;
 	struct db_sys_list *s_iter;
 
-	fds = fdopen(fd, "a");
-	if (fds == NULL)
+	newfd = dup(fd);
+	if (newfd < 0)
 		return errno;
+	fds = fdopen(newfd, "a");
+	if (fds == NULL) {
+		close(newfd);
+		return errno;
+	}
 
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code start\n");
@@ -195,5 +202,6 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "#\n");
 
 	fflush(fds);
+	fclose(fds);
 	return 0;
 }
