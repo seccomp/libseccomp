@@ -38,10 +38,10 @@ include ../version_info
 INCFLAGS := $(INCFLAGS) -I../include
 LDFLAGS := ../src/libseccomp.a
 
-TESTS = 01-basic \
-	02-basic-pfc \
-	03-chains-pfc \
-	04-chains-bpf
+TESTS = 01-allow \
+	02-basic \
+	03-basic-chains \
+	04-multilevel-chains
 
 DEPS = $(TESTS:%=%.d)
 
