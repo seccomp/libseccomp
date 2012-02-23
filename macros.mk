@@ -45,16 +45,35 @@ CFLAGS  ?= -O0 -g -Wall
 LDFLAGS ?= -g
 
 #
-# auto dependencies
+# build tools
 #
 
-# we require gcc specific functionality (see the MAKEDEP* definitions below)
+MV ?= mv
+CAT ?= cat
+ECHO ?= echo
+
+SED ?= sed
+
+# we require gcc specific functionality (see the MAKEDEP definitions below)
 GCC ?= gcc
+
+#
+# auto dependencies
+#
 
 MAKEDEP = @$(GCC) $(INCFLAGS) -MM -MF $(patsubst %.o,%.d,$@) $<;
 MAKEDEP_EXEC = \
 	@$(GCC) $(INCFLAGS) -MM -MT $(patsubst %.d,%,$@) \
 		-MF $@ $(patsubst %.d,%.c,$@);
+
+ADDDEP = \
+	@adep() { \
+		$(MV) $$1 $$1.dtmp; \
+		$(CAT) $$1.dtmp | $(SED) -e 's/\([^\]\)$$/\1 \\/' | \
+			( $(CAT) - && $(ECHO) " $$2" ) > $$1; \
+		$(RM) -f $@.dtmp; \
+	}; \
+	adep
 
 #
 # build constants

@@ -37,8 +37,6 @@ LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 OBJS = api.o db.o hash.o gen_pfc.o gen_bpf.o
 DEPS = $(OBJS:%.o=%.d)
 
-INCFLAGS := $(INCFLAGS) -I../include
-
 #
 # targets
 #

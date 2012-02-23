@@ -2,6 +2,7 @@
 *.a
 *.o
 *.d
+*.dtmp
 *.swp
 *.orig
 .stgit-*

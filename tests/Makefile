@@ -35,7 +35,6 @@ include ../macros.mk
 
 include ../version_info
 
-INCFLAGS := $(INCFLAGS) -I../include
 LDFLAGS := ../src/libseccomp.a
 
 TESTS = 01-allow \
@@ -57,6 +56,7 @@ all: $(TESTS)
 
 $(DEPS):
 	$(MAKEDEP_EXEC)
+	$(ADDDEP) $@ ../src/libseccomp.a
 
 $(TESTS):
 	$(COMPILE_EXEC)
