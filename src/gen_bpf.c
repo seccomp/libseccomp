@@ -189,8 +189,9 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 	if (blk == NULL)
 		return;
 
-	/* remove this block from the hash table */
-	_hsh_remove(state, blk->hash);
+	/* remove this block from the hash table and honor the refcnt */
+	if ((blk->hash != 0) && (_hsh_remove(state, blk->hash) == NULL))
+		return;
 
 	/* run through the block freeing TGT_PTR_{BLK,HSH} jump targets */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
@@ -534,6 +535,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 					h_iter->blk->priority = blk->priority;
 
 				/* free the block */
+				blk->hash = 0;
 				_blk_free(state, blk);
 				h_iter->refcnt++;
 				*blk_p = h_iter->blk;
