@@ -177,7 +177,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	FILE *fds;
 	struct db_sys_list *s_iter;
 
-	fds = fdopen(fd, "a+");
+	fds = fdopen(fd, "a");
 	if (fds == NULL)
 		return errno;
 
