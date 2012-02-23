@@ -19,17 +19,63 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <seccomp.h>
 
 int main(int argc, char *argv[])
 {
+	static int bpf = 0;
 	int rc;
+
+
+	while (1) {
+		static struct option long_options[] = {
+			{"bpf", no_argument, &bpf, 1},
+			{"pfc", no_argument, &bpf, 0},
+			{0,0,0,0},
+		};
+		int c, option_index = 0;
+
+		c = getopt_long(argc, argv, "bp",
+				long_options, &option_index);
+
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 0:
+			break;
+		case 'b':
+			bpf = 1;
+			break;
+
+		case 'p':
+			bpf = 0;
+			break;
+		default:
+			return -EINVAL;
+		}
+	}
+
+	if (optind < argc) {
+		printf("usage %s: [--bpf,-b] [--pfc,-p]\n", argv[0]);
+		return -EINVAL;
+	}
 
 	rc = seccomp_init(SCMP_ACT_ALLOW);
 	if (rc != 0)
+		return rc;
+
+	if (bpf)
+		rc = seccomp_gen_bpf(STDOUT_FILENO);
+	else
+		rc = seccomp_gen_pfc(STDOUT_FILENO);
+	if (rc)
 		return rc;
 
 	seccomp_release();
