@@ -152,6 +152,7 @@ struct bpf_state {
  */
 #define _BPF_INSTR(_ins,_op,_jt,_jf,_k) \
 	do { \
+		memset(&(_ins), 0, sizeof(_ins)); \
 		(_ins).op = (_op); \
 		(_ins).jt = _jt; \
 		(_ins).jf = _jf; \
