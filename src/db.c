@@ -470,6 +470,14 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 					ec_iter->lvl_nxt = c_iter;
 					c_iter->lvl_prv = ec_iter;
 					goto add_free_match;
+				} else if (db_chain_lt(c_iter,
+						       ec_iter->lvl_nxt)) {
+					/* add new chain in between */
+					c_iter->lvl_nxt = ec_iter->lvl_nxt;
+					ec_iter->lvl_nxt->lvl_prv = c_iter;
+					ec_iter->lvl_nxt = c_iter;
+					c_iter->lvl_prv = ec_iter;
+					goto add_free_match;
 				} else
 					ec_iter = ec_iter->lvl_nxt;
 			}
