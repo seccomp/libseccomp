@@ -313,8 +313,8 @@ int main(int argc, char *argv[])
 	do {
 		/* XXX - need to account for partial reads */
 		fd_read_len = read(fd, &(bpf_prg.i[bpf_prg.i_cnt]),
-				   sizeof(struct bpf_instr));
-		if (fd_read_len == sizeof(struct bpf_instr))
+				   sizeof(*bpf_prg.i));
+		if (fd_read_len == sizeof(*bpf_prg.i))
 			bpf_prg.i_cnt++;
 
 		/* check the size */
