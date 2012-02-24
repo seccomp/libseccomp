@@ -176,6 +176,18 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      const struct db_arg_chain_tree *c);
 
 static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val);
+static struct bpf_blk *_hsh_find(const struct bpf_state *state,
+				 unsigned int h_val);
+
+/**
+ * XXX
+ */
+static void __blk_free(struct bpf_state *state, struct bpf_blk *blk)
+{
+	if (blk->blks != NULL)
+		free(blk->blks);
+	free(blk);
+}
 
 /**
  * XXX
@@ -189,7 +201,7 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 	if (blk == NULL)
 		return;
 
-	/* remove this block from the hash table and honor the refcnt */
+	/* remove this block from the hash table */
 	if ((blk->hash != 0) && (_hsh_remove(state, blk->hash) == NULL))
 		return;
 
@@ -201,9 +213,8 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 			_blk_free(state, i_iter->jt.tgt.ptr);
 			break;
 		case TGT_PTR_HSH:
-			b_iter = _hsh_remove(state, i_iter->jt.tgt.hash);
-			if (b_iter != NULL)
-				_blk_free(state, b_iter);
+			b_iter = _hsh_find(state, i_iter->jt.tgt.hash);
+			_blk_free(state, b_iter);
 			break;
 		default:
 			/* do nothing */
@@ -214,18 +225,15 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 			_blk_free(state, i_iter->jf.tgt.ptr);
 			break;
 		case TGT_PTR_HSH:
-			b_iter = _hsh_remove(state, i_iter->jf.tgt.hash);
-			if (b_iter != NULL)
-				_blk_free(state, b_iter);
+			b_iter = _hsh_find(state, i_iter->jf.tgt.hash);
+			_blk_free(state, b_iter);
 			break;
 		default:
 			/* do nothing */
 			break;
 		}
 	}
-	if (blk->blks != NULL)
-		free(blk->blks);
-	free(blk);
+	__blk_free(state, blk);
 }
 
 /**
@@ -276,15 +284,8 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 /**
  * XXX
  */
-static void _grp_reset(struct bpf_state *state, struct bpf_blk_grp *grp)
+static void _grp_reset(struct bpf_blk_grp *grp)
 {
-	unsigned int iter;
-
-	if (grp == NULL)
-		return;
-
-	for (iter = 0; iter < grp->grp_cnt; iter++)
-		_blk_free(state, grp->grps[iter]);
 	if (grp->grps != NULL)
 		free(grp->grps);
 	memset(grp, 0, sizeof(*grp));
@@ -480,21 +481,22 @@ static void _program_free(struct bpf_program *program)
  */
 static void _state_release(struct bpf_state *state)
 {
+	unsigned int bkt;
+	struct bpf_hash_bkt *iter;
+
 	if (state == NULL)
 		return;
 
-	_grp_reset(state, &state->tg_chains);
-}
-
-/**
- * XXX
- */
-static void _state_reset_all(struct bpf_state *state)
-{
-	if (state == NULL)
-		return;
-
-	_state_release(state);
+	/* release all of the hash table entries */
+	for (bkt = 0; bkt < _BPF_HASH_SIZE; bkt++) {
+		while (state->htbl[bkt]) {
+			iter = state->htbl[bkt];
+			state->htbl[bkt] = iter->next;
+			__blk_free(state, iter->blk);
+			free(iter);
+		}
+	}
+	_grp_reset(&state->tg_chains);
 	_program_free(state->bpf);
 
 	memset(state, 0, sizeof(*state));
@@ -508,7 +510,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		    unsigned int *h_val_ret)
 {
 	unsigned int h_val;
-	struct bpf_hash_bkt *h_new, *h_iter;
+	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
 	struct bpf_blk *blk = *blk_p;
 
 	h_new = malloc(sizeof(*h_new));
@@ -526,25 +528,26 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	/* insert the block into the hash table */
 	h_iter = state->htbl[h_val & _BPF_HASH_MASK];
 	if (h_iter != NULL) {
-		while (h_iter->next != NULL) {
+		do {
 			if (h_iter->blk->hash == h_val) {
 				/* duplicate block */
+				free(h_new);
 
 				/* update the priority if needed */
 				if (h_iter->blk->priority < blk->priority)
 					h_iter->blk->priority = blk->priority;
 
 				/* free the block */
-				blk->hash = 0;
-				_blk_free(state, blk);
+				__blk_free(state, blk);
 				h_iter->refcnt++;
 				*blk_p = h_iter->blk;
 				*h_val_ret = h_val;
 				return 0;
 			}
+			h_prev = h_iter;
 			h_iter = h_iter->next;
-		}
-		h_iter->next = h_new;
+		} while (h_iter != NULL);
+		h_prev->next = h_new;
 	} else
 		state->htbl[h_val & _BPF_HASH_MASK] = h_new;
 
@@ -562,22 +565,36 @@ static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
 	struct bpf_hash_bkt *h_iter, *h_prev = NULL;
 
 	h_iter = state->htbl[bkt];
-	if (h_iter != NULL) {
-		while (h_iter->next != NULL) {
-			if (h_iter->blk->hash == h_val) {
-				if (--h_iter->refcnt > 0)
-					return NULL;
-
-				if (h_prev != NULL)
-					h_prev->next = h_iter->next;
-				else
-					state->htbl[bkt] = h_iter->next;
-				blk = h_iter->blk;
-				free(h_iter);
-				return blk;
-			}
-			h_iter =  h_iter->next;
+	while (h_iter != NULL) {
+		if (h_iter->blk->hash == h_val) {
+			if (h_prev != NULL)
+				h_prev->next = h_iter->next;
+			else
+				state->htbl[bkt] = h_iter->next;
+			blk = h_iter->blk;
+			free(h_iter);
+			return blk;
 		}
+		h_prev = h_iter;
+		h_iter =  h_iter->next;
+	}
+
+	return NULL;
+}
+
+/**
+ * XXX
+ */
+static struct bpf_hash_bkt *_hsh_find_bkt(const struct bpf_state *state,
+					  unsigned int h_val)
+{
+	struct bpf_hash_bkt *h_iter;
+
+	h_iter = state->htbl[h_val & _BPF_HASH_MASK];
+	while (h_iter != NULL) {
+		if (h_iter->blk->hash == h_val)
+			return h_iter;
+		h_iter = h_iter->next;
 	}
 
 	return NULL;
@@ -591,19 +608,25 @@ static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
 {
 	struct bpf_hash_bkt *h_iter;
 
-	h_iter = state->htbl[h_val & _BPF_HASH_MASK];
-	while (h_iter != NULL) {
-		if (h_iter->blk->hash == h_val) {
-			if (h_iter->found == 0) {
-				h_iter->found = 1;
-				return h_iter->blk;
-			} else
-				return NULL;
-		}
-		h_iter = h_iter->next;
-	}
+	h_iter = _hsh_find_bkt(state, h_val);
+	if (h_iter == NULL || h_iter->found != 0)
+		return NULL;
+	h_iter->found = 1;
+	return h_iter->blk;
+}
 
-	return NULL;
+/**
+ * XXX
+ */
+static struct bpf_blk *_hsh_find(const struct bpf_state *state,
+				 unsigned int h_val)
+{
+	struct bpf_hash_bkt *h_iter;
+
+	h_iter = _hsh_find_bkt(state, h_val);
+	if (h_iter == NULL)
+		return NULL;
+	return h_iter->blk;
 }
 
 /**
@@ -903,37 +926,25 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	else if (state->def_action == SCMP_ACT_DENY)
 		_BPF_INSTR(instr, BPF_RET,
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
-	else {
-		rc = -EFAULT;
-		goto build_state_failure;
-	}
-	state->def_blk = _blk_append(state, state->def_blk, &instr);
-	if (state->def_blk == NULL) {
-		rc = -ENOMEM;
-		goto build_state_failure;
-	}
+	else
+		return -EFAULT;
+	state->def_blk = _blk_append(state, NULL, &instr);
+	if (state->def_blk == NULL)
+		return -ENOMEM;
 	rc = _hsh_add(state, &state->def_blk, 1, &state->def_hsh);
 	if (rc < 0)
-		goto build_state_failure;
+		return rc;
 
 	/* run through all the syscall filters */
 	db_list_foreach(s_iter, db->syscalls) {
 		/* build the top level block groups */
 		rc = _gen_bpf_syscall(state, s_iter);
 		if (rc < 0)
-			goto build_state_failure;
+			return rc;
 	}
 
 	/* tack on a default action at the end */
-	rc = _grp_append(state, &(state->tg_chains), state->def_blk);
-	if (rc < 0)
-		goto build_state_failure;
-
-	return 0;
-
-build_state_failure:
-	_state_reset_all(state);
-	return rc;
+	return _grp_append(state, &(state->tg_chains), state->def_blk);
 }
 
 /**
@@ -1141,8 +1152,14 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 		if (rc < 0)
 			return rc;
 
-		b_iter = b_iter->next;
+		/* we're done with the block, free it */
+		b_jmp = b_iter->next;
+		_blk_free(state, b_iter);
+		b_iter = b_jmp;
 	}
+
+	/* the tg_chains group is now worthless (full of dead ptrs) */
+	_grp_reset(&state->tg_chains);
 
 	return 0;
 }
@@ -1179,8 +1196,6 @@ struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 
 bpf_generate_end:
 	if (rc < 0)
-		_state_reset_all(&state);
-	else
 		_state_release(&state);
 	return state.bpf;
 }
