@@ -19,8 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* XXX - this file is a new version under test */
-
 /* XXX - only 32bit at present, although 64bit should be easy to add */
 
 /* XXX - the hash functions, or related code, doesn't handle collisions */
@@ -146,9 +144,6 @@ struct bpf_state {
 	struct bpf_program *bpf;
 };
 
-#define _max(x,y) \
-	((x) > (y) ? (x) : (y))
-
 /**
  * XXX
  */
@@ -160,18 +155,6 @@ struct bpf_state {
 		(_ins).jf = _jf; \
 		(_ins).k = (_k); \
 	} while (0)
-
-/**
- * Iterate over each item in the hash bucket
- * @param iter the iterator
- * @param bucket the bucket
- *
- * This macro acts as for()/while() conditional and iterates the following
- * statement for each item in the given hash bucket.
- *
- */
-#define _hash_bucket_foreach(iter,bucket) \
-	for (iter = (bucket); iter != NULL; iter = iter->next)
 
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      struct bpf_blk *blk,
@@ -254,7 +237,7 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 		memset(blk, 0, sizeof(*blk));
 	}
 	if ((blk->blk_cnt + 1) > blk->blk_alloc) {
-		blk->blk_alloc += _max(AINC_BLK, 1);
+		blk->blk_alloc += AINC_BLK;
 		new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
 		if (new == NULL) {
 			_blk_free(state, blk);
@@ -287,7 +270,7 @@ static int _grp_append(struct bpf_state *state,
 	struct bpf_blk **new;
 
 	if ((grp->grp_cnt + 1) > grp->grp_alloc) {
-		grp->grp_alloc += _max(AINC_BLKGRP, 1);
+		grp->grp_alloc += AINC_BLKGRP;
 		new = realloc(grp->grps, grp->grp_alloc * sizeof(*(grp->grps)));
 		if (new == NULL) {
 			for (iter = 0; iter < grp->grp_cnt; iter++)
@@ -322,8 +305,6 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 	}
 	prg->blks = i_new;
 
-	/* XXX - not sure yet, but we may want to remove the TGT_NXT code */
-
 	/* transfer and translate the blocks to raw instructions */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
 		i_iter = &(prg->blks[old_cnt + iter]);
@@ -332,10 +313,6 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 		switch (blk->blks[iter].jt.type) {
 		case TGT_NONE:
 			i_iter->jt = 0;
-			break;
-		case TGT_NXT:
-			/* jump the the end of the block */
-			i_iter->jt = blk->blk_cnt - (iter + 1);
 			break;
 		case TGT_IMM:
 			/* jump to the value specified */
@@ -349,10 +326,6 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 		switch (blk->blks[iter].jf.type) {
 		case TGT_NONE:
 			i_iter->jf = 0;
-			break;
-		case TGT_NXT:
-			/* jump the the end of the block */
-			i_iter->jf = blk->blk_cnt - (iter + 1);
 			break;
 		case TGT_IMM:
 			/* jump to the value specified */
