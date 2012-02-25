@@ -351,57 +351,16 @@ bpf_append_blk_failure:
  * XXX
  */
 static int _bpf_append_instr(struct bpf_program *prg,
-			     const struct bpf_instr *instr)
+			     struct bpf_instr *instr)
 {
-	int rc;
-	struct bpf_instr_raw *i_raw;
-	unsigned int old_cnt = prg->blk_cnt;
+	struct bpf_blk blk;
 
-	/* (re)allocate the program memory */
-	prg->blk_cnt++;
-	i_raw = realloc(prg->blks, BPF_PGM_SIZE(prg));
-	if (i_raw == NULL) {
-		rc = -ENOMEM;
-		goto bpf_append_instr_failure;
-	}
-	prg->blks = i_raw;
+	memset(&blk, 0, sizeof(blk));
+	blk.blk_cnt = 1;
+	blk.blk_alloc = 1;
+	blk.blks = instr;
 
-	i_raw = &(prg->blks[old_cnt]);
-	i_raw->op = instr->op;
-	switch (instr->jt.type) {
-		case TGT_NONE:
-			i_raw->jt = 0;
-			break;
-		case TGT_IMM:
-			/* jump to the value specified */
-			i_raw->jt = instr->jt.tgt.imm;
-			break;
-		default:
-			/* fatal error - we should never get here */
-			rc = -EFAULT;
-			goto bpf_append_instr_failure;
-	}
-	switch (instr->jf.type) {
-		case TGT_NONE:
-			i_raw->jf = 0;
-			break;
-		case TGT_IMM:
-			/* jump to the value specified */
-			i_raw->jf = instr->jf.tgt.imm;
-			break;
-		default:
-			/* fatal error - we should never get here */
-			rc = -EFAULT;
-			goto bpf_append_instr_failure;
-	}
-	i_raw->k = instr->k;
-
-	return prg->blk_cnt;
-
-bpf_append_instr_failure:
-	prg->blk_cnt = 0;
-	free(prg->blks);
-	return rc;
+	return _bpf_append_blk(prg, &blk);
 }
 
 /**
