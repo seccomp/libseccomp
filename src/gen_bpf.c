@@ -241,10 +241,10 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 /**
  * XXX
  */
-static struct bpf_blk *_blk_grow(struct bpf_state *state,
-				 struct bpf_blk *blk, unsigned int incr)
+static struct bpf_blk *_blk_append(struct bpf_state *state,
+				   struct bpf_blk *blk,
+				   const struct bpf_instr *instr)
 {
-	unsigned int cnt = _max(AINC_BLK, incr);
 	struct bpf_instr *new;
 
 	if (blk == NULL) {
@@ -252,35 +252,19 @@ static struct bpf_blk *_blk_grow(struct bpf_state *state,
 		if (blk == NULL)
 			return NULL;
 		memset(blk, 0, sizeof(*blk));
-	} else if ((blk->blk_cnt + cnt) <= blk->blk_alloc)
-		return blk;
-
-	blk->blk_alloc += cnt;
-	new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
-	if (new == NULL) {
-		_blk_free(state, blk);
-		return NULL;
 	}
-	blk->blks = new;
+	if ((blk->blk_cnt + 1) > blk->blk_alloc) {
+		blk->blk_alloc += _max(AINC_BLK, 1);
+		new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
+		if (new == NULL) {
+			_blk_free(state, blk);
+			return NULL;
+		}
+		blk->blks = new;
+	}
+	memcpy(&blk->blks[blk->blk_cnt++], instr, sizeof(*instr));
 
 	return blk;
-}
-
-/**
- * XXX
- */
-static struct bpf_blk *_blk_append(struct bpf_state *state,
-				   struct bpf_blk *blk,
-				   const struct bpf_instr *instr)
-{
-	struct bpf_blk *new;
-
-	new = _blk_grow(state, blk, 1);
-	if (new == NULL)
-		return NULL;
-	memcpy(&new->blks[new->blk_cnt++], instr, sizeof(*instr));
-
-	return new;
 }
 
 /**
@@ -296,41 +280,23 @@ static void _grp_reset(struct bpf_blk_grp *grp)
 /**
  * XXX
  */
-static int _grp_grow(struct bpf_state *state,
-		     struct bpf_blk_grp *grp, unsigned int incr)
-{
-	int iter;
-	unsigned int cnt = _max(AINC_BLKGRP, incr);
-	struct bpf_blk **new;
-
-	if ((grp->grp_cnt + cnt) <= grp->grp_alloc)
-		return 0;
-
-	grp->grp_alloc += cnt;
-	new = realloc(grp->grps, grp->grp_alloc * sizeof(*(grp->grps)));
-	if (new == NULL) {
-		for (iter = 0; iter < grp->grp_cnt; iter++)
-			_blk_free(state, grp->grps[iter]);
-		free(grp->grps);
-		memset(grp, 0, sizeof(*grp));
-		return -ENOMEM;
-	}
-	grp->grps = new;
-
-	return 0;
-}
-
-/**
- * XXX
- */
 static int _grp_append(struct bpf_state *state,
 		       struct bpf_blk_grp *grp, struct bpf_blk *blk)
 {
-	int rc;
+	int iter;
+	struct bpf_blk **new;
 
-	rc = _grp_grow(state, grp, 1);
-	if (rc < 0)
-		return rc;
+	if ((grp->grp_cnt + 1) > grp->grp_alloc) {
+		grp->grp_alloc += _max(AINC_BLKGRP, 1);
+		new = realloc(grp->grps, grp->grp_alloc * sizeof(*(grp->grps)));
+		if (new == NULL) {
+			for (iter = 0; iter < grp->grp_cnt; iter++)
+				_blk_free(state, grp->grps[iter]);
+			_grp_reset(grp);
+			return -ENOMEM;
+		}
+		grp->grps = new;
+	}
 	grp->grps[grp->grp_cnt++] = blk;
 
 	return 0;
