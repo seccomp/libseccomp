@@ -132,8 +132,10 @@ struct bpf_state {
 	enum scmp_flt_action def_action;
 	enum scmp_flt_action blk_action;
 
-	/* top level block groups */
-	struct bpf_blk_grp tg_chains;
+	/* top level of the instruction blocks */
+	struct bpf_blk_grp top_blks;
+
+	/* default action */
 	struct bpf_blk *def_blk;
 	unsigned int def_hsh;
 
@@ -496,7 +498,7 @@ static void _state_release(struct bpf_state *state)
 			free(iter);
 		}
 	}
-	_grp_reset(&state->tg_chains);
+	_grp_reset(&state->top_blks);
 	_program_free(state->bpf);
 
 	memset(state, 0, sizeof(*state));
@@ -906,7 +908,7 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 		return rc;
 
 	/* add to the top level block group */
-	return _grp_append(state, &(state->tg_chains), blk_s);
+	return _grp_append(state, &(state->top_blks), blk_s);
 }
 
 /**
@@ -944,7 +946,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	}
 
 	/* tack on a default action at the end */
-	return _grp_append(state, &(state->tg_chains), state->def_blk);
+	return _grp_append(state, &(state->top_blks), state->def_blk);
 }
 
 /**
@@ -967,11 +969,11 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	 *       the overall program */
 
 	/* link the top level blocks together while considering priority */
-	b_head = state->tg_chains.grps[0];
+	b_head = state->top_blks.grps[0];
 	b_head->prev = NULL;
 	b_head->next = NULL;
-	for (iter = 1; iter < state->tg_chains.grp_cnt; iter++) {
-		b_new = state->tg_chains.grps[iter];
+	for (iter = 1; iter < state->top_blks.grp_cnt; iter++) {
+		b_new = state->top_blks.grps[iter];
 		b_iter = b_head;
 		do {
 			if (b_new->priority > b_iter->priority) {
@@ -1158,8 +1160,8 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 		b_iter = b_jmp;
 	}
 
-	/* the tg_chains group is now worthless (full of dead ptrs) */
-	_grp_reset(&state->tg_chains);
+	/* the top_blks group is now worthless (full of dead ptrs) */
+	_grp_reset(&state->top_blks);
 
 	return 0;
 }
