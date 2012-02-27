@@ -725,6 +725,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	unsigned int res_cnt;
 	unsigned int jmp_len;
 	struct bpf_instr instr;
+	struct bpf_instr *i_iter;
 	struct db_sys_list *s_iter;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 
@@ -800,20 +801,11 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	while (b_iter != NULL && b_iter->next != NULL) {
 		b_jmp = b_iter->next;
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
-			switch (b_iter->blks[iter].jt.type) {
-			case TGT_NXT:
-				b_iter->blks[iter].jt =
-						      _BPF_JMP_HSH(b_jmp->hash);
-			default:
-				break;
-			}
-			switch (b_iter->blks[iter].jf.type) {
-			case TGT_NXT:
-				b_iter->blks[iter].jf =
-						      _BPF_JMP_HSH(b_jmp->hash);
-			default:
-				break;
-			}
+			i_iter = &b_iter->blks[iter];
+			if (i_iter->jt.type == TGT_NXT)
+				i_iter->jt = _BPF_JMP_HSH(b_jmp->hash);
+			if (i_iter->jf.type == TGT_NXT)
+				i_iter->jf = _BPF_JMP_HSH(b_jmp->hash);
 		}
 		b_iter = b_iter->next;
 	}
@@ -834,13 +826,14 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		while (b_iter != NULL) {
 			/* look for jumps - backwards (shorter jumps) */
 			for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
-				switch (b_iter->blks[iter].jt.type) {
+				i_iter = &b_iter->blks[iter];
+				switch (i_iter->jt.type) {
 				case TGT_NONE:
 				case TGT_IMM:
 					break;
 				case TGT_PTR_HSH:
 					b_jmp = _hsh_find_once(state,
-						b_iter->blks[iter].jt.tgt.hash);
+							   i_iter->jt.tgt.hash);
 					if (b_jmp == NULL)
 						break;
 					/* insert the block immediately after*/
@@ -855,13 +848,13 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					/* fatal error */
 					return -EFAULT;
 				}
-				switch (b_iter->blks[iter].jf.type) {
+				switch (i_iter->jf.type) {
 				case TGT_NONE:
 				case TGT_IMM:
 					break;
 				case TGT_PTR_HSH:
 					b_jmp = _hsh_find_once(state,
-						b_iter->blks[iter].jf.tgt.hash);
+							   i_iter->jf.tgt.hash);
 					if (b_jmp == NULL)
 						break;
 					/* insert the block immediately after*/
@@ -893,12 +886,13 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	while (b_iter != NULL) {
 		/* resolve the jumps */
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
-			switch (b_iter->blks[iter].jt.type) {
+			i_iter = &b_iter->blks[iter];
+			switch (i_iter->jt.type) {
 			case TGT_NONE:
 			case TGT_IMM:
 				break;
 			case TGT_PTR_HSH:
-				h_val = b_iter->blks[iter].jt.tgt.hash;
+				h_val = i_iter->jt.tgt.hash;
 				jmp_len = b_iter->blk_cnt - (iter + 1);
 				b_jmp = b_iter->next;
 				while (b_jmp != NULL && b_jmp->hash != h_val) {
@@ -911,18 +905,18 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					/* XXX - we can fix this by inserting
 					 *       long jumps */
 					return -EFAULT;
-				b_iter->blks[iter].jt = _BPF_JMP_IMM(jmp_len);
+				i_iter->jt = _BPF_JMP_IMM(jmp_len);
 				break;
 			default:
 				/* fatal error */
 				return -EFAULT;
 			}
-			switch (b_iter->blks[iter].jf.type) {
+			switch (i_iter->jf.type) {
 			case TGT_NONE:
 			case TGT_IMM:
 				break;
 			case TGT_PTR_HSH:
-				h_val = b_iter->blks[iter].jf.tgt.hash;
+				h_val = i_iter->jf.tgt.hash;
 				jmp_len = b_iter->blk_cnt - (iter + 1);
 				b_jmp = b_iter->next;
 				while (b_jmp != NULL && b_jmp->hash != h_val) {
@@ -935,7 +929,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					/* XXX - we can fix this by inserting
 					 *       long jumps */
 					return -EFAULT;
-				b_iter->blks[iter].jf = _BPF_JMP_IMM(jmp_len);
+				i_iter->jf = _BPF_JMP_IMM(jmp_len);
 				break;
 			default:
 				/* fatal error */
