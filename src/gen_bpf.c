@@ -107,12 +107,6 @@ struct bpf_blk {
 #define _BPF_BLK_MSZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
 
-struct bpf_blk_grp {
-	struct bpf_blk **grps;
-	unsigned int grp_cnt;
-	unsigned int grp_alloc;
-};
-
 struct bpf_hash_bkt {
 	struct bpf_blk *blk;
 	unsigned int refcnt;
@@ -245,41 +239,6 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 	memcpy(&blk->blks[blk->blk_cnt++], instr, sizeof(*instr));
 
 	return blk;
-}
-
-/**
- * XXX
- */
-static void _grp_reset(struct bpf_blk_grp *grp)
-{
-	if (grp->grps != NULL)
-		free(grp->grps);
-	memset(grp, 0, sizeof(*grp));
-}
-
-/**
- * XXX
- */
-static int _grp_append(struct bpf_state *state,
-		       struct bpf_blk_grp *grp, struct bpf_blk *blk)
-{
-	int iter;
-	struct bpf_blk **new;
-
-	if ((grp->grp_cnt + 1) > grp->grp_alloc) {
-		grp->grp_alloc += AINC_BLKGRP;
-		new = realloc(grp->grps, grp->grp_alloc * sizeof(*(grp->grps)));
-		if (new == NULL) {
-			for (iter = 0; iter < grp->grp_cnt; iter++)
-				_blk_free(state, grp->grps[iter]);
-			_grp_reset(grp);
-			return -ENOMEM;
-		}
-		grp->grps = new;
-	}
-	grp->grps[grp->grp_cnt++] = blk;
-
-	return 0;
 }
 
 /**
@@ -819,10 +778,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	unsigned int jmp_len;
 	struct bpf_instr instr;
 	struct db_sys_list *s_iter;
-	struct bpf_blk *b_head, *b_tail, *b_iter, *b_new, *b_jmp;
-	struct bpf_blk_grp top_blks;
-
-	memset(&top_blks, 0, sizeof(top_blks));
+	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 
 	/* create the default action */
 	if (state->def_action == SCMP_ACT_ALLOW)
@@ -842,56 +798,54 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* create the syscall filters and add them to the top block group */
 	db_list_foreach(s_iter, db->syscalls) {
-		/* build the top level block groups */
-		rc = _gen_bpf_syscall(state, s_iter, &b_iter);
+		/* build the syscall filter */
+		rc = _gen_bpf_syscall(state, s_iter, &b_new);
 		if (rc < 0)
 			return rc;
-		rc = _grp_append(state, &top_blks, b_iter);
-		if (rc < 0)
-			return rc;
+		/* add the filter to the list, sorting based on priority */
+		if (b_head != NULL) {
+			b_iter = b_head;
+			do {
+				if (b_new->priority > b_iter->priority) {
+					if (b_iter == b_head) {
+						b_new->next = b_head;
+						b_head->prev = b_new;
+						b_head = b_new;
+					} else {
+						b_iter->prev->next = b_new;
+						b_new->prev = b_iter->prev;
+						b_new->next = b_iter;
+						b_iter->prev = b_new;
+					}
+					b_iter = NULL;
+				} else {
+					if (b_iter->next == NULL) {
+						b_iter->next = b_new;
+						b_new->prev = b_iter;
+						b_iter = NULL;
+					} else
+						b_iter = b_iter->next;
+				}
+			} while (b_iter != NULL);
+			if (b_tail->next != NULL)
+				b_tail = b_tail->next;
+		} else {
+			b_head = b_new;
+			b_tail = b_head;
+			b_head->prev = NULL;
+			b_head->next = NULL;
+		}
 	}
 
 	/* tack on the default action to the end of the top block group */
-	rc = _grp_append(state, &top_blks, state->def_blk);
-	if (rc < 0)
-		return rc;
-
-	/* sort the top block group based on block priority */
-	b_head = top_blks.grps[0];
-	b_head->prev = NULL;
-	b_head->next = NULL;
-	for (iter = 1; iter < top_blks.grp_cnt; iter++) {
-		b_new = top_blks.grps[iter];
-		b_iter = b_head;
-		do {
-			if (b_new->priority > b_iter->priority) {
-				if (b_iter == b_head) {
-					b_new->next = b_head;
-					b_head->prev = b_new;
-					b_head = b_new;
-				} else {
-					b_iter->prev->next = b_new;
-					b_new->prev = b_iter->prev;
-					b_new->next = b_iter;
-					b_iter->prev = b_new;
-				}
-				b_iter = NULL;
-			} else {
-				if (b_iter->next == NULL) {
-					b_iter->next = b_new;
-					b_new->prev = b_iter;
-					b_iter = NULL;
-				} else
-					b_iter = b_iter->next;
-			}
-		} while (b_iter != NULL);
+	if (b_tail != NULL) {
+		b_tail->next = state->def_blk;
+		state->def_blk->prev = b_tail;
+		b_tail = state->def_blk;
+	} else {
+		b_head = state->def_blk;
+		b_tail = b_head;
 	}
-	b_tail = b_head;
-	while (b_tail->next != NULL)
-		b_tail = b_tail->next;
-
-	/* the top_blks group is now worthless (full of dead ptrs) */
-	_grp_reset(&top_blks);
 
 	/* resolve any TGT_NXT jumps to TGT_PTR_HSH jumps at the top level */
 	b_iter = b_head;
