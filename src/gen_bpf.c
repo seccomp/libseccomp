@@ -125,7 +125,6 @@ struct bpf_state {
 	enum scmp_flt_action blk_action;
 
 	/* default action */
-	struct bpf_blk *def_blk;
 	unsigned int def_hsh;
 
 	/* block hash table */
@@ -727,6 +726,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	struct bpf_instr instr;
 	struct bpf_instr *i_iter;
 	struct db_sys_list *s_iter;
+	struct bpf_blk *def_blk;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 
 	/* create the default action */
@@ -738,10 +738,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
 	else
 		return -EFAULT;
-	state->def_blk = _blk_append(state, NULL, &instr);
-	if (state->def_blk == NULL)
+	def_blk = _blk_append(state, NULL, &instr);
+	if (def_blk == NULL)
 		return -ENOMEM;
-	rc = _hsh_add(state, &state->def_blk, 1, &state->def_hsh);
+	rc = _hsh_add(state, &def_blk, 1, &state->def_hsh);
 	if (rc < 0)
 		return rc;
 
@@ -788,11 +788,11 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* tack on the default action to the end of the top block group */
 	if (b_tail != NULL) {
-		b_tail->next = state->def_blk;
-		state->def_blk->prev = b_tail;
-		b_tail = state->def_blk;
+		b_tail->next = def_blk;
+		def_blk->prev = b_tail;
+		b_tail = def_blk;
 	} else {
-		b_head = state->def_blk;
+		b_head = def_blk;
 		b_tail = b_head;
 	}
 
