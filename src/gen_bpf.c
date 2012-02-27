@@ -135,7 +135,15 @@ struct bpf_state {
 };
 
 /**
- * XXX
+ * Populate a BPF instruction
+ * @param _ins the BPF instruction
+ * @param _op the BPF operand
+ * @param _jt the BPF jt value
+ * @param _jf the BPF jf value
+ * @param _k the BPF k value
+ *
+ * Set the given values on the provided bpf_instr struct.
+ *
  */
 #define _BPF_INSTR(_ins,_op,_jt,_jf,_k) \
 	do { \
@@ -147,15 +155,21 @@ struct bpf_state {
 	} while (0)
 
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
-				      struct bpf_blk *blk,
-				      const struct db_arg_chain_tree *c);
+				      const struct db_arg_chain_tree *chain);
 
 static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val);
 static struct bpf_blk *_hsh_find(const struct bpf_state *state,
 				 unsigned int h_val);
 
 /**
- * XXX
+ * Free the BPF instruction block
+ * @param state the BPF state
+ * @param blk the BPF instruction block
+ *
+ * Free the BPF instruction block, any linked blocks are preserved and the hash
+ * table is not modified.  In general, you probably want to use _blk_free()
+ * instead.
+ *
  */
 static void __blk_free(struct bpf_state *state, struct bpf_blk *blk)
 {
@@ -165,7 +179,13 @@ static void __blk_free(struct bpf_state *state, struct bpf_blk *blk)
 }
 
 /**
- * XXX
+* Free the BPF instruction block
+ * @param state the BPF state
+ * @param blk the BPF instruction block
+ *
+ * Free the BPF instruction block including any linked blocks.  The hash table
+ * is updated to reflect the newly removed block(s).
+ *
  */
 static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 {
@@ -212,7 +232,16 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 }
 
 /**
- * XXX
+ * Append a new BPF instruction to an instruction block
+ * @param state the BPF state
+ * @param blk the existing instruction block, or NULL
+ * @param instr the new instruction
+ *
+ * Add the new BPF instruction to the end of the give instruction block.  If
+ * the given instruction block is NULL, a new block will be allocated.  Returns
+ * a pointer to the block on success, NULL on failure and in the case of
+ * failure the instruction block is free'd.
+ *
  */
 static struct bpf_blk *_blk_append(struct bpf_state *state,
 				   struct bpf_blk *blk,
@@ -241,7 +270,14 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 }
 
 /**
- * XXX
+ * Append a block of BPF instructions to the final BPF program
+ * @param prg the BPF program
+ * @param blk the BPF instruction block
+ *
+ * Add the BPF instruction block to the end of the BPF program and perform the
+ * necssary translation.  Returns zero on success, negative values on failure
+ * and in the case of failure the BPF program is free'd.
+ *
  */
 static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 {
@@ -303,7 +339,14 @@ bpf_append_blk_failure:
 }
 
 /**
- * XXX
+ * Append a single BPF instruction to the final BPF program
+ * @param prg the BPF program
+ * @param instr the BPF instruction
+ *
+ * Add the BPF instruction to the end of the BPF program and perform the
+ * necssary translation.  Returns zero on success, negative values on failure
+ * and in the case of failure the BPF program is free'd.
+ *
  */
 static int _bpf_append_instr(struct bpf_program *prg,
 			     struct bpf_instr *instr)
@@ -319,20 +362,29 @@ static int _bpf_append_instr(struct bpf_program *prg,
 }
 
 /**
- * XXX
+ * Free the BPF program
+ * @param prg the BPF program
+ *
+ * Free the BPF program.  None of the associated BPF state used to generate the
+ * BPF program is released in this function.
+ *
  */
-static void _program_free(struct bpf_program *program)
+static void _program_free(struct bpf_program *prg)
 {
-	if (program == NULL)
+	if (prg == NULL)
 		return;
 
-	if (program->blks != NULL)
-		free(program->blks);
-	free(program);
+	if (prg->blks != NULL)
+		free(prg->blks);
+	free(prg);
 }
 
 /**
- * XXX
+ * Free the BPF state
+ * @param the BPF state
+ *
+ * Free all of the BPF state, including the BPF program if present.
+ *
  */
 static void _state_release(struct bpf_state *state)
 {
@@ -357,7 +409,18 @@ static void _state_release(struct bpf_state *state)
 }
 
 /**
- * XXX
+ * Add an instruction block to the BPF state hash table
+ * @param state the BPF state
+ * @param blk_p pointer to the BPF instruction block
+ * @param found initial found value (see _hsh_find_once() for description)
+ * @param h_val_ret generated hash value of the given block
+ *
+ * This function adds an instruction block to the hash table, and frees the
+ * block if an identical instruction block already exists, returning a pointer
+ * to the original block in place of the given block.  The hash value of the
+ * block is also returned via the @h_val_ret parameter.  Returns zero on
+ * success and negative values on failure.
+ *
  */
 static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		    unsigned int found,
@@ -410,7 +473,13 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 }
 
 /**
- * XXX
+ * Remove an entry from the hash table
+ * @param state the BPF state
+ * @param h_val the hash value
+ *
+ * Remove an entry from the hash table and return it to the caller, NULL is
+ * returned if the entry can not be found.
+ *
  */
 static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
 {
@@ -437,7 +506,14 @@ static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
 }
 
 /**
- * XXX
+ * Find and return a hash bucket
+ * @param state the BPF state
+ * @param h_val the hash value
+ *
+ * Find the entry associated with the given hash value and return it to the
+ * caller, NULL is returned if the entry can not be found.  This function
+ * should not be called directly; use _hsh_find() and _hsh_find_once() instead.
+ *
  */
 static struct bpf_hash_bkt *_hsh_find_bkt(const struct bpf_state *state,
 					  unsigned int h_val)
@@ -455,7 +531,15 @@ static struct bpf_hash_bkt *_hsh_find_bkt(const struct bpf_state *state,
 }
 
 /**
- * XXX
+ * Find and only return an entry in the hash table once
+ * @param state the BPF state
+ * @param h_val the hash value
+ *
+ * Find the entry associated with the given hash value and return it to the
+ * caller if it has not be returned previously by this function; returns NULL
+ * if the entry can not be found or has already been returned in a previous
+ * call.
+ *
  */
 static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
 				      unsigned int h_val)
@@ -470,7 +554,13 @@ static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
 }
 
 /**
- * XXX
+ * Finds an entry in the hash table
+ * @param state the BPF state
+ * @param h_val the hash value
+ *
+ * Find the entry associated with the given hash value and return it to the
+ * caller, NULL is returned if the entry can not be found.
+ *
  */
 static struct bpf_blk *_hsh_find(const struct bpf_state *state,
 				 unsigned int h_val)
@@ -484,7 +574,15 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state,
 }
 
 /**
- * XXX
+ * Generate a BPF instruction block for a given filter DB level
+ * @param state the BPF state
+ * @param blk the existing BPF block, or NULL
+ * @param node the filter DB node
+ *
+ * Generate a BPF instruction block which executes the filter specified by the
+ * given filter DB level.  Returns a pointer to the instruction block on
+ * success, NULL on failure.  The given BPF block is free'd on failure.
+ *
  */
 static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 					  struct bpf_blk *blk,
@@ -561,6 +659,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 			goto chain_lvl_failure;
 		}
 
+		/* XXX - we need to be concerned about jump lengths here since
+		 *       this block could be large, unlikely but possible */
+
 		/* fixup the jump targets */
 		if (l_iter->nxt_t != NULL)
 			instr.jt = _BPF_JMP_DB(l_iter->nxt_t);
@@ -606,7 +707,15 @@ chain_lvl_failure:
 }
 
 /**
- * XXX
+ * Resolve the jump targets in a BPF instruction block
+ * @param state the BPF state
+ * @param blk the BPF instruction block
+ *
+ * Resolve the jump targets in a BPF instruction block generated by the
+ * _gen_bpf_chain_lvl() function and adds the resulting block to the hash
+ * table.  Returns a pointer to the new instruction block on success, NULL on
+ * failure.
+ *
  */
 static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 					      struct bpf_blk *blk)
@@ -628,7 +737,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			/* ignore these jump types */
 			break;
 		case TGT_PTR_DB:
-			b_new = _gen_bpf_chain(state, NULL, i_iter->jt.tgt.ptr);
+			b_new = _gen_bpf_chain(state, i_iter->jt.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
@@ -645,7 +754,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			/* ignore these jump types */
 			break;
 		case TGT_PTR_DB:
-			b_new = _gen_bpf_chain(state, NULL, i_iter->jf.tgt.ptr);
+			b_new = _gen_bpf_chain(state, i_iter->jf.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
@@ -665,55 +774,69 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 }
 
 /**
- * XXX
+ * Generates the BPF instruction blocks for a given filter chain
+ * @param state the BPF state
+ * @param chain the filter chain
+ *
+ * Generate the BPF instruction blocks for the given filter chain and return
+ * a pointer to the first block on success; returns NULL on failure.
+ *
  */
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
-				      struct bpf_blk *blk,
-				      const struct db_arg_chain_tree *c)
+				      const struct db_arg_chain_tree *chain)
 {
-	blk = _gen_bpf_chain_lvl(state, blk, c);
+	struct bpf_blk *blk;
+
+	blk = _gen_bpf_chain_lvl(state, NULL, chain);
 	if (blk == NULL)
 		return NULL;
 	return _gen_bpf_chain_lvl_res(state, blk);
 }
 
 /**
- * XXX
+ * Generate the BPF instruction blocks for a given syscall
+ * @param state the BPF state
+ * @param sys the syscall filter DB entry
+ *
+ * Generate the BPF instruction blocks for the given syscall filter and return
+ * a pointer to the first block on success; returns NULL on failure.
+ *
  */
-static int _gen_bpf_syscall(struct bpf_state *state,
-			    const struct db_sys_list *sys,
-			    struct bpf_blk **blk)
+static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
+					const struct db_sys_list *sys)
 {
 	int rc;
 	struct bpf_instr instr;
 	struct bpf_blk *blk_c, *blk_s;
 	unsigned int h_val;
 
-	if (sys == NULL)
-		return 0;
-
 	/* generate the argument chains */
-	blk_c = _gen_bpf_chain(state, NULL, sys->chains);
+	blk_c = _gen_bpf_chain(state, sys->chains);
 	if (blk_c == NULL)
-		return -ENOMEM;
+		return NULL;
 
 	/* syscall check (syscall number is still in the accumulator) */
 	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT, sys->num);
 	blk_s = _blk_append(state, NULL, &instr);
 	if (blk_s == NULL)
-		return -ENOMEM;
+		return NULL;
 	blk_s->priority = sys->priority;
 	rc = _hsh_add(state, &blk_s, 1, &h_val);
 	if (rc < 0)
-		return rc;
+		return NULL;
 
-	*blk = blk_s;
-	return rc;
+	return blk_s;
 }
 
 /**
- * XXX
+ * Generate the BPF program for the given filter DB
+ * @param state the BPF state
+ * @param db the filter DB
+ *
+ * Generate the BPF program for the given filter DB.  Returns zero on success,
+ * negative values on failure.
+ *
  */
 static int _gen_bpf_build_bpf(struct bpf_state *state,
 			      const struct db_filter *db)
@@ -748,9 +871,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	/* create the syscall filters and add them to the top block group */
 	db_list_foreach(s_iter, db->syscalls) {
 		/* build the syscall filter */
-		rc = _gen_bpf_syscall(state, s_iter, &b_new);
-		if (rc < 0)
-			return rc;
+		b_new = _gen_bpf_syscall(state, s_iter);
+		if (b_new == NULL)
+			return -ENOMEM;
 		/* add the filter to the list, sorting based on priority */
 		if (b_head != NULL) {
 			b_iter = b_head;
@@ -988,7 +1111,7 @@ bpf_generate_end:
  * @param fprog the BPF representation
  *
  * Free the memory associated with a BPF representation generated by the
- * gen_bpf_generate().
+ * gen_bpf_generate() function.
  *
  */
 void gen_bpf_destroy(struct bpf_program *program)
