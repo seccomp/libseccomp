@@ -765,7 +765,8 @@ static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk **blk_p,
  * XXX
  */
 static int _gen_bpf_syscall(struct bpf_state *state,
-			    const struct db_sys_list *sys)
+			    const struct db_sys_list *sys,
+			    struct bpf_blk **blk)
 {
 	int rc;
 	struct bpf_instr instr;
@@ -805,8 +806,8 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 	if (rc < 0)
 		return rc;
 
-	/* add to the top level block group */
-	return _grp_append(state, &(state->top_blks), blk_s);
+	*blk = blk_s;
+	return rc;
 }
 
 /**
@@ -817,6 +818,7 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 {
 	int rc;
 	struct db_sys_list *s_iter;
+	struct bpf_blk *blk;
 	struct bpf_instr instr;
 
 	/* default action */
@@ -838,7 +840,10 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	/* run through all the syscall filters */
 	db_list_foreach(s_iter, db->syscalls) {
 		/* build the top level block groups */
-		rc = _gen_bpf_syscall(state, s_iter);
+		rc = _gen_bpf_syscall(state, s_iter, &blk);
+		if (rc < 0)
+			return rc;
+		rc = _grp_append(state, &state->top_blks, blk);
 		if (rc < 0)
 			return rc;
 	}
