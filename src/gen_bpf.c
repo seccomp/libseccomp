@@ -130,9 +130,6 @@ struct bpf_state {
 	enum scmp_flt_action def_action;
 	enum scmp_flt_action blk_action;
 
-	/* top level of the instruction blocks */
-	struct bpf_blk_grp top_blks;
-
 	/* default action */
 	struct bpf_blk *def_blk;
 	unsigned int def_hsh;
@@ -396,7 +393,6 @@ static void _state_release(struct bpf_state *state)
 			free(iter);
 		}
 	}
-	_grp_reset(&state->top_blks);
 	_program_free(state->bpf);
 
 	memset(state, 0, sizeof(*state));
@@ -813,15 +809,22 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 /**
  * XXX
  */
-static int _gen_bpf_build_state(struct bpf_state *state,
-				const struct db_filter *db)
+static int _gen_bpf_build_bpf(struct bpf_state *state,
+			      const struct db_filter *db)
 {
 	int rc;
-	struct db_sys_list *s_iter;
-	struct bpf_blk *blk;
+	int iter;
+	unsigned int h_val;
+	unsigned int res_cnt;
+	unsigned int jmp_len;
 	struct bpf_instr instr;
+	struct db_sys_list *s_iter;
+	struct bpf_blk *b_head, *b_tail, *b_iter, *b_new, *b_jmp;
+	struct bpf_blk_grp top_blks;
 
-	/* default action */
+	memset(&top_blks, 0, sizeof(top_blks));
+
+	/* create the default action */
 	if (state->def_action == SCMP_ACT_ALLOW)
 		_BPF_INSTR(instr, BPF_RET,
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ALLOW);
@@ -837,46 +840,28 @@ static int _gen_bpf_build_state(struct bpf_state *state,
 	if (rc < 0)
 		return rc;
 
-	/* run through all the syscall filters */
+	/* create the syscall filters and add them to the top block group */
 	db_list_foreach(s_iter, db->syscalls) {
 		/* build the top level block groups */
-		rc = _gen_bpf_syscall(state, s_iter, &blk);
+		rc = _gen_bpf_syscall(state, s_iter, &b_iter);
 		if (rc < 0)
 			return rc;
-		rc = _grp_append(state, &state->top_blks, blk);
+		rc = _grp_append(state, &top_blks, b_iter);
 		if (rc < 0)
 			return rc;
 	}
 
-	/* tack on a default action at the end */
-	return _grp_append(state, &(state->top_blks), state->def_blk);
-}
+	/* tack on the default action to the end of the top block group */
+	rc = _grp_append(state, &top_blks, state->def_blk);
+	if (rc < 0)
+		return rc;
 
-/**
- * XXX
- */
-static int _gen_bpf_build_bpf(struct bpf_state *state)
-{
-	int rc;
-	int iter;
-	unsigned int h_val;
-	unsigned int res_cnt;
-	unsigned int jmp_len;
-	struct bpf_instr instr;
-	struct bpf_blk *b_head, *b_tail, *b_iter, *b_new, *b_jmp;
-
-	/* XXX - we use a very simplistic algorithm for "writing out" the
-	 *       final bpf program, we should factor into account jump lengths
-	 *       to minimize the total average jump length as well as other
-	 *       possible heuristics to optimize the block placement within
-	 *       the overall program */
-
-	/* link the top level blocks together while considering priority */
-	b_head = state->top_blks.grps[0];
+	/* sort the top block group based on block priority */
+	b_head = top_blks.grps[0];
 	b_head->prev = NULL;
 	b_head->next = NULL;
-	for (iter = 1; iter < state->top_blks.grp_cnt; iter++) {
-		b_new = state->top_blks.grps[iter];
+	for (iter = 1; iter < top_blks.grp_cnt; iter++) {
+		b_new = top_blks.grps[iter];
 		b_iter = b_head;
 		do {
 			if (b_new->priority > b_iter->priority) {
@@ -904,6 +889,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 	b_tail = b_head;
 	while (b_tail->next != NULL)
 		b_tail = b_tail->next;
+
+	/* the top_blks group is now worthless (full of dead ptrs) */
+	_grp_reset(&top_blks);
 
 	/* resolve any TGT_NXT jumps to TGT_PTR_HSH jumps at the top level */
 	b_iter = b_head;
@@ -1063,9 +1051,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state)
 		b_iter = b_jmp;
 	}
 
-	/* the top_blks group is now worthless (full of dead ptrs) */
-	_grp_reset(&state->top_blks);
-
 	return 0;
 }
 
@@ -1092,10 +1077,7 @@ struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 		return NULL;
 	memset(state.bpf, 0, sizeof(*(state.bpf)));
 
-	rc = _gen_bpf_build_state(&state, db);
-	if (rc < 0)
-		goto bpf_generate_end;
-	rc = _gen_bpf_build_bpf(&state);
+	rc = _gen_bpf_build_bpf(&state, db);
 	if (rc < 0)
 		goto bpf_generate_end;
 
