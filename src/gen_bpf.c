@@ -612,28 +612,55 @@ chain_lvl_failure:
 static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 					      struct bpf_blk *blk)
 {
-	struct bpf_blk *b_new;
+	int rc;
 	unsigned int iter;
+	unsigned int h_val;
+	struct bpf_blk *b_new;
+	struct bpf_instr *i_iter;
 
-	/* convert TGT_PTR_DB references to TGT_PTR_BLK references */
+	/* convert TGT_PTR_DB to TGT_PTR_HSH references */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
-		if (blk->blks[iter].jt.type == TGT_PTR_DB) {
-			/* dive down the rabbit hole */
-			b_new = _gen_bpf_chain(state, NULL,
-					       blk->blks[iter].jt.tgt.ptr);
+		i_iter = &blk->blks[iter];
+		switch (i_iter->jt.type) {
+		case TGT_NONE:
+		case TGT_NXT:
+		case TGT_IMM:
+		case TGT_PTR_HSH:
+			/* ignore these jump types */
+			break;
+		case TGT_PTR_DB:
+			b_new = _gen_bpf_chain(state, NULL, i_iter->jt.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
-			blk->blks[iter].jt = _BPF_JMP_BLK(b_new);
+			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
+			break;
+		default:
+			/* we should not be here */
+			return NULL;
 		}
-		if (blk->blks[iter].jf.type == TGT_PTR_DB) {
-			/* dive down the rabbit hole */
-			b_new = _gen_bpf_chain(state, NULL,
-					       blk->blks[iter].jf.tgt.ptr);
+		switch (i_iter->jf.type) {
+		case TGT_NONE:
+		case TGT_NXT:
+		case TGT_IMM:
+		case TGT_PTR_HSH:
+			/* ignore these jump types */
+			break;
+		case TGT_PTR_DB:
+			b_new = _gen_bpf_chain(state, NULL, i_iter->jf.tgt.ptr);
 			if (b_new == NULL)
 				return NULL;
-			blk->blks[iter].jf = _BPF_JMP_BLK(b_new);
+			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
+			break;
+		default:
+			/* we should not be here */
+			return NULL;
 		}
 	}
+
+	/* insert the block into the hash table */
+	rc = _hsh_add(state, &blk, 0, &h_val);
+	if (rc < 0)
+		return NULL;
 
 	return blk;
 }
@@ -654,71 +681,6 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 /**
  * XXX
  */
-static int _gen_bpf_blk_hsh(struct bpf_state *state, struct bpf_blk **blk_p,
-			    unsigned int *h_val_ret)
-{
-	int rc;
-	int iter;
-	struct bpf_instr *i_iter;
-	struct bpf_blk *blk = *blk_p, *b_iter;
-	unsigned int h_val;
-
-	/* run through the block looking for jumps */
-	for (iter = 0; iter < blk->blk_cnt; iter++) {
-		i_iter = &blk->blks[iter];
-		switch (i_iter->jt.type) {
-		case TGT_NONE:
-		case TGT_NXT:
-		case TGT_IMM:
-		case TGT_PTR_HSH:
-			/* ignore these jump types */
-			break;
-		case TGT_PTR_BLK:
-			/* start at the leaf nodes */
-			b_iter = i_iter->jt.tgt.ptr;
-			rc = _gen_bpf_blk_hsh(state, &b_iter, &h_val);
-			if (rc < 0)
-				return rc;
-			i_iter->jt = _BPF_JMP_HSH(h_val);
-			break;
-		default:
-			/* we should not be here */
-			return -EFAULT;
-		}
-		switch (i_iter->jf.type) {
-		case TGT_NONE:
-		case TGT_NXT:
-		case TGT_IMM:
-		case TGT_PTR_HSH:
-			/* ignore these jump types */
-			break;
-		case TGT_PTR_BLK:
-			/* start at the leaf nodes */
-			b_iter = i_iter->jf.tgt.ptr;
-			rc = _gen_bpf_blk_hsh(state, &b_iter, &h_val);
-			if (rc < 0)
-				return rc;
-			i_iter->jf = _BPF_JMP_HSH(h_val);
-			break;
-		default:
-			/* we should not be here */
-			return -EFAULT;
-		}
-	}
-
-	/* insert the block into the hash table */
-	rc = _hsh_add(state, &blk, 0, &h_val);
-	if (rc < 0)
-		return rc;
-	*blk_p = blk;
-	*h_val_ret = h_val;
-
-	return 0;
-}
-
-/**
- * XXX
- */
 static int _gen_bpf_syscall(struct bpf_state *state,
 			    const struct db_sys_list *sys,
 			    struct bpf_blk **blk)
@@ -728,31 +690,17 @@ static int _gen_bpf_syscall(struct bpf_state *state,
 	struct bpf_blk *blk_c, *blk_s;
 	unsigned int h_val;
 
-	/* we treat syscall block generation slightly different from the rest
-	 * because we sort the list according to syscall number and not
-	 * something useful like chain size/length */
-
 	if (sys == NULL)
 		return 0;
 
-	/* generate the syscall and chain instruction block */
-
-	/* generate the chains */
+	/* generate the argument chains */
 	blk_c = _gen_bpf_chain(state, NULL, sys->chains);
 	if (blk_c == NULL)
 		return -ENOMEM;
 
-	/* add the chain to the hash table */
-	/* XXX - we can probably move this down into the
-	 *       _gen_bpf_chain_lvl_res() function with a little work
-	 *       which would save us some time */
-	rc = _gen_bpf_blk_hsh(state, &blk_c, &h_val);
-	if (rc < 0)
-		return rc;
-
-	/* syscall check (syscall is still in the accumulator) */
+	/* syscall check (syscall number is still in the accumulator) */
 	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-		   _BPF_JMP_HSH(h_val), _BPF_JMP_NXT, sys->num);
+		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT, sys->num);
 	blk_s = _blk_append(state, NULL, &instr);
 	if (blk_s == NULL)
 		return -ENOMEM;
