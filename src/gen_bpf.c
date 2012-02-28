@@ -464,7 +464,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				if ((h_val >> 32) == 0xffffffff)
 					/* overflow */
 					return -EFAULT;
-				h_val += (1UL << 32);
+				h_val += ((uint64_t)1 << 32);
 				h_new->blk->hash = h_val;
 
 				/* restart at the beginning of the bucket */
