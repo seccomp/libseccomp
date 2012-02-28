@@ -21,8 +21,6 @@
 
 /* XXX - only 32bit at present, although 64bit should be easy to add */
 
-/* XXX - the hash functions, or related code, doesn't handle collisions */
-
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -63,7 +61,7 @@ struct bpf_jump {
 	enum bpf_jump_type type;
 	union {
 		uint8_t imm;
-		unsigned int hash;
+		uint64_t hash;
 		void *ptr;
 	} tgt;
 };
@@ -101,10 +99,10 @@ struct bpf_blk {
 	unsigned int priority;
 
 	/* used during final block assembly */
-	unsigned int hash;
+	uint64_t hash;
 	struct bpf_blk *prev, *next;
 };
-#define _BPF_BLK_MSZE(x) \
+#define _BLK_MSZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
 
 struct bpf_hash_bkt {
@@ -125,7 +123,7 @@ struct bpf_state {
 	enum scmp_flt_action blk_action;
 
 	/* default action */
-	unsigned int def_hsh;
+	uint64_t def_hsh;
 
 	/* block hash table */
 	struct bpf_hash_bkt *htbl[_BPF_HASH_SIZE];
@@ -157,9 +155,8 @@ struct bpf_state {
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      const struct db_arg_chain_tree *chain);
 
-static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val);
-static struct bpf_blk *_hsh_find(const struct bpf_state *state,
-				 unsigned int h_val);
+static struct bpf_blk *_hsh_remove(struct bpf_state *state, uint64_t h_val);
+static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
 
 /**
  * Free the BPF instruction block
@@ -423,10 +420,9 @@ static void _state_release(struct bpf_state *state)
  *
  */
 static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
-		    unsigned int found,
-		    unsigned int *h_val_ret)
+		    unsigned int found, uint64_t *h_val_ret)
 {
-	unsigned int h_val;
+	uint64_t h_val;
 	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
 	struct bpf_blk *blk = *blk_p;
 
@@ -436,7 +432,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	memset(h_new, 0, sizeof(*h_new));
 
 	/* generate the hash */
-	h_val = jhash(blk->blks, _BPF_BLK_MSZE(blk), 0);
+	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
 	h_new->blk = blk;
 	h_new->blk->hash = h_val;
 	h_new->refcnt = 1;
@@ -446,7 +442,10 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	h_iter = state->htbl[h_val & _BPF_HASH_MASK];
 	if (h_iter != NULL) {
 		do {
-			if (h_iter->blk->hash == h_val) {
+			if ((h_iter->blk->hash == h_val) &&
+			    (_BLK_MSZE(h_iter->blk) == _BLK_MSZE(blk)) &&
+			    (memcmp(h_iter->blk->blks, blk->blks,
+				    _BLK_MSZE(blk)) == 0)) {
 				/* duplicate block */
 				free(h_new);
 
@@ -460,9 +459,21 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				*blk_p = h_iter->blk;
 				*h_val_ret = h_val;
 				return 0;
+			} else if (h_iter->blk->hash == h_val) {
+				/* hash collision */
+				if ((h_val >> 32) == 0xffffffff)
+					/* overflow */
+					return -EFAULT;
+				h_val += (1UL << 32);
+				h_new->blk->hash = h_val;
+
+				/* restart at the beginning of the bucket */
+				h_iter = state->htbl[h_val & _BPF_HASH_MASK];
+			} else {
+				/* no match, move along */
+				h_prev = h_iter;
+				h_iter = h_iter->next;
 			}
-			h_prev = h_iter;
-			h_iter = h_iter->next;
 		} while (h_iter != NULL);
 		h_prev->next = h_new;
 	} else
@@ -481,7 +492,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
  * returned if the entry can not be found.
  *
  */
-static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
+static struct bpf_blk *_hsh_remove(struct bpf_state *state, uint64_t h_val)
 {
 	unsigned int bkt = h_val & _BPF_HASH_MASK;
 	struct bpf_blk *blk;
@@ -516,7 +527,7 @@ static struct bpf_blk *_hsh_remove(struct bpf_state *state, unsigned int h_val)
  *
  */
 static struct bpf_hash_bkt *_hsh_find_bkt(const struct bpf_state *state,
-					  unsigned int h_val)
+					  uint64_t h_val)
 {
 	struct bpf_hash_bkt *h_iter;
 
@@ -542,7 +553,7 @@ static struct bpf_hash_bkt *_hsh_find_bkt(const struct bpf_state *state,
  *
  */
 static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
-				      unsigned int h_val)
+				      uint64_t h_val)
 {
 	struct bpf_hash_bkt *h_iter;
 
@@ -562,8 +573,7 @@ static struct bpf_blk *_hsh_find_once(const struct bpf_state *state,
  * caller, NULL is returned if the entry can not be found.
  *
  */
-static struct bpf_blk *_hsh_find(const struct bpf_state *state,
-				 unsigned int h_val)
+static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
 {
 	struct bpf_hash_bkt *h_iter;
 
@@ -722,7 +732,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 {
 	int rc;
 	unsigned int iter;
-	unsigned int h_val;
+	uint64_t h_val;
 	struct bpf_blk *b_new;
 	struct bpf_instr *i_iter;
 
@@ -808,7 +818,7 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	int rc;
 	struct bpf_instr instr;
 	struct bpf_blk *blk_c, *blk_s;
-	unsigned int h_val;
+	uint64_t h_val;
 
 	/* generate the argument chains */
 	blk_c = _gen_bpf_chain(state, sys->chains);
@@ -843,7 +853,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 {
 	int rc;
 	int iter;
-	unsigned int h_val;
+	uint64_t h_val;
 	unsigned int res_cnt;
 	unsigned int jmp_len;
 	struct bpf_instr instr;
