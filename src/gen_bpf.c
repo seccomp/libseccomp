@@ -50,6 +50,7 @@
 
 enum bpf_jump_type {
 	TGT_NONE = 0,
+	TGT_K,			/* immediate "k" value */
 	TGT_NXT,		/* fall through to the next block */
 	TGT_IMM,		/* resolved immediate value */
 	TGT_PTR_DB,		/* pointer to part of the filter db */
@@ -60,7 +61,8 @@ enum bpf_jump_type {
 struct bpf_jump {
 	enum bpf_jump_type type;
 	union {
-		uint8_t imm;
+		uint8_t imm_j;
+		uint32_t imm_k;
 		uint64_t hash;
 		void *ptr;
 	} tgt;
@@ -70,25 +72,27 @@ struct bpf_jump {
 #define _BPF_JMP_NXT \
 	((struct bpf_jump) { TGT_NXT, { .ptr = 0 } })  /* be careful! */
 #define _BPF_JMP_IMM(x) \
-	((struct bpf_jump) { TGT_IMM, { .imm = (x) } })
+	((struct bpf_jump) { TGT_IMM, { .imm_j = (x) } })
 #define _BPF_JMP_DB(x) \
 	((struct bpf_jump) { TGT_PTR_DB, { .ptr = (x) } })
 #define _BPF_JMP_BLK(x) \
 	((struct bpf_jump) { TGT_PTR_BLK, { .ptr = (x) } })
 #define _BPF_JMP_HSH(x) \
 	((struct bpf_jump) { TGT_PTR_HSH, { .hash = (x) } })
+#define _BPF_K(x) \
+	((struct bpf_jump) { TGT_K, { .imm_k = (x) } })
 #define _BPF_JMP_MAX		255
 
 struct bpf_instr {
 	uint16_t op;
 	struct bpf_jump jt;
 	struct bpf_jump jf;
-	uint32_t k;
+	struct bpf_jump k;
 };
-#define _BPF_SYSCALL		(0)
-#define _BPF_ARG(x)		(8 + ((x) * 4))
-#define _BPF_ALLOW		(0xffffffff)
-#define _BPF_DENY		(0)
+#define _BPF_SYSCALL		_BPF_K(0)
+#define _BPF_ARG(x)		_BPF_K((8 + ((x) * 4)))
+#define _BPF_ALLOW		_BPF_K(0xffffffff)
+#define _BPF_DENY		_BPF_K(0)
 
 struct bpf_blk {
 	struct bpf_instr *blks;
@@ -149,7 +153,7 @@ struct bpf_state {
 		(_ins).op = (_op); \
 		(_ins).jt = _jt; \
 		(_ins).jf = _jf; \
-		(_ins).k = (_k); \
+		(_ins).k = _k; \
 	} while (0)
 
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
@@ -304,7 +308,7 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 			break;
 		case TGT_IMM:
 			/* jump to the value specified */
-			i_iter->jt = blk->blks[iter].jt.tgt.imm;
+			i_iter->jt = blk->blks[iter].jt.tgt.imm_j;
 			break;
 		default:
 			/* fatal error - we should never get here */
@@ -317,14 +321,25 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 			break;
 		case TGT_IMM:
 			/* jump to the value specified */
-			i_iter->jf = blk->blks[iter].jf.tgt.imm;
+			i_iter->jf = blk->blks[iter].jf.tgt.imm_j;
 			break;
 		default:
 			/* fatal error - we should never get here */
 			rc = -EFAULT;
 			goto bpf_append_blk_failure;
 		}
-		i_iter->k = blk->blks[iter].k;
+		switch (blk->blks[iter].k.type) {
+		case TGT_NONE:
+			i_iter->k = 0;
+			break;
+		case TGT_K:
+			i_iter->k = blk->blks[iter].k.tgt.imm_k;
+			break;
+		default:
+			/* fatal error - we should never get here */
+			rc = -EFAULT;
+			goto bpf_append_blk_failure;
+		}
 	}
 
 	return prg->blk_cnt;
@@ -586,7 +601,6 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
 /**
  * Generate a BPF instruction block for a given filter DB level
  * @param state the BPF state
- * @param blk the existing BPF block, or NULL
  * @param node the filter DB node
  *
  * Generate a BPF instruction block which executes the filter specified by the
@@ -595,9 +609,9 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
  *
  */
 static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
-					  struct bpf_blk *blk,
 					  const struct db_arg_chain_tree *node)
 {
+	struct bpf_blk *blk = NULL;
 	struct bpf_instr instr;
 	const struct db_arg_chain_tree *l_iter;
 	int acc_arg = -1;
@@ -649,15 +663,18 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 		switch (l_iter->op) {
 		case SCMP_CMP_EQ:
 			_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-				   _BPF_JMP_NO, _BPF_JMP_NO, l_iter->datum);
+				   _BPF_JMP_NO, _BPF_JMP_NO,
+				   _BPF_K(l_iter->datum));
 			break;
 		case SCMP_CMP_GT:
 			_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
-				   _BPF_JMP_NO, _BPF_JMP_NO, l_iter->datum);
+				   _BPF_JMP_NO, _BPF_JMP_NO,
+				   _BPF_K(l_iter->datum));
 			break;
 		case SCMP_CMP_GE:
 			_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-				   _BPF_JMP_NO, _BPF_JMP_NO, l_iter->datum);
+				   _BPF_JMP_NO, _BPF_JMP_NO,
+				   _BPF_K(l_iter->datum));
 			break;
 		case SCMP_CMP_NE:
 		case SCMP_CMP_LT:
@@ -773,6 +790,22 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			/* we should not be here */
 			return NULL;
 		}
+		switch (i_iter->k.type) {
+		case TGT_NONE:
+		case TGT_K:
+		case TGT_PTR_HSH:
+			/* ignore these jump types */
+			break;
+		case TGT_PTR_DB:
+			b_new = _gen_bpf_chain(state, i_iter->k.tgt.ptr);
+			if (b_new == NULL)
+				return NULL;
+			i_iter->k = _BPF_JMP_HSH(b_new->hash);
+			break;
+		default:
+			/* we should not be here */
+			return NULL;
+		}
 	}
 
 	/* insert the block into the hash table */
@@ -797,7 +830,7 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 {
 	struct bpf_blk *blk;
 
-	blk = _gen_bpf_chain_lvl(state, NULL, chain);
+	blk = _gen_bpf_chain_lvl(state, chain);
 	if (blk == NULL)
 		return NULL;
 	return _gen_bpf_chain_lvl_res(state, blk);
@@ -827,7 +860,7 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 
 	/* syscall check (syscall number is still in the accumulator) */
 	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT, sys->num);
+		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT, _BPF_K(sys->num));
 	blk_s = _blk_append(state, NULL, &instr);
 	if (blk_s == NULL)
 		return NULL;
@@ -939,6 +972,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				i_iter->jt = _BPF_JMP_HSH(b_jmp->hash);
 			if (i_iter->jf.type == TGT_NXT)
 				i_iter->jf = _BPF_JMP_HSH(b_jmp->hash);
+			/* we shouldn't need to worry about a TGT_NXT in k */
 		}
 		b_iter = b_iter->next;
 	}
@@ -988,6 +1022,27 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				case TGT_PTR_HSH:
 					b_jmp = _hsh_find_once(state,
 							   i_iter->jf.tgt.hash);
+					if (b_jmp == NULL)
+						break;
+					/* insert the block immediately after*/
+					res_cnt++;
+					b_jmp->prev = b_iter;
+					b_jmp->next = b_iter->next;
+					b_iter->next = b_jmp;
+					if (b_jmp->next)
+						b_jmp->next->prev = b_jmp;
+					break;
+				default:
+					/* fatal error */
+					return -EFAULT;
+				}
+				switch (i_iter->k.type) {
+				case TGT_NONE:
+				case TGT_K:
+					break;
+				case TGT_PTR_HSH:
+					b_jmp = _hsh_find_once(state,
+							   i_iter->k.tgt.hash);
 					if (b_jmp == NULL)
 						break;
 					/* insert the block immediately after*/
@@ -1063,6 +1118,28 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					 *       long jumps */
 					return -EFAULT;
 				i_iter->jf = _BPF_JMP_IMM(jmp_len);
+				break;
+			default:
+				/* fatal error */
+				return -EFAULT;
+			}
+			switch (i_iter->k.type) {
+			case TGT_NONE:
+			case TGT_K:
+				break;
+			case TGT_PTR_HSH:
+				h_val = i_iter->k.tgt.hash;
+				jmp_len = b_iter->blk_cnt - (iter + 1);
+				b_jmp = b_iter->next;
+				while (b_jmp != NULL && b_jmp->hash != h_val) {
+					jmp_len += b_jmp->blk_cnt;
+					b_jmp = b_jmp->next;
+				}
+				if (b_jmp == NULL)
+					return -EFAULT;
+				/* technically we should bounds check jmp_len,
+				 * but practically, there is no point */
+				i_iter->k = _BPF_K(jmp_len);
 				break;
 			default:
 				/* fatal error */
