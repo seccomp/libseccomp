@@ -40,7 +40,8 @@ LDFLAGS := ../src/libseccomp.a
 TESTS = 01-allow \
 	02-basic \
 	03-basic-chains \
-	04-multilevel-chains
+	04-multilevel-chains \
+	05-long-jumps
 
 DEPS = $(TESTS:%=%.d)
 

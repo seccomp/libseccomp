@@ -197,8 +197,7 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 		return;
 
 	/* remove this block from the hash table */
-	if ((blk->hash != 0) && (_hsh_remove(state, blk->hash) == NULL))
-		return;
+	_hsh_remove(state, blk->hash);
 
 	/* run through the block freeing TGT_PTR_{BLK,HSH} jump targets */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
@@ -948,6 +947,85 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 }
 
 /**
+ * Add long jumps to the list of BPF instruction blocks if needed
+ * @param state the BPF state
+ * @param tail the tail of the instruction block list
+ * @param blk the instruction block to check
+ * @param offset the instruction offset into the instruction block
+ * @param tgt_hash the hash of the jump destination block
+ *
+ * Using the given block and instruction offset, calculate the jump distance
+ * between the jumping instruction and the destination.  If the jump distance
+ * is too great, add a long jump instruction to reduce the distance to a legal
+ * value.  Returns 1 if a long jump was added, zero if the existing jump is
+ * valid, and negative values on failure.
+ *
+ */
+static int _gen_bpf_build_jmp(struct bpf_state *state,
+			      struct bpf_blk *tail,
+			      struct bpf_blk *blk, unsigned int offset,
+			      uint64_t tgt_hash)
+{
+	unsigned int jmp_len;
+	struct bpf_instr instr;
+	struct bpf_blk *b_new, *b_jmp, *b_tgt;
+
+	/* find the jump target */
+	b_tgt = tail;
+	while (b_tgt != blk && b_tgt->hash != tgt_hash)
+		b_tgt = b_tgt->prev;
+	if (b_tgt == blk)
+		return -EFAULT;
+
+	/* calculate the jump distance */
+	jmp_len = blk->blk_cnt - (offset + 1);
+	b_jmp = blk->next;
+	while (b_jmp != NULL && b_jmp != b_tgt && jmp_len < _BPF_JMP_MAX) {
+		jmp_len += b_jmp->blk_cnt;
+		b_jmp = b_jmp->next;
+	}
+	if (b_jmp == b_tgt)
+		return 0;
+	if (b_jmp == NULL)
+		return -EFAULT;
+
+	/* we need a long jump, see if one already exists */
+	jmp_len = blk->blk_cnt - (offset + 1);
+	b_jmp = blk->next;
+	while (b_jmp != NULL && b_jmp->hash != tgt_hash &&
+	       jmp_len < _BPF_JMP_MAX) {
+		jmp_len += b_jmp->blk_cnt;
+		b_jmp = b_jmp->next;
+	}
+	if (b_jmp->hash == tgt_hash)
+		return 0;
+	if (b_jmp == NULL)
+		return -EFAULT;
+
+	/* we need to insert a long jump - create one */
+	_BPF_INSTR(instr, BPF_JMP+BPF_JA,
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_JMP_HSH(tgt_hash));
+	b_new = _blk_append(state, NULL, &instr);
+	if (b_new == NULL)
+		return -EFAULT;
+
+	/* NOTE - we need to be careful here, we're giving the block a hash
+	 *	  value (this is a sneaky way to ensure we leverage the
+	 *	  inserted long jumps as much as possible) but we never add the
+	 *	  block to the hash table so it won't get cleaned up
+	 *	  automatically */
+	b_new->hash = tgt_hash;
+
+	/* insert the jump after the current jumping block */
+	b_new->prev = blk;
+	b_new->next = blk->next;
+	blk->next->prev = b_new;
+	blk->next = b_new;
+
+	return 1;
+}
+
+/**
  * Generate the BPF program for the given filter DB
  * @param state the BPF state
  * @param db the filter DB
@@ -1038,7 +1116,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		b_tail = b_head;
 	}
 
-	/* resolve any TGT_NXT jumps to TGT_PTR_HSH jumps at the top level */
+	/* resolve any TGT_NXT jumps at the top level */
 	b_iter = b_head;
 	while (b_iter != NULL && b_iter->next != NULL) {
 		b_jmp = b_iter->next;
@@ -1062,8 +1140,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	 *       syscall */
 	do {
 		res_cnt = 0;
-		while (b_tail->next != NULL)
-			b_tail = b_tail->next;
 		b_iter = b_tail;
 		/* go through the block list backwards (no reverse jumps) */
 		while (b_iter != NULL) {
@@ -1136,6 +1212,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			}
 			b_iter = b_iter->prev;
 		}
+		/* reset the tail pointer as it may have changed */
+		while (b_tail->next != NULL)
+			b_tail = b_tail->next;
 	} while (res_cnt != 0);
 
 	/* load the syscall into the accumulator */
@@ -1145,11 +1224,15 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	if (rc < 0)
 		return rc;
 
-	/* resolve the TGT_PTR_HSH jumps and build the single bpf program */
-	b_iter = b_head;
+	/* NOTE - from here to the end of the function we need to fail via the
+	 *	  the build_bpf_free_blks label, not just return an error; see
+	 *	  the _gen_bpf_build_jmp() function for details */
+
+	/* check for long jumps and insert if necessary */
+	b_iter = b_tail;
 	while (b_iter != NULL) {
-		/* resolve the jumps */
-		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
+		res_cnt = 0;
+		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
 			i_iter = &b_iter->blks[iter];
 			switch (i_iter->jt.type) {
 			case TGT_NONE:
@@ -1157,23 +1240,16 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				break;
 			case TGT_PTR_HSH:
 				h_val = i_iter->jt.tgt.hash;
-				jmp_len = b_iter->blk_cnt - (iter + 1);
-				b_jmp = b_iter->next;
-				while (b_jmp != NULL && b_jmp->hash != h_val) {
-					jmp_len += b_jmp->blk_cnt;
-					b_jmp = b_jmp->next;
-				}
-				if (b_jmp == NULL)
-					return -EFAULT;
-				if (jmp_len > _BPF_JMP_MAX)
-					/* XXX - we can fix this by inserting
-					 *       long jumps */
-					return -EFAULT;
-				i_iter->jt = _BPF_JMP_IMM(jmp_len);
+				rc = _gen_bpf_build_jmp(state, b_tail,
+							b_iter, iter,
+							h_val);
+				if (rc < 0)
+					goto build_bpf_free_blks;
+				res_cnt += rc;
 				break;
 			default:
 				/* fatal error */
-				return -EFAULT;
+				goto build_bpf_free_blks;
 			}
 			switch (i_iter->jf.type) {
 			case TGT_NONE:
@@ -1181,51 +1257,72 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				break;
 			case TGT_PTR_HSH:
 				h_val = i_iter->jf.tgt.hash;
-				jmp_len = b_iter->blk_cnt - (iter + 1);
-				b_jmp = b_iter->next;
-				while (b_jmp != NULL && b_jmp->hash != h_val) {
-					jmp_len += b_jmp->blk_cnt;
-					b_jmp = b_jmp->next;
-				}
-				if (b_jmp == NULL)
-					return -EFAULT;
-				if (jmp_len > _BPF_JMP_MAX)
-					/* XXX - we can fix this by inserting
-					 *       long jumps */
-					return -EFAULT;
-				i_iter->jf = _BPF_JMP_IMM(jmp_len);
+				rc = _gen_bpf_build_jmp(state, b_tail,
+							b_iter, iter,
+							h_val);
+				if (rc < 0)
+					goto build_bpf_free_blks;
+				res_cnt += rc;
 				break;
 			default:
 				/* fatal error */
-				return -EFAULT;
-			}
-			switch (i_iter->k.type) {
-			case TGT_NONE:
-			case TGT_K:
-				break;
-			case TGT_PTR_HSH:
-				h_val = i_iter->k.tgt.hash;
-				jmp_len = b_iter->blk_cnt - (iter + 1);
-				b_jmp = b_iter->next;
-				while (b_jmp != NULL && b_jmp->hash != h_val) {
-					jmp_len += b_jmp->blk_cnt;
-					b_jmp = b_jmp->next;
-				}
-				if (b_jmp == NULL)
-					return -EFAULT;
-				/* technically we should bounds check jmp_len,
-				 * but practically, there is no point */
-				i_iter->k = _BPF_K(jmp_len);
-				break;
-			default:
-				/* fatal error */
-				return -EFAULT;
+				goto build_bpf_free_blks;
 			}
 		}
+		if (res_cnt == 0)
+			b_iter = b_iter->prev;
+	}
+
+	/* build the bpf program */
+	b_iter = b_head;
+	while (b_iter != NULL) {
+		/* resolve the TGT_PTR_HSH jumps */
+		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
+			i_iter = &b_iter->blks[iter];
+			if (i_iter->jt.type == TGT_PTR_HSH) {
+				h_val = i_iter->jt.tgt.hash;
+				jmp_len = b_iter->blk_cnt - (iter + 1);
+				b_jmp = b_iter->next;
+				while (b_jmp != NULL && b_jmp->hash != h_val) {
+					jmp_len += b_jmp->blk_cnt;
+					b_jmp = b_jmp->next;
+				}
+				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX)
+					goto build_bpf_free_blks;
+				i_iter->jt = _BPF_JMP_IMM(jmp_len);
+			}
+			if (i_iter->jf.type == TGT_PTR_HSH) {
+				h_val = i_iter->jf.tgt.hash;
+				jmp_len = b_iter->blk_cnt - (iter + 1);
+				b_jmp = b_iter->next;
+				while (b_jmp != NULL && b_jmp->hash != h_val) {
+					jmp_len += b_jmp->blk_cnt;
+					b_jmp = b_jmp->next;
+				}
+				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX)
+					goto build_bpf_free_blks;
+				i_iter->jf = _BPF_JMP_IMM(jmp_len);
+			}
+			if (i_iter->k.type == TGT_PTR_HSH) {
+				h_val = i_iter->k.tgt.hash;
+				jmp_len = b_iter->blk_cnt - (iter + 1);
+				b_jmp = b_tail;
+				while (b_jmp->hash != h_val)
+					b_jmp = b_jmp->prev;
+				b_jmp = b_jmp->prev;
+				while (b_jmp != b_iter) {
+					jmp_len += b_jmp->blk_cnt;
+					b_jmp = b_jmp->prev;
+				}
+				if (b_jmp == NULL)
+					goto build_bpf_free_blks;
+				i_iter->k = _BPF_K(jmp_len);
+			}
+		}
+
 		/* build the bpf program */
-		rc = _bpf_append_blk(state->bpf, b_iter);
-		if (rc < 0)
-			return rc;
+		if (_bpf_append_blk(state->bpf, b_iter) < 0)
+			goto build_bpf_free_blks;
 
 		/* we're done with the block, free it */
 		b_jmp = b_iter->next;
@@ -1234,6 +1331,16 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	}
 
 	return 0;
+
+build_bpf_free_blks:
+	b_iter = b_head;
+	while (b_iter != NULL) {
+		b_jmp = b_iter->next;
+		_hsh_remove(state, b_iter->hash);
+		__blk_free(state, b_iter);
+		b_iter = b_jmp;
+	}
+	return -EFAULT;
 }
 
 /**
