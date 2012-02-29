@@ -599,6 +599,98 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
 }
 
 /**
+ * Generate a BPF instruction block for a given chain node
+ * @param state the BPF state
+ * @param node the filter chain node
+ * @param acc_arg the argument loaded into the accumulator
+ *
+ * Generate the BPF instructions to execute the filter specified by the given
+ * chain node.  Returns a pointer to the instruction block on success, NULL on
+ * failure.
+ *
+ */
+static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
+					   const struct db_arg_chain_tree *node,
+					   int *acc_arg)
+{
+	struct bpf_blk *blk = NULL;
+	struct bpf_instr instr;
+
+	if (node->arg != *acc_arg) {
+		/* reload the accumulator */
+		*acc_arg = node->arg;
+		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
+			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARG(*acc_arg));
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto chain_node_failure;
+	}
+
+	/* do any necessary alu operations */
+	/* XXX - only needed for bitmask which we don't support yet as it
+	 *       messes up the accumulator value */
+
+	/* check the accumulator against the datum */
+	switch (node->op) {
+	case SCMP_CMP_EQ:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+			break;
+	case SCMP_CMP_GT:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
+			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+		break;
+	case SCMP_CMP_GE:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
+			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+		break;
+	case SCMP_CMP_NE:
+	case SCMP_CMP_LT:
+	case SCMP_CMP_LE:
+		/* if we hit here it means the filter db isn't correct */
+	default:
+		/* fatal error, we should never get here */
+		goto chain_node_failure;
+	}
+
+	/* fixup the jump targets */
+	if (node->nxt_t != NULL)
+		instr.jt = _BPF_JMP_DB(node->nxt_t);
+	else if ((node->action != 0) && (node->action_flag))
+		instr.jt = _BPF_JMP_IMM(0);
+	else
+		instr.jt = _BPF_JMP_NXT;
+	if (node->nxt_f != NULL)
+		instr.jf = _BPF_JMP_DB(node->nxt_f);
+	else if ((node->action != 0) && (!node->action_flag))
+		instr.jf = _BPF_JMP_IMM(0);
+	else
+		instr.jf = _BPF_JMP_NXT;
+	blk = _blk_append(state, blk, &instr);
+	if (blk == NULL)
+		goto chain_node_failure;
+
+	/* take any action needed */
+	if (node->action != 0) {
+		if (node->action == SCMP_ACT_ALLOW)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ALLOW);
+		else if (node->action == SCMP_ACT_DENY)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto chain_node_failure;
+	}
+
+	return blk;
+
+chain_node_failure:
+	_blk_free(state, blk);
+	return NULL;
+}
+
+/**
  * Generate a BPF instruction block for a given filter DB level
  * @param state the BPF state
  * @param node the filter DB node
@@ -611,11 +703,13 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
 static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 					  const struct db_arg_chain_tree *node)
 {
-	struct bpf_blk *blk = NULL;
+	struct bpf_blk *blk;
+	struct bpf_blk *b_head = NULL, *b_prev = NULL, *b_next, *b_iter;
 	struct bpf_instr instr;
+	struct bpf_instr *i_iter;
 	const struct db_arg_chain_tree *l_iter;
 	int acc_arg = -1;
-	int last_flag = 0;
+	unsigned int iter;
 
 	if (node == NULL) {
 		if (state->blk_action == SCMP_ACT_ALLOW)
@@ -626,7 +720,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 			_BPF_INSTR(instr, BPF_RET,
 				   _BPF_JMP_NO, _BPF_JMP_NO,
 				   _BPF_DENY);
-		blk = _blk_append(state, blk, &instr);
+		blk = _blk_append(state, NULL, &instr);
 		if (blk == NULL)
 			goto chain_lvl_failure;
 		return blk;
@@ -637,99 +731,75 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 	while (l_iter->lvl_prv != NULL)
 		l_iter = l_iter->lvl_prv;
 
-	/* note - if the filter db was built correctly, we shouldn't have any
-	 * duplicate instruction block on the same level so include them all
-	 * in the same instruction block */
+	/* build all of the blocks for this level */
 	do {
-		/* are we the last node on this level */
-		if (l_iter->lvl_nxt == NULL)
-			last_flag = 1;
-
-		if (l_iter->arg != acc_arg) {
-			/* reload the accumulator */
-			acc_arg = l_iter->arg;
-			_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-				_BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARG(acc_arg));
-			blk = _blk_append(state, blk, &instr);
-			if (blk == NULL)
-				goto chain_lvl_failure;
-		}
-
-		/* do any necessary alu operations */
-		/* XXX - only needed for bitmask which we don't support yet */
-		/* XXX - this messes up the accumulator value */
-
-		/* check the accumulator against the datum */
-		switch (l_iter->op) {
-		case SCMP_CMP_EQ:
-			_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-				   _BPF_JMP_NO, _BPF_JMP_NO,
-				   _BPF_K(l_iter->datum));
-			break;
-		case SCMP_CMP_GT:
-			_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
-				   _BPF_JMP_NO, _BPF_JMP_NO,
-				   _BPF_K(l_iter->datum));
-			break;
-		case SCMP_CMP_GE:
-			_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-				   _BPF_JMP_NO, _BPF_JMP_NO,
-				   _BPF_K(l_iter->datum));
-			break;
-		case SCMP_CMP_NE:
-		case SCMP_CMP_LT:
-		case SCMP_CMP_LE:
-			/* if we hit here it means that we didn't build
-			 * the filter db correctly */
-		default:
-			/* fatal error, we should never get here */
-			goto chain_lvl_failure;
-		}
-
-		/* XXX - we need to be concerned about jump lengths here since
-		 *       this block could be large, unlikely but possible */
-
-		/* fixup the jump targets */
-		if (l_iter->nxt_t != NULL)
-			instr.jt = _BPF_JMP_DB(l_iter->nxt_t);
-		else if ((l_iter->action != 0) && (l_iter->action_flag))
-			/* true falls through to the action by default */
-			instr.jf = _BPF_JMP_IMM(1);
-		else if (last_flag)
-			instr.jt = _BPF_JMP_HSH(state->def_hsh);
-		if (l_iter->nxt_f != NULL)
-			instr.jf = _BPF_JMP_DB(l_iter->nxt_f);
-		else if ((l_iter->action != 0) && (!l_iter->action_flag))
-			/* false falls through to the action by default */
-			instr.jt = _BPF_JMP_IMM(1);
-		else if (last_flag)
-			instr.jf = _BPF_JMP_HSH(state->def_hsh);
-		blk = _blk_append(state, blk, &instr);
+		blk = _gen_bpf_chain_node(state, l_iter, &acc_arg);
 		if (blk == NULL)
 			goto chain_lvl_failure;
+		if (b_head != NULL) {
+			b_prev->next = blk;
+			blk->prev = b_prev;
+		} else
+			b_head = blk;
 
-		/* are we at least partially a leaf node? */
-		if (l_iter->action != 0) {
-			if (l_iter->action == SCMP_ACT_ALLOW)
-				_BPF_INSTR(instr, BPF_RET,
-					   _BPF_JMP_NO, _BPF_JMP_NO,
-					   _BPF_ALLOW);
-			else if (l_iter->action == SCMP_ACT_DENY)
-				_BPF_INSTR(instr, BPF_RET,
-					   _BPF_JMP_NO, _BPF_JMP_NO,
-					   _BPF_DENY);
-			blk = _blk_append(state, blk, &instr);
-			if (blk == NULL)
-				goto chain_lvl_failure;
-		}
-
+		b_prev = blk;
 		l_iter = l_iter->lvl_nxt;
 	} while (l_iter != NULL);
 
-	return blk;
+	/* resolve the TGT_NXT jumps */
+	b_iter = b_head;
+	do {
+		b_next = b_iter->next;
+		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
+			i_iter = &b_iter->blks[iter];
+			switch (i_iter->jt.type) {
+			case TGT_NONE:
+			case TGT_IMM:
+			case TGT_PTR_DB:
+				/* ignore these jump types */
+				break;
+			case TGT_NXT:
+				if (b_next != NULL)
+					i_iter->jt = _BPF_JMP_BLK(b_next);
+				else
+					i_iter->jt = _BPF_JMP_HSH(
+								state->def_hsh);
+				break;
+			default:
+				/* we should not be here */
+				goto chain_lvl_failure;
+			}
+			switch (i_iter->jf.type) {
+			case TGT_NONE:
+			case TGT_IMM:
+			case TGT_PTR_DB:
+				/* ignore these jump types */
+				break;
+			case TGT_NXT:
+				if (b_next != NULL)
+					i_iter->jf = _BPF_JMP_BLK(b_next);
+				else
+					i_iter->jf = _BPF_JMP_HSH(
+								state->def_hsh);
+				break;
+			default:
+				/* we should not be here */
+				goto chain_lvl_failure;
+			}
+		}
+		b_iter->prev = NULL;
+		b_iter->next = NULL;
+		b_iter = b_next;
+	} while (b_iter != NULL);
+
+	return b_head;
 
 chain_lvl_failure:
-	_blk_free(state, blk);
+	while (b_head != NULL) {
+		b_iter = b_head;
+		b_head = b_iter->next;
+		_blk_free(state, b_iter);
+	}
 	return NULL;
 }
 
@@ -758,10 +828,16 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		i_iter = &blk->blks[iter];
 		switch (i_iter->jt.type) {
 		case TGT_NONE:
-		case TGT_NXT:
 		case TGT_IMM:
 		case TGT_PTR_HSH:
 			/* ignore these jump types */
+			break;
+		case TGT_PTR_BLK:
+			b_new = _gen_bpf_chain_lvl_res(state,
+						       i_iter->jt.tgt.ptr);
+			if (b_new == NULL)
+				return NULL;
+			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
 			break;
 		case TGT_PTR_DB:
 			b_new = _gen_bpf_chain(state, i_iter->jt.tgt.ptr);
@@ -775,10 +851,16 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		}
 		switch (i_iter->jf.type) {
 		case TGT_NONE:
-		case TGT_NXT:
 		case TGT_IMM:
 		case TGT_PTR_HSH:
 			/* ignore these jump types */
+			break;
+		case TGT_PTR_BLK:
+			b_new = _gen_bpf_chain_lvl_res(state,
+						       i_iter->jf.tgt.ptr);
+			if (b_new == NULL)
+				return NULL;
+			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
 			break;
 		case TGT_PTR_DB:
 			b_new = _gen_bpf_chain(state, i_iter->jf.tgt.ptr);
