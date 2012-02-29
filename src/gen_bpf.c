@@ -45,7 +45,6 @@
 
 /* allocation increments */
 #define AINC_BLK		8
-#define AINC_BLKGRP		8
 #define AINC_PROG		64
 
 enum bpf_jump_type {
