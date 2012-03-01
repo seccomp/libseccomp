@@ -198,7 +198,7 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 			break;
 		case BPF_JMP:
 			if (BPF_OP(bpf->op) == BPF_JA) {
-				printf("%-4u", (line + 1) + bpf->k);
+				printf("%.4u", (line + 1) + bpf->k);
 			} else {
 				printf("%-4u true:%.4u false:%.4u",
 				       bpf->k,
