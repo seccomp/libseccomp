@@ -35,17 +35,17 @@
 #include "hash.h"
 
 /* allocation increments */
-#define AINC_BLK		8
-#define AINC_PROG		64
+#define AINC_BLK			8
+#define AINC_PROG			64
 
 enum bpf_jump_type {
 	TGT_NONE = 0,
-	TGT_K,			/* immediate "k" value */
-	TGT_NXT,		/* fall through to the next block */
-	TGT_IMM,		/* resolved immediate value */
-	TGT_PTR_DB,		/* pointer to part of the filter db */
-	TGT_PTR_BLK,		/* pointer to an instruction block */
-	TGT_PTR_HSH,		/* pointer to a block hash table */
+	TGT_K,				/* immediate "k" value */
+	TGT_NXT,			/* fall through to the next block */
+	TGT_IMM,			/* resolved immediate value */
+	TGT_PTR_DB,			/* pointer to part of the filter db */
+	TGT_PTR_BLK,			/* pointer to an instruction block */
+	TGT_PTR_HSH,			/* pointer to a block hash table */
 };
 
 struct bpf_jump {
@@ -71,7 +71,7 @@ struct bpf_jump {
 	((struct bpf_jump) { TGT_PTR_HSH, { .hash = (x) } })
 #define _BPF_K(x) \
 	((struct bpf_jump) { TGT_K, { .imm_k = (x) } })
-#define _BPF_JMP_MAX		255
+#define _BPF_JMP_MAX			255
 
 struct bpf_instr {
 	uint16_t op;
@@ -79,11 +79,16 @@ struct bpf_instr {
 	struct bpf_jump jf;
 	struct bpf_jump k;
 };
-#define _BPF_OFFSET_SYSCALL	0
-#define _BPF_SYSCALL		_BPF_K(_BPF_OFFSET_SYSCALL)
-#define _BPF_OFFSET_ARG32(x)	(8 + ((x) * 4))
-#define _BPF_ALLOW		_BPF_K(0xffffffff)
-#define _BPF_DENY		_BPF_K(0)
+#define _BPF_OFFSET_SYSCALL		0
+#define _BPF_SYSCALL			_BPF_K(_BPF_OFFSET_SYSCALL)
+#define _BPF_OFFSET_ARG32(x)		(8 + ((x) * 4))
+#define _BPF_OFFSET_ARG64_BASE(x)	(8 + ((x) * 8))
+#define _BPF_OFFSET_ARG64_LE_LO(x)	(_BPF_OFFSET_ARG64_BASE(x) + 0)
+#define _BPF_OFFSET_ARG64_LE_HI(x)	(_BPF_OFFSET_ARG64_BASE(x) + 4)
+#define _BPF_OFFSET_ARG64_BE_LO(x)	(_BPF_OFFSET_ARG64_BASE(x) + 4)
+#define _BPF_OFFSET_ARG64_BE_HI(x)	(_BPF_OFFSET_ARG64_BASE(x) + 0)
+#define _BPF_ALLOW			_BPF_K(0xffffffff)
+#define _BPF_DENY			_BPF_K(0)
 
 struct bpf_blk {
 	struct bpf_instr *blks;
@@ -94,6 +99,7 @@ struct bpf_blk {
 	unsigned int priority;
 
 	/* used during final block assembly */
+	unsigned int hashed_flag;
 	uint64_t hash;
 	struct bpf_blk *prev, *next;
 };
@@ -102,16 +108,14 @@ struct bpf_blk {
 
 struct bpf_hash_bkt {
 	struct bpf_blk *blk;
-	unsigned int refcnt;
-
 	unsigned int found;
 
 	struct bpf_hash_bkt *next;
 };
 
-#define _BPF_HASH_BITS		8
-#define _BPF_HASH_SIZE		(1 << _BPF_HASH_BITS)
-#define _BPF_HASH_MASK		(_BPF_HASH_BITS - 1)
+#define _BPF_HASH_BITS			8
+#define _BPF_HASH_SIZE			(1 << _BPF_HASH_BITS)
+#define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
 	/* target arch */
 	struct bpf_arch bpf_tgt;
@@ -129,6 +133,9 @@ struct bpf_state {
 	/* bpf program */
 	struct bpf_program *bpf;
 };
+
+#define D64_LO(x)	_BPF_K((uint32_t)((uint64_t)(x) & 0x00000000ffffffff))
+#define D64_HI(x)	_BPF_K((uint32_t)((uint64_t)(x) >> 32))
 
 /**
  * Populate a BPF instruction
@@ -441,7 +448,6 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
 	h_new->blk = blk;
 	h_new->blk->hash = h_val;
-	h_new->refcnt = 1;
 	h_new->found = (found ? 1 : 0);
 
 	/* insert the block into the hash table */
@@ -461,9 +467,8 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 
 				/* free the block */
 				__blk_free(state, blk);
-				h_iter->refcnt++;
 				*blk_p = h_iter->blk;
-				return 0;
+				goto hsh_add_success;
 			} else if (h_iter->blk->hash == h_val) {
 				/* hash collision */
 				if ((h_val >> 32) == 0xffffffff)
@@ -484,6 +489,8 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	} else
 		state->htbl[h_val & _BPF_HASH_MASK] = h_new;
 
+hsh_add_success:
+	(*blk_p)->hashed_flag = 1;
 	return 0;
 }
 
@@ -680,6 +687,150 @@ node_32_failure:
 }
 
 /**
+ * Generate a BPF instruction block for a given chain node
+ * @param state the BPF state
+ * @param node the filter chain node
+ *
+ * Generate BPF instructions to execute the filter for the given chain node on
+ * a 64 bit system.  Returns a pointer to the instruction block on success,
+ * NULL on failure.
+ *
+ */
+static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
+					const struct db_arg_chain_tree *node)
+{
+	struct bpf_blk *blk = NULL;
+	struct bpf_instr instr;
+	unsigned int acc_desired_lo, acc_desired_hi;
+
+	/* NOTE - we can certainly come up with a more optimized approach,
+	 *	  especially when you consider how we always reload the
+	 *	  argument value and don't take advantage of similarities in
+	 *	  datum values, but this code at least works; we can tweak it
+	 *	  later */
+
+	/* determine the proper argument offsets */
+	if (state->bpf_tgt.endian == _BPF_ENDIAN_LITTLE) {
+		acc_desired_hi = _BPF_OFFSET_ARG64_LE_HI(node->arg);
+		acc_desired_lo = _BPF_OFFSET_ARG64_LE_LO(node->arg);
+	} else if (state->bpf_tgt.endian == _BPF_ENDIAN_BIG) {
+		acc_desired_hi = _BPF_OFFSET_ARG64_BE_HI(node->arg);
+		acc_desired_lo = _BPF_OFFSET_ARG64_BE_LO(node->arg);
+	} else
+		goto node_64_failure;
+
+	/* load the high 32 bit word into the accumulator first */
+	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired_hi));
+	blk = _blk_append(state, blk, &instr);
+	if (blk == NULL)
+		goto node_64_failure;
+
+	/* do any necessary alu operations */
+	/* XXX - only needed for bitmask which we don't support yet */
+
+	/* check the accumulator against the datum */
+	switch (node->op) {
+	case SCMP_CMP_EQ:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+			   _BPF_JMP_IMM(0), _BPF_JMP_NO, D64_HI(node->datum));
+		break;
+	case SCMP_CMP_GT:
+	case SCMP_CMP_GE:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
+			   _BPF_JMP_IMM(0), _BPF_JMP_NO, D64_HI(node->datum));
+		break;
+	case SCMP_CMP_NE:
+	case SCMP_CMP_LT:
+	case SCMP_CMP_LE:
+		/* if we hit here it means the filter db isn't correct */
+	default:
+		/* fatal error, we should never get here */
+		goto node_64_failure;
+	}
+
+	/* fixup the jump targets */
+	if (node->nxt_f != NULL)
+		instr.jf = _BPF_JMP_DB(node->nxt_f);
+	else if ((node->action != 0) && (!node->action_flag))
+		instr.jf = _BPF_JMP_IMM(2);
+	else
+		instr.jf = _BPF_JMP_NXT;
+	blk = _blk_append(state, blk, &instr);
+	if (blk == NULL)
+		goto node_64_failure;
+
+	/* load the low 32 bit word into the accumulator */
+	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired_lo));
+	blk = _blk_append(state, blk, &instr);
+	if (blk == NULL)
+		goto node_64_failure;
+
+	/* do any necessary alu operations */
+	/* XXX - only needed for bitmask which we don't support yet */
+
+	/* check the accumulator against the datum */
+	switch (node->op) {
+	case SCMP_CMP_EQ:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+		break;
+	case SCMP_CMP_GT:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
+			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+		break;
+	case SCMP_CMP_GE:
+		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
+			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+		break;
+	case SCMP_CMP_NE:
+	case SCMP_CMP_LT:
+	case SCMP_CMP_LE:
+		/* if we hit here it means the filter db isn't correct */
+	default:
+		/* fatal error, we should never get here */
+		goto node_64_failure;
+	}
+
+	/* fixup the jump targets */
+	if (node->nxt_t != NULL)
+		instr.jt = _BPF_JMP_DB(node->nxt_t);
+	else if ((node->action != 0) && (node->action_flag))
+		instr.jt = _BPF_JMP_IMM(0);
+	else
+		instr.jt = _BPF_JMP_NXT;
+	if (node->nxt_f != NULL)
+		instr.jf = _BPF_JMP_DB(node->nxt_f);
+	else if ((node->action != 0) && (!node->action_flag))
+		instr.jf = _BPF_JMP_IMM(0);
+	else
+		instr.jf = _BPF_JMP_NXT;
+	blk = _blk_append(state, blk, &instr);
+	if (blk == NULL)
+		goto node_64_failure;
+
+	/* take any action needed */
+	if (node->action != 0) {
+		if (node->action == SCMP_ACT_ALLOW)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ALLOW);
+		else if (node->action == SCMP_ACT_DENY)
+			_BPF_INSTR(instr, BPF_RET,
+				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto node_64_failure;
+	}
+
+	return blk;
+
+node_64_failure:
+	_blk_free(state, blk);
+	return NULL;
+}
+
+/**
  * Generate a BPF instruction block for a given filter DB level
  * @param state the BPF state
  * @param node the filter DB node
@@ -722,7 +873,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		if (state->bpf_tgt.word_len == _BPF_WLEN_32)
+		if (state->bpf_tgt.word_len == _BPF_WLEN_64)
+			blk = _gen_bpf_node_64(state, l_iter);
+		else if (state->bpf_tgt.word_len == _BPF_WLEN_32)
 			blk = _gen_bpf_node_32(state, l_iter, &acc_off);
 		else
 			goto chain_lvl_failure;
@@ -787,6 +940,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 	unsigned int iter;
 	struct bpf_blk *b_new;
 	struct bpf_instr *i_iter;
+
+	if (blk->hashed_flag)
+		return blk;
 
 	/* convert TGT_PTR_DB to TGT_PTR_HSH references */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
