@@ -746,40 +746,14 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 		b_next = b_iter->next;
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
 			i_iter = &b_iter->blks[iter];
-			switch (i_iter->jt.type) {
-			case TGT_NONE:
-			case TGT_IMM:
-			case TGT_PTR_DB:
-				/* ignore these jump types */
-				break;
-			case TGT_NXT:
-				if (b_next != NULL)
-					i_iter->jt = _BPF_JMP_BLK(b_next);
-				else
-					i_iter->jt = _BPF_JMP_HSH(
-								state->def_hsh);
-				break;
-			default:
-				/* we should not be here */
-				goto chain_lvl_failure;
-			}
-			switch (i_iter->jf.type) {
-			case TGT_NONE:
-			case TGT_IMM:
-			case TGT_PTR_DB:
-				/* ignore these jump types */
-				break;
-			case TGT_NXT:
-				if (b_next != NULL)
-					i_iter->jf = _BPF_JMP_BLK(b_next);
-				else
-					i_iter->jf = _BPF_JMP_HSH(
-								state->def_hsh);
-				break;
-			default:
-				/* we should not be here */
-				goto chain_lvl_failure;
-			}
+			if (i_iter->jt.type == TGT_NXT)
+				i_iter->jt = (b_next == NULL ?
+					      _BPF_JMP_HSH(state->def_hsh) :
+					      _BPF_JMP_BLK(b_next));
+			if (i_iter->jf.type == TGT_NXT)
+				i_iter->jf = (b_next == NULL ?
+					      _BPF_JMP_HSH(state->def_hsh) :
+					      _BPF_JMP_BLK(b_next));
 		}
 		b_iter->prev = NULL;
 		b_iter->next = NULL;
