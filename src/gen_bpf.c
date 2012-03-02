@@ -1132,12 +1132,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	}
 
 	/* pull in all of the TGT_PTR_HSH jumps, one layer at a time */
-	/* XXX - this is going to be _really_ slow */
-	/* XXX - we really should make this more intelligent about ordering, it
-	 *       shouldn't be terrible as-is but we can likely do much better
-	 *       in the case of jumps spanning a top level (de-duped blocks)
-	 *       and we can probably do a bit better even within the same
-	 *       syscall */
 	do {
 		res_cnt = 0;
 		b_iter = b_tail;
