@@ -81,8 +81,7 @@ struct bpf_instr {
 };
 #define _BPF_OFFSET_SYSCALL	0
 #define _BPF_SYSCALL		_BPF_K(_BPF_OFFSET_SYSCALL)
-#define _BPF_OFFSET_ARG(x)	(8 + ((x) * 4))
-#define _BPF_ARG(x)		_BPF_K(_BPF_OFFSET_ARG(x))
+#define _BPF_OFFSET_ARG32(x)	(8 + ((x) * 4))
 #define _BPF_ALLOW		_BPF_K(0xffffffff)
 #define _BPF_DENY		_BPF_K(0)
 
@@ -594,26 +593,26 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
  * @param node the filter chain node
  * @param acc_off the data offset loaded into the accumulator
  *
- * Generate the BPF instructions to execute the filter specified by the given
- * chain node.  Returns a pointer to the instruction block on success, NULL on
- * failure.
+ * Generate BPF instructions to execute the filter for the given chain node on
+ * a 32 bit system.  Returns a pointer to the instruction block on success,
+ * NULL on failure.
  *
  */
-static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
-					   const struct db_arg_chain_tree *node,
-					   int *acc_off)
+static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
+					const struct db_arg_chain_tree *node,
+					int *acc_off)
 {
 	struct bpf_blk *blk = NULL;
 	struct bpf_instr instr;
 
-	if (_BPF_OFFSET_ARG(node->arg) != *acc_off) {
+	if (_BPF_OFFSET_ARG32(node->arg) != *acc_off) {
 		/* reload the accumulator */
-		*acc_off = _BPF_OFFSET_ARG(node->arg);
+		*acc_off = _BPF_OFFSET_ARG32(node->arg);
 		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
 			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(*acc_off));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
-			goto chain_node_failure;
+			goto node_32_failure;
 	}
 
 	/* do any necessary alu operations */
@@ -640,7 +639,7 @@ static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
 		/* if we hit here it means the filter db isn't correct */
 	default:
 		/* fatal error, we should never get here */
-		goto chain_node_failure;
+		goto node_32_failure;
 	}
 
 	/* fixup the jump targets */
@@ -658,7 +657,7 @@ static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
-		goto chain_node_failure;
+		goto node_32_failure;
 
 	/* take any action needed */
 	if (node->action != 0) {
@@ -670,12 +669,12 @@ static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
 				   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_DENY);
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
-			goto chain_node_failure;
+			goto node_32_failure;
 	}
 
 	return blk;
 
-chain_node_failure:
+node_32_failure:
 	_blk_free(state, blk);
 	return NULL;
 }
@@ -723,7 +722,10 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		blk = _gen_bpf_chain_node(state, l_iter, &acc_off);
+		if (state->bpf_tgt.word_len == _BPF_WLEN_32)
+			blk = _gen_bpf_node_32(state, l_iter, &acc_off);
+		else
+			goto chain_lvl_failure;
 		if (blk == NULL)
 			goto chain_lvl_failure;
 		if (b_head != NULL) {
