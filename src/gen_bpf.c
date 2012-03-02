@@ -1140,68 +1140,44 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			/* look for jumps - backwards (shorter jumps) */
 			for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
 				i_iter = &b_iter->blks[iter];
-				switch (i_iter->jt.type) {
-				case TGT_NONE:
-				case TGT_IMM:
-					break;
-				case TGT_PTR_HSH:
+				if (i_iter->jt.type == TGT_PTR_HSH) {
 					b_jmp = _hsh_find_once(state,
 							   i_iter->jt.tgt.hash);
-					if (b_jmp == NULL)
-						break;
-					/* insert the block immediately after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev = b_jmp;
-					break;
-				default:
-					/* fatal error */
-					return -EFAULT;
+					if (b_jmp != NULL) {
+						/* insert the block after*/
+						res_cnt++;
+						b_jmp->prev = b_iter;
+						b_jmp->next = b_iter->next;
+						b_iter->next = b_jmp;
+						if (b_jmp->next)
+							b_jmp->next->prev=b_jmp;
+					}
 				}
-				switch (i_iter->jf.type) {
-				case TGT_NONE:
-				case TGT_IMM:
-					break;
-				case TGT_PTR_HSH:
+				if (i_iter->jf.type == TGT_PTR_HSH) {
 					b_jmp = _hsh_find_once(state,
 							   i_iter->jf.tgt.hash);
-					if (b_jmp == NULL)
-						break;
-					/* insert the block immediately after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev = b_jmp;
-					break;
-				default:
-					/* fatal error */
-					return -EFAULT;
+					if (b_jmp != NULL) {
+						/* insert the block after*/
+						res_cnt++;
+						b_jmp->prev = b_iter;
+						b_jmp->next = b_iter->next;
+						b_iter->next = b_jmp;
+						if (b_jmp->next)
+							b_jmp->next->prev=b_jmp;
+					}
 				}
-				switch (i_iter->k.type) {
-				case TGT_NONE:
-				case TGT_K:
-					break;
-				case TGT_PTR_HSH:
+				if (i_iter->k.type == TGT_PTR_HSH) {
 					b_jmp = _hsh_find_once(state,
 							   i_iter->k.tgt.hash);
-					if (b_jmp == NULL)
-						break;
-					/* insert the block immediately after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev = b_jmp;
-					break;
-				default:
-					/* fatal error */
-					return -EFAULT;
+					if (b_jmp != NULL) {
+						/* insert the block after*/
+						res_cnt++;
+						b_jmp->prev = b_iter;
+						b_jmp->next = b_iter->next;
+						b_iter->next = b_jmp;
+						if (b_jmp->next)
+							b_jmp->next->prev=b_jmp;
+					}
 				}
 			}
 			b_iter = b_iter->prev;
@@ -1222,7 +1198,8 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	 *	  the build_bpf_free_blks label, not just return an error; see
 	 *	  the _gen_bpf_build_jmp() function for details */
 
-	/* check for long jumps and insert if necessary */
+	/* check for long jumps and insert if necessary, we also verify that
+	 * all our jump targets are valid at this point in the process */
 	b_iter = b_tail;
 	while (b_iter != NULL) {
 		res_cnt = 0;
