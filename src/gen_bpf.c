@@ -34,15 +34,6 @@
 #include "db.h"
 #include "hash.h"
 
-/* are we 32bit or 64bit? */
-#if __BITS_PER_LONG == 32
-#define _BPF_32
-#elif __BITS_PER_LONG == 64
-#define _BPF_64
-#else
-#error unknown platform
-#endif
-
 /* allocation increments */
 #define AINC_BLK		8
 #define AINC_PROG		64
@@ -121,6 +112,9 @@ struct bpf_hash_bkt {
 #define _BPF_HASH_SIZE		(1 << _BPF_HASH_BITS)
 #define _BPF_HASH_MASK		(_BPF_HASH_BITS - 1)
 struct bpf_state {
+	/* target arch */
+	struct bpf_arch bpf_tgt;
+
 	/* filter actions */
 	enum scmp_flt_action def_action;
 	enum scmp_flt_action blk_action;
@@ -1291,17 +1285,20 @@ build_bpf_free_blks:
 /**
  * Generate a BPF representation of the filter DB
  * @param db the seccomp filter DB
+ * @param arch the target architecture specifics
  *
  * This function generates a BPF representation of the given filter DB.
  * Returns a pointer to a valid bpf_program on success, NULL on failure.
  *
  */
-struct bpf_program *gen_bpf_generate(const struct db_filter *db)
+struct bpf_program *gen_bpf_generate(const struct db_filter *db,
+				     const struct bpf_arch *arch)
 {
 	int rc;
 	struct bpf_state state;
 
 	memset(&state, 0, sizeof(state));
+	state.bpf_tgt = *arch;
 	state.def_action = db->def_action;
 	state.blk_action = (db->def_action == SCMP_ACT_ALLOW ?
 			    SCMP_ACT_DENY : SCMP_ACT_ALLOW);
