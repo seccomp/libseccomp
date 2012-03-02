@@ -79,8 +79,10 @@ struct bpf_instr {
 	struct bpf_jump jf;
 	struct bpf_jump k;
 };
-#define _BPF_SYSCALL		_BPF_K(0)
-#define _BPF_ARG(x)		_BPF_K((8 + ((x) * 4)))
+#define _BPF_OFFSET_SYSCALL	0
+#define _BPF_SYSCALL		_BPF_K(_BPF_OFFSET_SYSCALL)
+#define _BPF_OFFSET_ARG(x)	(8 + ((x) * 4))
+#define _BPF_ARG(x)		_BPF_K(_BPF_OFFSET_ARG(x))
 #define _BPF_ALLOW		_BPF_K(0xffffffff)
 #define _BPF_DENY		_BPF_K(0)
 
@@ -590,7 +592,7 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
  * Generate a BPF instruction block for a given chain node
  * @param state the BPF state
  * @param node the filter chain node
- * @param acc_arg the argument loaded into the accumulator
+ * @param acc_off the data offset loaded into the accumulator
  *
  * Generate the BPF instructions to execute the filter specified by the given
  * chain node.  Returns a pointer to the instruction block on success, NULL on
@@ -599,16 +601,16 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val)
  */
 static struct bpf_blk *_gen_bpf_chain_node(struct bpf_state *state,
 					   const struct db_arg_chain_tree *node,
-					   int *acc_arg)
+					   int *acc_off)
 {
 	struct bpf_blk *blk = NULL;
 	struct bpf_instr instr;
 
-	if (node->arg != *acc_arg) {
+	if (_BPF_OFFSET_ARG(node->arg) != *acc_off) {
 		/* reload the accumulator */
-		*acc_arg = node->arg;
+		*acc_off = _BPF_OFFSET_ARG(node->arg);
 		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARG(*acc_arg));
+			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(*acc_off));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto chain_node_failure;
@@ -696,7 +698,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 	struct bpf_instr instr;
 	struct bpf_instr *i_iter;
 	const struct db_arg_chain_tree *l_iter;
-	int acc_arg = -1;
+	int acc_off = -1;
 	unsigned int iter;
 
 	if (node == NULL) {
@@ -721,7 +723,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		blk = _gen_bpf_chain_node(state, l_iter, &acc_arg);
+		blk = _gen_bpf_chain_node(state, l_iter, &acc_off);
 		if (blk == NULL)
 			goto chain_lvl_failure;
 		if (b_head != NULL) {
