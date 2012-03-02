@@ -424,17 +424,15 @@ static void _state_release(struct bpf_state *state)
  * @param state the BPF state
  * @param blk_p pointer to the BPF instruction block
  * @param found initial found value (see _hsh_find_once() for description)
- * @param h_val_ret generated hash value of the given block
  *
  * This function adds an instruction block to the hash table, and frees the
  * block if an identical instruction block already exists, returning a pointer
- * to the original block in place of the given block.  The hash value of the
- * block is also returned via the @h_val_ret parameter.  Returns zero on
- * success and negative values on failure.
+ * to the original block in place of the given block.  Returns zero on success
+ * and negative values on failure.
  *
  */
 static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
-		    unsigned int found, uint64_t *h_val_ret)
+		    unsigned int found)
 {
 	uint64_t h_val;
 	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
@@ -471,7 +469,6 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				__blk_free(state, blk);
 				h_iter->refcnt++;
 				*blk_p = h_iter->blk;
-				*h_val_ret = h_val;
 				return 0;
 			} else if (h_iter->blk->hash == h_val) {
 				/* hash collision */
@@ -493,7 +490,6 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	} else
 		state->htbl[h_val & _BPF_HASH_MASK] = h_new;
 
-	*h_val_ret = h_val;
 	return 0;
 }
 
@@ -818,7 +814,6 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 {
 	int rc;
 	unsigned int iter;
-	uint64_t h_val;
 	struct bpf_blk *b_new;
 	struct bpf_instr *i_iter;
 
@@ -890,7 +885,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 	}
 
 	/* insert the block into the hash table */
-	rc = _hsh_add(state, &blk, 0, &h_val);
+	rc = _hsh_add(state, &blk, 0);
 	if (rc < 0)
 		return NULL;
 
@@ -932,7 +927,6 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	int rc;
 	struct bpf_instr instr;
 	struct bpf_blk *blk_c, *blk_s;
-	uint64_t h_val;
 
 	/* generate the argument chains */
 	blk_c = _gen_bpf_chain(state, sys->chains);
@@ -946,7 +940,7 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	if (blk_s == NULL)
 		return NULL;
 	blk_s->priority = sys->priority;
-	rc = _hsh_add(state, &blk_s, 1, &h_val);
+	rc = _hsh_add(state, &blk_s, 1);
 	if (rc < 0)
 		return NULL;
 
@@ -988,9 +982,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	def_blk = _blk_append(state, NULL, &instr);
 	if (def_blk == NULL)
 		return -ENOMEM;
-	rc = _hsh_add(state, &def_blk, 1, &state->def_hsh);
+	rc = _hsh_add(state, &def_blk, 1);
 	if (rc < 0)
 		return rc;
+	state->def_hsh = def_blk->hash;
 
 	/* create the syscall filters and add them to the top block group */
 	db_list_foreach(s_iter, db->syscalls) {
