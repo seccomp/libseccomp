@@ -1090,7 +1090,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* resolve any TGT_NXT jumps at the top level */
 	b_iter = b_head;
-	while (b_iter != NULL && b_iter->next != NULL) {
+	do {
 		b_jmp = b_iter->next;
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
 			i_iter = &b_iter->blks[iter];
@@ -1101,14 +1101,14 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			/* we shouldn't need to worry about a TGT_NXT in k */
 		}
 		b_iter = b_iter->next;
-	}
+	} while (b_iter != NULL && b_iter->next != NULL);
 
 	/* pull in all of the TGT_PTR_HSH jumps, one layer at a time */
 	do {
 		res_cnt = 0;
 		b_iter = b_tail;
 		/* go through the block list backwards (no reverse jumps) */
-		while (b_iter != NULL) {
+		do {
 			/* look for jumps - backwards (shorter jumps) */
 			for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
 				i_iter = &b_iter->blks[iter];
@@ -1153,10 +1153,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				}
 			}
 			b_iter = b_iter->prev;
-		}
-		/* reset the tail pointer as it may have changed */
-		while (b_tail->next != NULL)
-			b_tail = b_tail->next;
+		} while (b_iter != NULL);
 	} while (res_cnt != 0);
 
 	/* load the syscall into the accumulator */
@@ -1173,7 +1170,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	/* check for long jumps and insert if necessary, we also verify that
 	 * all our jump targets are valid at this point in the process */
 	b_iter = b_tail;
-	while (b_iter != NULL) {
+	do {
 		res_cnt = 0;
 		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
 			i_iter = &b_iter->blks[iter];
@@ -1214,10 +1211,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		}
 		if (res_cnt == 0)
 			b_iter = b_iter->prev;
-	}
+	} while (b_iter != NULL);
 
 	/* build the bpf program */
-	while (b_head != NULL) {
+	do {
 		b_iter = b_head;
 		/* resolve the TGT_PTR_HSH jumps */
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
@@ -1270,7 +1267,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		/* we're done with the block, free it */
 		b_head = b_iter->next;
 		_blk_free(state, b_iter);
-	}
+	} while (b_head != NULL);
 
 	return 0;
 
