@@ -1217,8 +1217,8 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	}
 
 	/* build the bpf program */
-	b_iter = b_head;
-	while (b_iter != NULL) {
+	while (b_head != NULL) {
+		b_iter = b_head;
 		/* resolve the TGT_PTR_HSH jumps */
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
 			i_iter = &b_iter->blks[iter];
@@ -1268,9 +1268,8 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			goto build_bpf_free_blks;
 
 		/* we're done with the block, free it */
-		b_jmp = b_iter->next;
+		b_head = b_iter->next;
 		_blk_free(state, b_iter);
-		b_iter = b_jmp;
 	}
 
 	return 0;
