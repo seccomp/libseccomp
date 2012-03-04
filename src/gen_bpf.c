@@ -956,7 +956,7 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		jmp_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (b_jmp == b_tgt)
+	if (jmp_len <= _BPF_JMP_MAX && b_jmp == b_tgt)
 		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
@@ -969,7 +969,7 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		jmp_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (b_jmp->hash == tgt_hash)
+	if (jmp_len <= _BPF_JMP_MAX && b_jmp->hash == tgt_hash)
 		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
