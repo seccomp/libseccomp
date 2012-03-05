@@ -19,8 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* XXX - only 32bit at present, although 64bit should be easy to add */
-
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
