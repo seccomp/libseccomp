@@ -28,6 +28,7 @@
 
 #include <seccomp.h>
 
+#include "arch.h"
 #include "gen_bpf.h"
 #include "db.h"
 #include "hash.h"
@@ -114,7 +115,7 @@ struct bpf_hash_bkt {
 #define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
 	/* target arch */
-	struct bpf_arch bpf_tgt;
+	struct arch_def bpf_tgt;
 
 	/* filter actions */
 	uint32_t def_action;
@@ -720,10 +721,10 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	 *	  later */
 
 	/* determine the proper argument offsets */
-	if (state->bpf_tgt.endian == _BPF_ENDIAN_LITTLE) {
+	if (state->bpf_tgt.endian == ARCH_ENDIAN_LITTLE) {
 		acc_desired_hi = _BPF_OFFSET_ARG64_LE_HI(node->arg);
 		acc_desired_lo = _BPF_OFFSET_ARG64_LE_LO(node->arg);
-	} else if (state->bpf_tgt.endian == _BPF_ENDIAN_BIG) {
+	} else if (state->bpf_tgt.endian == ARCH_ENDIAN_BIG) {
 		acc_desired_hi = _BPF_OFFSET_ARG64_BE_HI(node->arg);
 		acc_desired_lo = _BPF_OFFSET_ARG64_BE_LO(node->arg);
 	} else
@@ -870,9 +871,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		if (state->bpf_tgt.word_len == _BPF_WLEN_64)
+		if (state->bpf_tgt.size == ARCH_SIZE_64)
 			blk = _gen_bpf_node_64(state, l_iter);
-		else if (state->bpf_tgt.word_len == _BPF_WLEN_32)
+		else if (state->bpf_tgt.size == ARCH_SIZE_32)
 			blk = _gen_bpf_node_32(state, l_iter, &acc_off);
 		else
 			goto chain_lvl_failure;
@@ -1441,7 +1442,7 @@ build_bpf_free_blks:
  *
  */
 struct bpf_program *gen_bpf_generate(const struct db_filter *db,
-				     const struct bpf_arch *arch)
+				     const struct arch_def *arch)
 {
 	int rc;
 	struct bpf_state state;

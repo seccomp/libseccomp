@@ -25,11 +25,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
-#include <asm/bitsperlong.h>
 #include <sys/prctl.h>
 
 #include <seccomp.h>
 
+#include "arch.h"
 #include "db.h"
 #include "gen_pfc.h"
 #include "gen_bpf.h"
@@ -45,24 +45,6 @@
 /* the underlying code supports multiple simultaneous seccomp filters, but in
  * practice we really only need one per-process right now, and this is it */
 static struct db_filter *filter = NULL;
-
-/* define the native system architecture */
-static const struct bpf_arch bpf_arch_native = {
-#if __BITS_PER_LONG == 32
-	_BPF_WLEN_32,
-#elif __BITS_PER_LONG == 64
-	_BPF_WLEN_64,
-#else
-	_BPF_WLEN_UNSPEC,
-#endif /* BITS_PER_LONG */
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	_BPF_ENDIAN_LITTLE,
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	_BPF_ENDIAN_BIG,
-#else
-	_BPF_ENDIAN_UNSPEC,
-#endif /* __BYTE_ORDER */
-};
 
 /**
  * Validate the seccomp action
@@ -163,7 +145,7 @@ int seccomp_enable(void)
 	if (filter == NULL)
 		return -EFAULT;
 
-	program = gen_bpf_generate(filter, &bpf_arch_native);
+	program = gen_bpf_generate(filter, &arch_def_native);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = prctl(PR_ATTACH_SECCOMP_FILTER, program);
@@ -249,7 +231,7 @@ int seccomp_gen_bpf(int fd)
 	if (filter == NULL)
 		return -EFAULT;
 
-	program = gen_bpf_generate(filter, &bpf_arch_native);
+	program = gen_bpf_generate(filter, &arch_def_native);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));

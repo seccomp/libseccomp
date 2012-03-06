@@ -34,7 +34,7 @@ include ../version_info
 LIB_STATIC = libseccomp.a
 LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
-OBJS = api.o db.o hash.o gen_pfc.o gen_bpf.o
+OBJS = api.o arch.o db.o hash.o gen_pfc.o gen_bpf.o
 DEPS = $(OBJS:%.o=%.d)
 
 #

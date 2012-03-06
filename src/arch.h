@@ -1,5 +1,5 @@
 /**
- * Seccomp BPF Translator
+ * Enhanced Seccomp Architecture/Machine Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,32 +19,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TRANSLATOR_BPF_H
-#define _TRANSLATOR_BPF_H
+#ifndef _ARCH_H
+#define _ARCH_H
 
 #include <inttypes.h>
 
-#include "arch.h"
-#include "db.h"
-
-/* XXX - should we just use "sock_filter" in linux/filter.h? the name is
- *       awkward, but using the standard struct might be a good idea */
-struct bpf_instr_raw {
-	uint16_t op;
-	uint8_t jt;
-	uint8_t jf;
-	uint32_t k;
-} __attribute__ ((packed));
-
-struct bpf_program {
-	uint16_t blk_cnt;
-	struct bpf_instr_raw *blks;
+struct arch_def {
+	uint32_t token;
+	enum {
+		ARCH_SIZE_UNSPEC = 0,
+		ARCH_SIZE_32 = 32,
+		ARCH_SIZE_64 = 64,
+	} size;
+	enum {
+		ARCH_ENDIAN_UNSPEC = 0,
+		ARCH_ENDIAN_LITTLE,
+		ARCH_ENDIAN_BIG,
+	} endian;
 };
-#define BPF_PGM_SIZE(x) \
-	((x)->blk_cnt * sizeof(*((x)->blks)))
 
-struct bpf_program *gen_bpf_generate(const struct db_filter *db,
-				     const struct arch_def *arch);
-void gen_bpf_destroy(struct bpf_program *program);
+/* arch_def for the current process */
+extern const struct arch_def arch_def_native;
 
 #endif

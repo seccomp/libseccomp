@@ -1,5 +1,5 @@
 /**
- * Seccomp BPF Translator
+ * Enhanced Seccomp Architecture/Machine Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,32 +19,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TRANSLATOR_BPF_H
-#define _TRANSLATOR_BPF_H
-
-#include <inttypes.h>
+#include <stdlib.h>
+#include <asm/bitsperlong.h>
 
 #include "arch.h"
-#include "db.h"
 
-/* XXX - should we just use "sock_filter" in linux/filter.h? the name is
- *       awkward, but using the standard struct might be a good idea */
-struct bpf_instr_raw {
-	uint16_t op;
-	uint8_t jt;
-	uint8_t jf;
-	uint32_t k;
-} __attribute__ ((packed));
-
-struct bpf_program {
-	uint16_t blk_cnt;
-	struct bpf_instr_raw *blks;
+const struct arch_def arch_def_native = {
+	.token = 0,
+#if __BITS_PER_LONG == 32
+	.size = ARCH_SIZE_32,
+#elif __BITS_PER_LONG == 64
+	.size = ARCH_SIZE_64,
+#else
+	.size = ARCH_SIZE_UNSPEC,
+#endif /* BITS_PER_LONG */
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	.endian = ARCH_ENDIAN_LITTLE,
+#elif __BYTE_ORDER == __BIG_ENDIAN
+	.endian = ARCH_ENDIAN_BIG,
+#else
+	.endian = ARCH_ENDIAN_UNSPEC,
+#endif /* __BYTE_ORDER */
 };
-#define BPF_PGM_SIZE(x) \
-	((x)->blk_cnt * sizeof(*((x)->blks)))
-
-struct bpf_program *gen_bpf_generate(const struct db_filter *db,
-				     const struct arch_def *arch);
-void gen_bpf_destroy(struct bpf_program *program);
-
-#endif
