@@ -41,7 +41,8 @@ TESTS = 01-allow \
 	02-basic \
 	03-basic-chains \
 	04-multilevel-chains \
-	05-long-jumps
+	05-long-jumps \
+	06-actions
 
 DEPS = $(TESTS:%=%.d)
 
