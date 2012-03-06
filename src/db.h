@@ -41,7 +41,7 @@ struct db_arg_chain_tree {
 	unsigned long datum;
 
 	/* if non-zero, this is the last node and the value is desired action */
-	enum scmp_flt_action action;
+	uint32_t action;
 	unsigned int action_flag;
 
 	/* list of nodes on this level */
@@ -66,19 +66,23 @@ struct db_arg_chain_tree {
 struct db_sys_list {
 	/* native syscall number */
 	unsigned int num;
+
+	/* priority - higher is better */
+	unsigned int priority;
+
 	/* the argument chain heads */
 	struct db_arg_chain_tree *chains;
 	unsigned int node_cnt;
 
-	/* priority - higher is better */
-	unsigned int priority;
+	/* action in the case of no argument chains */
+	uint32_t action;
 
 	struct db_sys_list *next;
 };
 
 struct db_filter {
 	/* action to take if we don't match an explicit allow/deny */
-	enum scmp_flt_action def_action;
+	uint32_t def_action;
 
 	/* syscall filters, kept as a sorted single-linked list */
 	struct db_sys_list *syscalls;
@@ -96,11 +100,10 @@ struct db_filter {
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
 
-struct db_filter *db_new(enum scmp_flt_action def_action);
+struct db_filter *db_new(uint32_t def_action);
 void db_destroy(struct db_filter *db);
 
-int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
-		   unsigned int syscall,
+int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		   unsigned int chain_len, va_list chain_list);
 
 struct db_sys_list *db_find_syscall(const struct db_filter *db,

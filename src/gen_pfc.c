@@ -20,6 +20,7 @@
  */
 
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -33,10 +34,28 @@
 
 /**
  * Display a string representation of the filter action
+ * @param fds the file stream to send the output
  * @param action the action
  */
-#define _pfc_action(action) \
-	((action) == SCMP_ACT_ALLOW ? "ALLOW" : "DENY")
+static void _pfc_action(FILE *fds, uint32_t action)
+{
+	switch (action & 0xffff0000) {
+	case SCMP_ACT_KILL:
+		fprintf(fds, " action KILL;\n");
+		break;
+	case SCMP_ACT_TRAP:
+		fprintf(fds, " action TRAP;\n");
+		break;
+	case SCMP_ACT_ERRNO(0):
+		fprintf(fds, " action ERRNO(%u);\n", (action & 0x0000ffff));
+		break;
+	case SCMP_ACT_ALLOW:
+		fprintf(fds, " action ALLOW;\n");
+		break;
+	default:
+		fprintf(fds, " action 0x%x;\n", action);
+	}
+}
 
 /**
  * Indent the output stream
@@ -114,8 +133,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 		/* true result */
 		if ((c_iter->action != 0) && (c_iter->action_flag)) {
 			_indent(fds, lvl + 1);
-			fprintf(fds, " action %s;\n",
-				_pfc_action(c_iter->action));
+			_pfc_action(fds, c_iter->action);
 		} else if (c_iter->nxt_t != NULL)
 			_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
 
@@ -124,8 +142,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 			_indent(fds, lvl);
 			fprintf(fds, " else\n");
 			_indent(fds, lvl + 1);
-			fprintf(fds, " action %s;\n",
-				_pfc_action(c_iter->action));
+			_pfc_action(fds, c_iter->action);
 		} else if (c_iter->nxt_f != NULL) {
 			_indent(fds, lvl);
 			fprintf(fds, " else\n");
@@ -138,7 +155,6 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 
 /**
  * Generate pseudo filter code for a syscall
- * @param act the filter action
  * @param sys the syscall filter
  * @param fds the file stream to send the output
  *
@@ -146,8 +162,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
  * syscall filter and writes it to the given output stream.
  *
  */
-static void _gen_pfc_syscall(enum scmp_flt_action act,
-			     const struct db_sys_list *sys, FILE *fds)
+static void _gen_pfc_syscall(const struct db_sys_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
 
@@ -158,8 +173,8 @@ static void _gen_pfc_syscall(enum scmp_flt_action act,
 		_gen_pfc_chain(sys->chains, 0, fds);
 		fprintf(fds, " syscall_%d_end:\n", sys_num);
 	} else {
-		fprintf(fds, " if ($syscall == %d) action %s;\n",
-			sys_num, _pfc_action(act));
+		fprintf(fds, " if ($syscall == %d)", sys_num);
+		_pfc_action(fds, sys->action);
 	}
 }
 
@@ -192,11 +207,9 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "# pseudo filter code start\n");
 	fprintf(fds, "#\n");
 	db_list_foreach(s_iter, db->syscalls)
-		_gen_pfc_syscall((db->def_action == SCMP_ACT_DENY ?
-				  SCMP_ACT_ALLOW : SCMP_ACT_DENY ),
-				 s_iter, fds);
+		_gen_pfc_syscall(s_iter, fds);
 	fprintf(fds, "# default action\n");
-	fprintf(fds, " action %s;\n", _pfc_action(db->def_action));
+	_pfc_action(fds, db->def_action);
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");

@@ -211,9 +211,14 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 				/* XXX - accumulator? */
 				printf("$acc");
 			} else if (BPF_SRC(bpf->op) == BPF_K) {
-				if (bpf->k == 0)
-					printf("DENY");
-				else if (bpf->k == 0xffffffff)
+				if (bpf->k == 0x00000000)
+					printf("KILL");
+				else if (bpf->k == 0x00020000)
+					printf("TRAP");
+				else if ((bpf->k & 0xffff0000) == 0x00030000)
+					printf("ERRNO(%u)",
+					       (bpf->k & 0x0000ffff));
+				else if (bpf->k == 0x7fff0000)
 					printf("ALLOW");
 				else
 					printf("0x%.8x", bpf->k);

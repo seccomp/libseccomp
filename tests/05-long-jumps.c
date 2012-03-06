@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		return -EINVAL;
 	}
 
-	rc = seccomp_init(SCMP_ACT_DENY);
+	rc = seccomp_init(SCMP_ACT_KILL);
 	if (rc != 0)
 		return rc;
 

@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -179,7 +180,7 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
  * Returns a pointer to the DB on success, NULL on failure.
  *
  */
-struct db_filter *db_new(enum scmp_flt_action def_action)
+struct db_filter *db_new(uint32_t def_action)
 {
 	struct db_filter *db;
 
@@ -227,8 +228,7 @@ void db_destroy(struct db_filter *db)
  * filter DB. Returns zero on success, negative values on failure.
  *
  */
-int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
-		   unsigned int syscall,
+int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		   unsigned int chain_len, va_list chain_list)
 {
 	int rc = -ENOMEM;
@@ -321,7 +321,8 @@ int db_add_syscall(struct db_filter *db, enum scmp_flt_action action,
 		/* set the leaf node */
 		c_iter->action = action;
 		c_iter->action_flag = tf_flag;
-	}
+	} else
+		s_new->action = action;
 	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
 
 	/* no more failures allowed after this point that would result in the

@@ -22,6 +22,7 @@
 #ifndef _SECCOMP_H
 #define _SECCOMP_H
 
+#include <inttypes.h>
 #include <asm/unistd.h>
 
 /* XXX - see notes in seccomp_add_syscall() about pseudo syscalls, we'll need
@@ -33,12 +34,11 @@
 
 #define SCMP_SYS(x)		__NR_##x
 
-enum scmp_flt_action {
-	_SCMP_ACT_MIN = 0,	/* sentinel */
-	SCMP_ACT_ALLOW,
-	SCMP_ACT_DENY,
-	_SCMP_ACT_MAX,		/* sentinel */
-};
+/* XXX - the constants here should be replaced with the seccomp #defines */
+#define SCMP_ACT_KILL		0x00000000U
+#define SCMP_ACT_TRAP		0x00020000U
+#define SCMP_ACT_ERRNO(x)	(0x00030000U | ((x) & 0x0000ffff))
+#define SCMP_ACT_ALLOW		0x7fff0000U
 
 enum scmp_compare {
 	_SCMP_CMP_MIN = 0,	/* sentinel */
@@ -52,13 +52,13 @@ enum scmp_compare {
 	_SCMP_CMP_MAX,		/* sentinel */
 };
 
-int seccomp_init(enum scmp_flt_action def_action);
-int seccomp_reset(enum scmp_flt_action def_action);
+int seccomp_init(uint32_t def_action);
+int seccomp_reset(uint32_t def_action);
 void seccomp_release(void);
 
 int seccomp_enable(void);
 
-int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
+int seccomp_add_syscall(uint32_t action, int syscall,
 			unsigned int chain_len, ...);
 
 int seccomp_gen_pfc(int fd);

@@ -21,6 +21,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -83,6 +84,7 @@ static void exit_fault(unsigned int rc)
 /**
  * Handle a BPF program error
  * @param rc the error or return code
+ * @param line the line number
  *
  * Print an "ERROR" to stderr to indicate a program error, and an errno value
  * if the simulator is running in verbose mode, then exit with ENOEXEC.
@@ -98,28 +100,25 @@ static void exit_error(unsigned int rc, unsigned int line)
 }
 
 /**
- * Handle a simulator ALLOW action
+ * Handle a simulator return/action
+ * @param action the return value
+ * @param line the line number
  *
- * Print an "ALLOW" to stdout to indicate that the BPF program would allow the
- * syscall/arguments provided on the command line and exit with 0.
- *
- */
-static void end_allow(void)
-{
-	fprintf(stdout, "ALLOW\n");
-	exit(0);
-}
-
-/**
- * Handle a simulator DENY action
- *
- * Print a "DENY" to stdout to indicate that the BPF program would not allow
- * the syscall/arguments provided on the command line and exit with 0.
+ * Display the action to stdout and exit with 0.
  *
  */
-static void end_deny(void)
+static void end_action(uint32_t action, unsigned int line)
 {
-	fprintf(stdout, "DENY\n");
+	if (action == 0x00000000)
+		fprintf(stdout, "KILL");
+	else if (action == 0x00020000)
+		fprintf(stdout, "TRAP");
+	else if ((action & 0xffff0000) == 0x00030000)
+		fprintf(stdout, "ERRNO(%u)", (action & 0x0000ffff));
+	else if (action == 0x7fff0000)
+		fprintf(stdout, "ALLOW");
+	else
+		exit_error(EDOM, line);
 	exit(0);
 }
 
@@ -183,12 +182,8 @@ static void bpf_execute(const struct bpf_program *prg,
 				ip += bpf->jf;
 			break;
 		case BPF_RET+BPF_K:
-			if (bpf->k == BPF_SCMP_DENY)
-				end_deny();
-			else if (bpf->k == BPF_SCMP_ALLOW)
-				end_allow();
-			else
-				exit_error(EDOM, ip_c);
+			end_action(bpf->k, ip_c);
+			break;
 		default:
 			/* XXX - since we don't support the full bpf language
 			 *       just yet, this could be either a fault or

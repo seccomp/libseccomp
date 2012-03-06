@@ -21,6 +21,7 @@
 
 #include <endian.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -64,6 +65,27 @@ static const struct bpf_arch bpf_arch_native = {
 };
 
 /**
+ * Validate the seccomp action
+ * @param action the seccomp action
+ *
+ * Verify that the given action is a valid seccomp action; return zero if
+ * valid, -EINVAL if invalid.
+ */
+static int _seccomp_action_valid(uint32_t action)
+{
+	if (action == SCMP_ACT_KILL)
+		return 0;
+	else if (action == SCMP_ACT_TRAP)
+		return 0;
+	else if (action == SCMP_ACT_ERRNO(action & 0x0000ffff))
+		return 0;
+	else if (action == SCMP_ACT_ALLOW)
+		return 0;
+
+	return -EINVAL;
+}
+
+/**
  * Initialize the filter state
  * @param def_action the default filter action
  *
@@ -72,10 +94,13 @@ static const struct bpf_arch bpf_arch_native = {
  * state is initialized.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_init(enum scmp_flt_action def_action)
+int seccomp_init(uint32_t def_action)
 {
-	if (def_action <= _SCMP_ACT_MIN || def_action >= _SCMP_ACT_MAX)
-		return -EINVAL;
+	int rc;
+
+	rc = _seccomp_action_valid(def_action);
+	if (rc < 0)
+		return rc;
 
 	if (filter != NULL)
 		return -EEXIST;
@@ -94,10 +119,13 @@ int seccomp_init(enum scmp_flt_action def_action)
  * values on failure.
  *
  */
-int seccomp_reset(enum scmp_flt_action def_action)
+int seccomp_reset(uint32_t def_action)
 {
-	if (def_action != SCMP_ACT_ALLOW && def_action != SCMP_ACT_DENY)
-		return -EINVAL;
+	int rc;
+
+	rc = _seccomp_action_valid(def_action);
+	if (rc < 0)
+		return rc;
 
 	if (filter != NULL)
 		db_destroy(filter);
@@ -166,7 +194,7 @@ int seccomp_enable(void)
  * success, negative values on failure.
  *
  */
-int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
+int seccomp_add_syscall(uint32_t action, int syscall,
 			unsigned int chain_len, ...)
 {
 	int rc;
@@ -175,9 +203,9 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
 	if (filter == NULL)
 		return -EFAULT;
 
-	/* XXX - not sure it still makes sense to have the action as a
-	 *       parameter, but it does help reinforce what should happen
-	 *       when reading the app code which calls us */
+	rc = _seccomp_action_valid(action);
+	if (rc < 0)
+		return rc;
 	if (action == filter->def_action)
 		return -EPERM;
 
@@ -187,7 +215,7 @@ int seccomp_add_syscall(enum scmp_flt_action action, int syscall,
 	 *       e.g. all the socketcall() syscalls on x86 will be represented
 	 *       with negative syscall numbers - we need a thin shim layer
 	 *       here to convert these pseudo syscalls into real filters (check
-	 * 	 the a0 value, etc.) */
+	 *       the a0 value, etc.) */
 
 	va_start(chain_list, chain_len);
 	rc = db_add_syscall(filter, action, syscall, chain_len, chain_list);
