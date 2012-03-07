@@ -54,7 +54,7 @@ ECHO ?= echo
 
 SED ?= sed
 
-# we require gcc specific functionality (see the MAKEDEP definitions below)
+# we require gcc specific functionality
 GCC ?= gcc
 
 #
@@ -86,10 +86,10 @@ VERSION_HDR = src/version.h
 #
 
 ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
-COMPILE = @echo " CC $@"; $(CC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
-COMPILE_EXEC = @echo " CC $@"; $(CC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
-LINK_EXEC = @echo " LD $@"; $(CC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
-LINK_LIB  = @echo " LD $@ "; $(CC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
+COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
+COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
+LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
+LINK_LIB  = @echo " LD $@ "; $(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
 
 #
 # default build targets

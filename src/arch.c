@@ -21,11 +21,19 @@
 
 #include <stdlib.h>
 #include <asm/bitsperlong.h>
+#include <linux/audit.h>
 
 #include "arch.h"
 
 const struct arch_def arch_def_native = {
-	.token = 0,
+#if __i386__
+	.token = AUDIT_ARCH_I386,
+#elif __x86_64__
+	.token = AUDIT_ARCH_X86_64,
+#else
+#error the arch code needs to know about your machine type
+#endif /* machine type guess */
+
 #if __BITS_PER_LONG == 32
 	.size = ARCH_SIZE_32,
 #elif __BITS_PER_LONG == 64
@@ -33,6 +41,7 @@ const struct arch_def arch_def_native = {
 #else
 	.size = ARCH_SIZE_UNSPEC,
 #endif /* BITS_PER_LONG */
+
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	.endian = ARCH_ENDIAN_LITTLE,
 #elif __BYTE_ORDER == __BIG_ENDIAN
