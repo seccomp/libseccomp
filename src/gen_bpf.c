@@ -80,12 +80,6 @@ struct bpf_instr {
 };
 #define _BPF_OFFSET_SYSCALL		0
 #define _BPF_SYSCALL			_BPF_K(_BPF_OFFSET_SYSCALL)
-#define _BPF_OFFSET_ARG32(x)		(8 + ((x) * 4))
-#define _BPF_OFFSET_ARG64_BASE(x)	(8 + ((x) * 8))
-#define _BPF_OFFSET_ARG64_LE_LO(x)	(_BPF_OFFSET_ARG64_BASE(x) + 0)
-#define _BPF_OFFSET_ARG64_LE_HI(x)	(_BPF_OFFSET_ARG64_BASE(x) + 4)
-#define _BPF_OFFSET_ARG64_BE_LO(x)	(_BPF_OFFSET_ARG64_BASE(x) + 4)
-#define _BPF_OFFSET_ARG64_BE_HI(x)	(_BPF_OFFSET_ARG64_BASE(x) + 0)
 
 struct bpf_blk {
 	struct bpf_instr *blks;
@@ -623,14 +617,18 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 					const struct db_arg_chain_tree *node,
 					int *acc_off)
 {
+	int acc_desired;
 	struct bpf_blk *blk = NULL;
 	struct bpf_instr instr;
 
-	if (_BPF_OFFSET_ARG32(node->arg) != *acc_off) {
+	acc_desired = arch_arg_offset(state->bpf_tgt, node->arg);
+	if (acc_desired < 0)
+		goto node_32_failure;
+	if (acc_desired != *acc_off) {
 		/* reload the accumulator */
-		*acc_off = _BPF_OFFSET_ARG32(node->arg);
+		*acc_off = acc_desired;
 		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(*acc_off));
+			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto node_32_failure;
@@ -707,9 +705,9 @@ node_32_failure:
 static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 					const struct db_arg_chain_tree *node)
 {
+	int acc_desired_lo, acc_desired_hi;
 	struct bpf_blk *blk = NULL;
 	struct bpf_instr instr;
-	unsigned int acc_desired_lo, acc_desired_hi;
 
 	/* NOTE - we can certainly come up with a more optimized approach,
 	 *	  especially when you consider how we always reload the
@@ -718,13 +716,11 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	 *	  later */
 
 	/* determine the proper argument offsets */
-	if (state->bpf_tgt->endian == ARCH_ENDIAN_LITTLE) {
-		acc_desired_hi = _BPF_OFFSET_ARG64_LE_HI(node->arg);
-		acc_desired_lo = _BPF_OFFSET_ARG64_LE_LO(node->arg);
-	} else if (state->bpf_tgt->endian == ARCH_ENDIAN_BIG) {
-		acc_desired_hi = _BPF_OFFSET_ARG64_BE_HI(node->arg);
-		acc_desired_lo = _BPF_OFFSET_ARG64_BE_LO(node->arg);
-	} else
+	acc_desired_hi = arch_arg_offset_hi(state->bpf_tgt, node->arg);
+	if (acc_desired_hi < 0)
+		goto node_64_failure;
+	acc_desired_lo = arch_arg_offset_lo(state->bpf_tgt, node->arg);
+	if (acc_desired_hi < 0)
 		goto node_64_failure;
 
 	/* load the high 32 bit word into the accumulator first */
