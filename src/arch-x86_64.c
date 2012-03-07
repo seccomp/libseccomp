@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp Architecture/Machine Specific Code
+ * Enhanced Seccomp x86_64 Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,40 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <errno.h>
 #include <stdlib.h>
-#include <asm/bitsperlong.h>
-#include <linux/audit.h>
 
 #include "arch.h"
-#include "arch-i386.h"
 #include "arch-x86_64.h"
-
-const struct arch_def arch_def_native = {
-#if __i386__
-	.token = AUDIT_ARCH_I386,
-#elif __x86_64__
-	.token = AUDIT_ARCH_X86_64,
-#else
-#error the arch code needs to know about your machine type
-#endif /* machine type guess */
-
-#if __BITS_PER_LONG == 32
-	.size = ARCH_SIZE_32,
-#elif __BITS_PER_LONG == 64
-	.size = ARCH_SIZE_64,
-#else
-	.size = ARCH_SIZE_UNSPEC,
-#endif /* BITS_PER_LONG */
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	.endian = ARCH_ENDIAN_LITTLE,
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	.endian = ARCH_ENDIAN_BIG,
-#else
-	.endian = ARCH_ENDIAN_UNSPEC,
-#endif /* __BYTE_ORDER */
-};
 
 /**
  * Determine the argument offset for the lower 32 bits
@@ -64,16 +34,9 @@ const struct arch_def arch_def_native = {
  * values on failure.
  *
  */
-int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
+int x86_64_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_arg_offset_lo(arch, arg);
-	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset_lo(arch, arg);
-	default:
-		return -EDOM;
-	}
+	return x86_64_arg_offset(arch, arg);
 }
 
 /**
@@ -86,14 +49,9 @@ int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
  * negative values on failure.
  *
  */
-int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
+int x86_64_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset_hi(arch, arg);
-	default:
-		return -EDOM;
-	}
+	return x86_64_arg_offset(arch, arg) + 4;
 }
 
 /**
@@ -105,14 +63,7 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
  * definition.  Returns the offset on success, negative values on failure.
  *
  */
-int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
+int x86_64_arg_offset(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_arg_offset(arch, arg);
-	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset(arch, arg);
-	default:
-		return -EDOM;
-	}
+	return 8 + (arg * 8);
 }
