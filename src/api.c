@@ -121,17 +121,10 @@ int seccomp_init(uint32_t def_action)
  */
 int seccomp_reset(uint32_t def_action)
 {
-	int rc;
-
-	rc = _seccomp_action_valid(def_action);
-	if (rc < 0)
-		return rc;
-
 	if (filter != NULL)
 		db_destroy(filter);
-	filter = db_new(def_action);
 
-	return (filter ? 0 : -ENOMEM);
+	return seccomp_init(def_action);
 }
 
 /**
