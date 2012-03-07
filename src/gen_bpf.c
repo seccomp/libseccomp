@@ -115,7 +115,7 @@ struct bpf_hash_bkt {
 #define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
 	/* target arch */
-	struct arch_def bpf_tgt;
+	const struct arch_def *bpf_tgt;
 
 	/* filter actions */
 	uint32_t def_action;
@@ -721,10 +721,10 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	 *	  later */
 
 	/* determine the proper argument offsets */
-	if (state->bpf_tgt.endian == ARCH_ENDIAN_LITTLE) {
+	if (state->bpf_tgt->endian == ARCH_ENDIAN_LITTLE) {
 		acc_desired_hi = _BPF_OFFSET_ARG64_LE_HI(node->arg);
 		acc_desired_lo = _BPF_OFFSET_ARG64_LE_LO(node->arg);
-	} else if (state->bpf_tgt.endian == ARCH_ENDIAN_BIG) {
+	} else if (state->bpf_tgt->endian == ARCH_ENDIAN_BIG) {
 		acc_desired_hi = _BPF_OFFSET_ARG64_BE_HI(node->arg);
 		acc_desired_lo = _BPF_OFFSET_ARG64_BE_LO(node->arg);
 	} else
@@ -871,9 +871,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		if (state->bpf_tgt.size == ARCH_SIZE_64)
+		if (state->bpf_tgt->size == ARCH_SIZE_64)
 			blk = _gen_bpf_node_64(state, l_iter);
-		else if (state->bpf_tgt.size == ARCH_SIZE_32)
+		else if (state->bpf_tgt->size == ARCH_SIZE_32)
 			blk = _gen_bpf_node_32(state, l_iter, &acc_off);
 		else
 			goto chain_lvl_failure;
@@ -1435,20 +1435,18 @@ build_bpf_free_blks:
 /**
  * Generate a BPF representation of the filter DB
  * @param db the seccomp filter DB
- * @param arch the target architecture specifics
  *
  * This function generates a BPF representation of the given filter DB.
  * Returns a pointer to a valid bpf_program on success, NULL on failure.
  *
  */
-struct bpf_program *gen_bpf_generate(const struct db_filter *db,
-				     const struct arch_def *arch)
+struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 {
 	int rc;
 	struct bpf_state state;
 
 	memset(&state, 0, sizeof(state));
-	state.bpf_tgt = *arch;
+	state.bpf_tgt = db->arch;
 	state.def_action = db->def_action;
 
 	state.bpf = malloc(sizeof(*(state.bpf)));

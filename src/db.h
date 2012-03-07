@@ -26,6 +26,8 @@
 
 #include <seccomp.h>
 
+#include "arch.h"
+
 /* XXX - need to provide doxygen comments for the types here */
 
 struct db_arg_chain_tree {
@@ -81,6 +83,9 @@ struct db_sys_list {
 };
 
 struct db_filter {
+	/* target architecture */
+	const struct arch_def *arch;
+
 	/* action to take if we don't match an explicit allow/deny */
 	uint32_t def_action;
 
@@ -100,7 +105,7 @@ struct db_filter {
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
 
-struct db_filter *db_new(uint32_t def_action);
+struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action);
 void db_destroy(struct db_filter *db);
 
 int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,

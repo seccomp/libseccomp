@@ -86,7 +86,7 @@ int seccomp_init(uint32_t def_action)
 
 	if (filter != NULL)
 		return -EEXIST;
-	filter = db_new(def_action);
+	filter = db_new(&arch_def_native, def_action);
 
 	return (filter ? 0 : -ENOMEM);
 }
@@ -145,7 +145,7 @@ int seccomp_enable(void)
 	if (filter == NULL)
 		return -EFAULT;
 
-	program = gen_bpf_generate(filter, &arch_def_native);
+	program = gen_bpf_generate(filter);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = prctl(PR_ATTACH_SECCOMP_FILTER, program);
@@ -231,7 +231,7 @@ int seccomp_gen_bpf(int fd)
 	if (filter == NULL)
 		return -EFAULT;
 
-	program = gen_bpf_generate(filter, &arch_def_native);
+	program = gen_bpf_generate(filter);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));

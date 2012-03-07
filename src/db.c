@@ -174,19 +174,21 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 
 /**
  * Intitalize a seccomp filter DB
+ * @param arch the architecture definition
  * @param def_action the default filter action
  *
  * This function initializes a seccomp filter DB and readies it for use.
  * Returns a pointer to the DB on success, NULL on failure.
  *
  */
-struct db_filter *db_new(uint32_t def_action)
+struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action)
 {
 	struct db_filter *db;
 
 	db = malloc(sizeof(*db));
 	if (db) {
 		memset(db, 0, sizeof(*db));
+		db->arch = arch;
 		db->def_action = def_action;
 	}
 
