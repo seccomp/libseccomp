@@ -37,10 +37,7 @@ struct db_arg_chain_tree {
 	/* comparison operator */
 	enum scmp_compare op;
 	/* syscall argument value */
-	/* XXX - need something big enough to hold any syscall argument */
-	/* XXX - should this just be a void ptr? */
-	/* XXX - should we make it a macro or typedef defined at build time? */
-	unsigned long datum;
+	datum_t datum;
 
 	/* if non-zero, this is the last node and the value is desired action */
 	uint32_t action;

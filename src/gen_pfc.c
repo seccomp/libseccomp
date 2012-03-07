@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <asm/bitsperlong.h>
 
 #include <seccomp.h>
 
@@ -31,6 +32,14 @@
 #include "gen_pfc.h"
 
 /* XXX - we should check the fprintf() return values */
+
+#if __BITS_PER_LONG == 32
+#define DTUM_FMT		"%llu"
+#elif __BITS_PER_LONG == 64
+#define DTUM_FMT		"%lu"
+#else
+#error need to define a datum format string for DTUM_FMT
+#endif /* BITS_PER_LONG */
 
 /**
  * Display a string representation of the filter action
@@ -96,37 +105,37 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 		_indent(fds, lvl);
 		switch (c_iter->op) {
 			case SCMP_CMP_NE:
-				fprintf(fds, " if ($a%d != %ld)\n",
+				fprintf(fds, " if ($a%d != " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			case SCMP_CMP_LT:
-				fprintf(fds, " if ($a%d < %ld)\n",
+				fprintf(fds, " if ($a%d < " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			case SCMP_CMP_LE:
-				fprintf(fds, " if ($a%d <= %ld)\n",
+				fprintf(fds, " if ($a%d <= " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			case SCMP_CMP_EQ:
-				fprintf(fds, " if ($a%d == %ld)\n",
+				fprintf(fds, " if ($a%d == " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			case SCMP_CMP_GE:
-				fprintf(fds, " if ($a%d >= %ld)\n",
+				fprintf(fds, " if ($a%d >= " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			case SCMP_CMP_GT:
-				fprintf(fds, " if ($a%d > %ld)\n",
+				fprintf(fds, " if ($a%d > " DTUM_FMT ")\n",
 					c_iter->arg,
 					c_iter->datum);
 				break;
 			default:
-				fprintf(fds, " if ($a%d ??? %ld)\n",
+				fprintf(fds, " if ($a%d ??? " DTUM_FMT ")\n",
 					c_iter->arg, c_iter->datum);
 		}
 

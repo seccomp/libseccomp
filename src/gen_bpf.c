@@ -130,9 +130,6 @@ struct bpf_state {
 	struct bpf_program *bpf;
 };
 
-#define D64_LO(x)	_BPF_K((uint32_t)((uint64_t)(x) & 0x00000000ffffffff))
-#define D64_HI(x)	_BPF_K((uint32_t)((uint64_t)(x) >> 32))
-
 /**
  * Populate a BPF instruction
  * @param _ins the BPF instruction
@@ -744,12 +741,14 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	switch (node->op) {
 	case SCMP_CMP_EQ:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_IMM(0), _BPF_JMP_NO, D64_HI(node->datum));
+			   _BPF_JMP_IMM(0), _BPF_JMP_NO,
+			   _BPF_K(D64_HI(node->datum)));
 		break;
 	case SCMP_CMP_GT:
 	case SCMP_CMP_GE:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-			   _BPF_JMP_IMM(0), _BPF_JMP_NO, D64_HI(node->datum));
+			   _BPF_JMP_IMM(0), _BPF_JMP_NO,
+			   _BPF_K(D64_HI(node->datum)));
 		break;
 	case SCMP_CMP_NE:
 	case SCMP_CMP_LT:
@@ -785,15 +784,18 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	switch (node->op) {
 	case SCMP_CMP_EQ:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(D64_LO(node->datum)));
 		break;
 	case SCMP_CMP_GT:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
-			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(D64_LO(node->datum)));
 		break;
 	case SCMP_CMP_GE:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-			   _BPF_JMP_NO, _BPF_JMP_NO, D64_LO(node->datum));
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(D64_LO(node->datum)));
 		break;
 	case SCMP_CMP_NE:
 	case SCMP_CMP_LT:

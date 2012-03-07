@@ -41,7 +41,7 @@ struct db_arg_filter {
 
 	unsigned int arg;
 	unsigned int op;
-	unsigned long datum;
+	datum_t datum;
 };
 
 static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
@@ -260,6 +260,8 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 			if (chain[arg_num].op < _SCMP_CMP_MIN ||
 			    chain[arg_num].op > _SCMP_CMP_MAX)
 				return -EINVAL;
+			/* NOTE - basic testing indicates we can't pick a type
+			 *	  larger than the system's 'unsigned long' */
 			chain[arg_num].datum = va_arg(chain_list,
 						      unsigned long);
 		} else
