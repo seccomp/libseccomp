@@ -19,11 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <asm/bitsperlong.h>
 #include <linux/audit.h>
 
 #include "arch.h"
+#include "arch-i386.h"
 
 const struct arch_def arch_def_native = {
 #if __i386__
@@ -50,3 +52,57 @@ const struct arch_def arch_def_native = {
 	.endian = ARCH_ENDIAN_UNSPEC,
 #endif /* __BYTE_ORDER */
 };
+
+/**
+ * Determine the argument offset for the lower 32 bits
+ * @param arch the architecture definition
+ * @param arg the argument number
+ *
+ * Determine the correct offset for the low 32 bits of the given argument based
+ * on the architecture definition.  Returns the offset on success, negative
+ * values on failure.
+ *
+ */
+int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return i386_arg_offset_lo(arch, arg);
+	default:
+		return -EDOM;
+	}
+}
+
+/**
+ * Determine the argument offset for the high 32 bits
+ * @param arch the architecture definition
+ * @param arg the argument number
+ *
+ * Determine the correct offset for the high 32 bits of the given argument
+ * based on the architecture definition.  Returns the offset on success,
+ * negative values on failure.
+ *
+ */
+int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
+{
+	return -EDOM;
+}
+
+/**
+ * Determine the argument offset
+ * @param arch the architecture definition
+ * @param arg the argument number
+ *
+ * Determine the correct offset of the given argument based on the architecture
+ * definition.  Returns the offset on success, negative values on failure.
+ *
+ */
+int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return i386_arg_offset(arch, arg);
+	default:
+		return -EDOM;
+	}
+}

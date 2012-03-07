@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp Architecture/Machine Specific Code
+ * Enhanced Seccomp i386 Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,33 +19,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARCH_H
-#define _ARCH_H
+#ifndef _ARCH_i386_H
+#define _ARCH_i386_H
 
 #include <inttypes.h>
 
-struct arch_def {
-	uint32_t token;
-	enum {
-		ARCH_SIZE_UNSPEC = 0,
-		ARCH_SIZE_32 = 32,
-		ARCH_SIZE_64 = 64,
-	} size;
-	enum {
-		ARCH_ENDIAN_UNSPEC = 0,
-		ARCH_ENDIAN_LITTLE,
-		ARCH_ENDIAN_BIG,
-	} endian;
-};
+#include "arch.h"
 
-/* arch_def for the current process */
-extern const struct arch_def arch_def_native;
-
-/* syscall argument datum type */
-typedef uint64_t datum_t;
-
-int arch_arg_offset(const struct arch_def *arch, unsigned int arg);
-int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
-int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
+int i386_arg_offset(const struct arch_def *arch, unsigned int arg);
+int i386_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 
 #endif
