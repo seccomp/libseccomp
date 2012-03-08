@@ -136,3 +136,27 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 		return -EDOM;
 	}
 }
+
+/**
+ * Rewrite a filter rule to match the architecture specifics
+ * @param arch the architecture definition
+ * @param syscall the syscall number
+ * @param chain the argument filter chain
+ *
+ * Syscalls can vary across different architectures so this function handles
+ * the necessary seccomp rule rewrites to ensure the right thing is done
+ * regardless of the rule or architecture.  Returns zero on success, negative
+ * values on error.
+ *
+ */
+int arch_filter_rewrite(const struct arch_def *arch,
+			int *syscall, struct db_api_arg *chain)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return i386_filter_rewrite(arch, syscall, chain);
+	default:
+		return -EDOM;
+	}
+}
+

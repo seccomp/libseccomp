@@ -31,4 +31,7 @@ int i386_arg_count_max(const struct arch_def *arch);
 int i386_arg_offset(const struct arch_def *arch, unsigned int arg);
 int i386_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 
+int i386_filter_rewrite(const struct arch_def *arch,
+			int *syscall, struct db_api_arg *chain);
+
 #endif

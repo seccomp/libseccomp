@@ -24,6 +24,8 @@
 
 #include <inttypes.h>
 
+struct db_api_arg;
+
 struct arch_def {
 	uint32_t token;
 	enum {
@@ -53,5 +55,8 @@ int arch_arg_count_max(const struct arch_def *arch);
 int arch_arg_offset(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
+
+int arch_filter_rewrite(const struct arch_def *arch,
+			int *syscall, struct db_api_arg *chain);
 
 #endif

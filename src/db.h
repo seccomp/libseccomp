@@ -22,8 +22,6 @@
 #ifndef _FILTER_DB_H
 #define _FILTER_DB_H
 
-#include <stdarg.h>
-
 #include <seccomp.h>
 
 #include "arch.h"

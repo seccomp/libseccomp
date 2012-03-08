@@ -189,6 +189,7 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 	if (action == filter->def_action)
 		return -EPERM;
 
+	/* collect the arguments for the filter rule */
 	chain_len_max = arch_arg_count_max(filter->arch);
 	chain = malloc(sizeof(*chain) * chain_len_max);
 	if (chain == NULL)
@@ -201,8 +202,8 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
 			chain[arg_num].op = va_arg(arg_list, unsigned int);
-			if (chain[arg_num].op < _SCMP_CMP_MIN ||
-			    chain[arg_num].op > _SCMP_CMP_MAX) {
+			if (chain[arg_num].op <= _SCMP_CMP_MIN ||
+			    chain[arg_num].op >= _SCMP_CMP_MAX) {
 				rc = -EINVAL;
 				goto add_syscall_return;
 			}
@@ -215,12 +216,15 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 		}
 	}
 
-	/* XXX - negative syscall values are going to be considered "special",
-	 *       e.g. all the socketcall() syscalls on x86 will be represented
-	 *       with negative syscall numbers - we need a thin shim layer
-	 *       here to convert these pseudo syscalls into real filters (check
-	 *       the a0 value, etc.) */
+	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
+	 * the rule for some arch specific reason */
+	if (syscall < 0) {
+		rc = arch_filter_rewrite(filter->arch, &syscall, chain);
+		if (rc < 0)
+			goto add_syscall_return;
+	}
 
+	/* add the new rule to the existing filter */
 	rc = db_add_syscall(filter, action, syscall, chain);
 
 add_syscall_return:
