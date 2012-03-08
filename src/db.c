@@ -379,7 +379,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 					n_cnt = _db_arg_chain_tree_remove(
 							&(s_iter->chains),
 							ec_iter);
-					s_iter->node_cnt += n_cnt;
+					s_iter->node_cnt -= n_cnt;
 				}
 				rc = 0;
 				goto add_free;
@@ -391,7 +391,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 						goto add_free;
 					}
 					ec_iter->nxt_f = c_iter->nxt_f;
-					s_iter->node_cnt -= (s_new->node_cnt-1);
+					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					if (c_iter->nxt_f != NULL) {
@@ -400,7 +400,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 						goto add_free;
 					}
 					ec_iter->nxt_t = c_iter->nxt_t;
-					s_iter->node_cnt -= (s_new->node_cnt-1);
+					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
 				}
 			} else if (db_chain_leaf(c_iter)) {
@@ -420,14 +420,14 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 								ec_iter->nxt_f);
 					ec_iter->nxt_f = NULL;
 				}
-				s_iter->node_cnt += n_cnt;
+				s_iter->node_cnt -= n_cnt;
 				return 0;
 			} else if (c_iter->nxt_t != NULL) {
 				/* moving down the chain */
 				if (ec_iter->nxt_t == NULL) {
 					/* add on to the existing */
 					ec_iter->nxt_t = c_iter->nxt_t;
-					s_iter->node_cnt -= (s_new->node_cnt-1);
+					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					/* jump to the next level */
@@ -441,7 +441,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 				if (ec_iter->nxt_f == NULL) {
 					/* add on to the existing */
 					ec_iter->nxt_f = c_iter->nxt_f;
-					s_iter->node_cnt -= (s_new->node_cnt-1);
+					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
 				} else {
 					/* jump to the next level */
@@ -489,11 +489,21 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	return -EFAULT;
 
 add_free:
+	/* update the priority */
+	if (s_iter != NULL) {
+		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
+		s_iter->priority |= (s_iter->node_cnt & _DB_PRI_MASK_CHAIN);
+	}
 	/* free the new chain and its syscall struct */
 	_db_arg_chain_tree_free(s_new->chains);
 	free(s_new);
 	return rc;
 add_free_match:
+	/* update the priority */
+	if (s_iter != NULL) {
+		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
+		s_iter->priority |= (s_iter->node_cnt & _DB_PRI_MASK_CHAIN);
+	}
 	/* free the matching portion of new chain */
 	if (c_prev != NULL) {
 		c_prev->nxt_t = NULL;
