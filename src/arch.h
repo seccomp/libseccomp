@@ -48,6 +48,8 @@ typedef uint64_t datum_t;
 #define D64_LO(x)	((uint32_t)((uint64_t)(x) & 0x00000000ffffffff))
 #define D64_HI(x)	((uint32_t)((uint64_t)(x) >> 32))
 
+int arch_arg_count_max(const struct arch_def *arch);
+
 int arch_arg_offset(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);

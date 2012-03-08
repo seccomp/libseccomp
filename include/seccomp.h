@@ -28,10 +28,6 @@
 /* XXX - see notes in seccomp_add_syscall() about pseudo syscalls, we'll need
  *       to define them here for the arch/platforms that require them */
 
-/* XXX - this should match the kernel's maximum syscall count */
-/* XXX - we may want to make this arch dependent if it is in the kernel */
-#define SCMP_ARG_MAX		6
-
 #define SCMP_SYS(x)		__NR_##x
 
 /* XXX - the constants here should be replaced with the seccomp #defines */

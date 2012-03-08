@@ -26,6 +26,8 @@
 
 #include "arch.h"
 
+int i386_arg_count_max(const struct arch_def *arch);
+
 int i386_arg_offset(const struct arch_def *arch, unsigned int arg);
 int i386_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 

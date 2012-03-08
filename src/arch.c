@@ -55,6 +55,26 @@ const struct arch_def arch_def_native = {
 };
 
 /**
+ * Determine the maximum number of syscall arguments
+ * @param arch the architecture definition
+ *
+ * Determine the maximum number of syscall arguments for the given architecture.
+ * Returns the number of arguments on success, negative values on failure.
+ *
+ */
+int arch_arg_count_max(const struct arch_def *arch)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return i386_arg_count_max(arch);
+	case AUDIT_ARCH_X86_64:
+		return x86_64_arg_count_max(arch);
+	default:
+		return -EDOM;
+	}
+}
+
+/**
  * Determine the argument offset for the lower 32 bits
  * @param arch the architecture definition
  * @param arg the argument number

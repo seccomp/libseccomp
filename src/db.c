@@ -28,6 +28,7 @@
 
 #include <seccomp.h>
 
+#include "arch.h"
 #include "db.h"
 
 /* the priority field is fairly simple - without any user hints, or in the case
@@ -236,7 +237,8 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	int rc = -ENOMEM;
 	unsigned int iter;
 	unsigned int arg_num;
-	struct db_arg_filter chain[SCMP_ARG_MAX];
+	int chain_len_max;
+	struct db_arg_filter *chain;
 	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	struct db_arg_chain_tree *ec_iter;
@@ -245,39 +247,49 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 
 	assert(db != NULL);
 
-	if (chain_len > SCMP_ARG_MAX)
+	chain_len_max = arch_arg_count_max(db->arch);
+	if (chain_len > chain_len_max)
 		return -EINVAL;
 
 	/* we want to build a chain sorted by argument number to make it easier
 	 * to find duplicate chains */
-	memset(chain, 0, sizeof(chain));
+	chain = malloc(sizeof(*chain) * chain_len_max);
+	if (chain == NULL)
+		return -ENOMEM;
+	memset(chain, 0, sizeof(*chain) * chain_len_max);
 	for (iter = 0; iter < chain_len; iter++) {
 		arg_num = va_arg(chain_list, unsigned int);
-		if (arg_num < SCMP_ARG_MAX && chain[arg_num].valid == 0) {
+		if (arg_num < chain_len_max && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
 			chain[arg_num].op = va_arg(chain_list, unsigned int);
 			if (chain[arg_num].op < _SCMP_CMP_MIN ||
-			    chain[arg_num].op > _SCMP_CMP_MAX)
-				return -EINVAL;
+			    chain[arg_num].op > _SCMP_CMP_MAX) {
+				rc = -EINVAL;
+				goto add_failure;
+			}
 			/* NOTE - basic testing indicates we can't pick a type
 			 *	  larger than the system's 'unsigned long' */
 			chain[arg_num].datum = va_arg(chain_list,
 						      unsigned long);
-		} else
-			return -EINVAL;
+		} else {
+			rc = -EINVAL;
+			goto add_failure;
+		}
 	}
 
 	/* do all our possible memory allocation up front so we don't have to
 	 * worry about failure once we get to the point where we start updating
 	 * the filter db */
 	s_new = malloc(sizeof(*s_new));
-	if (s_new == NULL)
-		return -ENOMEM;
+	if (s_new == NULL) {
+		rc = -ENOMEM;
+		goto add_failure;
+	}
 	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	/* run through the argument chain */
-	for (iter = 0; iter < SCMP_ARG_MAX; iter++) {
+	for (iter = 0; iter < chain_len_max; iter++) {
 		if (chain[iter].valid == 0)
 			continue;
 
@@ -328,6 +340,10 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	} else
 		s_new->action = action;
 	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
+
+	/* do some early cleanup */
+	free(chain);
+	chain = NULL;
 
 	/* no more failures allowed after this point that would result in the
 	 * stored filter being in an inconsistent state */
@@ -492,6 +508,9 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	/* we should never be here! */
 	return -EFAULT;
 
+add_failure:
+	free(chain);
+	return rc;
 add_free:
 	/* update the priority */
 	if (s_iter != NULL) {
@@ -500,6 +519,8 @@ add_free:
 	}
 	/* free the new chain and its syscall struct */
 	_db_arg_chain_tree_free(s_new->chains);
+	if (chain != NULL)
+		free(chain);
 	free(s_new);
 	return rc;
 add_free_match:
@@ -514,6 +535,8 @@ add_free_match:
 		c_prev->nxt_f = NULL;
 		_db_arg_chain_tree_free(s_new->chains);
 	}
+	if (chain != NULL)
+		free(chain);
 	free(s_new);
 	return 0;
 }
