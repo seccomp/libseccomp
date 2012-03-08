@@ -42,7 +42,8 @@ TESTS = 01-allow \
 	03-basic-chains \
 	04-multilevel-chains \
 	05-long-jumps \
-	06-actions
+	06-actions \
+	07-db-bug-looping
 
 DEPS = $(TESTS:%=%.d)
 
