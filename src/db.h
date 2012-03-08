@@ -30,6 +30,14 @@
 
 /* XXX - need to provide doxygen comments for the types here */
 
+struct db_api_arg {
+	unsigned int valid;
+
+	unsigned int arg;
+	unsigned int op;
+	datum_t datum;
+};
+
 struct db_arg_chain_tree {
 	/* argument number (a0 = 0, a1 = 1, etc.) */
 	unsigned int arg;
@@ -106,7 +114,7 @@ struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action);
 void db_destroy(struct db_filter *db);
 
 int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
-		   unsigned int chain_len, va_list chain_list);
+		   struct db_api_arg *chain);
 
 struct db_sys_list *db_find_syscall(const struct db_filter *db,
 				    unsigned int syscall);

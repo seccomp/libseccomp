@@ -55,7 +55,7 @@ void seccomp_release(void);
 int seccomp_enable(void);
 
 int seccomp_add_syscall(uint32_t action, int syscall,
-			unsigned int chain_len, ...);
+			unsigned int arg_cnt, ...);
 
 int seccomp_gen_pfc(int fd);
 int seccomp_gen_bpf(int fd);

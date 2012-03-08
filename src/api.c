@@ -22,9 +22,10 @@
 #include <endian.h>
 #include <errno.h>
 #include <inttypes.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/prctl.h>
 
 #include <seccomp.h>
@@ -160,7 +161,7 @@ int seccomp_enable(void)
  * Add a syscall and an optional argument chain to the existing filter
  * @param action the filter action
  * @param syscall the syscall number
- * @param chain_len the number of argument filters in the argument filter chain
+ * @param arg_cnt the number of argument filters in the argument filter chain
  * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
  *
  * This function adds a new argument/comparison/value to the seccomp filter for
@@ -170,10 +171,14 @@ int seccomp_enable(void)
  *
  */
 int seccomp_add_syscall(uint32_t action, int syscall,
-			unsigned int chain_len, ...)
+			unsigned int arg_cnt, ...)
 {
 	int rc;
-	va_list chain_list;
+	unsigned int iter;
+	unsigned int chain_len_max;
+	va_list arg_list;
+	struct db_api_arg *chain = NULL;
+	unsigned int arg_num;
 
 	if (filter == NULL)
 		return -EFAULT;
@@ -184,7 +189,31 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 	if (action == filter->def_action)
 		return -EPERM;
 
-	/* XXX - we should cap the maximum syscall argument? is there one? */
+	chain_len_max = arch_arg_count_max(filter->arch);
+	chain = malloc(sizeof(*chain) * chain_len_max);
+	if (chain == NULL)
+		return -ENOMEM;
+	memset(chain, 0, sizeof(*chain) * chain_len_max);
+	va_start(arg_list, arg_cnt);
+	for (iter = 0; iter < arg_cnt; iter++) {
+		arg_num = va_arg(arg_list, unsigned int);
+		if (arg_num < chain_len_max && chain[arg_num].valid == 0) {
+			chain[arg_num].valid = 1;
+			chain[arg_num].arg = arg_num;
+			chain[arg_num].op = va_arg(arg_list, unsigned int);
+			if (chain[arg_num].op < _SCMP_CMP_MIN ||
+			    chain[arg_num].op > _SCMP_CMP_MAX) {
+				rc = -EINVAL;
+				goto add_syscall_return;
+			}
+			/* NOTE - basic testing indicates we can't pick a type
+			 *	  larger than the system's 'unsigned long' */
+			chain[arg_num].datum = va_arg(arg_list, unsigned long);
+		} else {
+			rc = -EINVAL;
+			goto add_syscall_return;
+		}
+	}
 
 	/* XXX - negative syscall values are going to be considered "special",
 	 *       e.g. all the socketcall() syscalls on x86 will be represented
@@ -192,10 +221,12 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 	 *       here to convert these pseudo syscalls into real filters (check
 	 *       the a0 value, etc.) */
 
-	va_start(chain_list, chain_len);
-	rc = db_add_syscall(filter, action, syscall, chain_len, chain_list);
-	va_end(chain_list);
+	rc = db_add_syscall(filter, action, syscall, chain);
 
+add_syscall_return:
+	va_end(arg_list);
+	if (chain != NULL)
+		free(chain);
 	return rc;
 }
 
