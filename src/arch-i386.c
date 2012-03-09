@@ -25,48 +25,6 @@
 #include "arch-i386.h"
 
 /**
- * Determine the maximum number of syscall arguments
- * @param arch the architecture definition
- *
- * Determine the maximum number of syscall arguments for the given architecture.
- * Returns the number of arguments on success, negative values on failure.
- *
- */
-int i386_arg_count_max(const struct arch_def *arch)
-{
-	return 6;
-}
-
-/**
- * Determine the argument offset for the lower 32 bits
- * @param arch the architecture definition
- * @param arg the argument number
- *
- * Determine the correct offset for the low 32 bits of the given argument based
- * on the architecture definition.  Returns the offset on success, negative
- * values on failure.
- *
- */
-int i386_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
-{
-	return i386_arg_offset(arch, arg);
-}
-
-/**
- * Determine the argument offset
- * @param arch the architecture definition
- * @param arg the argument number
- *
- * Determine the correct offset of the given argument based on the architecture
- * definition.  Returns the offset on success, negative values on failure.
- *
- */
-int i386_arg_offset(const struct arch_def *arch, unsigned int arg)
-{
-	return 8 + (arg * 4);
-}
-
-/**
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
  * @param syscall the syscall number

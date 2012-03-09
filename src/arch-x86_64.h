@@ -26,10 +26,10 @@
 
 #include "arch.h"
 
-int x86_64_arg_count_max(const struct arch_def *arch);
+#define x86_64_arg_count_max		6
 
-int x86_64_arg_offset(const struct arch_def *arch, unsigned int arg);
-int x86_64_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
-int x86_64_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
+#define x86_64_arg_offset(x)		(8 + ((x) * 8))
+#define x86_64_arg_offset_lo(x)		(x86_64_arg_offset(x))
+#define x86_64_arg_offset_hi(x)		(x86_64_arg_offset(x) + 4)
 
 #endif

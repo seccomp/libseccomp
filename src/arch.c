@@ -66,9 +66,9 @@ int arch_arg_count_max(const struct arch_def *arch)
 {
 	switch (arch->token) {
 	case AUDIT_ARCH_I386:
-		return i386_arg_count_max(arch);
+		return i386_arg_count_max;
 	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_count_max(arch);
+		return x86_64_arg_count_max;
 	default:
 		return -EDOM;
 	}
@@ -88,9 +88,9 @@ int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
 	case AUDIT_ARCH_I386:
-		return i386_arg_offset_lo(arch, arg);
+		return i386_arg_offset_lo(arg);
 	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset_lo(arch, arg);
+		return x86_64_arg_offset_lo(arg);
 	default:
 		return -EDOM;
 	}
@@ -110,7 +110,7 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
 	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset_hi(arch, arg);
+		return x86_64_arg_offset_hi(arg);
 	default:
 		return -EDOM;
 	}
@@ -129,9 +129,9 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
 	case AUDIT_ARCH_I386:
-		return i386_arg_offset(arch, arg);
+		return i386_arg_offset(arg);
 	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset(arch, arg);
+		return x86_64_arg_offset(arg);
 	default:
 		return -EDOM;
 	}
@@ -159,4 +159,3 @@ int arch_filter_rewrite(const struct arch_def *arch,
 		return -EDOM;
 	}
 }
-

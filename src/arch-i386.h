@@ -22,14 +22,13 @@
 #ifndef _ARCH_i386_H
 #define _ARCH_i386_H
 
-#include <inttypes.h>
-
 #include "arch.h"
+#include "db.h"
 
-int i386_arg_count_max(const struct arch_def *arch);
+#define i386_arg_count_max		6
 
-int i386_arg_offset(const struct arch_def *arch, unsigned int arg);
-int i386_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
+#define i386_arg_offset(x)		(8 + ((x) * 4))
+#define i386_arg_offset_lo(x)		(i386_arg_offset(x))
 
 int i386_filter_rewrite(const struct arch_def *arch,
 			int *syscall, struct db_api_arg *chain);

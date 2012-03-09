@@ -35,7 +35,7 @@ LIB_STATIC = libseccomp.a
 LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
 OBJS =  api.o db.o \
-	arch.o arch-i386.o arch-x86_64.o \
+	arch.o arch-i386.o \
 	hash.o \
 	gen_pfc.o gen_bpf.o
 
