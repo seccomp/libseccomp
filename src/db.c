@@ -98,6 +98,7 @@ static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
  * Remove a node from an argument chain tree
  * @param tree the pointer to the tree
  * @param node the node to remove
+ * @param action the removed node's action
  *
  * This function searches the tree looking for the node and removes it once
  * found.  The function also removes any other nodes that are no longer needed
@@ -105,7 +106,8 @@ static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
  *
  */
 static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
-					      struct db_arg_chain_tree *node)
+					      struct db_arg_chain_tree *node,
+					      uint32_t action)
 {
 	int cnt = 0;
 	struct db_arg_chain_tree *c_iter;
@@ -142,27 +144,73 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 		/* check the true sub-tree */
 		if (c_iter->nxt_t == node) {
 			/* free and return */
+			c_iter->act_t_flg = 1;
+			c_iter->act_t = action;
 			cnt += _db_arg_chain_tree_free(c_iter->nxt_t);
 			c_iter->nxt_t = NULL;
 			return cnt;
 		} else
 			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_t),
-							 node);
+							 node, action);
 
 		/* check the false sub-tree */
 		if (c_iter->nxt_f == node) {
 			/* free and return */
+			c_iter->act_f_flg = 1;
+			c_iter->act_f = action;
 			cnt += _db_arg_chain_tree_free(c_iter->nxt_f);
 			c_iter->nxt_f = NULL;
 			return cnt;
 		} else
 			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_f),
-							 node);
+							 node, action);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
 
 	return cnt;
+}
+
+/**
+ * Traverse a tree checking the action values
+ * @param tree the pointer to the tree
+ * @param action the action
+ *
+ * Traverse the tree inspecting each action to see if it matches the given
+ * action.  Returns zero if all actions match the given action, negative values
+ * on failure.
+ *
+ */
+static int _db_arg_chain_tree_act_check(struct db_arg_chain_tree *tree,
+					unsigned int action)
+{
+	int rc;
+	struct db_arg_chain_tree *c_iter;
+
+	if (tree == NULL)
+		return 0;
+
+	c_iter = tree;
+	while (c_iter->lvl_prv != NULL)
+		c_iter = c_iter->lvl_prv;
+
+	do {
+		if (c_iter->act_t_flg && c_iter->act_t != action)
+			return -EEXIST;
+		if (c_iter->act_f_flg && c_iter->act_f != action)
+			return -EEXIST;
+
+		rc = _db_arg_chain_tree_act_check(c_iter->nxt_t, action);
+		if (rc < 0)
+			return rc;
+		rc = _db_arg_chain_tree_act_check(c_iter->nxt_f, action);
+		if (rc < 0)
+			return rc;
+
+		c_iter = c_iter->lvl_nxt;
+	} while (c_iter != NULL);
+
+	return 0;
 }
 
 /**
@@ -291,8 +339,13 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	}
 	if (c_iter != NULL) {
 		/* set the leaf node */
-		c_iter->action = action;
-		c_iter->action_flag = tf_flag;
+		if (tf_flag) {
+			c_iter->act_t_flg = 1;
+			c_iter->act_t = action;
+		} else {
+			c_iter->act_f_flg = 1;
+			c_iter->act_f = action;
+		}
 	} else
 		s_new->action = action;
 	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
@@ -319,20 +372,15 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	} else if (s_iter->chains == NULL) {
 		/* syscall exists without any chains - existing filter is at
 		 * least as large as the new entry so cleanup and exit */
-		/* XXX - do we want to indicate that another, larger entry
-		 *       already exists? */
-		rc = 0;
-		goto add_free;
+		goto add_free_ok;
 	} else if (s_iter->chains != NULL && s_new->chains == NULL) {
 		/* syscall exists with chains but the new filter has no chains
 		 * so we need to clear the existing chains and exit */
 		_db_arg_chain_tree_free(s_iter->chains);
 		s_iter->chains = NULL;
 		s_iter->node_cnt = 0;
-		s_iter->priority |= _DB_PRI_MASK_CHAIN;
 		s_iter->action = action;
-		rc = 0;
-		goto add_free;
+		goto add_free_ok;
 	}
 	/* syscall exists and has at least one existing chain - start at the
 	 * top and walk the two chains */
@@ -342,85 +390,93 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	do {
 		if (db_chain_eq(c_iter, ec_iter)) {
 			/* found a matching node on this chain level */
-			if (db_chain_leaf(ec_iter) && db_chain_leaf(c_iter)) {
-				if (ec_iter->action_flag !=
-				    c_iter->action_flag) {
-					/* drop this node entirely as we take
-					 * an action regardless of the op's
-					 * result (true or false) */
+			if (db_chain_leaf(c_iter) && db_chain_leaf(ec_iter)) {
+				/* both are leaf nodes */
+				if (c_iter->act_t_flg && ec_iter->act_t_flg) {
+					if (ec_iter->act_t != action)
+						goto add_free_exist;
+				} else if (c_iter->act_t_flg) {
+					ec_iter->act_t_flg = 1;
+					ec_iter->act_t = action;
+				}
+				if (c_iter->act_f_flg && ec_iter->act_f_flg) {
+					if (ec_iter->act_f != action)
+						goto add_free_exist;
+				} else if (c_iter->act_f_flg) {
+					ec_iter->act_f_flg = 1;
+					ec_iter->act_f = action;
+				}
+				if (ec_iter->act_t_flg == ec_iter->act_f_flg &&
+				    ec_iter->act_t == ec_iter->act_f) {
 					n_cnt = _db_arg_chain_tree_remove(
-							&(s_iter->chains),
-							ec_iter);
+							     &(s_iter->chains),
+							     ec_iter,
+							     ec_iter->act_t);
 					s_iter->node_cnt -= n_cnt;
 				}
-				rc = 0;
-				goto add_free;
-			} else if (db_chain_leaf(ec_iter)) {
-				if (ec_iter->action_flag) {
-					if (c_iter->nxt_t != NULL) {
-						/* existing is shorter */
-						rc = 0;
-						goto add_free;
-					}
-					ec_iter->nxt_f = c_iter->nxt_f;
-					s_iter->node_cnt += (s_new->node_cnt-1);
-					goto add_free_match;
-				} else {
-					if (c_iter->nxt_f != NULL) {
-						/* existing is shorter */
-						rc = 0;
-						goto add_free;
-					}
-					ec_iter->nxt_t = c_iter->nxt_t;
-					s_iter->node_cnt += (s_new->node_cnt-1);
-					goto add_free_match;
-				}
+				goto add_free_ok;
 			} else if (db_chain_leaf(c_iter)) {
 				/* new is shorter */
-
-				/* now at least a partial leaf node */
-				ec_iter->action = action;
-				ec_iter->action_flag = c_iter->action_flag;
-
-				/* cleanup and return */
-				if (ec_iter->action_flag) {
+				if (c_iter->act_t_flg) {
+					rc = _db_arg_chain_tree_act_check(
+								 ec_iter->nxt_t,
+								 action);
+					if (rc < 0)
+						goto add_free;
 					n_cnt = _db_arg_chain_tree_free(
 								ec_iter->nxt_t);
 					ec_iter->nxt_t = NULL;
+					ec_iter->act_t_flg = 1;
+					ec_iter->act_t = action;
 				} else {
+					rc = _db_arg_chain_tree_act_check(
+								 ec_iter->nxt_f,
+								 action);
+					if (rc < 0)
+						goto add_free;
 					n_cnt = _db_arg_chain_tree_free(
 								ec_iter->nxt_f);
 					ec_iter->nxt_f = NULL;
+					ec_iter->act_f_flg = 1;
+					ec_iter->act_f = action;
 				}
 				s_iter->node_cnt -= n_cnt;
 				return 0;
 			} else if (c_iter->nxt_t != NULL) {
-				/* moving down the chain */
-				if (ec_iter->nxt_t == NULL) {
-					/* add on to the existing */
-					ec_iter->nxt_t = c_iter->nxt_t;
-					s_iter->node_cnt += (s_new->node_cnt-1);
-					goto add_free_match;
-				} else {
+				if (ec_iter->nxt_t != NULL) {
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_t;
 					ec_iter = ec_iter->nxt_t;
 					s_new->node_cnt--;
-				}
-			} else if (c_iter->nxt_f != NULL) {
-				/* moving down the chain */
-				if (ec_iter->nxt_f == NULL) {
-					/* add on to the existing */
-					ec_iter->nxt_f = c_iter->nxt_f;
+				} else if (ec_iter->act_t_flg) {
+					/* existing is shorter */
+					if (ec_iter->act_t == action)
+						goto add_free_ok;
+					goto add_free_exist;
+				} else {
+					/* add a new branch */
+					ec_iter->nxt_t = c_iter->nxt_t;
 					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
-				} else {
+				}
+			} else if (c_iter->nxt_f != NULL) {
+				if (ec_iter->nxt_f != NULL) {
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_f;
 					ec_iter = ec_iter->nxt_f;
 					s_new->node_cnt--;
+				} else if (ec_iter->act_f_flg) {
+					/* existing is shorter */
+					if (ec_iter->act_f == action)
+						goto add_free_ok;
+					goto add_free_exist;
+				} else {
+					/* add a new branch */
+					ec_iter->nxt_f = c_iter->nxt_f;
+					s_iter->node_cnt += (s_new->node_cnt-1);
+					goto add_free_match;
 				}
 			} else {
 				/* we should never be here! */
@@ -460,11 +516,16 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	/* we should never be here! */
 	return -EFAULT;
 
+add_free_exist:
+	rc = -EEXIST;
+	goto add_free;
+add_free_ok:
+	rc = 0;
 add_free:
 	/* update the priority */
 	if (s_iter != NULL) {
 		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
-		s_iter->priority |= (s_iter->node_cnt & _DB_PRI_MASK_CHAIN);
+		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
 	}
 	/* free the new chain and its syscall struct */
 	_db_arg_chain_tree_free(s_new->chains);
@@ -474,7 +535,7 @@ add_free_match:
 	/* update the priority */
 	if (s_iter != NULL) {
 		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
-		s_iter->priority |= (s_iter->node_cnt & _DB_PRI_MASK_CHAIN);
+		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
 	}
 	/* free the matching portion of new chain */
 	if (c_prev != NULL) {

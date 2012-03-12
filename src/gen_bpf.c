@@ -664,23 +664,28 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 	/* fixup the jump targets */
 	if (node->nxt_t != NULL)
 		instr.jt = _BPF_JMP_DB(node->nxt_t);
-	else if ((node->action != 0) && (node->action_flag))
+	else if (node->act_t_flg)
 		instr.jt = _BPF_JMP_IMM(0);
 	else
 		instr.jt = _BPF_JMP_NXT;
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if ((node->action != 0) && (!node->action_flag))
-		instr.jf = _BPF_JMP_IMM(0);
+	else if (node->act_f_flg)
+		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 1 : 0));
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_32_failure;
 
-	/* take any action needed */
-	if (node->action != 0) {
-		blk = _gen_bpf_action(state, blk, node->action);
+	/* take the actions needed */
+	if (node->act_t_flg) {
+		blk = _gen_bpf_action(state, blk, node->act_t);
+		if (blk == NULL)
+			goto node_32_failure;
+	}
+	if (node->act_f_flg) {
+		blk = _gen_bpf_action(state, blk, node->act_f);
 		if (blk == NULL)
 			goto node_32_failure;
 	}
@@ -758,8 +763,8 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	/* fixup the jump targets */
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if ((node->action != 0) && (!node->action_flag))
-		instr.jf = _BPF_JMP_IMM(2);
+	else if (node->act_f_flg)
+		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 3 : 2));
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
@@ -805,23 +810,28 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	/* fixup the jump targets */
 	if (node->nxt_t != NULL)
 		instr.jt = _BPF_JMP_DB(node->nxt_t);
-	else if ((node->action != 0) && (node->action_flag))
+	else if (node->act_t_flg)
 		instr.jt = _BPF_JMP_IMM(0);
 	else
 		instr.jt = _BPF_JMP_NXT;
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if ((node->action != 0) && (!node->action_flag))
-		instr.jf = _BPF_JMP_IMM(0);
+	else if (node->act_f_flg)
+		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 1 : 0));
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_64_failure;
 
-	/* take any action needed */
-	if (node->action != 0) {
-		blk = _gen_bpf_action(state, blk, node->action);
+	/* take the actions needed */
+	if (node->act_t_flg) {
+		blk = _gen_bpf_action(state, blk, node->act_t);
+		if (blk == NULL)
+			goto node_64_failure;
+	}
+	if (node->act_f_flg) {
+		blk = _gen_bpf_action(state, blk, node->act_f);
 		if (blk == NULL)
 			goto node_64_failure;
 	}

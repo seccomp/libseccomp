@@ -45,9 +45,11 @@ struct db_arg_chain_tree {
 	/* syscall argument value */
 	datum_t datum;
 
-	/* if non-zero, this is the last node and the value is desired action */
-	uint32_t action;
-	unsigned int action_flag;
+	/* actions */
+	unsigned int act_t_flg;
+	uint32_t act_t;
+	unsigned int act_f_flg;
+	uint32_t act_f;
 
 	/* list of nodes on this level */
 	struct db_arg_chain_tree *lvl_prv, *lvl_nxt;
@@ -63,7 +65,7 @@ struct db_arg_chain_tree {
 	(((x)->arg == (y)->arg) && \
 	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum))
 #define db_chain_leaf(x) \
-	((x)->action != 0)
+	(((x)->act_t_flg != 0) || ((x)->act_t_flg != 0))
 
 struct db_sys_list {
 	/* native syscall number */

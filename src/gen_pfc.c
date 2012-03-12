@@ -140,18 +140,18 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 		}
 
 		/* true result */
-		if ((c_iter->action != 0) && (c_iter->action_flag)) {
+		if (c_iter->act_t_flg) {
 			_indent(fds, lvl + 1);
-			_pfc_action(fds, c_iter->action);
+			_pfc_action(fds, c_iter->act_t);
 		} else if (c_iter->nxt_t != NULL)
 			_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
 
 		/* false result */
-		if ((c_iter->action != 0) && (!c_iter->action_flag)) {
+		if (c_iter->act_f_flg) {
 			_indent(fds, lvl);
 			fprintf(fds, " else\n");
 			_indent(fds, lvl + 1);
-			_pfc_action(fds, c_iter->action);
+			_pfc_action(fds, c_iter->act_f);
 		} else if (c_iter->nxt_f != NULL) {
 			_indent(fds, lvl);
 			fprintf(fds, " else\n");
