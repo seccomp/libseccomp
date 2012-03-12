@@ -55,9 +55,6 @@ struct db_arg_chain_tree {
 	/* next node in the chain */
 	struct db_arg_chain_tree *nxt_t;
 	struct db_arg_chain_tree *nxt_f;
-
-	/* number of chains referencing this node */
-	unsigned int refcnt;
 };
 #define db_chain_lt(x,y) \
 	(((x)->arg < (y)->arg) || \

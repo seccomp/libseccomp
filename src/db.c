@@ -257,7 +257,6 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		c_iter->arg = chain[iter].arg;
 		c_iter->op = chain[iter].op;
 		c_iter->datum = chain[iter].datum;
-		c_iter->refcnt = 1;
 		/* XXX - sanity check the c_iter->datum value? */
 
 		/* link in the new node and update the chain */
@@ -342,7 +341,6 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	do {
 		if (db_chain_eq(c_iter, ec_iter)) {
 			/* found a matching node on this chain level */
-			ec_iter->refcnt++;
 			if (db_chain_leaf(ec_iter) && db_chain_leaf(c_iter)) {
 				if (ec_iter->action_flag !=
 				    c_iter->action_flag) {
