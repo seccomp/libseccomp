@@ -330,6 +330,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		s_iter->chains = NULL;
 		s_iter->node_cnt = 0;
 		s_iter->priority |= _DB_PRI_MASK_CHAIN;
+		s_iter->action = action;
 		rc = 0;
 		goto add_free;
 	}
