@@ -84,7 +84,8 @@ static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
  * Remove a node from an argument chain tree
  * @param tree the pointer to the tree
  * @param node the node to remove
- * @param action the removed node's action
+ * @param action_flg the replacement action flag
+ * @param action the replacement action
  *
  * This function searches the tree looking for the node and removes it once
  * found.  The function also removes any other nodes that are no longer needed
@@ -93,6 +94,7 @@ static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
  */
 static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 				    struct db_arg_chain_tree *node,
+				    unsigned int action_flg,
 				    uint32_t action)
 {
 	int cnt = 0;
@@ -127,8 +129,10 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 		}
 
 		/* check the true/false sub-trees */
-		cnt += _db_tree_remove(&(c_iter->nxt_t), node, action);
-		cnt += _db_tree_remove(&(c_iter->nxt_f), node, action);
+		cnt += _db_tree_remove(&(c_iter->nxt_t), node,
+				       action_flg, action);
+		cnt += _db_tree_remove(&(c_iter->nxt_f), node,
+				       action_flg, action);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
@@ -175,6 +179,107 @@ static int _db_tree_act_check(struct db_arg_chain_tree *tree, uint32_t action)
 	} while (c_iter != NULL);
 
 	return 0;
+}
+
+/**
+ * Checks for a sub-tree match in an existing tree and prunes the leaves
+ * @param tree_head the head of the existing tree
+ * @param tree_start the starting point into the existing tree
+ * @param new_p pointer to the new tree
+ * @param remove_flg removal flag, only valid on return if return >= 0
+ *
+ * This function searches the existing tree for an occurance of the new tree
+ * and removes as much of it as possible.  Returns the number of nodes removed
+ * from the tree on success, and negative values on failure.
+ *
+ */
+static int _db_tree_sub_prune(struct db_arg_chain_tree **tree_head,
+			      struct db_arg_chain_tree *tree_start,
+			      struct db_arg_chain_tree *new,
+			      unsigned int *remove_flg)
+{
+	int rc = 0;
+	struct db_arg_chain_tree *c_iter = tree_start;
+
+	*remove_flg = 0;
+
+	if (new == NULL || c_iter == NULL)
+		return 0;
+	if (!db_chain_one_result(new))
+		return 0;
+
+	while (c_iter->lvl_prv != NULL)
+		c_iter = c_iter->lvl_prv;
+
+	do {
+		if (c_iter->arg < new->arg) {
+			if (c_iter->nxt_t != NULL) {
+				rc = _db_tree_sub_prune(tree_head,
+							c_iter->nxt_t, new,
+							remove_flg);
+				if (rc > 0)
+					goto sub_prune_found_down;
+			}
+			if (c_iter->nxt_f != NULL) {
+				rc = _db_tree_sub_prune(tree_head,
+							c_iter->nxt_f, new,
+							remove_flg);
+				if (rc > 0)
+					goto sub_prune_found_down;
+			}
+		} else if (db_chain_eq(c_iter, new)) {
+			if (db_chain_leaf(new)) {
+				if (!db_chain_one_result(c_iter)) {
+					/* can't remove existing node */
+					if (new->act_t_flg && c_iter->act_t_flg
+					    && new->act_t == c_iter->act_t)
+						c_iter->act_t_flg = 0;
+					if (new->act_f_flg && c_iter->act_f_flg
+					    && new->act_f == c_iter->act_f)
+						c_iter->act_f_flg = 0;
+					goto sub_prune_return;
+				}
+				if ((db_chain_eq_result(c_iter, new)) ||
+				    ((new->act_t_flg && c_iter->nxt_t != NULL)||
+				     (new->act_f_flg && c_iter->nxt_f != NULL)))
+					/* exact or close match - remove node */
+					goto sub_prune_remove;
+				goto sub_prune_return;
+			}
+			if (new->nxt_t != NULL) {
+				rc = _db_tree_sub_prune(tree_head,
+							c_iter->nxt_t,
+							new->nxt_t,
+							remove_flg);
+				if (rc > 0)
+					goto sub_prune_found_down;
+			}
+			if (new->nxt_f != NULL) {
+				rc = _db_tree_sub_prune(tree_head,
+							c_iter->nxt_f,
+							new->nxt_f,
+							remove_flg);
+				if (rc > 0)
+					goto sub_prune_found_down;
+			}
+		} else if (db_chain_gt(c_iter, new))
+			goto sub_prune_return;
+
+		c_iter = c_iter->lvl_nxt;
+	} while (c_iter != NULL);
+
+	goto sub_prune_return;
+
+sub_prune_found_down:
+	if (db_chain_zombie(c_iter))
+		goto sub_prune_remove;
+sub_prune_return:
+	*remove_flg = 0;
+	return rc;
+sub_prune_remove:
+	rc += _db_tree_remove(tree_head, c_iter, 0, 0);
+	*remove_flg = 1;
+	return rc;
 }
 
 /**
@@ -247,8 +352,10 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	int chain_len_max;
 	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
-	struct db_arg_chain_tree *ec_iter;
+	struct db_arg_chain_tree *ec_iter, *ec_iter_b;
 	unsigned int tf_flag;
+	unsigned int rm_flag = 0;
+	unsigned int new_chain_cnt = 0;
 	unsigned int n_cnt;
 
 	assert(db != NULL);
@@ -284,7 +391,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 				c_prev->nxt_f = c_iter;
 		} else
 			s_new->chains = c_iter;
-		s_new->node_cnt++;
+		new_chain_cnt++;
 
 		/* rewrite the op to reduce the op/datum combos */
 		switch (c_iter->op) {
@@ -327,6 +434,15 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		s_prev = s_iter;
 		s_iter = s_iter->next;
 	}
+add_reset:
+	s_new->node_cnt = new_chain_cnt;
+	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
+	c_prev = NULL;
+	c_iter = s_new->chains;
+	if (s_iter != NULL)
+		ec_iter = s_iter->chains;
+	else
+		ec_iter = NULL;
 	if (s_iter == NULL || s_iter->num != syscall) {
 		/* new syscall, add before s_iter */
 		if (s_prev != NULL) {
@@ -338,9 +454,20 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		}
 		return 0;
 	} else if (s_iter->chains == NULL) {
-		/* syscall exists without any chains - existing filter is at
-		 * least as large as the new entry so cleanup and exit */
-		goto add_free_ok;
+		if (rm_flag) {
+			/* we are here because our previous pass cleared the
+			 * entire syscall chain when searching for a subtree
+			 * match, so add the new chain regardless */
+			s_iter->chains = s_new->chains;
+			s_iter->node_cnt = s_new->node_cnt;
+			s_iter->priority = s_new->priority;
+			free(s_new);
+			return 0;
+		} else
+			/* syscall exists without any chains - existing filter
+			 * is at least as large as the new entry so cleanup and
+			 * exit */
+			goto add_free_ok;
 	} else if (s_iter->chains != NULL && s_new->chains == NULL) {
 		/* syscall exists with chains but the new filter has no chains
 		 * so we need to clear the existing chains and exit */
@@ -352,10 +479,39 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	}
 	/* syscall exists and has at least one existing chain - start at the
 	 * top and walk the two chains */
-	c_prev = NULL;
-	c_iter = s_new->chains;
-	ec_iter = s_iter->chains;
 	do {
+		/* check for sub-tree matches in the existing tree */
+		rc = _db_tree_sub_prune(&(s_iter->chains), ec_iter, c_iter,
+					&rm_flag);
+		if (rc > 0)
+			s_iter->node_cnt -= rc;
+		else if (rc < 0)
+			goto add_free;
+		if (rm_flag)
+			goto add_reset;
+
+		/* check for sub-tree matches in the new tree */
+		ec_iter_b = ec_iter;
+		while (ec_iter_b->lvl_prv != NULL)
+			ec_iter_b = ec_iter_b->lvl_prv;
+		do {
+			rc = _db_tree_sub_prune(&(s_new->chains),
+						c_iter, ec_iter_b, &rm_flag);
+			ec_iter_b = ec_iter_b->lvl_nxt;
+		} while (rc == 0 && ec_iter_b != NULL);
+		if (rc > 0) {
+			s_new->node_cnt -= rc;
+			if (s_new->node_cnt > 0)
+				/* XXX - are we ever going to hit this is a
+				 *       normal use case?  pretty sure we can't
+				 *       "reset" in this case ... */
+				return -EFAULT;
+			rc = 0;
+			goto add_free;
+		} else if (rc < 0)
+			goto add_free;
+
+		/* insert the new rule into the existing tree */
 		if (db_chain_eq(c_iter, ec_iter)) {
 			/* found a matching node on this chain level */
 			if (db_chain_leaf(c_iter) && db_chain_leaf(ec_iter)) {
@@ -379,6 +535,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 					n_cnt = _db_tree_remove(
 							     &(s_iter->chains),
 							     ec_iter,
+							     1,
 							     ec_iter->act_t);
 					s_iter->node_cnt -= n_cnt;
 				}

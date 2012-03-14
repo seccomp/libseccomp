@@ -64,8 +64,32 @@ struct db_arg_chain_tree {
 #define db_chain_eq(x,y) \
 	(((x)->arg == (y)->arg) && \
 	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum))
+#define db_chain_gt(x,y) \
+	(((x)->arg > (y)->arg) || \
+	 (((x)->arg == (y)->arg) && ((x)->op > (y)->op)))
 #define db_chain_leaf(x) \
 	(((x)->act_t_flg != 0) || ((x)->act_f_flg != 0))
+#define db_chain_zombie(x) \
+	(((x)->nxt_t == NULL) && ((x)->nxt_f == NULL) && \
+	 ((x)->act_t_flg == 0) && ((x)->act_f_flg == 0))
+#define db_chain_one_nxt(x) \
+	(((x)->nxt_t != NULL && (x)->nxt_f == NULL) || \
+	 ((x)->nxt_t == NULL && (x)->nxt_f != NULL))
+#define db_chain_one_action(x) \
+	((x)->act_t_flg != (x)->act_f_flg)
+#define db_chain_one_result(x) \
+	(db_chain_one_nxt(x) != db_chain_one_action(x))
+#define db_chain_eq_result(x,y) \
+	((((x)->nxt_t != NULL && (y)->nxt_t != NULL) || \
+	  ((x)->nxt_t == NULL && (y)->nxt_t == NULL)) && \
+	 (((x)->nxt_f != NULL && (y)->nxt_f != NULL) || \
+	  ((x)->nxt_f == NULL && (y)->nxt_f == NULL)) && \
+	 ((x)->act_t_flg == (y)->act_t_flg) && \
+	 ((x)->act_f_flg == (y)->act_f_flg) && \
+	 (((x)->act_t_flg && (x)->act_t == (y)->act_t) || \
+	  (!((x)->act_t_flg))) && \
+	 (((x)->act_f_flg && (x)->act_f == (y)->act_f) || \
+	  (!((x)->act_f_flg))))
 
 struct db_sys_list {
 	/* native syscall number */
