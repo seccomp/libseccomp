@@ -37,12 +37,12 @@
 #define _DB_PRI_MASK_CHAIN		0x0000FFFF
 #define _DB_PRI_MASK_USER		0x00FF0000
 
-static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
+static unsigned int _db_tree_free(struct db_arg_chain_tree *tree);
 
 /**
- * Do not call this function directly, use _db_arg_chain_tree_free() instead
+ * Do not call this function directly, use _db_tree_free() instead
  */
-static unsigned int __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
+static unsigned int __db_tree_free(struct db_arg_chain_tree *tree)
 {
 	int cnt;
 
@@ -50,9 +50,9 @@ static unsigned int __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
 		return 0;
 
 	/* we assume the caller has ensured that 'tree->lvl_prv == NULL' */
-	cnt = __db_arg_chain_tree_free(tree->lvl_nxt);
-	cnt += _db_arg_chain_tree_free(tree->nxt_t);
-	cnt += _db_arg_chain_tree_free(tree->nxt_f);
+	cnt = __db_tree_free(tree->lvl_nxt);
+	cnt += _db_tree_free(tree->nxt_t);
+	cnt += _db_tree_free(tree->nxt_f);
 
 	free(tree);
 	return cnt + 1;
@@ -66,7 +66,7 @@ static unsigned int __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
  * nodes freed.
  *
  */
-static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
+static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
 {
 	struct db_arg_chain_tree *iter;
 
@@ -77,7 +77,7 @@ static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
 	while (iter->lvl_prv != NULL)
 		iter = iter->lvl_prv;
 
-	return __db_arg_chain_tree_free(iter);
+	return __db_tree_free(iter);
 }
 
 /**
@@ -91,9 +91,9 @@ static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
  * as a result of removing the given node.  Returns the number of nodes freed.
  *
  */
-static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
-					      struct db_arg_chain_tree *node,
-					      uint32_t action)
+static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
+				    struct db_arg_chain_tree *node,
+				    uint32_t action)
 {
 	int cnt = 0;
 	struct db_arg_chain_tree *c_iter;
@@ -123,7 +123,7 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 			/* free and return */
 			c_iter->lvl_prv = NULL;
 			c_iter->lvl_nxt = NULL;
-			cnt += _db_arg_chain_tree_free(c_iter);
+			cnt += _db_tree_free(c_iter);
 			return cnt;
 		}
 
@@ -132,24 +132,22 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
 			/* free and return */
 			c_iter->act_t_flg = 1;
 			c_iter->act_t = action;
-			cnt += _db_arg_chain_tree_free(c_iter->nxt_t);
+			cnt += _db_tree_free(c_iter->nxt_t);
 			c_iter->nxt_t = NULL;
 			return cnt;
 		} else
-			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_t),
-							 node, action);
+			cnt += _db_tree_remove(&(c_iter->nxt_t), node, action);
 
 		/* check the false sub-tree */
 		if (c_iter->nxt_f == node) {
 			/* free and return */
 			c_iter->act_f_flg = 1;
 			c_iter->act_f = action;
-			cnt += _db_arg_chain_tree_free(c_iter->nxt_f);
+			cnt += _db_tree_free(c_iter->nxt_f);
 			c_iter->nxt_f = NULL;
 			return cnt;
 		} else
-			cnt += _db_arg_chain_tree_remove(&(c_iter->nxt_f),
-							 node, action);
+			cnt += _db_tree_remove(&(c_iter->nxt_f), node, action);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
@@ -167,8 +165,7 @@ static unsigned int _db_arg_chain_tree_remove(struct db_arg_chain_tree **tree,
  * on failure.
  *
  */
-static int _db_arg_chain_tree_act_check(struct db_arg_chain_tree *tree,
-					unsigned int action)
+static int _db_tree_act_check(struct db_arg_chain_tree *tree, uint32_t action)
 {
 	int rc;
 	struct db_arg_chain_tree *c_iter;
@@ -186,10 +183,10 @@ static int _db_arg_chain_tree_act_check(struct db_arg_chain_tree *tree,
 		if (c_iter->act_f_flg && c_iter->act_f != action)
 			return -EEXIST;
 
-		rc = _db_arg_chain_tree_act_check(c_iter->nxt_t, action);
+		rc = _db_tree_act_check(c_iter->nxt_t, action);
 		if (rc < 0)
 			return rc;
-		rc = _db_arg_chain_tree_act_check(c_iter->nxt_f, action);
+		rc = _db_tree_act_check(c_iter->nxt_f, action);
 		if (rc < 0)
 			return rc;
 
@@ -240,7 +237,7 @@ void db_destroy(struct db_filter *db)
 	s_iter = db->syscalls;
 	while (s_iter != NULL) {
 		db->syscalls = s_iter->next;
-		_db_arg_chain_tree_free(s_iter->chains);
+		_db_tree_free(s_iter->chains);
 		free(s_iter);
 		s_iter = db->syscalls;
 	}
@@ -367,7 +364,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 	} else if (s_iter->chains != NULL && s_new->chains == NULL) {
 		/* syscall exists with chains but the new filter has no chains
 		 * so we need to clear the existing chains and exit */
-		_db_arg_chain_tree_free(s_iter->chains);
+		_db_tree_free(s_iter->chains);
 		s_iter->chains = NULL;
 		s_iter->node_cnt = 0;
 		s_iter->action = action;
@@ -399,7 +396,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 				}
 				if (ec_iter->act_t_flg == ec_iter->act_f_flg &&
 				    ec_iter->act_t == ec_iter->act_f) {
-					n_cnt = _db_arg_chain_tree_remove(
+					n_cnt = _db_tree_remove(
 							     &(s_iter->chains),
 							     ec_iter,
 							     ec_iter->act_t);
@@ -409,24 +406,20 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 			} else if (db_chain_leaf(c_iter)) {
 				/* new is shorter */
 				if (c_iter->act_t_flg) {
-					rc = _db_arg_chain_tree_act_check(
-								 ec_iter->nxt_t,
-								 action);
+					rc = _db_tree_act_check(ec_iter->nxt_t,
+								action);
 					if (rc < 0)
 						goto add_free;
-					n_cnt = _db_arg_chain_tree_free(
-								ec_iter->nxt_t);
+					n_cnt = _db_tree_free(ec_iter->nxt_t);
 					ec_iter->nxt_t = NULL;
 					ec_iter->act_t_flg = 1;
 					ec_iter->act_t = action;
 				} else {
-					rc = _db_arg_chain_tree_act_check(
-								 ec_iter->nxt_f,
-								 action);
+					rc = _db_tree_act_check(ec_iter->nxt_f,
+								action);
 					if (rc < 0)
 						goto add_free;
-					n_cnt = _db_arg_chain_tree_free(
-								ec_iter->nxt_f);
+					n_cnt = _db_tree_free(ec_iter->nxt_f);
 					ec_iter->nxt_f = NULL;
 					ec_iter->act_f_flg = 1;
 					ec_iter->act_f = action;
@@ -519,7 +512,7 @@ add_free:
 		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
 	}
 	/* free the new chain and its syscall struct */
-	_db_arg_chain_tree_free(s_new->chains);
+	_db_tree_free(s_new->chains);
 	free(s_new);
 	return rc;
 add_free_match:
@@ -532,7 +525,7 @@ add_free_match:
 	if (c_prev != NULL) {
 		c_prev->nxt_t = NULL;
 		c_prev->nxt_f = NULL;
-		_db_arg_chain_tree_free(s_new->chains);
+		_db_tree_free(s_new->chains);
 	}
 	free(s_new);
 	return 0;
