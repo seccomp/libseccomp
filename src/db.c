@@ -40,20 +40,6 @@
 static unsigned int _db_arg_chain_tree_free(struct db_arg_chain_tree *tree);
 
 /**
- * Free each item in the DB list
- * @param iter the iterator
- * @param list the list
- *
- * This macro acts as for()/while() conditional and iterates the following
- * statement before freeing the list item.
- *
- */
-#define _db_list_foreach_free(iter,list) \
-	for (iter = (list); \
-	     iter != NULL; \
-	     (list) = iter->next, free(iter), iter = (list))
-
-/**
  * Do not call this function directly, use _db_arg_chain_tree_free() instead
  */
 static unsigned int __db_arg_chain_tree_free(struct db_arg_chain_tree *tree)
@@ -251,8 +237,13 @@ void db_destroy(struct db_filter *db)
 	if (db == NULL)
 		return;
 
-	_db_list_foreach_free(s_iter, db->syscalls)
+	s_iter = db->syscalls;
+	while (s_iter != NULL) {
+		db->syscalls = s_iter->next;
 		_db_arg_chain_tree_free(s_iter->chains);
+		free(s_iter);
+		s_iter = db->syscalls;
+	}
 	free(db);
 }
 
@@ -545,30 +536,4 @@ add_free_match:
 	}
 	free(s_new);
 	return 0;
-}
-
-/**
- * Find a syscall filter in the DB
- * @param db the seccomp filter DB
- * @param syscall the syscall number
- *
- * This function searches the filter DB using the given syscall number and
- * returns a pointer to the syscall filter or NULL if no matching syscall
- * filter exists.
- *
- */
-struct db_sys_list *db_find_syscall(const struct db_filter *db,
-				    unsigned int syscall)
-{
-	struct db_sys_list *iter;
-
-	assert(db != NULL);
-
-	iter = db->syscalls;
-	while (iter != NULL && iter->num < syscall)
-		iter = iter->next;
-	if (iter != NULL && iter->num == syscall)
-		return iter;
-
-	return NULL;
 }

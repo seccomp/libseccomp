@@ -113,7 +113,4 @@ void db_destroy(struct db_filter *db);
 int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		   struct db_api_arg *chain);
 
-struct db_sys_list *db_find_syscall(const struct db_filter *db,
-				    unsigned int syscall);
-
 #endif
