@@ -1,8 +1,8 @@
 /**
- * Seccomp Library test program
+ * Seccomp Library utility code for tests
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
- * Author: Paul Moore <pmoore@redhat.com>
+ * Copyright IBM Corp. 2012
+ * Author: Corey Bryant <coreyb@linux.vnet.ibm.com>
  */
 
 /*
@@ -19,32 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
+#ifndef _UTIL_TEST_H
+#define _UTIL_TEST_H
 
-#include <seccomp.h>
+int util_getopt(int argc, char *argv[], int *bpf);
 
-#include "util.h"
-
-int main(int argc, char *argv[])
-{
-	int rc;
-	int bpf;
-
-	rc = util_getopt(argc, argv, &bpf);
-	if (rc < 0)
-		return rc;
-
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
-
-	if (bpf)
-		rc = seccomp_gen_bpf(STDOUT_FILENO);
-	else
-		rc = seccomp_gen_pfc(STDOUT_FILENO);
-	if (rc)
-		return rc;
-
-	seccomp_release();
-	return rc;
-}
+#endif

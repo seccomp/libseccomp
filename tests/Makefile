@@ -35,7 +35,9 @@ include ../macros.mk
 
 include ../version_info
 
-LDFLAGS := ../src/libseccomp.a
+OBJS = util.o
+
+LDFLAGS := ../src/libseccomp.a $(OBJS)
 
 TESTS = 01-allow \
 	02-basic \
@@ -45,7 +47,8 @@ TESTS = 01-allow \
 	06-actions \
 	07-db-bug-looping
 
-DEPS = $(TESTS:%=%.d)
+DEPS_OBJS = $(OBJS:%.o=%.d)
+DEPS_TESTS = $(TESTS:%=%.d)
 
 #
 # targets
@@ -53,16 +56,17 @@ DEPS = $(TESTS:%=%.d)
 
 .PHONY: clean
 
-all: $(TESTS)
+all: $(TESTS) $(OBJS)
 
--include $(DEPS)
+-include $(DEPS_TESTS) $(DEPS_OBJS)
 
-$(DEPS):
+$(DEPS_TESTS):
 	$(MAKEDEP_EXEC)
 	$(ADDDEP) $@ ../src/libseccomp.a
+	$(ADDDEP) $@ $(OBJS)
 
 $(TESTS):
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) -f $(DEPS) $(TESTS)
+	$(RM) -f $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(OBJS)
