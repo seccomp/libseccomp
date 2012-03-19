@@ -317,7 +317,6 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 		}
 	} else
 		s_new->action = action;
-	s_new->priority = _DB_PRI_MASK_CHAIN - s_new->node_cnt;
 
 	/* no more failures allowed after this point that would result in the
 	 * stored filter being in an inconsistent state */
