@@ -106,7 +106,6 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 		c_iter = c_iter->lvl_prv;
 
 	do {
-		/* this is only an issue on the first level */
 		if (c_iter == node) {
 			/* remove from the tree */
 			if (c_iter == *tree) {
@@ -127,27 +126,9 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 			return cnt;
 		}
 
-		/* check the true sub-tree */
-		if (c_iter->nxt_t == node) {
-			/* free and return */
-			c_iter->act_t_flg = 1;
-			c_iter->act_t = action;
-			cnt += _db_tree_free(c_iter->nxt_t);
-			c_iter->nxt_t = NULL;
-			return cnt;
-		} else
-			cnt += _db_tree_remove(&(c_iter->nxt_t), node, action);
-
-		/* check the false sub-tree */
-		if (c_iter->nxt_f == node) {
-			/* free and return */
-			c_iter->act_f_flg = 1;
-			c_iter->act_f = action;
-			cnt += _db_tree_free(c_iter->nxt_f);
-			c_iter->nxt_f = NULL;
-			return cnt;
-		} else
-			cnt += _db_tree_remove(&(c_iter->nxt_f), node, action);
+		/* check the true/false sub-trees */
+		cnt += _db_tree_remove(&(c_iter->nxt_t), node, action);
+		cnt += _db_tree_remove(&(c_iter->nxt_f), node, action);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
