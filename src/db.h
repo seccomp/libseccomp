@@ -65,7 +65,7 @@ struct db_arg_chain_tree {
 	(((x)->arg == (y)->arg) && \
 	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum))
 #define db_chain_leaf(x) \
-	(((x)->act_t_flg != 0) || ((x)->act_t_flg != 0))
+	(((x)->act_t_flg != 0) || ((x)->act_f_flg != 0))
 
 struct db_sys_list {
 	/* native syscall number */
