@@ -35,6 +35,7 @@
 #define SCMP_ACT_KILL		0x00000000U
 #define SCMP_ACT_TRAP		0x00020000U
 #define SCMP_ACT_ERRNO(x)	(0x00030000U | ((x) & 0x0000ffff))
+#define SCMP_ACT_TRACE		0x7ff00000U
 #define SCMP_ACT_ALLOW		0x7fff0000U
 
 /*
