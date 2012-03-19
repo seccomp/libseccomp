@@ -452,17 +452,21 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 			/* need to check other nodes on this level */
 			if (db_chain_lt(c_iter, ec_iter)) {
 				if (ec_iter->lvl_prv == NULL) {
+					/* add to the start of the level */
 					ec_iter->lvl_prv = c_iter;
 					c_iter->lvl_nxt = ec_iter;
 					if (ec_iter == s_iter->chains)
 						s_iter->chains = c_iter;
+					s_iter->node_cnt += s_new->node_cnt;
 					goto add_free_match;
 				} else
 					ec_iter = ec_iter->lvl_prv;
 			} else {
 				if (ec_iter->lvl_nxt == NULL) {
+					/* add to the end of the level */
 					ec_iter->lvl_nxt = c_iter;
 					c_iter->lvl_prv = ec_iter;
+					s_iter->node_cnt += s_new->node_cnt;
 					goto add_free_match;
 				} else if (db_chain_lt(c_iter,
 						       ec_iter->lvl_nxt)) {
@@ -471,6 +475,7 @@ int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
 					ec_iter->lvl_nxt->lvl_prv = c_iter;
 					ec_iter->lvl_nxt = c_iter;
 					c_iter->lvl_prv = ec_iter;
+					s_iter->node_cnt += s_new->node_cnt;
 					goto add_free_match;
 				} else
 					ec_iter = ec_iter->lvl_nxt;
