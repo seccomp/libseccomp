@@ -1283,57 +1283,59 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	} while (b_iter != NULL && b_iter->next != NULL);
 
 	/* pull in all of the TGT_PTR_HSH jumps, one layer at a time */
+	b_iter = b_tail;
 	do {
 		res_cnt = 0;
-		b_iter = b_tail;
-		/* go through the block list backwards (no reverse jumps) */
-		do {
-			/* look for jumps - backwards (shorter jumps) */
-			for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
-				i_iter = &b_iter->blks[iter];
-				if (i_iter->jt.type == TGT_PTR_HSH) {
-					b_jmp = _hsh_find_once(state,
-							   i_iter->jt.tgt.hash);
-					if (b_jmp != NULL) {
-						/* insert the block after*/
-						res_cnt++;
-						b_jmp->prev = b_iter;
-						b_jmp->next = b_iter->next;
-						b_iter->next = b_jmp;
-						if (b_jmp->next)
-							b_jmp->next->prev=b_jmp;
-					}
-				}
-				if (i_iter->jf.type == TGT_PTR_HSH) {
-					b_jmp = _hsh_find_once(state,
-							   i_iter->jf.tgt.hash);
-					if (b_jmp != NULL) {
-						/* insert the block after*/
-						res_cnt++;
-						b_jmp->prev = b_iter;
-						b_jmp->next = b_iter->next;
-						b_iter->next = b_jmp;
-						if (b_jmp->next)
-							b_jmp->next->prev=b_jmp;
-					}
-				}
-				if (i_iter->k.type == TGT_PTR_HSH) {
-					b_jmp = _hsh_find_once(state,
-							   i_iter->k.tgt.hash);
-					if (b_jmp != NULL) {
-						/* insert the block after*/
-						res_cnt++;
-						b_jmp->prev = b_iter;
-						b_jmp->next = b_iter->next;
-						b_iter->next = b_jmp;
-						if (b_jmp->next)
-							b_jmp->next->prev=b_jmp;
-					}
+		/* look for jumps - backwards (shorter jumps) */
+		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
+			i_iter = &b_iter->blks[iter];
+			if (i_iter->jt.type == TGT_PTR_HSH) {
+				b_jmp = _hsh_find_once(state,
+						       i_iter->jt.tgt.hash);
+				if (b_jmp != NULL) {
+					/* insert the block after*/
+					res_cnt++;
+					b_jmp->prev = b_iter;
+					b_jmp->next = b_iter->next;
+					b_iter->next = b_jmp;
+					if (b_jmp->next)
+						b_jmp->next->prev=b_jmp;
 				}
 			}
+			if (i_iter->jf.type == TGT_PTR_HSH) {
+				b_jmp = _hsh_find_once(state,
+						       i_iter->jf.tgt.hash);
+				if (b_jmp != NULL) {
+					/* insert the block after*/
+					res_cnt++;
+					b_jmp->prev = b_iter;
+					b_jmp->next = b_iter->next;
+					b_iter->next = b_jmp;
+					if (b_jmp->next)
+						b_jmp->next->prev=b_jmp;
+				}
+			}
+			if (i_iter->k.type == TGT_PTR_HSH) {
+				b_jmp = _hsh_find_once(state,
+						       i_iter->k.tgt.hash);
+				if (b_jmp != NULL) {
+					/* insert the block after*/
+					res_cnt++;
+					b_jmp->prev = b_iter;
+					b_jmp->next = b_iter->next;
+					b_iter->next = b_jmp;
+					if (b_jmp->next)
+						b_jmp->next->prev=b_jmp;
+				}
+			}
+		}
+		if (res_cnt > 0) {
+			while (b_tail->next != NULL)
+				b_tail = b_tail->next;
+			b_iter = b_tail;
+		} else
 			b_iter = b_iter->prev;
-		} while (b_iter != NULL);
-	} while (res_cnt != 0);
+	} while (b_iter != NULL);
 
 	/* load the syscall into the accumulator */
 	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
