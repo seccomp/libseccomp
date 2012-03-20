@@ -92,6 +92,7 @@ struct bpf_blk {
 	/* used during final block assembly */
 	unsigned int hashed_flag;
 	uint64_t hash;
+	struct bpf_blk *hash_nxt;
 	struct bpf_blk *prev, *next;
 };
 #define _BLK_MSZE(x) \
@@ -163,6 +164,13 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
  */
 static void __blk_free(struct bpf_state *state, struct bpf_blk *blk)
 {
+	struct bpf_blk *b_tmp;
+
+	while (blk->hash_nxt != NULL) {
+		b_tmp = blk->hash_nxt;
+		blk->hash_nxt = b_tmp->hash_nxt;
+		free(b_tmp);
+	}
 	if (blk->blks != NULL)
 		free(blk->blks);
 	free(blk);
@@ -426,6 +434,10 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	uint64_t h_val;
 	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
 	struct bpf_blk *blk = *blk_p;
+	struct bpf_blk *b_iter;
+
+	if (blk->hashed_flag)
+		return 0;
 
 	h_new = malloc(sizeof(*h_new));
 	if (h_new == NULL)
@@ -434,8 +446,9 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 
 	/* generate the hash */
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
+	blk->hash = h_val;
+	blk->hashed_flag = 1;
 	h_new->blk = blk;
-	h_new->blk->hash = h_val;
 	h_new->found = (found ? 1 : 0);
 
 	/* insert the block into the hash table */
@@ -453,15 +466,25 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				if (h_iter->blk->priority < blk->priority)
 					h_iter->blk->priority = blk->priority;
 
-				/* free the block */
-				__blk_free(state, blk);
+				/* try to save some memory */
+				free(blk->blks);
+				blk->blks = h_iter->blk->blks;
+
+				/* store the duplicate block */
+				b_iter = h_iter->blk;
+				while (b_iter->hash_nxt != NULL)
+					b_iter = b_iter->hash_nxt;
+				b_iter->hash_nxt = blk;
 				*blk_p = h_iter->blk;
-				goto hsh_add_success;
+				return 0;
 			} else if (h_iter->blk->hash == h_val) {
 				/* hash collision */
-				if ((h_val >> 32) == 0xffffffff)
+				if ((h_val >> 32) == 0xffffffff) {
 					/* overflow */
+					blk->hashed_flag = 0;
+					blk->hash = 0;
 					return -EFAULT;
+				}
 				h_val += ((uint64_t)1 << 32);
 				h_new->blk->hash = h_val;
 
@@ -477,8 +500,6 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	} else
 		state->htbl[h_val & _BPF_HASH_MASK] = h_new;
 
-hsh_add_success:
-	(*blk_p)->hashed_flag = 1;
 	return 0;
 }
 
