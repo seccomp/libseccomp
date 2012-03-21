@@ -59,7 +59,7 @@ static int _seccomp_action_valid(uint32_t action)
 		return 0;
 	else if (action == SCMP_ACT_ERRNO(action & 0x0000ffff))
 		return 0;
-	else if (action == SCMP_ACT_TRACE)
+	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
 		return 0;
 	else if (action == SCMP_ACT_ALLOW)
 		return 0;

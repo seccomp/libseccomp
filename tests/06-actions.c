@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_add_syscall(SCMP_ACT_TRACE, SCMP_SYS(open), 0);
+	rc = seccomp_add_syscall(SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
 	if (rc != 0)
 		return rc;
 

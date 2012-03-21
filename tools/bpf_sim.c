@@ -115,6 +115,8 @@ static void end_action(uint32_t action, unsigned int line)
 		fprintf(stdout, "TRAP");
 	else if ((action & 0xffff0000) == 0x00030000)
 		fprintf(stdout, "ERRNO(%u)", (action & 0x0000ffff));
+	else if ((action & 0xffff0000) == 0x7ff00000)
+		fprintf(stdout, "TRACE(%u)", (action & 0x0000ffff));
 	else if (action == 0x7fff0000)
 		fprintf(stdout, "ALLOW");
 	else
