@@ -40,9 +40,6 @@
 #define PR_ATTACH_SECCOMP_FILTER	37
 #endif
 
-/* XXX - we need a way to handle things like socketcall() so devs don't have
- *       to worry about underlying arch/platform oddities */
-
 /* the underlying code supports multiple simultaneous seccomp filters, but in
  * practice we really only need one per-process right now, and this is it */
 static struct db_filter *filter = NULL;
