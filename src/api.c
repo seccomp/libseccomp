@@ -86,7 +86,7 @@ int seccomp_init(uint32_t def_action)
 
 	if (filter != NULL)
 		return -EEXIST;
-	filter = db_new(&arch_def_native, def_action);
+	filter = db_init(&arch_def_native, def_action);
 
 	return (filter ? 0 : -ENOMEM);
 }
@@ -104,7 +104,7 @@ int seccomp_init(uint32_t def_action)
 int seccomp_reset(uint32_t def_action)
 {
 	if (filter != NULL)
-		db_destroy(filter);
+		db_release(filter);
 
 	return seccomp_init(def_action);
 }
@@ -124,7 +124,7 @@ void seccomp_release(void)
 	if (filter == NULL)
 		return;
 
-	db_destroy(filter);
+	db_release(filter);
 	filter = NULL;
 }
 
@@ -223,7 +223,7 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 	}
 
 	/* add the new rule to the existing filter */
-	rc = db_add_syscall(filter, action, syscall, chain);
+	rc = db_rule_add(filter, action, syscall, chain);
 
 rule_add_return:
 	va_end(arg_list);

@@ -131,10 +131,10 @@ struct db_filter {
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
 
-struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action);
-void db_destroy(struct db_filter *db);
+struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
+void db_release(struct db_filter *db);
 
-int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
-		   struct db_api_arg *chain);
+int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
+		struct db_api_arg *chain);
 
 #endif

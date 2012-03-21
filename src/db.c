@@ -291,7 +291,7 @@ sub_prune_remove:
  * Returns a pointer to the DB on success, NULL on failure.
  *
  */
-struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action)
+struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 {
 	struct db_filter *db;
 
@@ -313,7 +313,7 @@ struct db_filter *db_new(const struct arch_def *arch, uint32_t def_action)
  * the filter should no longer be referenced.
  *
  */
-void db_destroy(struct db_filter *db)
+void db_release(struct db_filter *db)
 {
 	struct db_sys_list *s_iter;
 
@@ -331,7 +331,7 @@ void db_destroy(struct db_filter *db)
 }
 
 /**
- * Add a syscall filter with an optional argument chain
+ * Add a new rule to the seccomp filter DB
  * @param db the seccomp filter db
  * @param action the filter action
  * @param syscall the syscall number
@@ -344,8 +344,8 @@ void db_destroy(struct db_filter *db)
  * filter DB. Returns zero on success, negative values on failure.
  *
  */
-int db_add_syscall(struct db_filter *db, uint32_t action, unsigned int syscall,
-		   struct db_api_arg *chain)
+int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
+		struct db_api_arg *chain)
 {
 	int rc = -ENOMEM;
 	unsigned int iter;
