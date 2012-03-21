@@ -92,7 +92,7 @@ int seccomp_init(uint32_t def_action)
 }
 
 /**
- * Reset the filter state
+ * Reset the current filter state
  * @param def_action the default filter action
  *
  * This function resets the internal seccomp filter state and ensures the
@@ -110,7 +110,7 @@ int seccomp_reset(uint32_t def_action)
 }
 
 /**
- * Destroys the filter state and releases any resources
+ * Destroys the current filter state and releases any resources
  *
  * This functions destroys the internal seccomp filter state and releases any
  * resources, including memory, associated with the filter state.  This
@@ -129,7 +129,7 @@ void seccomp_release(void)
 }
 
 /**
- * Enables the currently configured seccomp filter
+ * Loads the current filter into the kernel
  *
  * This function loads the currently configured seccomp filter into the kernel.
  * If the filter was loaded correctly, the kernel will be enforcing the filter
@@ -137,7 +137,7 @@ void seccomp_release(void)
  * error.
  *
  */
-int seccomp_enable(void)
+int seccomp_load(void)
 {
 	int rc;
 	struct bpf_program *program;
@@ -157,7 +157,7 @@ int seccomp_enable(void)
 }
 
 /**
- * Add a syscall and an optional argument chain to the existing filter
+ * Add a new rule to the current filter
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
@@ -169,8 +169,7 @@ int seccomp_enable(void)
  * success, negative values on failure.
  *
  */
-int seccomp_add_syscall(uint32_t action, int syscall,
-			unsigned int arg_cnt, ...)
+int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
 	unsigned int iter;
@@ -204,14 +203,14 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 			if (chain[arg_num].op <= _SCMP_CMP_MIN ||
 			    chain[arg_num].op >= _SCMP_CMP_MAX) {
 				rc = -EINVAL;
-				goto add_syscall_return;
+				goto rule_add_return;
 			}
 			/* NOTE - basic testing indicates we can't pick a type
 			 *	  larger than the system's 'unsigned long' */
 			chain[arg_num].datum = va_arg(arg_list, unsigned long);
 		} else {
 			rc = -EINVAL;
-			goto add_syscall_return;
+			goto rule_add_return;
 		}
 	}
 
@@ -220,13 +219,13 @@ int seccomp_add_syscall(uint32_t action, int syscall,
 	if (syscall < 0) {
 		rc = arch_filter_rewrite(filter->arch, &syscall, chain);
 		if (rc < 0)
-			goto add_syscall_return;
+			goto rule_add_return;
 	}
 
 	/* add the new rule to the existing filter */
 	rc = db_add_syscall(filter, action, syscall, chain);
 
-add_syscall_return:
+rule_add_return:
 	va_end(arg_list);
 	if (chain != NULL)
 		free(chain);

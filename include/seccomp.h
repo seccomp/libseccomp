@@ -62,10 +62,9 @@ int seccomp_init(uint32_t def_action);
 int seccomp_reset(uint32_t def_action);
 void seccomp_release(void);
 
-int seccomp_enable(void);
+int seccomp_load(void);
 
-int seccomp_add_syscall(uint32_t action, int syscall,
-			unsigned int arg_cnt, ...);
+int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
 
 int seccomp_gen_pfc(int fd);
 int seccomp_gen_bpf(int fd);
