@@ -123,6 +123,13 @@ int seccomp_load(void)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+int seccomp_syscall_priority(int syscall, uint8_t priority)
+{
+	/* XXX - this isn't a correctness issue, so return zero for now */
+	return 0;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;

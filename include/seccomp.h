@@ -132,6 +132,19 @@ void seccomp_release(void);
 int seccomp_load(void);
 
 /**
+ * Set the priority of a given syscall
+ * @param syscall the syscall number
+ * @param priority priority value, higher value == higher priority
+ *
+ * This function sets the priority of the given syscall; this value is used
+ * when generating the seccomp filter code such that higher priority syscalls
+ * will incur less filter code overhead than the lower priority syscalls in the
+ * filter.  Returns zero on success, negative values on failure.
+ *
+ */
+int seccomp_syscall_priority(int syscall, uint8_t priority);
+
+/**
  * Add a new rule to the current filter
  * @param action the filter action
  * @param syscall the syscall number
