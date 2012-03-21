@@ -149,7 +149,7 @@ int seccomp_load(void)
 	if (program == NULL)
 		return -ENOMEM;
 	rc = prctl(PR_ATTACH_SECCOMP_FILTER, program);
-	gen_bpf_destroy(program);
+	gen_bpf_release(program);
 	if (rc < 0)
 		return errno;
 
@@ -268,7 +268,7 @@ int seccomp_gen_bpf(int fd)
 	if (program == NULL)
 		return -ENOMEM;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
-	gen_bpf_destroy(program);
+	gen_bpf_release(program);
 	if (rc < 0)
 		return errno;
 

@@ -1503,7 +1503,7 @@ bpf_generate_end:
  * gen_bpf_generate() function.
  *
  */
-void gen_bpf_destroy(struct bpf_program *program)
+void gen_bpf_release(struct bpf_program *program)
 {
 	_program_free(program);
 }

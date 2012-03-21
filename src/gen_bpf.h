@@ -44,6 +44,6 @@ struct bpf_program {
 	((x)->blk_cnt * sizeof(*((x)->blks)))
 
 struct bpf_program *gen_bpf_generate(const struct db_filter *db);
-void gen_bpf_destroy(struct bpf_program *program);
+void gen_bpf_release(struct bpf_program *program);
 
 #endif
