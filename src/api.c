@@ -67,15 +67,7 @@ static int _seccomp_action_valid(uint32_t action)
 	return -EINVAL;
 }
 
-/**
- * Initialize the filter state
- * @param def_action the default filter action
- *
- * This function initializes the internal seccomp filter state and should
- * be called before any other functions in this library to ensure the filter
- * state is initialized.  Returns zero on success, negative values on failure.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_init(uint32_t def_action)
 {
 	int rc;
@@ -91,16 +83,7 @@ int seccomp_init(uint32_t def_action)
 	return (filter ? 0 : -ENOMEM);
 }
 
-/**
- * Reset the current filter state
- * @param def_action the default filter action
- *
- * This function resets the internal seccomp filter state and ensures the
- * filter state is reinitialized.  This function does not reset any seccomp
- * filters already loaded into the kernel.  Returns zero on success, negative
- * values on failure.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_reset(uint32_t def_action)
 {
 	if (filter != NULL)
@@ -109,16 +92,7 @@ int seccomp_reset(uint32_t def_action)
 	return seccomp_init(def_action);
 }
 
-/**
- * Destroys the current filter state and releases any resources
- *
- * This functions destroys the internal seccomp filter state and releases any
- * resources, including memory, associated with the filter state.  This
- * function does not reset any seccomp filters already loaded into the kernel.
- * The function seccomp_reset() must be called before the filter can be
- * reconfigured after calling this function.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 void seccomp_release(void)
 {
 	if (filter == NULL)
@@ -128,15 +102,7 @@ void seccomp_release(void)
 	filter = NULL;
 }
 
-/**
- * Loads the current filter into the kernel
- *
- * This function loads the currently configured seccomp filter into the kernel.
- * If the filter was loaded correctly, the kernel will be enforcing the filter
- * when this function returns.  Returns zero on success, negative values on
- * error.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_load(void)
 {
 	int rc;
@@ -156,19 +122,7 @@ int seccomp_load(void)
 	return 0;
 }
 
-/**
- * Add a new rule to the current filter
- * @param action the filter action
- * @param syscall the syscall number
- * @param arg_cnt the number of argument filters in the argument filter chain
- * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
- *
- * This function adds a new argument/comparison/value to the seccomp filter for
- * a syscall; multiple arguments can be specified and they will be chained
- * together (essentially AND'd together) in the filter.  Returns zero on
- * success, negative values on failure.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
@@ -232,14 +186,7 @@ rule_add_return:
 	return rc;
 }
 
-/**
- * Generate seccomp pseudo filter code
- * @param fd the destination fd
- *
- * This function generates seccomp pseudo filter code and writes it to the
- * given fd.  Returns zero on success, negative values on failure.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_gen_pfc(int fd)
 {
 	if (filter == NULL)
@@ -248,14 +195,7 @@ int seccomp_gen_pfc(int fd)
 	return gen_pfc_generate(filter, fd);
 }
 
-/**
- * Generate seccomp Berkley Packet Filter code
- * @param fd the destination fd
- *
- * This function generates seccomp Berkley Packer Filter (BPF) code and writes
- * it to the given fd.  Returns zero on success, negative values on failure.
- *
- */
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_gen_bpf(int fd)
 {
 	int rc;

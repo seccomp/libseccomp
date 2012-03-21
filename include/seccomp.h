@@ -26,47 +26,144 @@
 #include <asm/unistd.h>
 
 /*
- * macros
+ * macros/defines
  */
 
+/**
+ * Convert a syscall name into the associated syscall number
+ * @param x the syscall name
+ */
 #define SCMP_SYS(x)		__NR_##x
 
-/* XXX - the constants here should be replaced with the seccomp #defines */
+/*
+ * seccomp actions
+ */
+
+/* XXX - the values used here should be replaced with the system #defines */
+
+/**
+ * Kill the process
+ */
 #define SCMP_ACT_KILL		0x00000000U
+/**
+ * Throw a SIGSYS signal
+ */
 #define SCMP_ACT_TRAP		0x00020000U
+/**
+ * Return the specified error code
+ */
 #define SCMP_ACT_ERRNO(x)	(0x00030000U | ((x) & 0x0000ffff))
+/**
+ * Notify a tracing process with the specified value
+ */
 #define SCMP_ACT_TRACE(x)	(0x7ff00000U | ((x) & 0x0000ffff))
+/**
+ * Allow the syscall to be executed
+ */
 #define SCMP_ACT_ALLOW		0x7fff0000U
 
 /*
  * types
  */
 
+/**
+ * Comparison operators
+ */
 enum scmp_compare {
-	_SCMP_CMP_MIN = 0,	/* sentinel */
-	SCMP_CMP_NE = 1,	/* not equal */
-	SCMP_CMP_LT = 2,	/* less than */
-	SCMP_CMP_LE = 3,	/* less than or equal */
-	SCMP_CMP_EQ = 4,	/* equal */
-	SCMP_CMP_GE = 5,	/* greater than or equal */
-	SCMP_CMP_GT = 6,	/* greater than */
-	SCMP_CMP_MASK = 7,	/* masked value equality */
-	_SCMP_CMP_MAX,		/* sentinel */
+	_SCMP_CMP_MIN = 0,
+	SCMP_CMP_NE = 1,	/**< not equal */
+	SCMP_CMP_LT = 2,	/**< less than */
+	SCMP_CMP_LE = 3,	/**< less than or equal */
+	SCMP_CMP_EQ = 4,	/**< equal */
+	SCMP_CMP_GE = 5,	/**< greater than or equal */
+	SCMP_CMP_GT = 6,	/**< greater than */
+	SCMP_CMP_MASK = 7,	/**< masked equality */
+	_SCMP_CMP_MAX,
 };
 
 /*
  * functions
  */
 
+/**
+ * Initialize the filter state
+ * @param def_action the default filter action
+ *
+ * This function initializes the internal seccomp filter state and should
+ * be called before any other functions in this library to ensure the filter
+ * state is initialized.  Returns zero on success, negative values on failure.
+ *
+ */
 int seccomp_init(uint32_t def_action);
+
+/**
+ * Reset the current filter state
+ * @param def_action the default filter action
+ *
+ * This function resets the internal seccomp filter state and ensures the
+ * filter state is reinitialized.  This function does not reset any seccomp
+ * filters already loaded into the kernel.  Returns zero on success, negative
+ * values on failure.
+ *
+ */
 int seccomp_reset(uint32_t def_action);
+
+/**
+ * Destroys the current filter state and releases any resources
+ *
+ * This functions destroys the internal seccomp filter state and releases any
+ * resources, including memory, associated with the filter state.  This
+ * function does not reset any seccomp filters already loaded into the kernel.
+ * The function seccomp_reset() must be called before the filter can be
+ * reconfigured after calling this function.
+ *
+ */
 void seccomp_release(void);
 
+/**
+ * Loads the current filter into the kernel
+ *
+ * This function loads the currently configured seccomp filter into the kernel.
+ * If the filter was loaded correctly, the kernel will be enforcing the filter
+ * when this function returns.  Returns zero on success, negative values on
+ * error.
+ *
+ */
 int seccomp_load(void);
 
+/**
+ * Add a new rule to the current filter
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param arg_cnt the number of argument filters in the argument filter chain
+ * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
+ *
+ * This function adds a new argument/comparison/value to the seccomp filter for
+ * a syscall; multiple arguments can be specified and they will be chained
+ * together (essentially AND'd together) in the filter.  Returns zero on
+ * success, negative values on failure.
+ *
+ */
 int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
 
+/**
+ * Generate seccomp Pseudo Filter Code (PFC)
+ * @param fd the destination fd
+ *
+ * This function generates seccomp Pseudo Filter Code (PFC) and writes it to
+ * the given fd.  Returns zero on success, negative values on failure.
+ *
+ */
 int seccomp_gen_pfc(int fd);
+
+/**
+ * Generate seccomp Berkley Packet Filter (BPF) code
+ * @param fd the destination fd
+ *
+ * This function generates seccomp Berkley Packer Filter (BPF) code and writes
+ * it to the given fd.  Returns zero on success, negative values on failure.
+ *
+ */
 int seccomp_gen_bpf(int fd);
 
 /*
