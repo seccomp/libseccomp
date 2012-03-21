@@ -218,7 +218,7 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 				else if ((bpf->k & 0xffff0000) == 0x00030000)
 					printf("ERRNO(%u)",
 					       (bpf->k & 0x0000ffff));
-				else if ((bpf->k & 0xffff0000) == 0x7ff0000)
+				else if ((bpf->k & 0xffff0000) == 0x7ff00000)
 					printf("TRACE(%u)",
 					       (bpf->k & 0x0000ffff));
 				else if (bpf->k == 0x7fff0000)
