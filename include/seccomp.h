@@ -275,4 +275,65 @@ int seccomp_gen_bpf(int fd);
 #define __NR_sendmmsg		__PNR_sendmmsg
 #endif /* __NR_sendmmsg */
 
+
+#define __PNR_semop		-200
+#ifndef __NR_semop
+#define __NR_semop		__PNR_semop
+#endif /* __NR_semop */
+
+#define __PNR_semget		-201
+#ifndef __NR_semget
+#define __NR_semget		__PNR_semget
+#endif /* __NR_semget */
+
+#define __PNR_semctl		-202
+#ifndef __NR_semctl
+#define __NR_semctl		__PNR_semctl
+#endif /* __NR_semctl */
+
+#define __PNR_semtimedop	-203
+#ifndef __NR_semtimedop
+#define __NR_semtimedop		__PNR_semtimedop
+#endif /* __NR_semtime */
+
+#define __PNR_msgsnd		-204
+#ifndef __NR_msgsnd
+#define __NR_msgsnd		__PNR_msgsnd
+#endif /* __NR_msgsnd */
+
+#define __PNR_msgrcv		-205
+#ifndef __NR_msgrcv
+#define __NR_msgrcv		__PNR_msgrcv
+#endif /* __NR_msgrcv */
+
+#define __PNR_msgget		-206
+#ifndef __NR_msgget
+#define __NR_msgget		__PNR_msgget
+#endif /* __NR_msgget */
+
+#define __PNR_msgctl		-207
+#ifndef __NR_msgctl
+#define __NR_msgctl		__PNR_msgctl
+#endif /* __NR_msgctl */
+
+#define __PNR_shmat		-208
+#ifndef __NR_shmat
+#define __NR_shmat		__PNR_shmat
+#endif /* __NR_shmat */
+
+#define __PNR_shmdt		-209
+#ifndef __NR_shmdt
+#define __NR_shmdt		__PNR_shmdt
+#endif /* __NR_shmdt */
+
+#define __PNR_shmget		-210
+#ifndef __NR_shmget
+#define __NR_shmget		__PNR_shmget
+#endif /* __NR_shmget */
+
+#define __PNR_shmctl		-211
+#ifndef __NR_shmctl
+#define __NR_shmctl		__PNR_shmctl
+#endif /* __NR_shmctl */
+
 #endif

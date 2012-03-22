@@ -20,9 +20,14 @@
  */
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "arch.h"
 #include "arch-i386.h"
+
+/* i386 syscall numbers */
+#define __i386_NR_socketcall		102
+#define __i386_NR_ipc			117
 
 /**
  * Rewrite a syscall value to match the architecture
@@ -55,6 +60,30 @@ int i386_syscall_rewrite(const struct arch_def *arch, int *syscall)
 int i386_filter_rewrite(const struct arch_def *arch,
 			int *syscall, struct db_api_arg *chain)
 {
-	/* XXX - rewrite the values in @syscall and @chain here */
-	return -1;
+	unsigned int iter;
+
+	if ((*syscall) <= -100 && (*syscall) >= -117) {
+		for (iter = 0; iter < i386_arg_count_max; iter++) {
+			if (chain[iter].valid != 0)
+				return -EINVAL;
+		}
+		*syscall = __i386_NR_socketcall;
+		chain[0].arg = 0;
+		chain[0].op = SCMP_CMP_EQ;
+		chain[0].datum = abs((*syscall) % 100);
+		chain[0].valid = 1;
+	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
+		for (iter = 0; iter < i386_arg_count_max; iter++) {
+			if (chain[iter].valid != 0)
+				return -EINVAL;
+		}
+		*syscall = __i386_NR_ipc;
+		chain[0].arg = 0;
+		chain[0].op = SCMP_CMP_EQ;
+		chain[0].datum = abs((*syscall) % 200);
+		chain[0].valid = 1;
+	} else if ((*syscall) < 0)
+		return -EINVAL;
+
+	return 0;
 }
