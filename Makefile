@@ -45,7 +45,7 @@ INSTALL_GROUP ?= root
 
 SUBDIRS = src tests tools
 
-.PHONY: tarball install clean $(SUBDIRS)
+.PHONY: tarball install ctags cstags clean $(SUBDIRS)
 
 all: $(SUBDIRS)
 
@@ -78,6 +78,15 @@ $(VERSION_HDR): version_info
 $(SUBDIRS): $(VERSION_HDR)
 	@echo "INFO: entering directory $@/ ..."
 	@$(MAKE) -s -C $@
+
+ctags:
+	@echo "INFO: generating ctags for the project ..."
+	@ctags -R *
+
+cstags:
+	@echo "INFO: generating cscope tags for the project ..."
+	@find -iname *.[ch] > cscope.files
+	@cscope -b -q -k
 
 clean:
 	@echo "INFO: removing the version header file"; \

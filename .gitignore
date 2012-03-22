@@ -7,3 +7,4 @@
 *.orig
 .stgit-*
 cscope.*
+tags
