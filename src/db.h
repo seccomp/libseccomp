@@ -135,6 +135,9 @@ struct db_filter {
 struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
 void db_release(struct db_filter *db);
 
+int db_syscall_priority(struct db_filter *db,
+			unsigned int syscall, uint8_t priority);
+
 int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
 		struct db_api_arg *chain);
 

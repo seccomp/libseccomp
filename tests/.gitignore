@@ -7,3 +7,5 @@
 06-actions
 07-db-bug-looping
 08-subtree-checks
+09-syscall-priority-pre
+10-syscall-priority-post

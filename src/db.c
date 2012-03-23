@@ -36,6 +36,7 @@
  * (filter is easier to evaluate) */
 #define _DB_PRI_MASK_CHAIN		0x0000FFFF
 #define _DB_PRI_MASK_USER		0x00FF0000
+#define _DB_PRI_USER(x)			(((x) << 16) & _DB_PRI_MASK_USER)
 
 static unsigned int _db_tree_free(struct db_arg_chain_tree *tree);
 
@@ -328,6 +329,63 @@ void db_release(struct db_filter *db)
 		s_iter = db->syscalls;
 	}
 	free(db);
+}
+
+/**
+ * Update the user specified portion of the syscall priority
+ * @param db the seccomp filter db
+ * @param syscall the syscall number
+ * @param priority the syscall priority
+ *
+ * This function sets, or updates, the syscall priority; the highest priority
+ * value between the existing and specified value becomes the new syscall
+ * priority.  If the syscall entry does not already exist, a new phantom
+ * syscall entry is created as a placeholder.  Returns zero on success,
+ * negative values on failure.
+ *
+ */
+int db_syscall_priority(struct db_filter *db,
+			unsigned int syscall, uint8_t priority)
+{
+	unsigned int sys_pri = _DB_PRI_USER(priority);
+	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
+
+	assert(db != NULL);
+
+	s_iter = db->syscalls;
+	while (s_iter != NULL && s_iter->num < syscall) {
+		s_prev = s_iter;
+		s_iter = s_iter->next;
+	}
+
+	/* matched an existing syscall entry */
+	if (s_iter != NULL && s_iter->num == syscall) {
+		if (sys_pri > (s_iter->priority & _DB_PRI_MASK_USER)) {
+			s_iter->priority &= (~_DB_PRI_MASK_USER);
+			s_iter->priority |= sys_pri;
+		}
+		return 0;
+	}
+
+	/* no existing syscall entry - create a phantom entry */
+	s_new = malloc(sizeof(*s_new));
+	if (s_new == NULL)
+		return -ENOMEM;
+	memset(s_new, 0, sizeof(*s_new));
+	s_new->num = syscall;
+	s_new->priority = sys_pri;
+	s_new->valid = 0;
+
+	/* add it before s_iter */
+	if (s_prev != NULL) {
+		s_new->next = s_prev->next;
+		s_prev->next = s_new;
+	} else {
+		s_new->next = db->syscalls;
+		db->syscalls = s_new;
+	}
+
+	return 0;
 }
 
 /**

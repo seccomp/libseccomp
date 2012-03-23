@@ -125,8 +125,20 @@ int seccomp_load(void)
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_syscall_priority(int syscall, uint8_t priority)
 {
-	/* XXX - this isn't a correctness issue, so return zero for now */
-	return 0;
+	int rc;
+
+	if (filter == NULL)
+		return -EFAULT;
+
+	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
+	 * the syscall for some arch specific reason */
+	if (syscall < 0) {
+		rc = arch_syscall_rewrite(filter->arch, &syscall);
+		if (rc < 0)
+			return rc;
+	}
+
+	return db_syscall_priority(filter, syscall, priority);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
