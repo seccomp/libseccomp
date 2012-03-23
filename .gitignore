@@ -6,5 +6,6 @@
 *.swp
 *.orig
 .stgit-*
+.stgitmail.txt
 cscope.*
 tags
