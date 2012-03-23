@@ -210,8 +210,11 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code start\n");
 	fprintf(fds, "#\n");
-	db_list_foreach(s_iter, db->syscalls)
+	db_list_foreach(s_iter, db->syscalls) {
+		if (s_iter->valid == 0)
+			continue;
 		_gen_pfc_syscall(s_iter, fds);
+	}
 	fprintf(fds, "# default action\n");
 	_pfc_action(fds, db->def_action);
 	fprintf(fds, "#\n");

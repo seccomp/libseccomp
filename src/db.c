@@ -368,6 +368,7 @@ int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
 		return -ENOMEM;
 	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
+	s_new->valid = 1;
 	/* run through the argument chain */
 	chain_len_max = arch_arg_count_max(db->arch);
 	for (iter = 0; iter < chain_len_max; iter++) {
@@ -454,15 +455,20 @@ add_reset:
 		}
 		return 0;
 	} else if (s_iter->chains == NULL) {
-		if (rm_flag) {
+		if (rm_flag || s_iter->valid == 0) {
 			/* we are here because our previous pass cleared the
 			 * entire syscall chain when searching for a subtree
-			 * match, so add the new chain regardless */
+			 * match or the existing syscall entry is a phantom,
+			 * so either way add the new chain */
 			s_iter->chains = s_new->chains;
+			s_iter->action = s_new->action;
 			s_iter->node_cnt = s_new->node_cnt;
-			s_iter->priority = s_new->priority;
+			if (s_iter->valid == 1)
+				s_iter->priority = s_new->priority;
+			s_iter->valid = 1;
 			free(s_new);
-			return 0;
+			rc = 0;
+			goto add_priority_update;
 		} else
 			/* syscall exists without any chains - existing filter
 			 * is at least as large as the new entry so cleanup and
@@ -648,21 +654,11 @@ add_free_exist:
 add_free_ok:
 	rc = 0;
 add_free:
-	/* update the priority */
-	if (s_iter != NULL) {
-		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
-		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
-	}
 	/* free the new chain and its syscall struct */
 	_db_tree_free(s_new->chains);
 	free(s_new);
-	return rc;
+	goto add_priority_update;
 add_free_match:
-	/* update the priority */
-	if (s_iter != NULL) {
-		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
-		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
-	}
 	/* free the matching portion of new chain */
 	if (c_prev != NULL) {
 		c_prev->nxt_t = NULL;
@@ -670,5 +666,12 @@ add_free_match:
 		_db_tree_free(s_new->chains);
 	}
 	free(s_new);
-	return 0;
+	rc = 0;
+add_priority_update:
+	/* update the priority */
+	if (s_iter != NULL) {
+		s_iter->priority &= (~_DB_PRI_MASK_CHAIN);
+		s_iter->priority |= (_DB_PRI_MASK_CHAIN - s_iter->node_cnt);
+	}
+	return rc;
 }

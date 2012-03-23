@@ -94,6 +94,7 @@ struct db_arg_chain_tree {
 struct db_sys_list {
 	/* native syscall number */
 	unsigned int num;
+	unsigned int valid;
 
 	/* priority - higher is better */
 	unsigned int priority;

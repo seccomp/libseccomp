@@ -1218,6 +1218,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* create the syscall filters and add them to the top block group */
 	db_list_foreach(s_iter, db->syscalls) {
+		if (s_iter->valid == 0)
+			continue;
+
 		/* build the syscall filter */
 		b_new = _gen_bpf_syscall(state, s_iter);
 		if (b_new == NULL)
