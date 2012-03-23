@@ -138,6 +138,26 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 }
 
 /**
+ * Rewrite a syscall value to match the architecture
+ * @param arch the architecture definition
+ * @param syscall the syscall number
+ *
+ * Syscalls can vary across different architectures so this function rewrites
+ * the syscall into the correct value for the specified architecture.  Returns
+ * zero on success, negative values on failure.
+ *
+ */
+int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return i386_syscall_rewrite(arch, syscall);
+	default:
+		return -EDOM;
+	}
+}
+
+/**
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
  * @param syscall the syscall number
