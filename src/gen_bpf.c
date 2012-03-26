@@ -71,6 +71,7 @@ struct bpf_jump {
 #define _BPF_K(x) \
 	((struct bpf_jump) { TGT_K, { .imm_k = (x) } })
 #define _BPF_JMP_MAX			255
+#define _BPF_JMP_MAX_RET		255
 
 struct bpf_instr {
 	uint16_t op;
@@ -1106,7 +1107,75 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 }
 
 /**
- * Add long jumps to the list of BPF instruction blocks if needed
+ * Manage jumps to return instructions
+ * @param state the BPF state
+ * @param blk the instruction block to check
+ * @param offset the instruction offset into the instruction block
+ * @param blk_ret the return instruction block
+ *
+ * Using the given block and instruction offset, calculate the jump distance
+ * between the jumping instruction and return instruction block.  If the jump
+ * distance is too great, duplicate the return instruction to reduce the
+ * distance to the maximum value.  Returns 1 if a long jump was added, zero if
+ * the existing jump is valid, and negative values on failure.
+ *
+ */
+static int _gen_bpf_build_jmp_ret(struct bpf_state *state,
+				  struct bpf_blk *blk, unsigned int offset,
+				  struct bpf_blk *blk_ret)
+{
+	unsigned int j_len;
+	uint64_t tgt_hash = blk_ret->hash;
+	struct bpf_blk *b_jmp, *b_new;
+
+	/* calculate the jump distance */
+	j_len = blk->blk_cnt - (offset + 1);
+	b_jmp = blk->next;
+	while (b_jmp != NULL && b_jmp != blk_ret && j_len < _BPF_JMP_MAX_RET) {
+		j_len += b_jmp->blk_cnt;
+		b_jmp = b_jmp->next;
+	}
+	if (j_len <= _BPF_JMP_MAX_RET && b_jmp == blk_ret)
+		return 0;
+	if (b_jmp == NULL)
+		return -EFAULT;
+
+	/* we need a closer return instruction, see if one already exists */
+	j_len = blk->blk_cnt - (offset + 1);
+	b_jmp = blk->next;
+	while (b_jmp != NULL && b_jmp->hash != tgt_hash &&
+	       j_len < _BPF_JMP_MAX_RET) {
+		j_len += b_jmp->blk_cnt;
+		b_jmp = b_jmp->next;
+	}
+	if (j_len <= _BPF_JMP_MAX_RET && b_jmp->hash == tgt_hash)
+		return 0;
+	if (b_jmp == NULL)
+		return -EFAULT;
+
+	/* we need to insert a new return instruction - create one */
+	b_new = _gen_bpf_action(state, NULL, blk_ret->blks[0].k.tgt.imm_k);
+	if (b_new == NULL)
+		return -EFAULT;
+
+	/* NOTE - we need to be careful here, we're giving the block a hash
+	 *	  value (this is a sneaky way to ensure we leverage the
+	 *	  inserted long jumps as much as possible) but we never add the
+	 *	  block to the hash table so it won't get cleaned up
+	 *	  automatically */
+	b_new->hash = tgt_hash;
+
+	/* insert the jump after the current jumping block */
+	b_new->prev = blk;
+	b_new->next = blk->next;
+	blk->next->prev = b_new;
+	blk->next = b_new;
+
+	return 1;
+}
+
+/**
+ * Manage jump lengths by duplicating and adding jumps if needed
  * @param state the BPF state
  * @param tail the tail of the instruction block list
  * @param blk the instruction block to check
@@ -1116,8 +1185,8 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
  * Using the given block and instruction offset, calculate the jump distance
  * between the jumping instruction and the destination.  If the jump distance
  * is too great, add a long jump instruction to reduce the distance to a legal
- * value.  Returns 1 if a long jump was added, zero if the existing jump is
- * valid, and negative values on failure.
+ * value.  Returns 1 if a new instruction was added, zero if the existing jump
+ * is valid, and negative values on failure.
  *
  */
 static int _gen_bpf_build_jmp(struct bpf_state *state,
@@ -1125,6 +1194,7 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 			      struct bpf_blk *blk, unsigned int offset,
 			      uint64_t tgt_hash)
 {
+	int rc;
 	unsigned int jmp_len;
 	struct bpf_instr instr;
 	struct bpf_blk *b_new, *b_jmp, *b_tgt;
@@ -1135,6 +1205,14 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		b_tgt = b_tgt->prev;
 	if (b_tgt == blk)
 		return -EFAULT;
+
+	if (b_tgt->blk_cnt == 1 && b_tgt->blks[0].op == BPF_RET) {
+		rc = _gen_bpf_build_jmp_ret(state, blk, offset, b_tgt);
+		if (rc == 1)
+			return 1;
+		else if (rc < 0)
+			return rc;
+	}
 
 	/* calculate the jump distance */
 	jmp_len = blk->blk_cnt - (offset + 1);
