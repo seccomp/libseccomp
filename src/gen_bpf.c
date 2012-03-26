@@ -625,6 +625,31 @@ static struct bpf_blk *_gen_bpf_action(struct bpf_state *state,
 }
 
 /**
+ * Generate a BPF action instruction and insert it into the hash table
+ * @param state the BPF state
+ * @param action the desired action
+ *
+ * Generate a BPF action instruction and insert it into the hash table.
+ * Returns a pointer to the instruction block on success, NULL on failure.
+ *
+ */
+static struct bpf_blk *_gen_bpf_action_hsh(struct bpf_state *state,
+					   uint32_t action)
+{
+	struct bpf_blk *blk;
+
+	blk = _gen_bpf_action(state, NULL, action);
+	if (blk == NULL)
+		return NULL;
+	if (_hsh_add(state, &blk, 0) < 0) {
+		_blk_free(state, blk);
+		return NULL;
+	}
+
+	return blk;
+}
+
+/**
  * Generate a BPF instruction block for a given chain node
  * @param state the BPF state
  * @param node the filter chain node
@@ -640,8 +665,23 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 					int *acc_off)
 {
 	int acc_desired;
-	struct bpf_blk *blk = NULL;
+	uint64_t act_t_hash = 0, act_f_hash = 0;
+	struct bpf_blk *blk = NULL, *b_act;
 	struct bpf_instr instr;
+
+	/* generate the action blocks */
+	if (node->act_t_flg) {
+		b_act = _gen_bpf_action_hsh(state, node->act_t);
+		if (b_act == NULL)
+			goto node_32_failure;
+		act_t_hash = b_act->hash;
+	}
+	if (node->act_f_flg) {
+		b_act = _gen_bpf_action_hsh(state, node->act_f);
+		if (b_act == NULL)
+			goto node_32_failure;
+		act_f_hash = b_act->hash;
+	}
 
 	acc_desired = arch_arg_offset(state->bpf_tgt, node->arg);
 	if (acc_desired < 0)
@@ -687,30 +727,18 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 	if (node->nxt_t != NULL)
 		instr.jt = _BPF_JMP_DB(node->nxt_t);
 	else if (node->act_t_flg)
-		instr.jt = _BPF_JMP_IMM(0);
+		instr.jt = _BPF_JMP_HSH(act_t_hash);
 	else
 		instr.jt = _BPF_JMP_NXT;
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
 	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 1 : 0));
+		instr.jf = _BPF_JMP_HSH(act_f_hash);
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_32_failure;
-
-	/* take the actions needed */
-	if (node->act_t_flg) {
-		blk = _gen_bpf_action(state, blk, node->act_t);
-		if (blk == NULL)
-			goto node_32_failure;
-	}
-	if (node->act_f_flg) {
-		blk = _gen_bpf_action(state, blk, node->act_f);
-		if (blk == NULL)
-			goto node_32_failure;
-	}
 
 	return blk;
 
@@ -733,8 +761,23 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 					const struct db_arg_chain_tree *node)
 {
 	int acc_desired_lo, acc_desired_hi;
-	struct bpf_blk *blk = NULL;
+	uint64_t act_t_hash = 0, act_f_hash = 0;
+	struct bpf_blk *blk = NULL, *b_act;
 	struct bpf_instr instr;
+
+	/* generate the action blocks */
+	if (node->act_t_flg) {
+		b_act = _gen_bpf_action_hsh(state, node->act_t);
+		if (b_act == NULL)
+			goto node_64_failure;
+		act_t_hash = b_act->hash;
+	}
+	if (node->act_f_flg) {
+		b_act = _gen_bpf_action_hsh(state, node->act_f);
+		if (b_act == NULL)
+			goto node_64_failure;
+		act_f_hash = b_act->hash;
+	}
 
 	/* NOTE - we can certainly come up with a more optimized approach,
 	 *	  especially when you consider how we always reload the
@@ -786,7 +829,7 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
 	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 3 : 2));
+		instr.jf = _BPF_JMP_HSH(act_f_hash);
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
@@ -833,30 +876,18 @@ static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
 	if (node->nxt_t != NULL)
 		instr.jt = _BPF_JMP_DB(node->nxt_t);
 	else if (node->act_t_flg)
-		instr.jt = _BPF_JMP_IMM(0);
+		instr.jt = _BPF_JMP_HSH(act_t_hash);
 	else
 		instr.jt = _BPF_JMP_NXT;
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
 	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_IMM((node->act_t_flg ? 1 : 0));
+		instr.jf = _BPF_JMP_HSH(act_f_hash);
 	else
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_64_failure;
-
-	/* take the actions needed */
-	if (node->act_t_flg) {
-		blk = _gen_bpf_action(state, blk, node->act_t);
-		if (blk == NULL)
-			goto node_64_failure;
-	}
-	if (node->act_f_flg) {
-		blk = _gen_bpf_action(state, blk, node->act_f);
-		if (blk == NULL)
-			goto node_64_failure;
-	}
 
 	return blk;
 
