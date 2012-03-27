@@ -235,12 +235,12 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 		}
 		if (p_head == NULL)
 			p_head = p_new;
-		else if (p_iter == NULL)
-			p_prev->next = p_new;
-		else {
+		else if (p_prev == NULL) {
+			p_new->next = p_head;
+			p_head = p_new;
+		} else {
 			p_new->next = p_iter;
-			if (p_prev != NULL)
-				p_prev->next = p_new;
+			p_prev->next = p_new;
 		}
 	}
 
