@@ -23,6 +23,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <asm/bitsperlong.h>
 
@@ -30,6 +31,11 @@
 
 #include "db.h"
 #include "gen_pfc.h"
+
+struct pfc_sys_list {
+	struct db_sys_list *sys;
+	struct pfc_sys_list *next;
+};
 
 /* XXX - we should check the fprintf() return values */
 
@@ -170,7 +176,8 @@ static void _gen_pfc_syscall(const struct db_sys_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
 
-	fprintf(fds, "# filter code for syscall #%d\n", sys_num);
+	fprintf(fds, "# filter code for syscall #%d (priority: %d)\n",
+		sys_num, sys->priority);
 	if (sys->chains != NULL) {
 		fprintf(fds, " if ($syscall != %d) goto syscal_%d_end;\n",
 			sys_num, sys_num);
@@ -194,9 +201,11 @@ static void _gen_pfc_syscall(const struct db_sys_list *sys, FILE *fds)
  */
 int gen_pfc_generate(const struct db_filter *db, int fd)
 {
+	int rc = 0;
 	int newfd;
 	FILE *fds;
 	struct db_sys_list *s_iter;
+	struct pfc_sys_list *p_iter = NULL, *p_new, *p_head = NULL, *p_prev;
 
 	newfd = dup(fd);
 	if (newfd < 0)
@@ -207,13 +216,44 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 		return errno;
 	}
 
+	/* sort the syscall list */
+	db_list_foreach(s_iter, db->syscalls) {
+		p_new = malloc(sizeof(*p_new));
+		if (p_new == NULL) {
+			rc = -ENOMEM;
+			goto generate_return;
+		}
+		memset(p_new, 0, sizeof(*p_new));
+		p_new->sys = s_iter;
+
+		p_prev = NULL;
+		p_iter = p_head;
+		while (p_iter != NULL &&
+		       s_iter->priority < p_iter->sys->priority) {
+			p_prev = p_iter;
+			p_iter = p_iter->next;
+		}
+		if (p_head == NULL)
+			p_head = p_new;
+		else if (p_iter == NULL)
+			p_prev->next = p_new;
+		else {
+			p_new->next = p_iter;
+			if (p_prev != NULL)
+				p_prev->next = p_new;
+		}
+	}
+
+	/* generate the pfc */
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code start\n");
 	fprintf(fds, "#\n");
-	db_list_foreach(s_iter, db->syscalls) {
-		if (s_iter->valid == 0)
+	p_iter = p_head;
+	while (p_iter != NULL) {
+		if (p_iter->sys->valid == 0)
 			continue;
-		_gen_pfc_syscall(s_iter, fds);
+		_gen_pfc_syscall(p_iter->sys, fds);
+		p_iter = p_iter->next;
 	}
 	fprintf(fds, "# default action\n");
 	_pfc_action(fds, db->def_action);
@@ -223,5 +263,12 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 
 	fflush(fds);
 	fclose(fds);
-	return 0;
+
+generate_return:
+	while (p_head != NULL) {
+		p_iter = p_head;
+		p_head = p_head->next;
+		free(p_iter);
+	}
+	return rc;
 }
