@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <asm/bitsperlong.h>
 
 #include <seccomp.h>
 
+#include "arch.h"
 #include "db.h"
 #include "gen_pfc.h"
 
@@ -38,6 +38,25 @@ struct pfc_sys_list {
 };
 
 /* XXX - we should check the fprintf() return values */
+
+/**
+ * Display a string representation of the node argument
+ * @param fds the file stream to send the output
+ * @param arch the architecture definition
+ * @param node the node
+ */
+static void _pfc_arg(FILE *fds,
+		     const struct arch_def *arch,
+		     const struct db_arg_chain_tree *node)
+{
+	if (arch->size == ARCH_SIZE_64) {
+		if (arch_arg_offset_hi(arch, node->arg) == node->arg_offset)
+			fprintf(fds, "$a%d.hi32", node->arg);
+		else
+			fprintf(fds, "$a%d.lo32", node->arg);
+	} else
+		fprintf(fds, "$a%d", node->arg);
+}
 
 /**
  * Display a string representation of the filter action
@@ -83,6 +102,7 @@ static void _indent(FILE *fds, unsigned int lvl)
 
 /**
  * Generate the pseudo filter code for an argument chain
+ * @param arch the architecture definition
  * @param node the head of the argument chain
  * @param lvl the indentation level
  * @param fds the file stream to send the output
@@ -91,7 +111,8 @@ static void _indent(FILE *fds, unsigned int lvl)
  * argument chain and writes it to the given output stream.
  *
  */
-static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
+static void _gen_pfc_chain(const struct arch_def *arch,
+			   const struct db_arg_chain_tree *node,
 			   unsigned int lvl, FILE *fds)
 {
 	const struct db_arg_chain_tree *c_iter;
@@ -104,48 +125,29 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 	while (c_iter != NULL) {
 		/* comparison operation */
 		_indent(fds, lvl);
+		fprintf(fds, " if (");
+		_pfc_arg(fds, arch, c_iter);
 		switch (c_iter->op) {
-			case SCMP_CMP_NE:
-				fprintf(fds, " if ($a%d != %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
-				break;
-			case SCMP_CMP_LT:
-				fprintf(fds, " if ($a%d < %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
-				break;
-			case SCMP_CMP_LE:
-				fprintf(fds, " if ($a%d <= %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
-				break;
 			case SCMP_CMP_EQ:
-				fprintf(fds, " if ($a%d == %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
+				fprintf(fds, " == ");
 				break;
 			case SCMP_CMP_GE:
-				fprintf(fds, " if ($a%d >= %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
+				fprintf(fds, " >= ");
 				break;
 			case SCMP_CMP_GT:
-				fprintf(fds, " if ($a%d > %"PRIu64")\n",
-					c_iter->arg,
-					c_iter->datum);
+				fprintf(fds, " > ");
 				break;
 			default:
-				fprintf(fds, " if ($a%d ??? %"PRIu64")\n",
-					c_iter->arg, c_iter->datum);
+				fprintf(fds, " ??? ");
 		}
+		fprintf(fds, "%u)\n", c_iter->datum);
 
 		/* true result */
 		if (c_iter->act_t_flg) {
 			_indent(fds, lvl + 1);
 			_pfc_action(fds, c_iter->act_t);
 		} else if (c_iter->nxt_t != NULL)
-			_gen_pfc_chain(c_iter->nxt_t, lvl + 1, fds);
+			_gen_pfc_chain(arch, c_iter->nxt_t, lvl + 1, fds);
 
 		/* false result */
 		if (c_iter->act_f_flg) {
@@ -156,7 +158,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 		} else if (c_iter->nxt_f != NULL) {
 			_indent(fds, lvl);
 			fprintf(fds, " else\n");
-			_gen_pfc_chain(c_iter->nxt_f, lvl + 1, fds);
+			_gen_pfc_chain(arch, c_iter->nxt_f, lvl + 1, fds);
 		}
 
 		c_iter = c_iter->lvl_nxt;
@@ -165,6 +167,7 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
 
 /**
  * Generate pseudo filter code for a syscall
+ * @param arch the architecture definition
  * @param sys the syscall filter
  * @param fds the file stream to send the output
  *
@@ -172,7 +175,8 @@ static void _gen_pfc_chain(const struct db_arg_chain_tree *node,
  * syscall filter and writes it to the given output stream.
  *
  */
-static void _gen_pfc_syscall(const struct db_sys_list *sys, FILE *fds)
+static void _gen_pfc_syscall(const struct arch_def *arch,
+			     const struct db_sys_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
 
@@ -181,7 +185,7 @@ static void _gen_pfc_syscall(const struct db_sys_list *sys, FILE *fds)
 	if (sys->chains != NULL) {
 		fprintf(fds, " if ($syscall != %d) goto syscal_%d_end;\n",
 			sys_num, sys_num);
-		_gen_pfc_chain(sys->chains, 0, fds);
+		_gen_pfc_chain(arch, sys->chains, 0, fds);
 		fprintf(fds, " syscall_%d_end:\n", sys_num);
 	} else {
 		fprintf(fds, " if ($syscall == %d)", sys_num);
@@ -252,7 +256,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 	while (p_iter != NULL) {
 		if (p_iter->sys->valid == 0)
 			continue;
-		_gen_pfc_syscall(p_iter->sys, fds);
+		_gen_pfc_syscall(db->arch, p_iter->sys, fds);
 		p_iter = p_iter->next;
 	}
 	fprintf(fds, "# default action\n");

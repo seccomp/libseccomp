@@ -34,7 +34,7 @@
 #include "hash.h"
 
 /* allocation increments */
-#define AINC_BLK			8
+#define AINC_BLK			2
 #define AINC_PROG			64
 
 enum bpf_jump_type {
@@ -655,14 +655,13 @@ static struct bpf_blk *_gen_bpf_action_hsh(struct bpf_state *state,
  * @param node the filter chain node
  * @param acc_off the data offset loaded into the accumulator
  *
- * Generate BPF instructions to execute the filter for the given chain node on
- * a 32 bit system.  Returns a pointer to the instruction block on success,
- * NULL on failure.
+ * Generate BPF instructions to execute the filter for the given chain node.
+ * Returns a pointer to the instruction block on success, NULL on failure.
  *
  */
-static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
-					const struct db_arg_chain_tree *node,
-					int *acc_off)
+static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
+				     const struct db_arg_chain_tree *node,
+				     int *acc_off)
 {
 	int acc_desired;
 	uint64_t act_t_hash = 0, act_f_hash = 0;
@@ -673,19 +672,19 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 	if (node->act_t_flg) {
 		b_act = _gen_bpf_action_hsh(state, node->act_t);
 		if (b_act == NULL)
-			goto node_32_failure;
+			goto node_failure;
 		act_t_hash = b_act->hash;
 	}
 	if (node->act_f_flg) {
 		b_act = _gen_bpf_action_hsh(state, node->act_f);
 		if (b_act == NULL)
-			goto node_32_failure;
+			goto node_failure;
 		act_f_hash = b_act->hash;
 	}
 
-	acc_desired = arch_arg_offset(state->bpf_tgt, node->arg);
+	acc_desired = node->arg_offset;
 	if (acc_desired < 0)
-		goto node_32_failure;
+		goto node_failure;
 	if (acc_desired != *acc_off) {
 		/* reload the accumulator */
 		*acc_off = acc_desired;
@@ -693,7 +692,7 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
-			goto node_32_failure;
+			goto node_failure;
 	}
 
 	/* do any necessary alu operations */
@@ -720,7 +719,7 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 		/* if we hit here it means the filter db isn't correct */
 	default:
 		/* fatal error, we should never get here */
-		goto node_32_failure;
+		goto node_failure;
 	}
 
 	/* fixup the jump targets */
@@ -738,160 +737,11 @@ static struct bpf_blk *_gen_bpf_node_32(struct bpf_state *state,
 		instr.jf = _BPF_JMP_NXT;
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
-		goto node_32_failure;
+		goto node_failure;
 
 	return blk;
 
-node_32_failure:
-	_blk_free(state, blk);
-	return NULL;
-}
-
-/**
- * Generate a BPF instruction block for a given chain node
- * @param state the BPF state
- * @param node the filter chain node
- *
- * Generate BPF instructions to execute the filter for the given chain node on
- * a 64 bit system.  Returns a pointer to the instruction block on success,
- * NULL on failure.
- *
- */
-static struct bpf_blk *_gen_bpf_node_64(struct bpf_state *state,
-					const struct db_arg_chain_tree *node)
-{
-	int acc_desired_lo, acc_desired_hi;
-	uint64_t act_t_hash = 0, act_f_hash = 0;
-	struct bpf_blk *blk = NULL, *b_act;
-	struct bpf_instr instr;
-
-	/* generate the action blocks */
-	if (node->act_t_flg) {
-		b_act = _gen_bpf_action_hsh(state, node->act_t);
-		if (b_act == NULL)
-			goto node_64_failure;
-		act_t_hash = b_act->hash;
-	}
-	if (node->act_f_flg) {
-		b_act = _gen_bpf_action_hsh(state, node->act_f);
-		if (b_act == NULL)
-			goto node_64_failure;
-		act_f_hash = b_act->hash;
-	}
-
-	/* NOTE - we can certainly come up with a more optimized approach,
-	 *	  especially when you consider how we always reload the
-	 *	  argument value and don't take advantage of similarities in
-	 *	  datum values, but this code at least works; we can tweak it
-	 *	  later */
-
-	/* determine the proper argument offsets */
-	acc_desired_hi = arch_arg_offset_hi(state->bpf_tgt, node->arg);
-	if (acc_desired_hi < 0)
-		goto node_64_failure;
-	acc_desired_lo = arch_arg_offset_lo(state->bpf_tgt, node->arg);
-	if (acc_desired_hi < 0)
-		goto node_64_failure;
-
-	/* load the high 32 bit word into the accumulator first */
-	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired_hi));
-	blk = _blk_append(state, blk, &instr);
-	if (blk == NULL)
-		goto node_64_failure;
-
-	/* do any necessary alu operations */
-	/* XXX - only needed for bitmask which we don't support yet */
-
-	/* check the accumulator against the datum */
-	switch (node->op) {
-	case SCMP_CMP_EQ:
-		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_IMM(0), _BPF_JMP_NO,
-			   _BPF_K(D64_HI(node->datum)));
-		break;
-	case SCMP_CMP_GT:
-	case SCMP_CMP_GE:
-		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-			   _BPF_JMP_IMM(0), _BPF_JMP_NO,
-			   _BPF_K(D64_HI(node->datum)));
-		break;
-	case SCMP_CMP_NE:
-	case SCMP_CMP_LT:
-	case SCMP_CMP_LE:
-		/* if we hit here it means the filter db isn't correct */
-	default:
-		/* fatal error, we should never get here */
-		goto node_64_failure;
-	}
-
-	/* fixup the jump targets */
-	if (node->nxt_f != NULL)
-		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_HSH(act_f_hash);
-	else
-		instr.jf = _BPF_JMP_NXT;
-	blk = _blk_append(state, blk, &instr);
-	if (blk == NULL)
-		goto node_64_failure;
-
-	/* load the low 32 bit word into the accumulator */
-	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired_lo));
-	blk = _blk_append(state, blk, &instr);
-	if (blk == NULL)
-		goto node_64_failure;
-
-	/* do any necessary alu operations */
-	/* XXX - only needed for bitmask which we don't support yet */
-
-	/* check the accumulator against the datum */
-	switch (node->op) {
-	case SCMP_CMP_EQ:
-		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-			   _BPF_JMP_NO, _BPF_JMP_NO,
-			   _BPF_K(D64_LO(node->datum)));
-		break;
-	case SCMP_CMP_GT:
-		_BPF_INSTR(instr, BPF_JMP+BPF_JGT,
-			   _BPF_JMP_NO, _BPF_JMP_NO,
-			   _BPF_K(D64_LO(node->datum)));
-		break;
-	case SCMP_CMP_GE:
-		_BPF_INSTR(instr, BPF_JMP+BPF_JGE,
-			   _BPF_JMP_NO, _BPF_JMP_NO,
-			   _BPF_K(D64_LO(node->datum)));
-		break;
-	case SCMP_CMP_NE:
-	case SCMP_CMP_LT:
-	case SCMP_CMP_LE:
-		/* if we hit here it means the filter db isn't correct */
-	default:
-		/* fatal error, we should never get here */
-		goto node_64_failure;
-	}
-
-	/* fixup the jump targets */
-	if (node->nxt_t != NULL)
-		instr.jt = _BPF_JMP_DB(node->nxt_t);
-	else if (node->act_t_flg)
-		instr.jt = _BPF_JMP_HSH(act_t_hash);
-	else
-		instr.jt = _BPF_JMP_NXT;
-	if (node->nxt_f != NULL)
-		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_HSH(act_f_hash);
-	else
-		instr.jf = _BPF_JMP_NXT;
-	blk = _blk_append(state, blk, &instr);
-	if (blk == NULL)
-		goto node_64_failure;
-
-	return blk;
-
-node_64_failure:
+node_failure:
 	_blk_free(state, blk);
 	return NULL;
 }
@@ -932,12 +782,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		if (state->bpf_tgt->size == ARCH_SIZE_64)
-			blk = _gen_bpf_node_64(state, l_iter);
-		else if (state->bpf_tgt->size == ARCH_SIZE_32)
-			blk = _gen_bpf_node_32(state, l_iter, &acc_off);
-		else
-			goto chain_lvl_failure;
+		blk = _gen_bpf_node(state, l_iter, &acc_off);
 		if (blk == NULL)
 			goto chain_lvl_failure;
 		if (b_head != NULL) {

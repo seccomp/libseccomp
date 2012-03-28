@@ -47,7 +47,7 @@ static unsigned int __db_tree_free(struct db_arg_chain_tree *tree)
 {
 	int cnt;
 
-	if (tree == NULL)
+	if (tree == NULL || --(tree->refcnt) > 0)
 		return 0;
 
 	/* we assume the caller has ensured that 'tree->lvl_prv == NULL' */
@@ -389,58 +389,172 @@ int db_syscall_priority(struct db_filter *db,
 }
 
 /**
- * Add a new rule to the seccomp filter DB
- * @param db the seccomp filter db
+ * Generate a new filter rule for a 64 bit system
+ * @param arch the architecture definition
  * @param action the filter action
  * @param syscall the syscall number
  * @param chain argument filter chain
  *
- * This function adds a new syscall filter to the seccomp filter DB, adding to
- * the existing filters for the syscall, unless no argument specific filters
- * are present (filtering only on the syscall).  When adding new chains, the
- * shortest chain, or most inclusive filter match, will be entered into the
- * filter DB. Returns zero on success, negative values on failure.
+ * This function generates a new syscall filter for a 64 bit system. Returns
+ * zero on success, negative values on failure.
  *
  */
-int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
-		struct db_api_arg *chain)
+static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
+					   uint32_t action,
+					   unsigned int syscall,
+					   struct db_api_arg *chain)
 {
-	int rc = -ENOMEM;
 	unsigned int iter;
 	int chain_len_max;
-	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
-	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
-	struct db_arg_chain_tree *ec_iter, *ec_iter_b;
+	struct db_sys_list *s_new;
+	struct db_arg_chain_tree *c_iter_hi = NULL, *c_iter_lo = NULL;
+	struct db_arg_chain_tree *c_prev_hi = NULL, *c_prev_lo = NULL;
 	unsigned int tf_flag;
-	unsigned int rm_flag = 0;
-	unsigned int new_chain_cnt = 0;
-	unsigned int n_cnt;
 
-	assert(db != NULL);
-
-	/* do all our possible memory allocation up front so we don't have to
-	 * worry about failure once we get to the point where we start updating
-	 * the filter db */
 	s_new = malloc(sizeof(*s_new));
 	if (s_new == NULL)
-		return -ENOMEM;
+		return NULL;
 	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	s_new->valid = 1;
 	/* run through the argument chain */
-	chain_len_max = arch_arg_count_max(db->arch);
+	chain_len_max = arch_arg_count_max(arch);
+	for (iter = 0; iter < chain_len_max; iter++) {
+		if (chain[iter].valid == 0)
+			continue;
+
+		c_iter_hi = malloc(sizeof(*c_iter_hi));
+		if (c_iter_hi == NULL)
+			goto gen_64_failure;
+		memset(c_iter_hi, 0, sizeof(*c_iter_hi));
+		c_iter_hi->refcnt = 1;
+		c_iter_lo = malloc(sizeof(*c_iter_lo));
+		if (c_iter_lo == NULL) {
+			free(c_iter_hi);
+			goto gen_64_failure;
+		}
+		memset(c_iter_lo, 0, sizeof(*c_iter_lo));
+		c_iter_lo->refcnt = 1;
+
+		/* link the hi node to the previous level */
+		if (c_prev_hi != NULL) {
+			if (tf_flag)
+				c_prev_lo->nxt_t = c_iter_hi;
+			else {
+				c_iter_hi->refcnt++;
+				c_prev_hi->nxt_f = c_iter_hi;
+				c_prev_lo->nxt_f = c_iter_hi;
+			}
+		} else
+			s_new->chains = c_iter_hi;
+		s_new->node_cnt += 2;
+
+		/* set the arg, op, and datum fields */
+		c_iter_hi->arg = chain[iter].arg;
+		c_iter_lo->arg = chain[iter].arg;
+		c_iter_hi->arg_offset = arch_arg_offset_hi(arch,
+							   c_iter_hi->arg);
+		c_iter_lo->arg_offset = arch_arg_offset_lo(arch,
+							   c_iter_lo->arg);
+		switch (chain[iter].op) {
+			case SCMP_CMP_GT:
+				c_iter_hi->op = SCMP_CMP_GE;
+				c_iter_lo->op = SCMP_CMP_GT;
+				tf_flag = 1;
+				break;
+			case SCMP_CMP_NE:
+				c_iter_hi->op = SCMP_CMP_EQ;
+				c_iter_lo->op = SCMP_CMP_EQ;
+				tf_flag = 0;
+				break;
+			case SCMP_CMP_LT:
+				c_iter_hi->op = SCMP_CMP_GE;
+				c_iter_lo->op = SCMP_CMP_GE;
+				tf_flag = 0;
+				break;
+			case SCMP_CMP_LE:
+				c_iter_hi->op = SCMP_CMP_GE;
+				c_iter_lo->op = SCMP_CMP_GT;
+				tf_flag = 0;
+				break;
+			default:
+				c_iter_hi->op = chain[iter].op;
+				c_iter_lo->op = chain[iter].op;
+				tf_flag = 1;
+		}
+		c_iter_hi->datum = D64_HI(chain[iter].datum);
+		c_iter_lo->datum = D64_LO(chain[iter].datum);
+
+		/* link the hi and lo chain nodes */
+		c_iter_hi->nxt_t = c_iter_lo;
+
+		c_prev_hi = c_iter_hi;
+		c_prev_lo = c_iter_lo;
+	}
+	if (c_iter_lo != NULL) {
+		/* set the leaf node */
+		if (tf_flag) {
+			c_iter_lo->act_t_flg = 1;
+			c_iter_lo->act_t = action;
+		} else {
+			c_iter_lo->act_f_flg = 1;
+			c_iter_lo->act_f = action;
+		}
+	} else
+		s_new->action = action;
+
+	return s_new;
+
+gen_64_failure:
+	/* free the new chain and its syscall struct */
+	_db_tree_free(s_new->chains);
+	free(s_new);
+	return NULL;
+}
+
+/**
+ * Generate a new filter rule for a 32 bit system
+ * @param arch the architecture definition
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param chain argument filter chain
+ *
+ * This function generates a new syscall filter for a 32 bit system. Returns
+ * zero on success, negative values on failure.
+ *
+ */
+static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
+					   uint32_t action,
+					   unsigned int syscall,
+					   struct db_api_arg *chain)
+{
+	unsigned int iter;
+	int chain_len_max;
+	struct db_sys_list *s_new;
+	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
+	unsigned int tf_flag;
+
+	s_new = malloc(sizeof(*s_new));
+	if (s_new == NULL)
+		return NULL;
+	memset(s_new, 0, sizeof(*s_new));
+	s_new->num = syscall;
+	s_new->valid = 1;
+	/* run through the argument chain */
+	chain_len_max = arch_arg_count_max(arch);
 	for (iter = 0; iter < chain_len_max; iter++) {
 		if (chain[iter].valid == 0)
 			continue;
 
 		c_iter = malloc(sizeof(*c_iter));
 		if (c_iter == NULL)
-			goto add_free;
+			goto gen_32_failure;
 		memset(c_iter, 0, sizeof(*c_iter));
+		c_iter->refcnt = 1;
 		c_iter->arg = chain[iter].arg;
+		c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
 		c_iter->op = chain[iter].op;
 		c_iter->datum = chain[iter].datum;
-		/* XXX - sanity check the c_iter->datum value? */
 
 		/* link in the new node and update the chain */
 		if (c_prev != NULL) {
@@ -450,7 +564,7 @@ int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
 				c_prev->nxt_f = c_iter;
 		} else
 			s_new->chains = c_iter;
-		new_chain_cnt++;
+		s_new->node_cnt++;
 
 		/* rewrite the op to reduce the op/datum combos */
 		switch (c_iter->op) {
@@ -483,6 +597,55 @@ int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
 		}
 	} else
 		s_new->action = action;
+
+	return s_new;
+
+gen_32_failure:
+	/* free the new chain and its syscall struct */
+	_db_tree_free(s_new->chains);
+	free(s_new);
+	return NULL;
+}
+
+/**
+ * Add a new rule to the seccomp filter DB
+ * @param db the seccomp filter db
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param chain argument filter chain
+ *
+ * This function adds a new syscall filter to the seccomp filter DB, adding to
+ * the existing filters for the syscall, unless no argument specific filters
+ * are present (filtering only on the syscall).  When adding new chains, the
+ * shortest chain, or most inclusive filter match, will be entered into the
+ * filter DB. Returns zero on success, negative values on failure.
+ *
+ */
+int db_rule_add(struct db_filter *db, uint32_t action, unsigned int syscall,
+		struct db_api_arg *chain)
+{
+	int rc = -ENOMEM;
+	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
+	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
+	struct db_arg_chain_tree *ec_iter, *ec_iter_b;
+	unsigned int rm_flag = 0;
+	unsigned int new_chain_cnt = 0;
+	unsigned int n_cnt;
+
+	assert(db != NULL);
+
+	/* do all our possible memory allocation up front so we don't have to
+	 * worry about failure once we get to the point where we start updating
+	 * the filter db */
+	if (db->arch->size == ARCH_SIZE_64)
+		s_new = _db_rule_gen_64(db->arch, action, syscall, chain);
+	else if (db->arch->size == ARCH_SIZE_32)
+		s_new = _db_rule_gen_32(db->arch, action, syscall, chain);
+	else
+		return -EFAULT;
+	if (s_new == NULL)
+		return -ENOMEM;
+	new_chain_cnt = s_new->node_cnt;
 
 	/* no more failures allowed after this point that would result in the
 	 * stored filter being in an inconsistent state */

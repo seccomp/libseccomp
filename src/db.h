@@ -22,6 +22,8 @@
 #ifndef _FILTER_DB_H
 #define _FILTER_DB_H
 
+#include "inttypes.h"
+
 #include <seccomp.h>
 
 #include "arch.h"
@@ -39,11 +41,13 @@ struct db_api_arg {
 struct db_arg_chain_tree {
 	/* argument number (a0 = 0, a1 = 1, etc.) */
 	unsigned int arg;
+	/* argument bpf offset */
+	unsigned int arg_offset;
 
 	/* comparison operator */
 	enum scmp_compare op;
 	/* syscall argument value */
-	datum_t datum;
+	uint32_t datum;
 
 	/* actions */
 	unsigned int act_t_flg;
@@ -57,6 +61,8 @@ struct db_arg_chain_tree {
 	/* next node in the chain */
 	struct db_arg_chain_tree *nxt_t;
 	struct db_arg_chain_tree *nxt_f;
+
+	unsigned int refcnt;
 };
 #define db_chain_lt(x,y) \
 	(((x)->arg < (y)->arg) || \
