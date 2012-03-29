@@ -41,8 +41,14 @@
  */
 int i386_syscall_rewrite(const struct arch_def *arch, int *syscall)
 {
-	/* XXX - rewrite the value in @syscall here */
-	return -1;
+	if ((*syscall) <= -100 && (*syscall) >= -117)
+		*syscall = __i386_NR_socketcall;
+	else if ((*syscall) <= -200 && (*syscall) >= -211)
+		*syscall = __i386_NR_ipc;
+	else if ((*syscall) < 0)
+		return -EINVAL;
+
+	return 0;
 }
 
 /**
