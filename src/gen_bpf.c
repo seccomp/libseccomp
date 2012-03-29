@@ -1397,51 +1397,30 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	/* pull in all of the TGT_PTR_HSH jumps, one layer at a time */
 	b_iter = b_tail;
 	do {
-		res_cnt = 0;
+		b_jmp = NULL;
 		/* look for jumps - backwards (shorter jumps) */
 		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
 			i_iter = &b_iter->blks[iter];
-			if (i_iter->jt.type == TGT_PTR_HSH) {
+			if (i_iter->jt.type == TGT_PTR_HSH)
 				b_jmp = _hsh_find_once(state,
 						       i_iter->jt.tgt.hash);
-				if (b_jmp != NULL) {
-					/* insert the block after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev=b_jmp;
-				}
-			}
-			if (i_iter->jf.type == TGT_PTR_HSH) {
+			if (b_jmp == NULL && i_iter->jf.type == TGT_PTR_HSH)
 				b_jmp = _hsh_find_once(state,
 						       i_iter->jf.tgt.hash);
-				if (b_jmp != NULL) {
-					/* insert the block after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev=b_jmp;
-				}
-			}
-			if (i_iter->k.type == TGT_PTR_HSH) {
+			if (b_jmp == NULL && i_iter->k.type == TGT_PTR_HSH)
 				b_jmp = _hsh_find_once(state,
 						       i_iter->k.tgt.hash);
-				if (b_jmp != NULL) {
-					/* insert the block after*/
-					res_cnt++;
-					b_jmp->prev = b_iter;
-					b_jmp->next = b_iter->next;
-					b_iter->next = b_jmp;
-					if (b_jmp->next)
-						b_jmp->next->prev=b_jmp;
-				}
+			if (b_jmp != NULL) {
+				/* insert the new block after this block */
+				b_jmp->prev = b_iter;
+				b_jmp->next = b_iter->next;
+				b_iter->next = b_jmp;
+				if (b_jmp->next)
+					b_jmp->next->prev=b_jmp;
+				break;
 			}
 		}
-		if (res_cnt > 0) {
+		if (b_jmp != NULL) {
 			while (b_tail->next != NULL)
 				b_tail = b_tail->next;
 			b_iter = b_tail;
