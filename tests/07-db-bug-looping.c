@@ -38,21 +38,21 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	/* The next three seccomp_rule_add() calls for read must
+	/* The next three seccomp_rule_add_exact() calls for read must
 	 * go together in this order to catch an infinite loop. */
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-			      0, SCMP_CMP_EQ, STDOUT_FILENO);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
+				    0, SCMP_CMP_EQ, STDOUT_FILENO);
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-			      1, SCMP_CMP_EQ, NULL);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
+				    1, SCMP_CMP_EQ, NULL);
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-			      0, SCMP_CMP_EQ, STDIN_FILENO);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
+				    0, SCMP_CMP_EQ, STDIN_FILENO);
 	if (rc != 0)
 		return rc;
 

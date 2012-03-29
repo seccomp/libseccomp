@@ -141,13 +141,29 @@ int seccomp_syscall_priority(int syscall, uint8_t priority)
 	return db_syscall_priority(filter, syscall, priority);
 }
 
-/* NOTE - function header comment in include/seccomp.h */
-int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
+/**
+ * Add a new rule to the current filter
+ * @param strict the strict flag
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param arg_cnt the number of argument filters in the argument filter chain
+ * @param arg_list the argument filter chain, (uint, enum scmp_compare, ulong)
+ *
+ * This function adds a new argument/comparison/value to the seccomp filter for
+ * a syscall; multiple arguments can be specified and they will be chained
+ * together (essentially AND'd together) in the filter.  When the strict flag
+ * is true the function will fail if the exact rule can not be added to the
+ * filter, if the strict flag is false the function will not fail if the
+ * function needs to adjust the rule due to architecture specifics.  Returns
+ * zero on success, negative values on failure.
+ *
+ */
+static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
+			     unsigned int arg_cnt, va_list arg_list)
 {
 	int rc;
 	unsigned int iter;
 	unsigned int chain_len_max;
-	va_list arg_list;
 	struct db_api_arg *chain = NULL;
 	unsigned int arg_num;
 
@@ -166,7 +182,6 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 	if (chain == NULL)
 		return -ENOMEM;
 	memset(chain, 0, sizeof(*chain) * chain_len_max);
-	va_start(arg_list, arg_cnt);
 	for (iter = 0; iter < arg_cnt; iter++) {
 		arg_num = va_arg(arg_list, unsigned int);
 		if (arg_num < chain_len_max && chain[arg_num].valid == 0) {
@@ -190,7 +205,7 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
 	 * the rule for some arch specific reason */
 	if (syscall < 0) {
-		rc = arch_filter_rewrite(filter->arch, 1, &syscall, chain);
+		rc = arch_filter_rewrite(filter->arch, strict, &syscall, chain);
 		if (rc < 0)
 			goto rule_add_return;
 	}
@@ -199,9 +214,35 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 	rc = db_rule_add(filter, action, syscall, chain);
 
 rule_add_return:
-	va_end(arg_list);
 	if (chain != NULL)
 		free(chain);
+	return rc;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
+{
+	int rc;
+	va_list arg_list;
+
+	va_start(arg_list, arg_cnt);
+	rc = _seccomp_rule_add(0, action, syscall, arg_cnt, arg_list);
+	va_end(arg_list);
+
+	return rc;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_rule_add_exact(uint32_t action,
+			   int syscall, unsigned int arg_cnt, ...)
+{
+	int rc;
+	va_list arg_list;
+
+	va_start(arg_list, arg_cnt);
+	rc = _seccomp_rule_add(1, action, syscall, arg_cnt, arg_list);
+	va_end(arg_list);
+
 	return rc;
 }
 

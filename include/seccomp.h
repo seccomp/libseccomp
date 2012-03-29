@@ -153,11 +153,29 @@ int seccomp_syscall_priority(int syscall, uint8_t priority);
  *
  * This function adds a new argument/comparison/value to the seccomp filter for
  * a syscall; multiple arguments can be specified and they will be chained
- * together (essentially AND'd together) in the filter.  Returns zero on
- * success, negative values on failure.
+ * together (essentially AND'd together) in the filter.  If the specified rule
+ * needs to be adjusted due to architecture specifics it will be adjusted
+ * without notification.  Returns zero on success, negative values on failure.
  *
  */
 int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
+
+/**
+ * Add a new rule to the current filter
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param arg_cnt the number of argument filters in the argument filter chain
+ * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
+ *
+ * This function adds a new argument/comparison/value to the seccomp filter for
+ * a syscall; multiple arguments can be specified and they will be chained
+ * together (essentially AND'd together) in the filter.  If the specified rule
+ * can not be represented on the architecture the function will fail.  Returns
+ * zero on success, negative values on failure.
+ *
+ */
+int seccomp_rule_add_exact(uint32_t action,
+			   int syscall, unsigned int arg_cnt, ...);
 
 /**
  * Generate seccomp Pseudo Filter Code (PFC)

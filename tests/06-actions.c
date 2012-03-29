@@ -44,19 +44,19 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_TRAP, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_TRAP, SCMP_SYS(close), 0);
 	if (rc != 0)
 		return rc;
 
-	rc = seccomp_rule_add(SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
 	if (rc != 0)
 		return rc;
 

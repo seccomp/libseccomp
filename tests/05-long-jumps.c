@@ -42,29 +42,29 @@ int main(int argc, char *argv[])
 
 	/* NOTE - syscalls referenced by number to make the test simpler */
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, 1, 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1, 0);
 	if (rc != 0)
 		return rc;
 
 	/* same syscall, many chains */
 	for (iter = 0; iter < 600; iter++) {
-		rc = seccomp_rule_add(SCMP_ACT_ALLOW, 1000, 3,
-				      0, SCMP_CMP_EQ, iter,
-				      1, SCMP_CMP_NE, NULL,
-				      2, SCMP_CMP_LT, SSIZE_MAX);
+		rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 3,
+					    0, SCMP_CMP_EQ, iter,
+					    1, SCMP_CMP_NE, NULL,
+					    2, SCMP_CMP_LT, SSIZE_MAX);
 		if (rc != 0)
 			return rc;
 	}
 
 	/* many syscalls, same chain */
 	for (iter = 100; iter < 700; iter++) {
-		rc = seccomp_rule_add(SCMP_ACT_ALLOW, iter, 1,
-				      0, SCMP_CMP_NE, 0);
+		rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, iter, 1,
+					    0, SCMP_CMP_NE, 0);
 		if (rc != 0)
 			return rc;
 	}
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, 4, 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 4, 0);
 	if (rc != 0)
 		return rc;
 

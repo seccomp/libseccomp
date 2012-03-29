@@ -43,16 +43,16 @@ int main(int argc, char *argv[])
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, 1000, 2,
-			      0, SCMP_CMP_EQ, 0UL,
-			      1, SCMP_CMP_EQ, 1UL);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 2,
+				    0, SCMP_CMP_EQ, 0UL,
+				    1, SCMP_CMP_EQ, 1UL);
 	if (rc != 0)
 		return rc;
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, 1001, 1,
-			      0, SCMP_CMP_EQ, 0UL);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 1,
+				    0, SCMP_CMP_EQ, 0UL);
 	if (rc != 0)
 		return rc;
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, 1002, 0);
+	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 0);
 	if (rc != 0)
 		return rc;
 
