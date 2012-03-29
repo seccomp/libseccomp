@@ -59,6 +59,7 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
 int arch_syscall_rewrite(const struct arch_def *arch, int *syscall);
 
 int arch_filter_rewrite(const struct arch_def *arch,
+			unsigned int strict,
 			int *syscall, struct db_api_arg *chain);
 
 #endif

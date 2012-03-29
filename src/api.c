@@ -190,7 +190,7 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
 	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
 	 * the rule for some arch specific reason */
 	if (syscall < 0) {
-		rc = arch_filter_rewrite(filter->arch, &syscall, chain);
+		rc = arch_filter_rewrite(filter->arch, 1, &syscall, chain);
 		if (rc < 0)
 			goto rule_add_return;
 	}

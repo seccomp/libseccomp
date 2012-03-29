@@ -54,16 +54,20 @@ int i386_syscall_rewrite(const struct arch_def *arch, int *syscall)
 /**
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
+ * @param strict strict flag
  * @param syscall the syscall number
  * @param chain the argument filter chain
  *
  * Syscalls can vary across different architectures so this function handles
  * the necessary seccomp rule rewrites to ensure the right thing is done
- * regardless of the rule or architecture.  Returns zero on success, negative
- * values on error.
+ * regardless of the rule or architecture.  If @strict is true then the
+ * function will fail if the entire filter can not be preservered, however,
+ * if @strict is false the function will do a "best effort" rewrite and not
+ * fail.  Returns zero on success, negative values on failure.
  *
  */
 int i386_filter_rewrite(const struct arch_def *arch,
+			unsigned int strict,
 			int *syscall, struct db_api_arg *chain)
 {
 	unsigned int iter;
@@ -71,7 +75,7 @@ int i386_filter_rewrite(const struct arch_def *arch,
 	if ((*syscall) <= -100 && (*syscall) >= -117) {
 		for (iter = 0; iter < i386_arg_count_max; iter++) {
 			if (chain[iter].valid != 0)
-				return -EINVAL;
+				goto filter_rewrite_failure;
 		}
 		*syscall = __i386_NR_socketcall;
 		chain[0].arg = 0;
@@ -81,7 +85,7 @@ int i386_filter_rewrite(const struct arch_def *arch,
 	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
 		for (iter = 0; iter < i386_arg_count_max; iter++) {
 			if (chain[iter].valid != 0)
-				return -EINVAL;
+				goto filter_rewrite_failure;
 		}
 		*syscall = __i386_NR_ipc;
 		chain[0].arg = 0;
@@ -91,5 +95,10 @@ int i386_filter_rewrite(const struct arch_def *arch,
 	} else if ((*syscall) < 0)
 		return -EINVAL;
 
+	return 0;
+
+filter_rewrite_failure:
+	if (strict)
+		return -EINVAL;
 	return 0;
 }

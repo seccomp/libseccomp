@@ -160,21 +160,25 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 /**
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
+ * @param strict strict flag
  * @param syscall the syscall number
  * @param chain the argument filter chain
  *
  * Syscalls can vary across different architectures so this function handles
  * the necessary seccomp rule rewrites to ensure the right thing is done
- * regardless of the rule or architecture.  Returns zero on success, negative
- * values on error.
+ * regardless of the rule or architecture.  If @strict is true then the
+ * function will fail if the entire filter can not be preservered, however,
+ * if @strict is false the function will do a "best effort" rewrite and not
+ * fail.  Returns zero on success, negative values on failure.
  *
  */
 int arch_filter_rewrite(const struct arch_def *arch,
+			unsigned int strict,
 			int *syscall, struct db_api_arg *chain)
 {
 	switch (arch->token) {
 	case AUDIT_ARCH_I386:
-		return i386_filter_rewrite(arch, syscall, chain);
+		return i386_filter_rewrite(arch, strict, syscall, chain);
 	default:
 		return -EDOM;
 	}
