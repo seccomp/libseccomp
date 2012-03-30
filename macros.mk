@@ -19,6 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+SHELL = /bin/bash
+
 #
 # simple /bin/sh script to find the top of the tree
 #
@@ -38,7 +40,7 @@ TOPDIR = $$( \
 # build configuration
 #
 
-INCFLAGS = -I$(TOPDIR)/include
+INCFLAGS = -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
 CFLAGS  ?= -O0 -g -Wall

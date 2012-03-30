@@ -29,6 +29,7 @@ include ../macros.mk
 # configuration
 #
 
+-include ../configure.mk
 include ../version_info
 
 LIB_STATIC = libseccomp.a

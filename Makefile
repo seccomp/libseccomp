@@ -29,7 +29,9 @@ include macros.mk
 # configuration
 #
 
-INSTALL_PREFIX ?= /usr/local
+-include configure.mk
+
+INSTALL_PREFIX ?= $(CONF_INSTALL_PREFIX)
 
 INSTALL_SBIN_DIR ?= $(INSTALL_PREFIX)/sbin
 INSTALL_BIN_DIR ?= $(INSTALL_PREFIX)/bin
@@ -43,11 +45,16 @@ INSTALL_GROUP ?= root
 # targets
 #
 
+CONFIGS = configure.mk configure.h
 SUBDIRS = src tests tools
 
-.PHONY: tarball install ctags cstags clean $(SUBDIRS)
+.PHONY: tarball install ctags cstags clean dist-clean $(SUBDIRS)
 
 all: $(SUBDIRS)
+
+$(CONFIGS):
+	@echo "INFO: automatically generating configuration ..."; \
+	./configure
 
 tarball: clean
 	@ver=$$(source ./version_info; echo $$VERSION_RELEASE); \
@@ -75,7 +82,7 @@ $(VERSION_HDR): version_info
 	echo "#define VERSION_RELEASE \"$$VERSION_RELEASE\"" >> $$hdr; \
 	echo "#endif" >> $$hdr;
 
-$(SUBDIRS): $(VERSION_HDR)
+$(SUBDIRS): $(VERSION_HDR) $(CONFIGS)
 	@echo "INFO: entering directory $@/ ..."
 	@$(MAKE) -s -C $@
 
@@ -89,9 +96,13 @@ cstags:
 	@cscope -b -q -k
 
 clean:
-	@echo "INFO: removing the version header file"; \
-	rm -f $(VERSION_HDR)
 	@for dir in $(SUBDIRS); do \
 		echo "INFO: cleaning in $$dir/"; \
 		$(MAKE) -s -C $$dir clean; \
 	done
+
+dist-clean: clean
+	@echo "INFO: removing the version header file"; \
+	rm -f $(VERSION_HDR)
+	@echo "INFO: removing the configuration files"; \
+	rm -f $(CONFIGS)

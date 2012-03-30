@@ -33,6 +33,8 @@ include ../macros.mk
 # configuration
 #
 
+-include ../configure.mk
+
 TOOLS = bpf_disasm \
 	bpf_sim
 

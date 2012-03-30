@@ -9,3 +9,5 @@
 .stgitmail.txt
 cscope.*
 tags
+configure.h
+configure.mk
