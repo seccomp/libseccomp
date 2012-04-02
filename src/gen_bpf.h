@@ -26,19 +26,11 @@
 
 #include "arch.h"
 #include "db.h"
-
-/* XXX - should we just use "sock_filter" in linux/filter.h? the name is
- *       awkward, but using the standard struct might be a good idea */
-struct bpf_instr_raw {
-	uint16_t op;
-	uint8_t jt;
-	uint8_t jf;
-	uint32_t k;
-} __attribute__ ((packed));
+#include "system.h"
 
 struct bpf_program {
 	uint16_t blk_cnt;
-	struct bpf_instr_raw *blks;
+	bpf_instr_raw *blks;
 };
 #define BPF_PGM_SIZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))

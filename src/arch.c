@@ -27,6 +27,7 @@
 #include "arch.h"
 #include "arch-i386.h"
 #include "arch-x86_64.h"
+#include "system.h"
 
 const struct arch_def arch_def_native = {
 #if __i386__
@@ -87,8 +88,6 @@ int arch_arg_count_max(const struct arch_def *arch)
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_arg_offset_lo(arg);
 	case AUDIT_ARCH_X86_64:
 		return x86_64_arg_offset_lo(arg);
 	default:
@@ -111,27 +110,6 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 	switch (arch->token) {
 	case AUDIT_ARCH_X86_64:
 		return x86_64_arg_offset_hi(arg);
-	default:
-		return -EDOM;
-	}
-}
-
-/**
- * Determine the argument offset
- * @param arch the architecture definition
- * @param arg the argument number
- *
- * Determine the correct offset of the given argument based on the architecture
- * definition.  Returns the offset on success, negative values on failure.
- *
- */
-int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
-{
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_arg_offset(arg);
-	case AUDIT_ARCH_X86_64:
-		return x86_64_arg_offset(arg);
 	default:
 		return -EDOM;
 	}

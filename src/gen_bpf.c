@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <linux/filter.h>
 
 #include <seccomp.h>
 
@@ -32,6 +31,7 @@
 #include "gen_bpf.h"
 #include "db.h"
 #include "hash.h"
+#include "system.h"
 
 /* allocation increments */
 #define AINC_BLK			2
@@ -280,8 +280,8 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 {
 	int rc;
-	struct bpf_instr_raw *i_new;
-	struct bpf_instr_raw *i_iter;
+	bpf_instr_raw *i_new;
+	bpf_instr_raw *i_iter;
 	unsigned int old_cnt = prg->blk_cnt;
 	unsigned int iter;
 
@@ -298,7 +298,7 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
 		i_iter = &(prg->blks[old_cnt + iter]);
 
-		i_iter->op = blk->blks[iter].op;
+		i_iter->code = blk->blks[iter].op;
 		switch (blk->blks[iter].jt.type) {
 		case TGT_NONE:
 			i_iter->jt = 0;

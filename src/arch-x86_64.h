@@ -25,11 +25,11 @@
 #include <inttypes.h>
 
 #include "arch.h"
+#include "system.h"
 
 #define x86_64_arg_count_max		6
 
-#define x86_64_arg_offset(x)		(8 + ((x) * 8))
-#define x86_64_arg_offset_lo(x)		(x86_64_arg_offset(x))
-#define x86_64_arg_offset_hi(x)		(x86_64_arg_offset(x) + 4)
+#define x86_64_arg_offset_lo(x)		(arch_arg_offset(x))
+#define x86_64_arg_offset_hi(x)		(arch_arg_offset(x) + 4)
 
 #endif

@@ -34,11 +34,7 @@
 #include "db.h"
 #include "gen_pfc.h"
 #include "gen_bpf.h"
-
-/* this is for systems that don't yet have this magic value defined */
-#ifndef PR_ATTACH_SECCOMP_FILTER
-#define PR_ATTACH_SECCOMP_FILTER	37
-#endif
+#include "system.h"
 
 /* the underlying code supports multiple simultaneous seccomp filters, but in
  * practice we really only need one per-process right now, and this is it */
@@ -114,7 +110,7 @@ int seccomp_load(void)
 	program = gen_bpf_generate(filter);
 	if (program == NULL)
 		return -ENOMEM;
-	rc = prctl(PR_ATTACH_SECCOMP_FILTER, program);
+	rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, program);
 	gen_bpf_release(program);
 	if (rc < 0)
 		return errno;

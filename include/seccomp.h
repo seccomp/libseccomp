@@ -39,8 +39,6 @@
  * seccomp actions
  */
 
-/* XXX - the values used here should be replaced with the system #defines */
-
 /**
  * Kill the process
  */

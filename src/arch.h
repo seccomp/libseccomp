@@ -23,6 +23,9 @@
 #define _ARCH_H
 
 #include <inttypes.h>
+#include <stddef.h>
+
+#include "system.h"
 
 struct db_api_arg;
 
@@ -52,7 +55,16 @@ typedef uint64_t datum_t;
 
 int arch_arg_count_max(const struct arch_def *arch);
 
-int arch_arg_offset(const struct arch_def *arch, unsigned int arg);
+
+/**
+ * Determine the argument offset
+ * @param _arg the argument number
+ *
+ * Return the correct offset of the given argument.
+ *
+ */
+#define arch_arg_offset(_arg)	(offsetof(struct seccomp_data, args[_arg]))
+
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
 

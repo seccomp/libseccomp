@@ -552,7 +552,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		memset(c_iter, 0, sizeof(*c_iter));
 		c_iter->refcnt = 1;
 		c_iter->arg = chain[iter].arg;
-		c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
+		c_iter->arg_offset = arch_arg_offset(c_iter->arg);
 		c_iter->op = chain[iter].op;
 		c_iter->datum = chain[iter].datum;
 

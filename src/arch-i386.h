@@ -24,11 +24,9 @@
 
 #include "arch.h"
 #include "db.h"
+#include "system.h"
 
 #define i386_arg_count_max		6
-
-#define i386_arg_offset(x)		(8 + ((x) * 4))
-#define i386_arg_offset_lo(x)		(i386_arg_offset(x))
 
 int i386_syscall_rewrite(const struct arch_def *arch, int *syscall);
 
