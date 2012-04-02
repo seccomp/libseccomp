@@ -111,7 +111,7 @@ struct bpf_hash_bkt {
 #define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
 	/* target arch */
-	const struct arch_def *bpf_tgt;
+	const struct arch_def *arch;
 
 	/* filter actions */
 	uint32_t def_action;
@@ -1273,6 +1273,25 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			b_iter = b_iter->prev;
 	} while (b_iter != NULL);
 
+	/* verify the architecture and kill ourselves if different */
+	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
+		   _BPF_JMP_NO, _BPF_JMP_NO,
+		   _BPF_K(offsetof(struct seccomp_data, arch)));
+	rc = _bpf_append_instr(state->bpf, &instr);
+	if (rc < 0)
+		return rc;
+	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+		   _BPF_JMP_IMM(1), _BPF_JMP_NO,
+		   _BPF_K(state->arch->token));
+	rc = _bpf_append_instr(state->bpf, &instr);
+	if (rc < 0)
+		return rc;
+	_BPF_INSTR(instr, BPF_RET,
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(SCMP_ACT_KILL));
+	rc = _bpf_append_instr(state->bpf, &instr);
+	if (rc < 0)
+		return rc;
+
 	/* load the syscall into the accumulator */
 	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
 		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL);
@@ -1413,7 +1432,7 @@ struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 	struct bpf_state state;
 
 	memset(&state, 0, sizeof(state));
-	state.bpf_tgt = db->arch;
+	state.arch = db->arch;
 	state.def_action = db->def_action;
 
 	state.bpf = malloc(sizeof(*(state.bpf)));
