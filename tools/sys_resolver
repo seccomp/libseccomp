@@ -49,7 +49,7 @@ if [[ "$#" -ne 1 || -z "$1" ]]; then
 fi
 
 # inspect the syscall header file and do the resolution
-sys_def="$(gcc -E -dM "$syscall_h" | grep " __NR_$1 ")"
+sys_def="$(gcc $CFLAGS -E -dM "$syscall_h" | grep " __NR_$1 ")"
 if [[ -n "$sys_def" ]]; then
 	echo "$sys_def" | awk '{ print $3 }'
 else
