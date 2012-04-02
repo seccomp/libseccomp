@@ -45,7 +45,8 @@ TESTS = 01-allow \
 	07-db-bug-looping \
 	08-subtree-checks \
 	09-syscall-priority-pre \
-	10-syscall-priority-post
+	10-syscall-priority-post \
+	11-basic-errors
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)
