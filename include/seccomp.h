@@ -46,15 +46,15 @@
 /**
  * Throw a SIGSYS signal
  */
-#define SCMP_ACT_TRAP		0x00020000U
+#define SCMP_ACT_TRAP		0x00030000U
 /**
  * Return the specified error code
  */
-#define SCMP_ACT_ERRNO(x)	(0x00030000U | ((x) & 0x0000ffff))
+#define SCMP_ACT_ERRNO(x)	(0x00050000U | ((x) & 0x0000ffffU))
 /**
  * Notify a tracing process with the specified value
  */
-#define SCMP_ACT_TRACE(x)	(0x7ff00000U | ((x) & 0x0000ffff))
+#define SCMP_ACT_TRACE(x)	(0x7ff00000U | ((x) & 0x0000ffffU))
 /**
  * Allow the syscall to be executed
  */
