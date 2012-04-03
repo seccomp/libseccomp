@@ -41,9 +41,9 @@
  * Decode the BPF operand and print it to stdout.
  *
  */
-static void bpf_decode_op(const struct bpf_instr *bpf)
+static void bpf_decode_op(const bpf_instr_raw *bpf)
 {
-	switch (bpf->op) {
+	switch (bpf->code) {
 		case BPF_LD+BPF_W+BPF_IMM:
 		case BPF_LD+BPF_W+BPF_ABS:
 		case BPF_LD+BPF_W+BPF_IND:
@@ -175,12 +175,12 @@ static void bpf_decode_op(const struct bpf_instr *bpf)
  * to stdout based on the operand.
  *
  */
-static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
+static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 {
-	switch (BPF_CLASS(bpf->op)) {
+	switch (BPF_CLASS(bpf->code)) {
 		case BPF_LD:
 		case BPF_LDX:
-			switch (BPF_MODE(bpf->op)) {
+			switch (BPF_MODE(bpf->code)) {
 				case BPF_ABS:
 					printf("$data[%u]", bpf->k);
 					break;
@@ -197,7 +197,7 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 			printf("%u", bpf->k);
 			break;
 		case BPF_JMP:
-			if (BPF_OP(bpf->op) == BPF_JA) {
+			if (BPF_OP(bpf->code) == BPF_JA) {
 				printf("%.4u", (line + 1) + bpf->k);
 			} else {
 				printf("%-4u true:%.4u false:%.4u",
@@ -207,25 +207,33 @@ static void bpf_decode_args(const struct bpf_instr *bpf, unsigned int line)
 			}
 			break;
 		case BPF_RET:
-			if (BPF_RVAL(bpf->op) == BPF_A) {
+			if (BPF_RVAL(bpf->code) == BPF_A) {
 				/* XXX - accumulator? */
 				printf("$acc");
-			} else if (BPF_SRC(bpf->op) == BPF_K) {
-				if (bpf->k == 0x00000000)
+			} else if (BPF_SRC(bpf->code) == BPF_K) {
+				uint32_t act = bpf->k & SECCOMP_RET_ACTION;
+				uint32_t data = bpf->k & SECCOMP_RET_DATA;
+
+				switch (act) {
+				case SECCOMP_RET_KILL:
 					printf("KILL");
-				else if (bpf->k == 0x00020000)
+					break;
+				case SECCOMP_RET_TRAP:
 					printf("TRAP");
-				else if ((bpf->k & 0xffff0000) == 0x00030000)
-					printf("ERRNO(%u)",
-					       (bpf->k & 0x0000ffff));
-				else if ((bpf->k & 0xffff0000) == 0x7ff00000)
-					printf("TRACE(%u)",
-					       (bpf->k & 0x0000ffff));
-				else if (bpf->k == 0x7fff0000)
+					break;
+				case SECCOMP_RET_ERRNO:
+					printf("ERRNO(%u)", data);
+					break;
+				case SECCOMP_RET_TRACE:
+					printf("TRACE(%u)", data);
+					break;
+				case SECCOMP_RET_ALLOW:
 					printf("ALLOW");
-				else
+					break;
+				default:
 					printf("0x%.8x", bpf->k);
-			} else if (BPF_SRC(bpf->op) == BPF_X) {
+				}
+			} else if (BPF_SRC(bpf->code) == BPF_X) {
 				/* XXX - any idea? */
 				printf("???");
 			}
@@ -249,7 +257,7 @@ static int bpf_decode(FILE *file)
 {
 	unsigned int line = 0;
 	size_t len;
-	struct bpf_instr bpf;
+	bpf_instr_raw bpf;
 
 	/* header */
 	printf(" line  OP   JT   JF   K\n");
@@ -257,7 +265,7 @@ static int bpf_decode(FILE *file)
 
 	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
 		printf(" %.4u: 0x%.2x 0x%.2x 0x%.2x 0x%.8x",
-		       line, bpf.op, bpf.jt, bpf.jf, bpf.k);
+		       line, bpf.code, bpf.jt, bpf.jf, bpf.k);
 
 		printf("   ");
 		bpf_decode_op(&bpf);

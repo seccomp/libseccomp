@@ -23,42 +23,49 @@
 #define _BPF_H
 
 #include <inttypes.h>
+#include <stddef.h>
 
 /* most of these structures and values are designed to match the Linux Kernel's
- * BPF interface (see /usr/include/linux/filter.h), but we define our own here
- * so that we can function independent of the host OS */
+ * BPF interface (see /usr/include/linux/{filter,seccomp}.h), but we define our
+ * own here so that we can function independent of the host OS */
 
 /* XXX - need to verify these values */
-#define BPF_SYS_ARG_MAX		6
 #define BPF_SCRATCH_SIZE	6
 
 /**
  * Syscall record data format used by seccomp
  */
-struct bpf_syscall_data {
-	uint32_t sys;
-	uint32_t _reserved;
-	union {
-		uint32_t m32[BPF_SYS_ARG_MAX];
-		uint64_t m64[BPF_SYS_ARG_MAX];
-	} args;
-} __attribute__ ((packed));
-#define BPF_SYSCALL_MAX_32	(8 + (4 * BPF_SYS_ARG_MAX))
-#define BPF_SYSCALL_MAX_64	(8 + (8 * BPF_SYS_ARG_MAX))
+#define BPF_SYS_ARG_MAX		6
+struct seccomp_data {
+	int nr;
+	uint32_t arch;
+	uint64_t instruction_pointer;
+	uint64_t args[BPF_SYS_ARG_MAX];
+};
+#define BPF_SYSCALL_MAX \
+	(offsetof(struct seccomp_data, args[BPF_SYS_ARG_MAX]))
 
 /**
  * BPF instruction format
  */
-struct bpf_instr {
-	uint16_t op;
+struct sock_filter {
+	uint16_t code;
 	uint8_t jt;
 	uint8_t jf;
 	uint32_t k;
 } __attribute__ ((packed));
+typedef struct sock_filter bpf_instr_raw;
 
-/* seccomp return values */
-#define BPF_SCMP_DENY		0x00000000
-#define BPF_SCMP_ALLOW		0xffffffff
+/* seccomp return masks */
+#define SECCOMP_RET_ACTION	0x7fff0000U
+#define SECCOMP_RET_DATA	0x0000ffffU
+
+/* seccomp action values */
+#define SECCOMP_RET_KILL	0x00000000U
+#define SECCOMP_RET_TRAP	0x00030000U
+#define SECCOMP_RET_ERRNO	0x00050000U
+#define SECCOMP_RET_TRACE	0x7ff00000U
+#define SECCOMP_RET_ALLOW	0x7fff0000U
 
 /* bpf command classes */
 #define BPF_CLASS(code)		((code) & 0x07)

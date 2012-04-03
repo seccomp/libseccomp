@@ -43,11 +43,10 @@ struct sim_state {
 
 struct bpf_program {
 	size_t i_cnt;
-	struct bpf_instr *i;
+	bpf_instr_raw *i;
 };
 
 static unsigned int opt_verbose = 0;
-static unsigned int opt_machine = 32;
 
 /**
  * Print the usage information to stderr and exit
@@ -58,7 +57,7 @@ static unsigned int opt_machine = 32;
  */
 static void exit_usage(const char *program)
 {
-	fprintf(stderr, "usage: %s [-m {32,64}] -f <bpf_file> [-v]"
+	fprintf(stderr, "usage: %s -f <bpf_file> [-v]"
 			" -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
 			program);
 	exit(EINVAL);
@@ -109,18 +108,29 @@ static void exit_error(unsigned int rc, unsigned int line)
  */
 static void end_action(uint32_t action, unsigned int line)
 {
-	if (action == 0x00000000)
+	uint32_t act = action & SECCOMP_RET_ACTION;
+	uint32_t data = action & SECCOMP_RET_DATA;
+
+	switch (act) {
+	case SECCOMP_RET_KILL:
 		fprintf(stdout, "KILL\n");
-	else if (action == 0x00020000)
+		break;
+	case SECCOMP_RET_TRAP:
 		fprintf(stdout, "TRAP\n");
-	else if ((action & 0xffff0000) == 0x00030000)
-		fprintf(stdout, "ERRNO(%u)\n", (action & 0x0000ffff));
-	else if ((action & 0xffff0000) == 0x7ff00000)
-		fprintf(stdout, "TRACE(%u)\n", (action & 0x0000ffff));
-	else if (action == 0x7fff0000)
+		break;
+	case SECCOMP_RET_ERRNO:
+		fprintf(stdout, "ERRNO(%u)\n", data);
+		break;
+	case SECCOMP_RET_TRACE:
+		fprintf(stdout, "TRACE(%u)\n", data);
+		break;
+	case SECCOMP_RET_ALLOW:
 		fprintf(stdout, "ALLOW\n");
-	else
+		break;
+	default:
 		exit_error(EDOM, line);
+	}
+
 	exit(0);
 }
 
@@ -133,11 +143,11 @@ static void end_action(uint32_t action, unsigned int line)
  *
  */
 static void bpf_execute(const struct bpf_program *prg,
-			const struct bpf_syscall_data *sys_data)
+			const struct seccomp_data *sys_data)
 {
 	unsigned int ip, ip_c;
 	struct sim_state state;
-	struct bpf_instr *bpf;
+	bpf_instr_raw *bpf;
 	unsigned char *sys_data_b = (unsigned char *)sys_data;
 
 	/* initialize the machine state */
@@ -151,15 +161,11 @@ static void bpf_execute(const struct bpf_program *prg,
 		ip_c = ip;
 		bpf = &prg->i[ip++];
 
-		switch (bpf->op) {
+		switch (bpf->code) {
 		case BPF_LD+BPF_W+BPF_ABS:
-			if ((opt_machine == 32) &&
-			    (bpf->k < BPF_SYSCALL_MAX_32)) {
+			if (bpf->k < BPF_SYSCALL_MAX)
 				state.acc = sys_data_b[bpf->k];
-			} else if ((opt_machine == 64) &&
-			    (bpf->k < BPF_SYSCALL_MAX_64)) {
-				state.acc = sys_data_b[bpf->k];
-			} else
+			else
 				exit_error(ERANGE, ip_c);
 			break;
 		case BPF_JMP+BPF_JA:
@@ -208,86 +214,48 @@ int main(int argc, char *argv[])
 	unsigned int opt_arg_flag = 0;
 	FILE *file;
 	size_t file_read_len;
-	struct bpf_syscall_data sys_data;
+	struct seccomp_data sys_data;
 	struct bpf_program bpf_prg;
 
 	/* clear the syscall record */
 	memset(&sys_data, 0, sizeof(sys_data));
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "f:h:m:s:v0:1:2:3:4:5:")) > 0) {
+	while ((opt = getopt(argc, argv, "f:h:s:v0:1:2:3:4:5:")) > 0) {
 		switch (opt) {
 		case 'f':
 			opt_file = strdup(optarg);
 			if (opt_file == NULL)
 				exit_fault(ENOMEM);
 			break;
-		case 'm':
-			if (opt_arg_flag)
-				exit_usage(argv[0]);
-			opt_machine = strtol(optarg, NULL, 0);
-			if (opt_machine != 32 && opt_machine != 64)
-				exit_usage(argv[0]);
-			break;
 		case 's':
-			sys_data.sys = strtol(optarg, NULL, 0);
+			sys_data.nr = strtol(optarg, NULL, 0);
 			break;
 		case 'v':
 			opt_verbose = 1;
 			break;
 		case '0':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[0] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[0] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
+			sys_data.args[0] = strtol(optarg, NULL, 0);
 			break;
 		case '1':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[1] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[1] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
+			sys_data.args[1] = strtol(optarg, NULL, 0);
 			break;
 		case '2':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[2] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[2] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
+			sys_data.args[2] = strtol(optarg, NULL, 0);
 			break;
 		case '3':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[3] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[3] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
+			sys_data.args[3] = strtol(optarg, NULL, 0);
 			break;
 		case '4':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[4] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[4] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
-			break;
+			sys_data.args[4] = strtol(optarg, NULL, 0);
 		case '5':
 			opt_arg_flag = 1;
-			if (opt_machine == 32)
-				sys_data.args.m32[5] = strtol(optarg, NULL, 0);
-			else if (opt_machine == 64)
-				sys_data.args.m64[5] = strtol(optarg, NULL, 0);
-			else
-				exit_fault(EINVAL);
+			sys_data.args[5] = strtol(optarg, NULL, 0);
 			break;
 		case 'h':
 		default:
