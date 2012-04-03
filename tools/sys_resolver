@@ -41,6 +41,7 @@ function verify_deps() {
 verify_deps gcc
 verify_deps grep
 verify_deps awk
+verify_deps sed
 
 # verify the command line
 if [[ "$#" -ne 1 || -z "$1" ]]; then
@@ -51,7 +52,16 @@ fi
 # inspect the syscall header file and do the resolution
 sys_def="$(gcc $CFLAGS -E -dM "$syscall_h" | grep " __NR_$1 ")"
 if [[ -n "$sys_def" ]]; then
-	echo "$sys_def" | awk '{ print $3 }'
+	if [[ $sys_def =~ .*__NR_[a-zA-Z_]+" "*\+" "*[0-9]+ ]]; then
+		# the value is calculated using an offset from another syscall
+		base="$(echo $sys_def |
+			sed -e 's/\(.*\)__NR_\([a-zA-Z_]\+\)\(.*\)/\2/;')"
+		offset="$(echo $sys_def |
+			  sed -e 's/\(.*+ *\)\([0-9]*\)\(.*\)/\2/;')"
+		echo $(($($0 $base) + $offset))
+	else
+		echo "$sys_def" | awk '{ print $3 }'
+	fi
 else
 	echo "error: unknown syscall \"$1\""
 	exit 1
