@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <linux/audit.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -58,7 +59,7 @@ static unsigned int opt_verbose = 0;
 static void exit_usage(const char *program)
 {
 	fprintf(stderr, "usage: %s -f <bpf_file> [-v]"
-			" -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
+			" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
 			program);
 	exit(EINVAL);
 }
@@ -221,8 +222,26 @@ int main(int argc, char *argv[])
 	memset(&sys_data, 0, sizeof(sys_data));
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "f:h:s:v0:1:2:3:4:5:")) > 0) {
+	while ((opt = getopt(argc, argv, "a:f:h:s:v0:1:2:3:4:5:")) > 0) {
 		switch (opt) {
+		case 'a':
+			if (strcmp(optarg, "x86") == 0)
+				sys_data.arch = AUDIT_ARCH_I386;
+			else if (strcmp(optarg, "x86_64") == 0)
+				sys_data.arch = AUDIT_ARCH_X86_64;
+			else if (strcmp(optarg, "ia64") == 0)
+				sys_data.arch = AUDIT_ARCH_IA64;
+			else if (strcmp(optarg, "ppc") == 0)
+				sys_data.arch = AUDIT_ARCH_PPC;
+			else if (strcmp(optarg, "ppc64") == 0)
+				sys_data.arch = AUDIT_ARCH_PPC64;
+			else if (strcmp(optarg, "s390") == 0)
+				sys_data.arch = AUDIT_ARCH_S390;
+			else if (strcmp(optarg, "s390x") == 0)
+				sys_data.arch = AUDIT_ARCH_S390X;
+			else
+				exit_fault(EINVAL);
+			break;
 		case 'f':
 			opt_file = strdup(optarg);
 			if (opt_file == NULL)
