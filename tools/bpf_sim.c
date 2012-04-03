@@ -59,7 +59,7 @@ static unsigned int opt_machine = 32;
 static void exit_usage(const char *program)
 {
 	fprintf(stderr, "usage: %s [-m {32,64}] -f <bpf_file> [-v]"
-			" -s <syscall_num> [-0 <a0>] ... [-5 <a5>]",
+			" -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
 			program);
 	exit(EINVAL);
 }
@@ -110,15 +110,15 @@ static void exit_error(unsigned int rc, unsigned int line)
 static void end_action(uint32_t action, unsigned int line)
 {
 	if (action == 0x00000000)
-		fprintf(stdout, "KILL");
+		fprintf(stdout, "KILL\n");
 	else if (action == 0x00020000)
-		fprintf(stdout, "TRAP");
+		fprintf(stdout, "TRAP\n");
 	else if ((action & 0xffff0000) == 0x00030000)
-		fprintf(stdout, "ERRNO(%u)", (action & 0x0000ffff));
+		fprintf(stdout, "ERRNO(%u)\n", (action & 0x0000ffff));
 	else if ((action & 0xffff0000) == 0x7ff00000)
-		fprintf(stdout, "TRACE(%u)", (action & 0x0000ffff));
+		fprintf(stdout, "TRACE(%u)\n", (action & 0x0000ffff));
 	else if (action == 0x7fff0000)
-		fprintf(stdout, "ALLOW");
+		fprintf(stdout, "ALLOW\n");
 	else
 		exit_error(EDOM, line);
 	exit(0);
@@ -187,10 +187,9 @@ static void bpf_execute(const struct bpf_program *prg,
 			end_action(bpf->k, ip_c);
 			break;
 		default:
-			/* XXX - since we don't support the full bpf language
-			 *       just yet, this could be either a fault or
-			 *       and error, we'll treat it as a fault until we
-			 *       provide full bpf support */
+			/* since we don't support the full bpf language just
+			 * yet, this could be either a fault or an error, we'll
+			 * treat it as a fault until we provide full support */
 			exit_fault(EOPNOTSUPP);
 		}
 	}
@@ -205,9 +204,10 @@ static void bpf_execute(const struct bpf_program *prg,
 int main(int argc, char *argv[])
 {
 	int opt;
-	int fd, fd_read_len;
 	char *opt_file = NULL;
 	unsigned int opt_arg_flag = 0;
+	FILE *file;
+	size_t file_read_len;
 	struct bpf_syscall_data sys_data;
 	struct bpf_program bpf_prg;
 
@@ -304,21 +304,20 @@ int main(int argc, char *argv[])
 		exit_fault(ENOMEM);
 
 	/* load the bpf program */
-	fd = open(opt_file, 0);
-	if (fd < 0)
+	file = fopen(opt_file, "r");
+	if (file == NULL)
 		exit_fault(errno);
 	do {
-		/* XXX - need to account for partial reads */
-		fd_read_len = read(fd, &(bpf_prg.i[bpf_prg.i_cnt]),
-				   sizeof(*bpf_prg.i));
-		if (fd_read_len == sizeof(*bpf_prg.i))
+		file_read_len = fread(&(bpf_prg.i[bpf_prg.i_cnt]),
+				      sizeof(*bpf_prg.i), 1, file);
+		if (file_read_len == 1)
 			bpf_prg.i_cnt++;
 
 		/* check the size */
 		if (bpf_prg.i_cnt == BPF_PRG_MAX_LEN)
 			exit_fault(E2BIG);
-	} while (fd_read_len > 0);
-	close(fd);
+	} while (file_read_len > 0);
+	fclose(file);
 
 	/* execute the bpf program */
 	bpf_execute(&bpf_prg, &sys_data);
