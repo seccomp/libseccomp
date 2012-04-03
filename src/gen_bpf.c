@@ -37,6 +37,11 @@
 #define AINC_BLK			2
 #define AINC_PROG			64
 
+struct acc_state {
+	int32_t offset;
+	uint32_t mask;
+};
+
 enum bpf_jump_type {
 	TGT_NONE = 0,
 	TGT_K,				/* immediate "k" value */
@@ -653,7 +658,7 @@ static struct bpf_blk *_gen_bpf_action_hsh(struct bpf_state *state,
  * Generate a BPF instruction block for a given chain node
  * @param state the BPF state
  * @param node the filter chain node
- * @param acc_off the data offset loaded into the accumulator
+ * @param a_state the accumulator state
  *
  * Generate BPF instructions to execute the filter for the given chain node.
  * Returns a pointer to the instruction block on success, NULL on failure.
@@ -661,9 +666,10 @@ static struct bpf_blk *_gen_bpf_action_hsh(struct bpf_state *state,
  */
 static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 				     const struct db_arg_chain_tree *node,
-				     int *acc_off)
+				     struct acc_state *a_state)
 {
-	int acc_desired;
+	int32_t acc_offset;
+	uint32_t acc_mask;
 	uint64_t act_t_hash = 0, act_f_hash = 0;
 	struct bpf_blk *blk = NULL, *b_act;
 	struct bpf_instr instr;
@@ -682,25 +688,35 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		act_f_hash = b_act->hash;
 	}
 
-	acc_desired = node->arg_offset;
-	if (acc_desired < 0)
+	/* check the accumulator state */
+	acc_offset = node->arg_offset;
+	acc_mask = node->mask;
+	if (acc_offset < 0)
 		goto node_failure;
-	if (acc_desired != *acc_off) {
+	if ((acc_offset != a_state->offset) ||
+	    ((acc_mask & a_state->mask) != acc_mask)) {
 		/* reload the accumulator */
-		*acc_off = acc_desired;
+		a_state->offset = acc_offset;
+		a_state->mask = ARG_MASK_MAX;
 		_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_desired));
+			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_offset));
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto node_failure;
+	}
+	if (acc_mask != a_state->mask) {
+		/* apply the bitmask */
+		a_state->mask = acc_mask;
+		_BPF_INSTR(instr, BPF_ALU+BPF_AND,
+			_BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_mask));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto node_failure;
 	}
 
-	/* do any necessary alu operations */
-	/* XXX - only needed for bitmask which we don't support yet as it
-	 *       messes up the accumulator value */
-
 	/* check the accumulator against the datum */
 	switch (node->op) {
+	case SCMP_CMP_MASKED_EQ:
 	case SCMP_CMP_EQ:
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
@@ -765,7 +781,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 	struct bpf_blk *b_head = NULL, *b_prev = NULL, *b_next, *b_iter;
 	struct bpf_instr *i_iter;
 	const struct db_arg_chain_tree *l_iter;
-	int acc_off = -1;
+	struct acc_state a_state = { -1, ARG_MASK_MAX };
 	unsigned int iter;
 
 	if (node == NULL) {
@@ -782,7 +798,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 
 	/* build all of the blocks for this level */
 	do {
-		blk = _gen_bpf_node(state, l_iter, &acc_off);
+		blk = _gen_bpf_node(state, l_iter, &a_state);
 		if (blk == NULL)
 			goto chain_lvl_failure;
 		if (b_head != NULL) {

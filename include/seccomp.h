@@ -34,13 +34,13 @@
  */
 enum scmp_compare {
 	_SCMP_CMP_MIN = 0,
-	SCMP_CMP_NE = 1,	/**< not equal */
-	SCMP_CMP_LT = 2,	/**< less than */
-	SCMP_CMP_LE = 3,	/**< less than or equal */
-	SCMP_CMP_EQ = 4,	/**< equal */
-	SCMP_CMP_GE = 5,	/**< greater than or equal */
-	SCMP_CMP_GT = 6,	/**< greater than */
-	SCMP_CMP_MASK = 7,	/**< masked equality */
+	SCMP_CMP_NE = 1,		/**< not equal */
+	SCMP_CMP_LT = 2,		/**< less than */
+	SCMP_CMP_LE = 3,		/**< less than or equal */
+	SCMP_CMP_EQ = 4,		/**< equal */
+	SCMP_CMP_GE = 5,		/**< greater than or equal */
+	SCMP_CMP_GT = 6,		/**< greater than */
+	SCMP_CMP_MASKED_EQ = 7,		/**< masked equality */
 	_SCMP_CMP_MAX,
 };
 

@@ -137,6 +137,9 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 			case SCMP_CMP_GT:
 				fprintf(fds, " > ");
 				break;
+			case SCMP_CMP_MASKED_EQ:
+				fprintf(fds, " & 0x%.8x == ", c_iter->mask);
+				break;
 			default:
 				fprintf(fds, " ??? ");
 		}

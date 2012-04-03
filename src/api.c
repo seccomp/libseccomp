@@ -186,14 +186,26 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
 			chain[arg_num].op = arg_data.op;
-			if (chain[arg_num].op <= _SCMP_CMP_MIN ||
-			    chain[arg_num].op >= _SCMP_CMP_MAX) {
+			/* XXX - we should check datum/mask size against the
+			 *	 arch definition, e.g. 64 bit datum on x86 */
+			switch (chain[arg_num].op) {
+			case SCMP_CMP_NE:
+			case SCMP_CMP_LT:
+			case SCMP_CMP_LE:
+			case SCMP_CMP_EQ:
+			case SCMP_CMP_GE:
+			case SCMP_CMP_GT:
+				chain[arg_num].mask = DATUM_MAX;
+				chain[arg_num].datum = arg_data.datum_a;
+				break;
+			case SCMP_CMP_MASKED_EQ:
+				chain[arg_num].mask = arg_data.datum_a;
+				chain[arg_num].datum = arg_data.datum_b;
+				break;
+			default:
 				rc = -EINVAL;
 				goto rule_add_return;
 			}
-			/* XXX - we should check datum size against the arch
-			 *       definition, e.g. 64 bit datum no-go on x86 */
-			chain[arg_num].datum = arg_data.datum_a;
 		} else {
 			rc = -EINVAL;
 			goto rule_add_return;

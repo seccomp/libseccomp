@@ -35,7 +35,8 @@ struct db_api_arg {
 
 	unsigned int arg;
 	unsigned int op;
-	datum_t datum;
+	scmp_datum_t mask;
+	scmp_datum_t datum;
 };
 
 struct db_arg_chain_tree {
@@ -47,6 +48,7 @@ struct db_arg_chain_tree {
 	/* comparison operator */
 	enum scmp_compare op;
 	/* syscall argument value */
+	uint32_t mask;
 	uint32_t datum;
 
 	/* actions */
@@ -64,15 +66,19 @@ struct db_arg_chain_tree {
 
 	unsigned int refcnt;
 };
+#define ARG_MASK_MAX		((uint32_t)-1)
 #define db_chain_lt(x,y) \
 	(((x)->arg < (y)->arg) || \
-	 (((x)->arg == (y)->arg) && ((x)->op < (y)->op)))
+	 (((x)->arg == (y)->arg) && (((x)->op < (y)->op) || \
+	   (((x)->mask & (y)->mask) == (y)->mask))))
 #define db_chain_eq(x,y) \
 	(((x)->arg == (y)->arg) && \
-	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum))
+	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum) && \
+	 ((x)->mask == (y)->mask))
 #define db_chain_gt(x,y) \
 	(((x)->arg > (y)->arg) || \
-	 (((x)->arg == (y)->arg) && ((x)->op > (y)->op)))
+	 (((x)->arg == (y)->arg) && (((x)->op > (y)->op) || \
+	   (((x)->mask & (y)->mask) != (y)->mask))))
 #define db_chain_leaf(x) \
 	(((x)->act_t_flg != 0) || ((x)->act_f_flg != 0))
 #define db_chain_zombie(x) \

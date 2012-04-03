@@ -389,6 +389,23 @@ int db_syscall_priority(struct db_filter *db,
 }
 
 /**
+ * Fixup the node based on the op/mask
+ * @param node the chain node
+ *
+ * Apply some simplifications based on the comparison op and mask value.
+ *
+ */
+static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
+{
+	if (node->op == SCMP_CMP_MASKED_EQ && node->mask == 0) {
+		node->op = SCMP_CMP_EQ;
+		node->mask = ARG_MASK_MAX;
+		node->datum = 0;
+	} else
+		node->datum &= node->mask;
+}
+
+/**
  * Generate a new filter rule for a 64 bit system
  * @param arch the architecture definition
  * @param action the filter action
@@ -482,8 +499,14 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 				c_iter_lo->op = chain[iter].op;
 				tf_flag = 1;
 		}
+		c_iter_hi->mask = D64_HI(chain[iter].mask);
+		c_iter_lo->mask = D64_LO(chain[iter].mask);
 		c_iter_hi->datum = D64_HI(chain[iter].datum);
 		c_iter_lo->datum = D64_LO(chain[iter].datum);
+
+		/* fixup the mask/datum */
+		_db_node_mask_fixup(c_iter_hi);
+		_db_node_mask_fixup(c_iter_lo);
 
 		/* link the hi and lo chain nodes */
 		c_iter_hi->nxt_t = c_iter_lo;
@@ -554,6 +577,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		c_iter->arg = chain[iter].arg;
 		c_iter->arg_offset = arch_arg_offset(c_iter->arg);
 		c_iter->op = chain[iter].op;
+		c_iter->mask = chain[iter].mask;
 		c_iter->datum = chain[iter].datum;
 
 		/* link in the new node and update the chain */
@@ -583,6 +607,9 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 			default:
 				tf_flag = 1;
 		}
+
+		/* fixup the mask/datum */
+		_db_node_mask_fixup(c_iter);
 
 		c_prev = c_iter;
 	}
