@@ -168,6 +168,12 @@ static void bpf_execute(const struct bpf_program *prg,
 			else
 				exit_error(ERANGE, ip_c);
 			break;
+		case BPF_ALU+BPF_OR+BPF_K:
+			state.acc |= bpf->k;
+			break;
+		case BPF_ALU+BPF_AND+BPF_K:
+			state.acc &= bpf->k;
+			break;
 		case BPF_JMP+BPF_JA:
 			ip += bpf->k;
 			break;
