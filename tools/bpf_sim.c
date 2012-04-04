@@ -156,7 +156,6 @@ static void bpf_execute(const struct bpf_program *prg,
 	ip = 0;
 	memset(&state, 0, sizeof(state));
 
-	/* start execution */
 	while (ip < prg->i_cnt) {
 		/* get the instruction and bump the ip */
 		ip_c = ip;
@@ -165,7 +164,7 @@ static void bpf_execute(const struct bpf_program *prg,
 		switch (bpf->code) {
 		case BPF_LD+BPF_W+BPF_ABS:
 			if (bpf->k < BPF_SYSCALL_MAX)
-				state.acc = sys_data_b[bpf->k];
+				state.acc = *((uint32_t *)&sys_data_b[bpf->k]);
 			else
 				exit_error(ERANGE, ip_c);
 			break;
@@ -173,19 +172,19 @@ static void bpf_execute(const struct bpf_program *prg,
 			ip += bpf->k;
 			break;
 		case BPF_JMP+BPF_JEQ+BPF_K:
-			if (bpf->k == state.acc)
+			if (state.acc == bpf->k)
 				ip += bpf->jt;
 			else
 				ip += bpf->jf;
 			break;
 		case BPF_JMP+BPF_JGT+BPF_K:
-			if (bpf->k > state.acc)
+			if (state.acc > bpf->k)
 				ip += bpf->jt;
 			else
 				ip += bpf->jf;
 			break;
 		case BPF_JMP+BPF_JGE+BPF_K:
-			if (bpf->k >= state.acc)
+			if (state.acc >= bpf->k)
 				ip += bpf->jt;
 			else
 				ip += bpf->jf;
@@ -272,6 +271,7 @@ int main(int argc, char *argv[])
 		case '4':
 			opt_arg_flag = 1;
 			sys_data.args[4] = strtol(optarg, NULL, 0);
+			break;
 		case '5':
 			opt_arg_flag = 1;
 			sys_data.args[5] = strtol(optarg, NULL, 0);
