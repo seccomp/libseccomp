@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
 	/* same syscall, many chains */
 	for (iter = 0; iter < 600; iter++) {
 		rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 3,
-					    0, SCMP_CMP_EQ, iter,
-					    1, SCMP_CMP_NE, NULL,
-					    2, SCMP_CMP_LT, SSIZE_MAX);
+					    SCMP_A0(SCMP_CMP_EQ, iter),
+					    SCMP_A1(SCMP_CMP_NE,
+						    (scmp_datum_t) NULL),
+					    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 		if (rc != 0)
 			return rc;
 	}
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
 	/* many syscalls, same chain */
 	for (iter = 100; iter < 700; iter++) {
 		rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, iter, 1,
-					    0, SCMP_CMP_NE, 0);
+					    SCMP_A0(SCMP_CMP_NE, 0));
 		if (rc != 0)
 			return rc;
 	}

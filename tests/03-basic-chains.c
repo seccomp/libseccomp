@@ -46,17 +46,17 @@ int main(int argc, char *argv[])
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-				    0, SCMP_CMP_EQ, STDIN_FILENO);
+				    SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
-				    0, SCMP_CMP_EQ, STDOUT_FILENO);
+				    SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
-				    0, SCMP_CMP_EQ, STDERR_FILENO);
+				    SCMP_A0(SCMP_CMP_EQ, STDERR_FILENO));
 	if (rc != 0)
 		return rc;
 

@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
 	/* seccomp_rule_add errors */
 	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-			      0, SCMP_CMP_EQ, 0);
+			      SCMP_A0(SCMP_CMP_EQ, 0));
 	if (rc != -EFAULT)
 		return -1;
 
@@ -93,21 +93,21 @@ int main(int argc, char *argv[])
 		if (rc != -EINVAL)
 			return -1;
 		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 7,
-				      0, SCMP_CMP_EQ, 0,
-				      1, SCMP_CMP_EQ, 0,
-				      2, SCMP_CMP_EQ, 0,
-				      3, SCMP_CMP_EQ, 0,
-				      4, SCMP_CMP_EQ, 0,
-				      5, SCMP_CMP_EQ, 0,
-				      6, SCMP_CMP_EQ, 0);
+				      SCMP_A0(SCMP_CMP_EQ, 0),
+				      SCMP_A1(SCMP_CMP_EQ, 0),
+				      SCMP_A2(SCMP_CMP_EQ, 0),
+				      SCMP_A3(SCMP_CMP_EQ, 0),
+				      SCMP_A4(SCMP_CMP_EQ, 0),
+				      SCMP_A5(SCMP_CMP_EQ, 0),
+				      SCMP_CMP(6, SCMP_CMP_EQ, 0));
 		if (rc != -EINVAL)
 			return -1;
 		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 1,
-				      0, _SCMP_CMP_MIN, 0);
+				      SCMP_A0(_SCMP_CMP_MIN, 0));
 		if (rc != -EINVAL)
 			return -1;
 		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 1,
-				      0, _SCMP_CMP_MAX, 0);
+				      SCMP_A0(_SCMP_CMP_MAX, 0));
 		if (rc != -EINVAL)
 			return -1;
 #if __i386__
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 	else {
 #if __i386__
 		rc = seccomp_rule_add_exact(SCMP_ACT_KILL, SCMP_SYS(socket), 1,
-					    0, SCMP_CMP_EQ, 2);
+					    SCMP_A0(SCMP_CMP_EQ, 2));
 		if (rc != -EINVAL)
 			return -1;
 #endif

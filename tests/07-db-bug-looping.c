@@ -42,17 +42,17 @@ int main(int argc, char *argv[])
 	 * go together in this order to catch an infinite loop. */
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-				    0, SCMP_CMP_EQ, STDOUT_FILENO);
+				    SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-				    1, SCMP_CMP_EQ, NULL);
+				    SCMP_A1(SCMP_CMP_EQ, (scmp_datum_t) NULL));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-				    0, SCMP_CMP_EQ, STDIN_FILENO);
+				    SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
 	if (rc != 0)
 		return rc;
 

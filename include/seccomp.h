@@ -26,6 +26,40 @@
 #include <asm/unistd.h>
 
 /*
+ * types
+ */
+
+/**
+ * Comparison operators
+ */
+enum scmp_compare {
+	_SCMP_CMP_MIN = 0,
+	SCMP_CMP_NE = 1,	/**< not equal */
+	SCMP_CMP_LT = 2,	/**< less than */
+	SCMP_CMP_LE = 3,	/**< less than or equal */
+	SCMP_CMP_EQ = 4,	/**< equal */
+	SCMP_CMP_GE = 5,	/**< greater than or equal */
+	SCMP_CMP_GT = 6,	/**< greater than */
+	SCMP_CMP_MASK = 7,	/**< masked equality */
+	_SCMP_CMP_MAX,
+};
+
+/**
+ * Argument datum
+ */
+typedef uint64_t scmp_datum_t;
+
+/**
+ * Argument / Value comparison definition
+ */
+struct scmp_arg_cmp {
+	unsigned int arg;	/**< argument number, starting at 0 */
+	unsigned int op;	/**< the comparison op, e.g. SCMP_CMP_* */
+	scmp_datum_t datum_a;
+	scmp_datum_t datum_b;
+};
+
+/*
  * macros/defines
  */
 
@@ -34,6 +68,45 @@
  * @param x the syscall name
  */
 #define SCMP_SYS(x)		__NR_##x
+
+/**
+ * Specify an argument comparison struct for use in declaring rules
+ * @param arg the argument number, starting at 0
+ * @param op the comparison operator, e.g. SCMP_CMP_*
+ * @param datum_a dependent on comparison
+ * @param datum_b dependent on comparison, optional
+ */
+#define SCMP_CMP(...)		((struct scmp_arg_cmp){__VA_ARGS__})
+
+/**
+ * Specify an argument comparison struct for argument 0
+ */
+#define SCMP_A0(...)		SCMP_CMP(0, __VA_ARGS__)
+
+/**
+ * Specify an argument comparison struct for argument 1
+ */
+#define SCMP_A1(...)		SCMP_CMP(1, __VA_ARGS__)
+
+/**
+ * Specify an argument comparison struct for argument 2
+ */
+#define SCMP_A2(...)		SCMP_CMP(2, __VA_ARGS__)
+
+/**
+ * Specify an argument comparison struct for argument 3
+ */
+#define SCMP_A3(...)		SCMP_CMP(3, __VA_ARGS__)
+
+/**
+ * Specify an argument comparison struct for argument 4
+ */
+#define SCMP_A4(...)		SCMP_CMP(4, __VA_ARGS__)
+
+/**
+ * Specify an argument comparison struct for argument 5
+ */
+#define SCMP_A5(...)		SCMP_CMP(5, __VA_ARGS__)
 
 /*
  * seccomp actions
@@ -59,25 +132,6 @@
  * Allow the syscall to be executed
  */
 #define SCMP_ACT_ALLOW		0x7fff0000U
-
-/*
- * types
- */
-
-/**
- * Comparison operators
- */
-enum scmp_compare {
-	_SCMP_CMP_MIN = 0,
-	SCMP_CMP_NE = 1,	/**< not equal */
-	SCMP_CMP_LT = 2,	/**< less than */
-	SCMP_CMP_LE = 3,	/**< less than or equal */
-	SCMP_CMP_EQ = 4,	/**< equal */
-	SCMP_CMP_GE = 5,	/**< greater than or equal */
-	SCMP_CMP_GT = 6,	/**< greater than */
-	SCMP_CMP_MASK = 7,	/**< masked equality */
-	_SCMP_CMP_MAX,
-};
 
 /*
  * functions
@@ -147,13 +201,14 @@ int seccomp_syscall_priority(int syscall, uint8_t priority);
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
- * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
+ * @param ... scmp_arg_cmp structs (use of SCMP_ARG_CMP() recommended)
  *
- * This function adds a new argument/comparison/value to the seccomp filter for
- * a syscall; multiple arguments can be specified and they will be chained
- * together (essentially AND'd together) in the filter.  If the specified rule
- * needs to be adjusted due to architecture specifics it will be adjusted
- * without notification.  Returns zero on success, negative values on failure.
+ * This function adds a series of new argument/value checks to the seccomp
+ * filter for the given syscall; multiple argument/value checks can be
+ * specified and they will be chained together (AND'd together) in the filter.
+ * If the specified rule needs to be adjusted due to architecture specifics it
+ * will be adjusted without notification.  Returns zero on success, negative
+ * values on failure.
  *
  */
 int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
@@ -163,13 +218,13 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
- * @param ... the argument filter chain, (uint, enum scmp_compare, ulong)
+ * @param ... scmp_arg_cmp structs (use of SCMP_ARG_CMP() recommended)
  *
- * This function adds a new argument/comparison/value to the seccomp filter for
- * a syscall; multiple arguments can be specified and they will be chained
- * together (essentially AND'd together) in the filter.  If the specified rule
- * can not be represented on the architecture the function will fail.  Returns
- * zero on success, negative values on failure.
+ * This function adds a series of new argument/value checks to the seccomp
+ * filter for the given syscall; multiple argument/value checks can be
+ * specified and they will be chained together (AND'd together) in the filter.
+ * If the specified rule can not be represented on the architecture the
+ * function will fail.  Returns zero on success, negative values on failure.
  *
  */
 int seccomp_rule_add_exact(uint32_t action,

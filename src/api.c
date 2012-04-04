@@ -160,8 +160,9 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 	int rc;
 	unsigned int iter;
 	unsigned int chain_len_max;
-	struct db_api_arg *chain = NULL;
 	unsigned int arg_num;
+	struct db_api_arg *chain = NULL;
+	struct scmp_arg_cmp arg_data;
 
 	if (filter == NULL)
 		return -EFAULT;
@@ -179,19 +180,20 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 		return -ENOMEM;
 	memset(chain, 0, sizeof(*chain) * chain_len_max);
 	for (iter = 0; iter < arg_cnt; iter++) {
-		arg_num = va_arg(arg_list, unsigned int);
+		arg_data = va_arg(arg_list, struct scmp_arg_cmp);
+		arg_num = arg_data.arg;
 		if (arg_num < chain_len_max && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
-			chain[arg_num].op = va_arg(arg_list, unsigned int);
+			chain[arg_num].op = arg_data.op;
 			if (chain[arg_num].op <= _SCMP_CMP_MIN ||
 			    chain[arg_num].op >= _SCMP_CMP_MAX) {
 				rc = -EINVAL;
 				goto rule_add_return;
 			}
-			/* NOTE - basic testing indicates we can't pick a type
-			 *	  larger than the system's 'unsigned long' */
-			chain[arg_num].datum = va_arg(arg_list, unsigned long);
+			/* XXX - we should check datum size against the arch
+			 *       definition, e.g. 64 bit datum no-go on x86 */
+			chain[arg_num].datum = arg_data.datum_a;
 		} else {
 			rc = -EINVAL;
 			goto rule_add_return;

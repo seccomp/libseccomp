@@ -44,128 +44,128 @@ int main(int argc, char *argv[])
 	 * simpler */
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 2,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 1,
-				    1, SCMP_CMP_EQ, 1UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 1,
-				    1, SCMP_CMP_EQ, 1UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 2,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 3UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 2,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1003, 2,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1003, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 3UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 3UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 2,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 11UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 11));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 33UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 33));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 2,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 2,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 3UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 2,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 11UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 11));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 4,
-				    0, SCMP_CMP_EQ, 0UL,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL,
-				    3, SCMP_CMP_EQ, 33UL);
+				    SCMP_A0(SCMP_CMP_EQ, 0),
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
+				    SCMP_A3(SCMP_CMP_EQ, 33));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 2,
-				    1, SCMP_CMP_NE, 1UL,
-				    2, SCMP_CMP_EQ, 0UL);
+				    SCMP_A1(SCMP_CMP_NE, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 0));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 2,
-				    1, SCMP_CMP_EQ, 1UL,
-				    2, SCMP_CMP_EQ, 2UL);
+				    SCMP_A1(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 1,
-				    1, SCMP_CMP_NE, 1UL);
+				    SCMP_A1(SCMP_CMP_NE, 1));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_TRAP, 1007, 2,
-				    2, SCMP_CMP_EQ, 1UL,
-				    3, SCMP_CMP_EQ, 3UL);
+				    SCMP_A2(SCMP_CMP_EQ, 1),
+				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1007, 2,
-				    2, SCMP_CMP_EQ, 1UL,
-				    3, SCMP_CMP_NE, 3UL);
+				    SCMP_A2(SCMP_CMP_EQ, 1),
+				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1007, 1,
-				    3, SCMP_CMP_NE, 3UL);
+				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
 		return rc;
 
