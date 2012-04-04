@@ -194,7 +194,17 @@ static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 			printf("$temp[%u]", bpf->k);
 			break;
 		case BPF_ALU:
-			printf("%u", bpf->k);
+			if (BPF_SRC(bpf->code) == BPF_K) {
+				switch (BPF_OP(bpf->code)) {
+				case BPF_OR:
+				case BPF_AND:
+					printf("0x%.8x", bpf->k);
+					break;
+				default:
+					printf("%u", bpf->k);
+				}
+			} else
+				printf("%u", bpf->k);
 			break;
 		case BPF_JMP:
 			if (BPF_OP(bpf->code) == BPF_JA) {
