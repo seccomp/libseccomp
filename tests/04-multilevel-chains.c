@@ -49,20 +49,20 @@ int main(int argc, char *argv[])
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
 				    SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, (scmp_datum_t)NULL),
+				    SCMP_A1(SCMP_CMP_NE, 0x0),
 				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
 				    SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, (scmp_datum_t)NULL),
+				    SCMP_A1(SCMP_CMP_NE, 0x0),
 				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		return rc;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
 				    SCMP_A0(SCMP_CMP_EQ, STDERR_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, (scmp_datum_t)NULL),
+				    SCMP_A1(SCMP_CMP_NE, 0x0),
 				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		return rc;

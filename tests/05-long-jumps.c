@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
 	for (iter = 0; iter < 600; iter++) {
 		rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 3,
 					    SCMP_A0(SCMP_CMP_EQ, iter),
-					    SCMP_A1(SCMP_CMP_NE,
-						    (scmp_datum_t) NULL),
+					    SCMP_A1(SCMP_CMP_NE, 0x0),
 					    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 		if (rc != 0)
 			return rc;

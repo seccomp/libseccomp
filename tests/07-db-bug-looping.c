@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 		return rc;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
-				    SCMP_A1(SCMP_CMP_EQ, (scmp_datum_t) NULL));
+				    SCMP_A1(SCMP_CMP_EQ, 0x0));
 	if (rc != 0)
 		return rc;
 
