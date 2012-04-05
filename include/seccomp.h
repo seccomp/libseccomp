@@ -54,7 +54,7 @@ typedef uint64_t scmp_datum_t;
  */
 struct scmp_arg_cmp {
 	unsigned int arg;	/**< argument number, starting at 0 */
-	unsigned int op;	/**< the comparison op, e.g. SCMP_CMP_* */
+	enum scmp_compare op;	/**< the comparison op, e.g. SCMP_CMP_* */
 	scmp_datum_t datum_a;
 	scmp_datum_t datum_b;
 };
