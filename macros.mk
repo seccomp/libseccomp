@@ -44,7 +44,7 @@ INCFLAGS = -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
 CFLAGS  ?= -fPIC -Wl,-z,relro -Wall -O0 -g
-LDFLAGS ?= -pie -z relro -g
+LDFLAGS ?= -z relro -g
 
 #
 # build tools
