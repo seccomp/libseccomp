@@ -1,5 +1,5 @@
 #
-# Enhanced Seccomp Library Makefile
+# Enhanced Seccomp Library Installation Defaults
 #
 # Copyright (c) 2012 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <pmoore@redhat.com>
@@ -19,49 +19,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#
-# macros
-#
+INSTALL_PREFIX ?= $(CONF_INSTALL_PREFIX)
 
-include ../macros.mk
+INSTALL_SBIN_DIR ?= $(INSTALL_PREFIX)/sbin
+INSTALL_BIN_DIR ?= $(INSTALL_PREFIX)/bin
+INSTALL_LIB_DIR ?= $(INSTALL_PREFIX)/lib
+INSTALL_MAN_DIR ?= $(INSTALL_PREFIX)/share/man
 
-#
-# configuration
-#
-
-include ../configure.mk
-include ../install.mk
-include ../version_info
-
-LIB_STATIC = libseccomp.a
-LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
-
-OBJS = \
-	api.o db.o \
-	arch.o arch-i386.o \
-	hash.o \
-	gen_pfc.o gen_bpf.o
-
-DEPS = $(OBJS:%.o=%.d)
-
-#
-# targets
-#
-
-.PHONY: all install clean
-
-all: $(LIB_STATIC) $(LIB_SHARED)
-
--include $(DEPS)
-
-$(LIB_STATIC): $(OBJS)
-	$(ARCHIVE)
-
-$(LIB_SHARED): $(OBJS)
-	$(LINK_LIB)
-
-install: $(LIB_SHARED)
-	$(INSTALL_MACRO) lib
-
-clean:
-	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
+INSTALL_OWNER ?= $$(id -u)
+INSTALL_GROUP ?= $$(id -g)

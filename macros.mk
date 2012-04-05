@@ -22,13 +22,13 @@
 SHELL = /bin/bash
 
 #
-# simple /bin/sh script to find the top of the tree
+# simple /bin/bash script to find the top of the tree
 #
 
-TOPDIR = $$( \
+TOPDIR = $$(\
 	ftd() { \
 		cd $$1; \
-		if [ -r "macros.mk" ]; then \
+		if [[ -r "macros.mk" ]]; then \
 			pwd; \
 		else \
 			ftd "../"; \
@@ -59,6 +59,8 @@ SED ?= sed
 # we require gcc specific functionality
 GCC ?= gcc
 
+INSTALL ?= install
+
 #
 # auto dependencies
 #
@@ -81,7 +83,7 @@ ADDDEP = \
 # build constants
 #
 
-VERSION_HDR = src/version.h
+VERSION_HDR = version.h
 
 #
 # build macros
@@ -91,7 +93,26 @@ ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
 COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
 COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
 LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
-LINK_LIB  = @echo " LD $@ "; $(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
+LINK_LIB  = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
+
+#
+# install macros
+#
+
+INSTALL_MACRO = \
+	@install_func() { \
+		dir="$(INSTALL_PREFIX)"/"$$1"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			$^ "$$dir"; \
+	}; \
+	install_func
 
 #
 # default build targets

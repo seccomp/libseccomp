@@ -11,3 +11,4 @@ cscope.*
 tags
 configure.h
 configure.mk
+version.h

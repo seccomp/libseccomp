@@ -33,35 +33,24 @@ include ../configure.mk
 include ../install.mk
 include ../version_info
 
-LIB_STATIC = libseccomp.a
-LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
-
-OBJS = \
-	api.o db.o \
-	arch.o arch-i386.o \
-	hash.o \
-	gen_pfc.o gen_bpf.o
-
-DEPS = $(OBJS:%.o=%.d)
+MAN3 = \
+	man/man3/seccomp_init.3 \
+	man/man3/seccomp_load.3 \
+	man/man3/seccomp_release.3 \
+	man/man3/seccomp_reset.3 \
+	man/man3/seccomp_rule_add.3 \
+	man/man3/seccomp_rule_add_exact.3 \
+	man/man3/seccomp_syscall_priority.3 \
 
 #
 # targets
 #
 
-.PHONY: all install clean
+.PHONY: all install install_man3
 
-all: $(LIB_STATIC) $(LIB_SHARED)
+all:
 
--include $(DEPS)
+install: install_man3
 
-$(LIB_STATIC): $(OBJS)
-	$(ARCHIVE)
-
-$(LIB_SHARED): $(OBJS)
-	$(LINK_LIB)
-
-install: $(LIB_SHARED)
-	$(INSTALL_MACRO) lib
-
-clean:
-	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
+install_man3: $(MAN3)
+	$(INSTALL_MACRO) share/man/man3 "manpages"
