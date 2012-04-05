@@ -48,12 +48,15 @@ DEPS = $(OBJS:%.o=%.d)
 
 .PHONY: all clean
 
-all: $(LIB_STATIC)
+all: $(LIB_STATIC) $(LIB_SHARED)
 
 -include $(DEPS)
 
 $(LIB_STATIC): $(OBJS)
 	$(ARCHIVE)
+
+$(LIB_SHARED): $(OBJS)
+	$(LINK_LIB)
 
 clean:
 	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)

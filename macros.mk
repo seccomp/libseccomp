@@ -43,7 +43,7 @@ TOPDIR = $$( \
 INCFLAGS = -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
-CFLAGS  ?= -O0 -g -Wall
+CFLAGS  ?= -fPIC -O0 -g -Wall
 LDFLAGS ?= -g
 
 #
