@@ -23,10 +23,6 @@
 # macros
 #
 
-#
-# macros
-#
-
 include ../macros.mk
 
 #

@@ -29,12 +29,12 @@ include ../macros.mk
 # configuration
 #
 
+include ../version_info.mk
 include ../configure.mk
 include ../install.mk
-include ../version_info
 
 LIB_STATIC = libseccomp.a
-LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
+LIB_SHARED = libseccomp.so.$(VERSION_RELEASE_LIB)
 
 OBJS = \
 	api.o db.o \

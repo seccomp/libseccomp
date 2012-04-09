@@ -29,6 +29,7 @@ include macros.mk
 # configuration
 #
 
+include version_info.mk
 -include configure.mk
 include install.mk
 
@@ -49,25 +50,25 @@ $(CONFIGS):
 	./configure
 
 tarball: clean
-	@ver=$$(source ./version_info; echo $$VERSION_RELEASE); \
+	@ver=$(VERSION_RELEASE); \
 	tarball=libseccomp-$$ver.tar.gz; \
 	echo "INFO: creating the tarball ../$$tarball"; \
 	tmp_dir=$$(mktemp -d /tmp/libseccomp.XXXXX); \
 	rel_dir=$$tmp_dir/libseccomp-$$ver; \
 	mkdir $$rel_dir; \
-	tar cf - --exclude=.svn . | (cd $$rel_dir; tar xf -); \
+	tar cf - --exclude=*~ --exclude=.git* --exclude=.stgit* . | \
+		(cd $$rel_dir; tar xf -); \
 	(cd $$tmp_dir; tar zcf $$tarball libseccomp-$$ver); \
 	mv $$tmp_dir/$$tarball ..; \
 	rm -rf $$tmp_dir;
 
-$(VERSION_HDR): version_info
+$(VERSION_HDR): version_info.mk
 	@echo "INFO: creating the version header file"
 	@hdr="$(VERSION_HDR)"; \
-	source ./version_info; \
 	echo "/* automatically generated - do not edit */" > $$hdr; \
 	echo "#ifndef _VERSION_H" >> $$hdr; \
 	echo "#define _VERSION_H" >> $$hdr; \
-	echo "#define VERSION_RELEASE \"$$VERSION_RELEASE\"" >> $$hdr; \
+	echo "#define VERSION_RELEASE \"$(VERSION_RELEASE)\"" >> $$hdr; \
 	echo "#endif" >> $$hdr;
 
 $(SUBDIRS_BUILD): $(VERSION_HDR) $(CONFIGS)

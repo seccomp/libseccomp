@@ -29,9 +29,9 @@ include ../macros.mk
 # configuration
 #
 
+include ../version_info.mk
 include ../configure.mk
 include ../install.mk
-include ../version_info
 
 #
 # targets
