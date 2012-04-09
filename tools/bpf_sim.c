@@ -217,7 +217,6 @@ int main(int argc, char *argv[])
 {
 	int opt;
 	char *opt_file = NULL;
-	unsigned int opt_arg_flag = 0;
 	FILE *file;
 	size_t file_read_len;
 	struct seccomp_data sys_data;
@@ -259,27 +258,21 @@ int main(int argc, char *argv[])
 			opt_verbose = 1;
 			break;
 		case '0':
-			opt_arg_flag = 1;
 			sys_data.args[0] = strtol(optarg, NULL, 0);
 			break;
 		case '1':
-			opt_arg_flag = 1;
 			sys_data.args[1] = strtol(optarg, NULL, 0);
 			break;
 		case '2':
-			opt_arg_flag = 1;
 			sys_data.args[2] = strtol(optarg, NULL, 0);
 			break;
 		case '3':
-			opt_arg_flag = 1;
 			sys_data.args[3] = strtol(optarg, NULL, 0);
 			break;
 		case '4':
-			opt_arg_flag = 1;
 			sys_data.args[4] = strtol(optarg, NULL, 0);
 			break;
 		case '5':
-			opt_arg_flag = 1;
 			sys_data.args[5] = strtol(optarg, NULL, 0);
 			break;
 		case 'h':
