@@ -93,7 +93,13 @@ ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
 COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
 COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
 LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
-LINK_LIB  = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$@;
+LINK_LIB = \
+	@link_lib_func() { \
+		name=$${1//.so.*/.so}; \
+		echo " LD $$name ($$1)"; \
+		$(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$$name; \
+	}; \
+	link_lib_func $@ $^;
 
 #
 # install macros

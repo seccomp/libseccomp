@@ -34,7 +34,7 @@ include ../configure.mk
 include ../install.mk
 
 LIB_STATIC = libseccomp.a
-LIB_SHARED = libseccomp.so.$(VERSION_RELEASE_LIB)
+LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
 OBJS = \
 	api.o db.o \
