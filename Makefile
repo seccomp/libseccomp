@@ -38,7 +38,7 @@ include install.mk
 
 CONFIGS = configure.mk configure.h
 SUBDIRS_BUILD = src tests tools
-SUBDIRS_INSTALL = src doc
+SUBDIRS_INSTALL = src include doc
 
 .PHONY: tarball install ctags cstags clean dist-clean $(SUBDIRS_BUILD)
 
