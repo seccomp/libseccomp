@@ -29,9 +29,9 @@ include ../macros.mk
 # configuration
 #
 
+include ../version_info.mk
 include ../configure.mk
 include ../install.mk
-include ../version_info
 
 MAN3 = \
 	man/man3/seccomp_init.3 \
