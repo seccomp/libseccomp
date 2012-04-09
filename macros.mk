@@ -109,7 +109,7 @@ INSTALL_MACRO = \
 		fi; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$$dir"; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
 			$^ "$$dir"; \
 	}; \
 	install_func
