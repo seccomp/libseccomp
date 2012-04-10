@@ -258,22 +258,22 @@ int main(int argc, char *argv[])
 			opt_verbose = 1;
 			break;
 		case '0':
-			sys_data.args[0] = strtol(optarg, NULL, 0);
+			sys_data.args[0] = strtoull(optarg, NULL, 0);
 			break;
 		case '1':
-			sys_data.args[1] = strtol(optarg, NULL, 0);
+			sys_data.args[1] = strtoull(optarg, NULL, 0);
 			break;
 		case '2':
-			sys_data.args[2] = strtol(optarg, NULL, 0);
+			sys_data.args[2] = strtoull(optarg, NULL, 0);
 			break;
 		case '3':
-			sys_data.args[3] = strtol(optarg, NULL, 0);
+			sys_data.args[3] = strtoull(optarg, NULL, 0);
 			break;
 		case '4':
-			sys_data.args[4] = strtol(optarg, NULL, 0);
+			sys_data.args[4] = strtoull(optarg, NULL, 0);
 			break;
 		case '5':
-			sys_data.args[5] = strtol(optarg, NULL, 0);
+			sys_data.args[5] = strtoull(optarg, NULL, 0);
 			break;
 		case 'h':
 		default:

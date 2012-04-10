@@ -37,13 +37,12 @@
  */
 #define BPF_SYS_ARG_MAX		6
 struct seccomp_data {
-	int nr;
+	int32_t nr;
 	uint32_t arch;
 	uint64_t instruction_pointer;
 	uint64_t args[BPF_SYS_ARG_MAX];
 };
-#define BPF_SYSCALL_MAX \
-	(offsetof(struct seccomp_data, args[BPF_SYS_ARG_MAX]))
+#define BPF_SYSCALL_MAX		(sizeof(struct seccomp_data))
 
 /**
  * BPF instruction format
