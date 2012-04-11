@@ -84,7 +84,7 @@ struct bpf_instr {
 	struct bpf_jump jf;
 	struct bpf_jump k;
 };
-#define _BPF_OFFSET_SYSCALL		0
+#define _BPF_OFFSET_SYSCALL		(offsetof(struct seccomp_data, nr))
 #define _BPF_SYSCALL			_BPF_K(_BPF_OFFSET_SYSCALL)
 
 struct bpf_blk {
