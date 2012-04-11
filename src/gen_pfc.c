@@ -263,7 +263,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 		p_iter = p_iter->next;
 	}
 	fprintf(fds, "# default action\n");
-	_pfc_action(fds, db->def_action);
+	_pfc_action(fds, db->attr.act_default);
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");

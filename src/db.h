@@ -121,12 +121,16 @@ struct db_sys_list {
 	struct db_sys_list *next;
 };
 
+struct db_filter_attr {
+	/* action to take if we don't match an explicit allow/deny */
+	uint32_t act_default;
+};
+
 struct db_filter {
 	/* target architecture */
 	const struct arch_def *arch;
-
-	/* action to take if we don't match an explicit allow/deny */
-	uint32_t def_action;
+	/* attributes */
+	struct db_filter_attr attr;
 
 	/* syscall filters, kept as a sorted single-linked list */
 	struct db_sys_list *syscalls;
@@ -146,6 +150,11 @@ struct db_filter {
 
 struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
 void db_release(struct db_filter *db);
+
+int db_attr_get(struct db_filter *db,
+		enum scmp_filter_attr attr, uint32_t *value);
+int db_attr_set(struct db_filter *db,
+		enum scmp_filter_attr attr, uint32_t value);
 
 int db_syscall_priority(struct db_filter *db,
 			unsigned int syscall, uint8_t priority);

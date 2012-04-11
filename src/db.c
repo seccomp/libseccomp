@@ -300,7 +300,7 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 	if (db) {
 		memset(db, 0, sizeof(*db));
 		db->arch = arch;
-		db->def_action = def_action;
+		db->attr.act_default = def_action;
 	}
 
 	return db;
@@ -329,6 +329,57 @@ void db_release(struct db_filter *db)
 		s_iter = db->syscalls;
 	}
 	free(db);
+}
+
+/**
+ * Get a filter attribute
+ * @param db the seccomp filter DB
+ * @param attr the filter attribute
+ * @param value the filter attribute value
+ *
+ * Get the requested filter attribute and provide it via @value.  Returns zero
+ * on success, negative values on failure.
+ *
+ */
+int db_attr_get(struct db_filter *db,
+		enum scmp_filter_attr attr, uint32_t *value)
+{
+	switch (attr) {
+	case SCMP_FLTATR_ACT_DEFAULT:
+		*value = db->attr.act_default;
+		break;
+	default:
+		return -EEXIST;
+		break;
+	}
+
+	return 0;
+}
+
+/**
+ * Set a filter attribute
+ * @param db the seccomp filter DB
+ * @param attr the filter attribute
+ * @param value the filter attribute value
+ *
+ * Set the requested filter attribute with the given value.  Returns zero on
+ * success, negative values on failure.
+ *
+ */
+int db_attr_set(struct db_filter *db,
+		enum scmp_filter_attr attr, uint32_t value)
+{
+	switch (attr) {
+	case SCMP_FLTATR_ACT_DEFAULT:
+		/* read only */
+		return -EACCES;
+		break;
+	default:
+		return -EEXIST;
+		break;
+	}
+
+	return 0;
 }
 
 /**

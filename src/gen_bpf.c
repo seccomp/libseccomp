@@ -120,9 +120,8 @@ struct bpf_hash_bkt {
 struct bpf_state {
 	/* target arch */
 	const struct arch_def *arch;
-
-	/* filter actions */
-	uint32_t def_action;
+	/* filter attributes */
+	const struct db_filter_attr *attr;
 
 	/* default action */
 	uint64_t def_hsh;
@@ -1202,7 +1201,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 
 	/* create the default action */
-	def_blk = _gen_bpf_action(state, NULL, state->def_action);
+	def_blk = _gen_bpf_action(state, NULL, state->attr->act_default);
 	if (def_blk == NULL)
 		return -ENOMEM;
 	rc = _hsh_add(state, &def_blk, 1);
@@ -1473,7 +1472,7 @@ struct bpf_program *gen_bpf_generate(const struct db_filter *db)
 
 	memset(&state, 0, sizeof(state));
 	state.arch = db->arch;
-	state.def_action = db->def_action;
+	state.attr = &db->attr;
 
 	state.bpf = malloc(sizeof(*(state.bpf)));
 	if (state.bpf == NULL)

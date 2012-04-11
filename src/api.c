@@ -119,6 +119,24 @@ int seccomp_load(void)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+int seccomp_attr_get(enum scmp_filter_attr attr, uint32_t *value)
+{
+	if (filter == NULL)
+		return -EFAULT;
+
+	return db_attr_get(filter, attr, value);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_attr_set(enum scmp_filter_attr attr, uint32_t value)
+{
+	if (filter == NULL)
+		return -EFAULT;
+
+	return db_attr_set(filter, attr, value);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_syscall_priority(int syscall, uint8_t priority)
 {
 	int rc;
@@ -170,7 +188,7 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 	rc = _seccomp_action_valid(action);
 	if (rc < 0)
 		return rc;
-	if (action == filter->def_action)
+	if (action == filter->attr.act_default)
 		return -EPERM;
 
 	/* collect the arguments for the filter rule */

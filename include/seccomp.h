@@ -30,6 +30,15 @@
  */
 
 /**
+ * Filter attributes
+ */
+enum scmp_filter_attr {
+	_SCMP_FLTATR_MIN = 0,
+	SCMP_FLTATR_ACT_DEFAULT,	/**< default filter action */
+	_SCMP_FLTATR_MAX,
+};
+
+/**
  * Comparison operators
  */
 enum scmp_compare {
@@ -182,6 +191,28 @@ void seccomp_release(void);
  *
  */
 int seccomp_load(void);
+
+/**
+ * Get the value of a filter attribute
+ * @param attr the filter attribute name
+ * @param value the filter attribute value
+ *
+ * This function fetches the value of the given attribute name and returns it
+ * via @value.  Returns zero on success, negative values on failure.
+ *
+ */
+int seccomp_attr_get(enum scmp_filter_attr attr, uint32_t *value);
+
+/**
+ * Set the value of a filter attribute
+ * @param attr the filter attribute name
+ * @param value the filter attribute value
+ *
+ * This function sets the value of the given attribute.  Returns zero on
+ * success, negative values on failure.
+ *
+ */
+int seccomp_attr_set(enum scmp_filter_attr attr, uint32_t value);
 
 /**
  * Set the priority of a given syscall
