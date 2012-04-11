@@ -95,6 +95,9 @@ struct bpf_blk {
 	/* priority - higher is better */
 	unsigned int priority;
 
+	/* original db_arg_chain_tree node */
+	const struct db_arg_chain_tree *node;
+
 	/* used during final block assembly */
 	unsigned int hashed_flag;
 	uint64_t hash;
@@ -153,7 +156,8 @@ struct bpf_state {
 
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      const struct db_sys_list *sys,
-				      const struct db_arg_chain_tree *chain);
+				      const struct db_arg_chain_tree *chain,
+				      struct bpf_blk *next);
 
 static struct bpf_blk *_hsh_remove(struct bpf_state *state, uint64_t h_val);
 static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
@@ -454,6 +458,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
 	blk->hash = h_val;
 	blk->hashed_flag = 1;
+	blk->node = NULL;
 	h_new->blk = blk;
 	h_new->found = (found ? 1 : 0);
 
@@ -755,6 +760,7 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	if (blk == NULL)
 		goto node_failure;
 
+	blk->node = node;
 	return blk;
 
 node_failure:
@@ -767,6 +773,7 @@ node_failure:
  * @param state the BPF state
  * @param sys the syscall filter DB node
  * @param node the filter DB node
+ * @param next the filter node to fallthrough to at the end of the level
  *
  * Generate a BPF instruction block which executes the filter specified by the
  * given filter DB level.  Returns a pointer to the instruction block on
@@ -775,13 +782,15 @@ node_failure:
  */
 static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 					  const struct db_sys_list *sys,
-					  const struct db_arg_chain_tree *node)
+					  const struct db_arg_chain_tree *node,
+					  struct bpf_blk *next)
 {
 	struct bpf_blk *blk;
 	struct bpf_blk *b_head = NULL, *b_prev = NULL, *b_next, *b_iter;
 	struct bpf_instr *i_iter;
 	const struct db_arg_chain_tree *l_iter;
 	struct acc_state a_state = { -1, ARG_MASK_MAX };
+	struct bpf_jump def_jump;
 	unsigned int iter;
 
 	if (node == NULL) {
@@ -811,6 +820,11 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 		l_iter = l_iter->lvl_nxt;
 	} while (l_iter != NULL);
 
+	if (next != NULL)
+		def_jump = _BPF_JMP_BLK(next);
+	else
+		def_jump = _BPF_JMP_HSH(state->def_hsh);
+
 	/* resolve the TGT_NXT jumps */
 	b_iter = b_head;
 	do {
@@ -819,15 +833,11 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 			i_iter = &b_iter->blks[iter];
 			if (i_iter->jt.type == TGT_NXT)
 				i_iter->jt = (b_next == NULL ?
-					      _BPF_JMP_HSH(state->def_hsh) :
-					      _BPF_JMP_BLK(b_next));
+					      def_jump : _BPF_JMP_BLK(b_next));
 			if (i_iter->jf.type == TGT_NXT)
 				i_iter->jf = (b_next == NULL ?
-					      _BPF_JMP_HSH(state->def_hsh) :
-					      _BPF_JMP_BLK(b_next));
+					      def_jump : _BPF_JMP_BLK(b_next));
 		}
-		b_iter->prev = NULL;
-		b_iter->next = NULL;
 		b_iter = b_next;
 	} while (b_iter != NULL);
 
@@ -862,9 +872,18 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 	unsigned int iter;
 	struct bpf_blk *b_new;
 	struct bpf_instr *i_iter;
+	struct db_arg_chain_tree *node;
+	struct bpf_blk *next;
 
 	if (blk->hashed_flag)
 		return blk;
+
+	if (state->arch->size == ARCH_SIZE_64 && blk->node != NULL &&
+	    blk->node->arg_offset == arch_arg_offset_hi(state->arch,
+							blk->node->arg))
+		next = blk->next;
+	else
+		next = NULL;
 
 	/* convert TGT_PTR_DB to TGT_PTR_HSH references */
 	for (iter = 0; iter < blk->blk_cnt; iter++) {
@@ -883,7 +902,8 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
 			break;
 		case TGT_PTR_DB:
-			b_new = _gen_bpf_chain(state, sys, i_iter->jt.tgt.ptr);
+			node = (struct db_arg_chain_tree *)i_iter->jt.tgt.ptr;
+			b_new = _gen_bpf_chain(state, sys, node, next);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
@@ -906,7 +926,8 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
 			break;
 		case TGT_PTR_DB:
-			b_new = _gen_bpf_chain(state, sys, i_iter->jf.tgt.ptr);
+			node = (struct db_arg_chain_tree *)i_iter->jf.tgt.ptr;
+			b_new = _gen_bpf_chain(state, sys, node, next);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
@@ -922,7 +943,8 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			/* ignore these jump types */
 			break;
 		case TGT_PTR_DB:
-			b_new = _gen_bpf_chain(state, sys, i_iter->k.tgt.ptr);
+			node = (struct db_arg_chain_tree *)i_iter->k.tgt.ptr;
+			b_new = _gen_bpf_chain(state, sys, node, NULL);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->k = _BPF_JMP_HSH(b_new->hash);
@@ -946,6 +968,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
  * @param state the BPF state
  * @param sys the syscall filter
  * @param chain the filter chain
+ * @param next the filter node to fallthrough to at the end of the level
  *
  * Generate the BPF instruction blocks for the given filter chain and return
  * a pointer to the first block on success; returns NULL on failure.
@@ -953,11 +976,12 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
  */
 static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      const struct db_sys_list *sys,
-				      const struct db_arg_chain_tree *chain)
+				      const struct db_arg_chain_tree *chain,
+				      struct bpf_blk *next)
 {
 	struct bpf_blk *blk;
 
-	blk = _gen_bpf_chain_lvl(state, sys, chain);
+	blk = _gen_bpf_chain_lvl(state, sys, chain, next);
 	if (blk == NULL)
 		return NULL;
 	return _gen_bpf_chain_lvl_res(state, sys, blk);
@@ -980,7 +1004,7 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	struct bpf_blk *blk_c, *blk_s;
 
 	/* generate the argument chains */
-	blk_c = _gen_bpf_chain(state, sys, sys->chains);
+	blk_c = _gen_bpf_chain(state, sys, sys->chains, NULL);
 	if (blk_c == NULL)
 		return NULL;
 
