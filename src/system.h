@@ -23,6 +23,7 @@
 #define _SYSTEM_H
 
 #include <linux/filter.h>
+#include <linux/prctl.h>
 
 #include <configure.h>
 
@@ -79,5 +80,13 @@ struct seccomp_data {
 
 /* rename some of the socket filter types to make more sense */
 typedef struct sock_filter bpf_instr_raw;
+
+#ifndef PR_SET_NO_NEW_PRIVS
+#define PR_SET_NO_NEW_PRIVS	38
+#endif /* PR_SET_NO_NEW_PRIVS */
+
+#ifndef PR_GET_NO_NEW_PRIVS
+#define PR_GET_NO_NEW_PRIVS	39
+#endif /* PR_GET_NO_NEW_PRIVS */
 
 #endif

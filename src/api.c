@@ -110,6 +110,9 @@ int seccomp_load(void)
 	program = gen_bpf_generate(filter);
 	if (program == NULL)
 		return -ENOMEM;
+	/* attempt to set NO_NEW_PRIVS but don't fail if it doesn't work */
+	prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+	/* load the filter into the kernel */
 	rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, program);
 	gen_bpf_release(program);
 	if (rc < 0)
