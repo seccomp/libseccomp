@@ -1,0 +1,17 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright IBM Corp. 2012
+# Author: Corey Bryant <coreyb@linux.vnet.ibm.com>
+#
+
+test type: bpf-sim
+
+# Testname                Arch    Syscall       Arg0       Arg1       Arg2                 Arg3     Arg4  Arg5  Result
+06-actions                all     read          4          139898888  80                   N        N     N     ALLOW
+06-actions                all     write         1          139898888  N                    N        N     N     ERRNO(1)
+06-actions                all     close         4          N          N                    N        N     N     TRAP
+06-actions                all     open          139898888  4          N                    N        N     N     TRACE(1234)
+06-actions                x86     0-2           N          N          N                    N        N     N     KILL
+06-actions                x86     7-350         N          N          N                    N        N     N     KILL
+06-actions                x86_64  4-350         N          N          N                    N        N     N     KILL

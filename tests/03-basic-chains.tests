@@ -1,0 +1,22 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright IBM Corp. 2012
+# Author: Corey Bryant <coreyb@linux.vnet.ibm.com>
+#
+
+test type: bpf-sim
+
+# Testname                Arch    Syscall       Arg0       Arg1       Arg2                 Arg3     Arg4  Arg5  Result
+03-basic-chains           all     read          0          139898888  10                   N        N     N     ALLOW
+03-basic-chains           all     read          1-10       139898888  10                   N        N     N     KILL
+03-basic-chains           all     write         1-2        139898888  10                   N        N     N     ALLOW
+03-basic-chains           all     write         3-10       139898888  10                   N        N     N     KILL
+03-basic-chains           all     close         N          N          N                    N        N     N     ALLOW
+03-basic-chains           all     rt_sigreturn  N          N          N                    N        N     N     ALLOW
+03-basic-chains           all     open          139898888  4          N                    N        N     N     KILL
+03-basic-chains           x86     0-2           N          N          N                    N        N     N     KILL
+03-basic-chains           x86     7-172         N          N          N                    N        N     N     KILL
+03-basic-chains           x86     174-350       N          N          N                    N        N     N     KILL
+03-basic-chains           x86_64  4-14          N          N          N                    N        N     N     KILL
+03-basic-chains           x86_64  16-350        N          N          N                    N        N     N     KILL
