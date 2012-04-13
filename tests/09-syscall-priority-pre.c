@@ -30,42 +30,43 @@ int main(int argc, char *argv[])
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_init(SCMP_ACT_KILL);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
 
 	rc = seccomp_syscall_priority(1000, 3);
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_syscall_priority(1001, 2);
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_syscall_priority(1002, 1);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 0));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 0);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = util_filter_output(&opts);
 	if (rc)
-		return rc;
+		goto out;
 
+out:
 	seccomp_release();
-	return rc;
+	return (rc < 0 ? -rc : rc);
 }

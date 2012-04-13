@@ -33,18 +33,24 @@ int main(int argc, char *argv[])
 
 	rc = seccomp_init(SCMP_ACT_ALLOW);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_attr_get(SCMP_FLTATR_ACT_DEFAULT, &val);
 	if (rc != 0)
-		return rc;
-	if (val != SCMP_ACT_ALLOW)
-		return -1;
+		goto out;
+	if (val != SCMP_ACT_ALLOW) {
+		rc = -1;
+		goto out;
+	}
 
 	rc = seccomp_attr_set(SCMP_FLTATR_ACT_DEFAULT, val);
-	if (rc != -EACCES)
-		return -1;
+	if (rc != -EACCES) {
+		rc = -1;
+		goto out;
+	}
+	rc = 0;
 
+out:
 	seccomp_release();
-	return 0;
+	return (rc < 0 ? -rc : rc);
 }

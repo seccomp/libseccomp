@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_init(SCMP_ACT_KILL);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
@@ -43,21 +43,21 @@ int main(int argc, char *argv[])
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 1,
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 1,
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
@@ -65,25 +65,25 @@ int main(int argc, char *argv[])
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 2,
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1003, 2,
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1003, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
@@ -91,84 +91,85 @@ int main(int argc, char *argv[])
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 11));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 33));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1004, 2,
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 2,
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 11));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1005, 4,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 33));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 2,
 				    SCMP_A1(SCMP_CMP_NE, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 0));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 2,
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1006, 1,
 				    SCMP_A1(SCMP_CMP_NE, 1));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_TRAP, 1007, 2,
 				    SCMP_A2(SCMP_CMP_EQ, 1),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1007, 2,
 				    SCMP_A2(SCMP_CMP_EQ, 1),
 				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1007, 1,
 				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = util_filter_output(&opts);
 	if (rc)
-		return rc;
+		goto out;
 
+out:
 	seccomp_release();
-	return rc;
+	return (rc < 0 ? -rc : rc);
 }

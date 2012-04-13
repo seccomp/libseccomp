@@ -35,33 +35,34 @@ int main(int argc, char *argv[])
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_init(SCMP_ACT_KILL);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
 	if (rc != 0)
-		return rc;
+		goto out;
 
 	rc = util_filter_output(&opts);
 	if (rc)
-		return rc;
+		goto out;
 
+out:
 	seccomp_release();
-	return rc;
+	return (rc < 0 ? -rc : rc);
 }
