@@ -124,6 +124,9 @@ struct db_sys_list {
 struct db_filter_attr {
 	/* action to take if we don't match an explicit allow/deny */
 	uint32_t act_default;
+	/* NO_NEW_PRIVS related attributes */
+	uint32_t nnp_enable;
+	uint32_t nnp_fail_err;
 };
 
 struct db_filter {
