@@ -113,7 +113,7 @@ int seccomp_load(void)
 	rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, program);
 	gen_bpf_release(program);
 	if (rc < 0)
-		return errno;
+		return -errno;
 
 	return 0;
 }
@@ -280,7 +280,7 @@ int seccomp_gen_bpf(int fd)
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
 	gen_bpf_release(program);
 	if (rc < 0)
-		return errno;
+		return -errno;
 
 	return 0;
 }

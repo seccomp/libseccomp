@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 		return rc;
 	else {
 		rc = seccomp_gen_bpf(sysconf(_SC_OPEN_MAX)-1);
-		if (rc != EBADF)
+		if (rc != -EBADF)
 			return -1;
 	}
 	seccomp_release();
