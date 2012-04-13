@@ -19,13 +19,6 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-/*
- * A lot like mode 1 seccomp where we allow 4 syscalls:
- * read, write, exit, and rt_sigreturn
- * except we only allow read on stdin
- * and we only allow write on stdout and stderr
- */
-
 #include <unistd.h>
 
 #include <seccomp.h>
@@ -35,9 +28,9 @@
 int main(int argc, char *argv[])
 {
 	int rc;
-	int bpf;
+	struct util_options opts;
 
-	rc = util_getopt(argc, argv, &bpf);
+	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		return rc;
 
@@ -68,11 +61,8 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	if (bpf)
-		rc = seccomp_gen_bpf(STDOUT_FILENO);
-	else
-		rc = seccomp_gen_pfc(STDOUT_FILENO);
-	if (rc != 0)
+	rc = util_filter_output(&opts);
+	if (rc)
 		return rc;
 
 	seccomp_release();

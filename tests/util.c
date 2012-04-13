@@ -22,6 +22,10 @@
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <seccomp.h>
 
 #include "util.h"
 
@@ -29,28 +33,30 @@
  * Parse the arguments passed to main
  * @param argc the argument count
  * @param argv the argument pointer
- * @param bpf indicates whether bpf or pfc should be generated for the test
+ * @param opts the options structure
  *
- * This function parses the arguments passed to main.  Returns zero on
- * success and negative values on failure.
+ * This function parses the arguments passed to the test from the command line.
+ * Returns zero on success and negative values on failure.
  *
  */
-int util_getopt(int argc, char *argv[], int *bpf)
+int util_getopt(int argc, char *argv[], struct util_options *opts)
 {
 	int rc = 0;
 
-	*bpf = 0;
+	if (opts == NULL)
+		return -EFAULT;
+
+	memset(opts, 0, sizeof(*opts));
 	while (1) {
 		int c, option_index = 0;
 		const struct option long_options[] = {
-			{"bpf", no_argument, bpf, 1},
-			{"pfc", no_argument, bpf, 0},
+			{"bpf", no_argument, &(opts->bpf_flg), 1},
+			{"pfc", no_argument, &(opts->bpf_flg), 0},
 			{0, 0, 0, 0},
 		};
 
 		c = getopt_long(argc, argv, "bp",
 				long_options, &option_index);
-
 		if (c == -1)
 			break;
 
@@ -58,11 +64,10 @@ int util_getopt(int argc, char *argv[], int *bpf)
 		case 0:
 			break;
 		case 'b':
-			*bpf = 1;
+			opts->bpf_flg = 1;
 			break;
-
 		case 'p':
-			*bpf = 0;
+			opts->bpf_flg = 0;
 			break;
 		default:
 			rc = -EINVAL;
@@ -71,9 +76,32 @@ int util_getopt(int argc, char *argv[], int *bpf)
 	}
 
 	if (rc == -EINVAL || optind < argc) {
-		printf("usage %s: [--bpf,-b] [--pfc,-p]\n", argv[0]);
+		fprintf(stderr, "usage %s: [--bpf,-b] [--pfc,-p]\n", argv[0]);
 		rc = -EINVAL;
 	}
+
+	return rc;
+}
+
+/**
+ * Output the filter in either BPF or PFC
+ * @param opts the options structure
+ *
+ * This function outputs the seccomp filter to in either BPF or PFC format
+ * depending on the test paramaeters supplied by @opts.
+ *
+ */
+int util_filter_output(const struct util_options *opts)
+{
+	int rc;
+
+	if (opts == NULL)
+		return -EFAULT;
+
+	if (opts->bpf_flg)
+		rc = seccomp_gen_bpf(STDOUT_FILENO);
+	else
+		rc = seccomp_gen_pfc(STDOUT_FILENO);
 
 	return rc;
 }

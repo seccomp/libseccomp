@@ -22,6 +22,12 @@
 #ifndef _UTIL_TEST_H
 #define _UTIL_TEST_H
 
-int util_getopt(int argc, char *argv[], int *bpf);
+struct util_options {
+	int bpf_flg;
+};
+
+int util_getopt(int argc, char *argv[], struct util_options *opts);
+
+int util_filter_output(const struct util_options *opts);
 
 #endif

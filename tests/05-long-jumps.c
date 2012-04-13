@@ -20,7 +20,6 @@
  */
 
 #include <limits.h>
-#include <unistd.h>
 
 #include <seccomp.h>
 
@@ -29,10 +28,10 @@
 int main(int argc, char *argv[])
 {
 	int rc;
-	int bpf;
 	int iter;
+	struct util_options opts;
 
-	rc = util_getopt(argc, argv, &bpf);
+	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		return rc;
 
@@ -68,11 +67,8 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 
-	if (bpf)
-		rc = seccomp_gen_bpf(STDOUT_FILENO);
-	else
-		rc = seccomp_gen_pfc(STDOUT_FILENO);
-	if (rc != 0)
+	rc = util_filter_output(&opts);
+	if (rc)
 		return rc;
 
 	seccomp_release();
