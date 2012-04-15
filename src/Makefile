@@ -61,7 +61,7 @@ $(LIB_SHARED): $(OBJS)
 	$(LINK_LIB)
 
 install: $(LIB_SHARED)
-	$(INSTALL_MACRO) lib
+	$(INSTALL_LIB_MACRO)
 
 clean:
 	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)

@@ -53,4 +53,4 @@ all:
 install: install_man3
 
 install_man3: $(MAN3)
-	$(INSTALL_MACRO) share/man/man3 "manpages"
+	$(INSTALL_MAN_MACRO) man3 "manpages"

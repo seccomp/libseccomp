@@ -44,4 +44,4 @@ all:
 install: install_hdr
 
 install_hdr: seccomp.h
-	$(INSTALL_MACRO) include
+	$(INSTALL_INC_MACRO)

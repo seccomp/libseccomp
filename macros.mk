@@ -71,13 +71,13 @@ MAKEDEP_EXEC = \
 		-MF $@ $(patsubst %.d,%.c,$@);
 
 ADDDEP = \
-	@adep() { \
+	@adddep_func() { \
 		$(MV) $$1 $$1.dtmp; \
 		$(CAT) $$1.dtmp | $(SED) -e 's/\([^\]\)$$/\1 \\/' | \
 			( $(CAT) - && $(ECHO) " $$2" ) > $$1; \
 		$(RM) -f $@.dtmp; \
 	}; \
-	adep
+	adddep_func
 
 #
 # build constants
@@ -99,7 +99,7 @@ LINK_LIB = \
 		echo " LD $$name ($$1)"; \
 		$(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$$name; \
 	}; \
-	link_lib_func $@ $^;
+	link_lib_func $@;
 
 #
 # install macros
@@ -119,6 +119,81 @@ INSTALL_MACRO = \
 			$^ "$$dir"; \
 	}; \
 	install_func
+
+INSTALL_SBIN_MACRO = \
+	@install_sbin_func() { \
+		dir="$(INSTALL_SBIN_DIR)"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$$dir"; \
+	}; \
+	install_sbin_func
+
+INSTALL_BIN_MACRO = \
+	@install_bin_func() { \
+		dir="$(INSTALL_BIN_DIR)"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$$dir"; \
+	}; \
+	install_bin_func
+
+INSTALL_LIB_MACRO = \
+	@install_lib_func() { \
+		dir="$(INSTALL_LIB_DIR)"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$$dir"; \
+	}; \
+	install_lib_func
+
+INSTALL_INC_MACRO = \
+	@install_inc_func() { \
+		dir="$(INSTALL_INC_DIR)"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$$dir"; \
+	}; \
+	install_inc_func
+
+INSTALL_MAN_MACRO = \
+	@install_man_func() { \
+		dir="$(INSTALL_MAN_DIR)"/"$$1"; \
+		if [[ -n "$$2" ]]; then \
+			$(ECHO) " INSTALL $$2"; \
+		else \
+			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+		fi; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$$dir"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$$dir"; \
+	}; \
+	install_man_func
 
 #
 # default build targets
