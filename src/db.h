@@ -124,6 +124,8 @@ struct db_sys_list {
 struct db_filter_attr {
 	/* action to take if we don't match an explicit allow/deny */
 	uint32_t act_default;
+	/* action to take if we don't match the architecture */
+	uint32_t act_badarch;
 	/* NO_NEW_PRIVS related attributes */
 	uint32_t nnp_enable;
 };
@@ -149,6 +151,8 @@ struct db_filter {
  */
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
+
+int db_action_valid(uint32_t action);
 
 struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
 void db_release(struct db_filter *db);

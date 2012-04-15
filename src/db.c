@@ -284,6 +284,29 @@ sub_prune_remove:
 }
 
 /**
+ * Validate the seccomp action
+ * @param action the seccomp action
+ *
+ * Verify that the given action is a valid seccomp action; return zero if
+ * valid, -EINVAL if invalid.
+ */
+int db_action_valid(uint32_t action)
+{
+	if (action == SCMP_ACT_KILL)
+		return 0;
+	else if (action == SCMP_ACT_TRAP)
+		return 0;
+	else if (action == SCMP_ACT_ERRNO(action & 0x0000ffff))
+		return 0;
+	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
+		return 0;
+	else if (action == SCMP_ACT_ALLOW)
+		return 0;
+
+	return -EINVAL;
+}
+
+/**
  * Intitalize a seccomp filter DB
  * @param arch the architecture definition
  * @param def_action the default filter action
@@ -304,6 +327,7 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 
 	/* default attribute values */
 	db->attr.act_default = def_action;
+	db->attr.act_badarch = SCMP_ACT_KILL;
 	db->attr.nnp_enable = 1;
 
 	return db;
@@ -351,7 +375,10 @@ int db_attr_get(struct db_filter *db,
 	case SCMP_FLTATR_ACT_DEFAULT:
 		*value = db->attr.act_default;
 		break;
-	case SCMP_FLTATR_CTL_NNP_ON:
+	case SCMP_FLTATR_ACT_BADARCH:
+		*value = db->attr.act_badarch;
+		break;
+	case SCMP_FLTATR_CTL_NNP:
 		*value = db->attr.nnp_enable;
 		break;
 	default:
@@ -380,7 +407,13 @@ int db_attr_set(struct db_filter *db,
 		/* read only */
 		return -EACCES;
 		break;
-	case SCMP_FLTATR_CTL_NNP_ON:
+	case SCMP_FLTATR_ACT_BADARCH:
+		if (db_action_valid(value) == 0)
+			db->attr.act_badarch = value;
+		else
+			return -EINVAL;
+		break;
+	case SCMP_FLTATR_CTL_NNP:
 		db->attr.nnp_enable = (value ? 1 : 0);
 		break;
 	default:

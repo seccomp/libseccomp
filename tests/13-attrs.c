@@ -48,10 +48,21 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	rc = seccomp_attr_set(SCMP_FLTATR_CTL_NNP_ON, 0);
+	rc = seccomp_attr_set(SCMP_FLTATR_ACT_BADARCH, SCMP_ACT_ALLOW);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_attr_get(SCMP_FLTATR_CTL_NNP_ON, &val);
+	rc = seccomp_attr_get(SCMP_FLTATR_ACT_BADARCH, &val);
+	if (rc != 0)
+		goto out;
+	if (val != SCMP_ACT_ALLOW) {
+		rc = -1;
+		goto out;
+	}
+
+	rc = seccomp_attr_set(SCMP_FLTATR_CTL_NNP, 0);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_attr_get(SCMP_FLTATR_CTL_NNP, &val);
 	if (rc != 0)
 		goto out;
 	if (val != 0) {

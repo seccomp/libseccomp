@@ -40,35 +40,12 @@
  * practice we really only need one per-process right now, and this is it */
 static struct db_filter *filter = NULL;
 
-/**
- * Validate the seccomp action
- * @param action the seccomp action
- *
- * Verify that the given action is a valid seccomp action; return zero if
- * valid, -EINVAL if invalid.
- */
-static int _seccomp_action_valid(uint32_t action)
-{
-	if (action == SCMP_ACT_KILL)
-		return 0;
-	else if (action == SCMP_ACT_TRAP)
-		return 0;
-	else if (action == SCMP_ACT_ERRNO(action & 0x0000ffff))
-		return 0;
-	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
-		return 0;
-	else if (action == SCMP_ACT_ALLOW)
-		return 0;
-
-	return -EINVAL;
-}
-
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_init(uint32_t def_action)
 {
 	int rc;
 
-	rc = _seccomp_action_valid(def_action);
+	rc = db_action_valid(def_action);
 	if (rc < 0)
 		return rc;
 
@@ -192,7 +169,7 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 	if (filter == NULL)
 		return -EFAULT;
 
-	rc = _seccomp_action_valid(action);
+	rc = db_action_valid(action);
 	if (rc < 0)
 		return rc;
 	if (action == filter->attr.act_default)

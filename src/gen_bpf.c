@@ -1326,7 +1326,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	if (rc < 0)
 		return rc;
 	_BPF_INSTR(instr, BPF_RET,
-		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(SCMP_ACT_KILL));
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(state->attr->act_badarch));
 	rc = _bpf_append_instr(state->bpf, &instr);
 	if (rc < 0)
 		return rc;
