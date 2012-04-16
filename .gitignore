@@ -13,3 +13,4 @@ configure.h
 configure.mk
 version_info.mk
 version.h
+libseccomp.pc
