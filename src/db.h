@@ -126,7 +126,6 @@ struct db_filter_attr {
 	uint32_t act_default;
 	/* NO_NEW_PRIVS related attributes */
 	uint32_t nnp_enable;
-	uint32_t nnp_fail_err;
 };
 
 struct db_filter {

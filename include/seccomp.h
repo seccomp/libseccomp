@@ -35,8 +35,7 @@
 enum scmp_filter_attr {
 	_SCMP_FLTATR_MIN = 0,
 	SCMP_FLTATR_ACT_DEFAULT,	/**< default filter action */
-	SCMP_FLTATR_CTL_NNP_ON,		/**< enable setting NO_NEW_PRIVS */
-	SCMP_FLTATR_CTL_NNP_ERR,	/**< fail on NO_NEW_PRIVS errors */
+	SCMP_FLTATR_CTL_NNP_ON,		/**< set NO_NEW_PRIVS on filter load */
 	_SCMP_FLTATR_MAX,
 };
 

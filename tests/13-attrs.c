@@ -59,19 +59,7 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	rc = seccomp_attr_set(SCMP_FLTATR_CTL_NNP_ERR, 1);
-	if (rc != 0)
-		goto out;
-	rc = seccomp_attr_get(SCMP_FLTATR_CTL_NNP_ERR, &val);
-	if (rc != 0)
-		goto out;
-	if (val != 1) {
-		rc = -1;
-		goto out;
-	}
-
 	rc = 0;
-
 out:
 	seccomp_release();
 	return (rc < 0 ? -rc : rc);

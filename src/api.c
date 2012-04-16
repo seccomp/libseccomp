@@ -113,7 +113,7 @@ int seccomp_load(void)
 	/* attempt to set NO_NEW_PRIVS but don't fail if it doesn't work */
 	if (filter->attr.nnp_enable) {
 		rc = prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-		if (filter->attr.nnp_fail_err && rc < 0)
+		if (rc < 0)
 			return -errno;
 	}
 	/* load the filter into the kernel */

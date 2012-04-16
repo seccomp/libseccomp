@@ -305,7 +305,6 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 	/* default attribute values */
 	db->attr.act_default = def_action;
 	db->attr.nnp_enable = 1;
-	db->attr.nnp_fail_err = 0;
 
 	return db;
 }
@@ -355,9 +354,6 @@ int db_attr_get(struct db_filter *db,
 	case SCMP_FLTATR_CTL_NNP_ON:
 		*value = db->attr.nnp_enable;
 		break;
-	case SCMP_FLTATR_CTL_NNP_ERR:
-		*value = db->attr.nnp_fail_err;
-		break;
 	default:
 		return -EEXIST;
 		break;
@@ -386,9 +382,6 @@ int db_attr_set(struct db_filter *db,
 		break;
 	case SCMP_FLTATR_CTL_NNP_ON:
 		db->attr.nnp_enable = (value ? 1 : 0);
-		break;
-	case SCMP_FLTATR_CTL_NNP_ERR:
-		db->attr.nnp_fail_err = (value ? 1 : 0);
 		break;
 	default:
 		return -EEXIST;
