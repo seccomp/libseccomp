@@ -107,16 +107,16 @@ LINK_LIB = \
 
 INSTALL_MACRO = \
 	@install_func() { \
-		dir="$(INSTALL_PREFIX)"/"$$1"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
+		dir="$$1"; \
+		if [[ -n "$$3" ]]; then \
+			$(ECHO) " INSTALL $$3"; \
 		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
+			$(ECHO) " INSTALL $$2 ($$dir/$$2)"; \
 		fi; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$$dir"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$$dir"; \
+			$$2 "$$dir"; \
 	}; \
 	install_func
 

@@ -37,7 +37,7 @@ include install.mk
 # targets
 #
 
-CONFIGS = configure.mk configure.h version_info.mk
+CONFIGS = configure.mk configure.h version_info.mk libseccomp.pc
 SUBDIRS_BUILD = src tests tools
 SUBDIRS_INSTALL = src include doc
 
@@ -77,6 +77,7 @@ $(SUBDIRS_BUILD): $(VERSION_HDR) $(CONFIGS)
 
 install: $(SUBDIRS_BUILD)
 	@echo "INFO: installing in $(INSTALL_PREFIX) ..."
+	@$(INSTALL_MACRO) $(INSTALL_LIB_DIR)/pkgconfig libseccomp.pc
 	@for dir in $(SUBDIRS_INSTALL); do \
 		echo "INFO: installing from $$dir/"; \
 		$(MAKE) -s -C $$dir install; \
