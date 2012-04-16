@@ -29,7 +29,7 @@ include macros.mk
 # configuration
 #
 
-include version_info.mk
+-include version_info.mk
 -include configure.mk
 include install.mk
 
@@ -37,7 +37,7 @@ include install.mk
 # targets
 #
 
-CONFIGS = configure.mk configure.h
+CONFIGS = configure.mk configure.h version_info.mk
 SUBDIRS_BUILD = src tests tools
 SUBDIRS_INSTALL = src include doc
 
@@ -45,7 +45,7 @@ SUBDIRS_INSTALL = src include doc
 
 all: $(SUBDIRS_BUILD)
 
-$(CONFIGS):
+$(CONFIGS): version_info
 	@echo "INFO: automatically generating configuration ..."; \
 	./configure
 
@@ -98,7 +98,5 @@ clean:
 	done
 
 dist-clean: clean
-	@echo "INFO: removing the version header file"; \
-	rm -f $(VERSION_HDR)
 	@echo "INFO: removing the configuration files"; \
 	rm -f $(CONFIGS)
