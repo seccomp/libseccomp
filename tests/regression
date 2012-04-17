@@ -132,7 +132,7 @@ function print_valgrind() {
 #     2    string containing dash-separated range or a single value
 #
 function get_range() {
-	if [[ $2 =~ ^[0-9]+-[0-9]+$ ]]; then
+	if [[ $2 =~ ^[0-9a-fA-Fx]+-[0-9a-fA-Fx]+$ ]]; then
 		# If there's a dash, get the low or high range value
 		range_val=`echo "$2" | cut -d'-' -f "$1"`
 	else
@@ -285,20 +285,13 @@ function run_test_bpf_sim() {
 	# If ranges exist, the following will loop through all syscall and arg
 	# ranges and generate/run every combination of requested tests.  If no
 	# ranges were specifed, then the single test is run.
-	for sys in `seq $low_syscall $high_syscall`;
-	do
-	for arg0 in `seq ${low_arg[0]} ${high_arg[0]}`;
-	do
-	for arg1 in `seq ${low_arg[1]} ${high_arg[1]}`;
-	do
-	for arg2 in `seq ${low_arg[2]} ${high_arg[2]}`;
-	do
-	for arg3 in `seq ${low_arg[3]} ${high_arg[3]}`;
-	do
-	for arg4 in `seq ${low_arg[4]} ${high_arg[4]}`;
-	do
-	for arg5 in `seq ${low_arg[5]} ${high_arg[5]}`;
-	do
+	for sys in `seq -f "%1.0f" $low_syscall $high_syscall`; do
+	for arg0 in `seq -f "%1.0f" ${low_arg[0]} ${high_arg[0]}`; do
+	for arg1 in `seq -f "%1.0f" ${low_arg[1]} ${high_arg[1]}`; do
+	for arg2 in `seq -f "%1.0f" ${low_arg[2]} ${high_arg[2]}`; do
+	for arg3 in `seq -f "%1.0f" ${low_arg[3]} ${high_arg[3]}`; do
+	for arg4 in `seq -f "%1.0f" ${low_arg[4]} ${high_arg[4]}`; do
+	for arg5 in `seq -f "%1.0f" ${low_arg[5]} ${high_arg[5]}`; do
 		local -a arg=($arg0 $arg1 $arg2 $arg3 $arg4 $arg5)
 		data=()
 		testdata=""

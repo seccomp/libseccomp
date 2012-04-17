@@ -7,21 +7,21 @@
 
 test type: bpf-sim
 
-# Testname                Arch    Syscall       Arg0       Arg1       Arg2                 Arg3     Arg4  Arg5  Result
-05-long-jumps             all     1             1          2          3                    4        5     6     ALLOW
-05-long-jumps             all     2             N          N          N                    N        N     N     KILL
-05-long-jumps             all     999           N          N          N                    N        N     N     KILL
-05-long-jumps             x86     1000          0-5        139898888  2147483646           N        N     N     ALLOW
-05-long-jumps             x86_64  1000          0-5        139898888  9223372036854775806  N        N     N     ALLOW
-05-long-jumps             x86     1000          595-599    139898888  2147483646           N        N     N     ALLOW
-05-long-jumps             x86_64  1000          595-599    139898888  9223372036854775806  N        N     N     ALLOW
-05-long-jumps             x86     1000          600        139898888  2147483646           N        N     N     KILL
-05-long-jumps             x86_64  1000          600        139898888  9223372036854775806  N        N     N     KILL
-05-long-jumps             all     1001          N          N          N                    N        N     N     KILL
-05-long-jumps             all     99            1          N          N                    N        N     N     KILL
-05-long-jumps             all     100-105       1          N          N                    N        N     N     ALLOW
-05-long-jumps             all     695-699       1          N          N                    N        N     N     ALLOW
-05-long-jumps             all     700           1          N          N                    N        N     N     KILL
-05-long-jumps             all     3             N          N          N                    N        N     N     KILL
-05-long-jumps             all     4             1          2          3                    4        5     6     ALLOW
-05-long-jumps             all     5             N          N          N                    N        N     N     KILL
+# Testname	Arch	Syscall	Arg0	Arg1		Arg2			Arg3	Arg4	Arg5	Result
+05-long-jumps	all	1	1	2		3			4	5	6	ALLOW
+05-long-jumps	all	2	N	N		N			N	N	N	KILL
+05-long-jumps	all	999	N	N		N			N	N	N	KILL
+05-long-jumps	x86	1000	0-5 	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-long-jumps	x86_64	1000	0-5 	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+05-long-jumps	x86	1000	595-599	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-long-jumps	x86_64	1000	595-599	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+05-long-jumps	x86	1000	600	0x856B008	0x7FFFFFFE		N	N	N	KILL
+05-long-jumps	x86_64	1000	600	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	KILL
+05-long-jumps	all	1001	N	N		N			N	N	N	KILL
+05-long-jumps	all	99	1	N		N			N	N	N	KILL
+05-long-jumps	all	100-105	1	N		N			N	N	N	ALLOW
+05-long-jumps	all	695-699	1	N		N			N	N	N	ALLOW
+05-long-jumps	all	700	1	N		N			N	N	N	KILL
+05-long-jumps	all	3	N	N		N			N	N	N	KILL
+05-long-jumps	all	4	1	2		3			4	5	6	ALLOW
+05-long-jumps	all	5	N	N		N			N	N	N	KILL

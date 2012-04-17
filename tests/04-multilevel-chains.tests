@@ -7,26 +7,26 @@
 
 test type: bpf-sim
 
-# Testname                Arch    Syscall       Arg0       Arg1       Arg2                 Arg3     Arg4  Arg5  Result
-04-multilevel-chains      all     open          139898888  4          N                    N        N     N     ALLOW
-04-multilevel-chains      all     close         4          N          N                    N        N     N     ALLOW
-04-multilevel-chains      x86     read          0          139898888  2147483646           N        N     N     ALLOW
-04-multilevel-chains      x86_64  read          0          139898888  9223372036854775806  N        N     N     ALLOW
-04-multilevel-chains      x86     read          0          139898888  2147483647           N        N     N     KILL
-04-multilevel-chains      x86_64  read          0          139898888  9223372036854775807  N        N     N     KILL
-04-multilevel-chains      x86     read          0          0          2147483646           N        N     N     KILL
-04-multilevel-chains      x86_64  read          0          0          9223372036854775806  N        N     N     KILL
-04-multilevel-chains      all     read          1-10       139898888  2147483646           N        N     N     KILL
-04-multilevel-chains      x86     write         1-2        139898888  2147483646           N        N     N     ALLOW
-04-multilevel-chains      x86_64  write         1-2        139898888  9223372036854775806  N        N     N     ALLOW
-04-multilevel-chains      x86     write         1-2        0          2147483646           N        N     N     KILL
-04-multilevel-chains      x86_64  write         1-2        0          9223372036854775806  N        N     N     KILL
-04-multilevel-chains      x86     write         1-2        139898888  2147483647           N        N     N     KILL
-04-multilevel-chains      x86_64  write         1-2        139898888  9223372036854775807  N        N     N     KILL
-04-multilevel-chains      all     write         3-10       139898888  2147483646           N        N     N     KILL
-04-multilevel-chains      all     rt_sigreturn  N          N          N                    N        N     N     ALLOW
-04-multilevel-chains      x86     0-2           N          N          N                    N        N     N     KILL
-04-multilevel-chains      x86     7-172         N          N          N                    N        N     N     KILL
-04-multilevel-chains      x86     174-350       N          N          N                    N        N     N     KILL
-04-multilevel-chains      x86_64  4-14          N          N          N                    N        N     N     KILL
-04-multilevel-chains      x86_64  16-350        N          N          N                    N        N     N     KILL
+# Testname		Arch	Syscall		Arg0		Arg1		Arg2			Arg3	Arg4	Arg5	Result
+04-multilevel-chains	all	open		0x856B008	4		N			N	N	N	ALLOW
+04-multilevel-chains	all	close		4		N		N			N	N	N	ALLOW
+04-multilevel-chains	x86	read		0		0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+04-multilevel-chains	x86_64	read		0		0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+04-multilevel-chains	x86	read		0		0x856B008	0x7FFFFFFF		N	N	N	KILL
+04-multilevel-chains	x86_64	read		0		0x856B008	0x7FFFFFFFFFFFFFFF	N	N	N	KILL
+04-multilevel-chains	x86	read		0		0		0x7FFFFFFE		N	N	N	KILL
+04-multilevel-chains	x86_64	read		0		0		0x7FFFFFFFFFFFFFFE	N	N	N	KILL
+04-multilevel-chains	all	read		1-10		0x856B008	0x7FFFFFFE		N	N	N	KILL
+04-multilevel-chains	x86	write		1-2		0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+04-multilevel-chains	x86_64	write		1-2		0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+04-multilevel-chains	x86	write		1-2		0		0x7FFFFFFE		N	N	N	KILL
+04-multilevel-chains	x86_64	write		1-2		0		0x7FFFFFFFFFFFFFFE	N	N	N	KILL
+04-multilevel-chains	x86	write		1-2		0x856B008	0x7FFFFFFF		N	N	N	KILL
+04-multilevel-chains	x86_64	write		1-2		0x856B008	0x7FFFFFFFFFFFFFFF	N	N	N	KILL
+04-multilevel-chains	all	write		3-10		0x856B008	0x7FFFFFFE		N	N	N	KILL
+04-multilevel-chains	all	rt_sigreturn	N		N		N			N	N	N	ALLOW
+04-multilevel-chains	x86	0-2		N		N		N			N	N	N	KILL
+04-multilevel-chains	x86	7-172		N		N		N			N	N	N	KILL
+04-multilevel-chains	x86	174-350		N		N		N			N	N	N	KILL
+04-multilevel-chains	x86_64	4-14		N		N		N			N	N	N	KILL
+04-multilevel-chains	x86_64	16-350		N		N		N			N	N	N	KILL

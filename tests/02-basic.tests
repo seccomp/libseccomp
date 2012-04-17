@@ -7,14 +7,14 @@
 
 test type: bpf-sim
 
-# Testname                Arch    Syscall       Arg0       Arg1       Arg2                 Arg3     Arg4  Arg5  Result
-02-basic                  all     read          0          139898888  40                   N        N     N     ALLOW
-02-basic                  all     write         1          139898888  40                   N        N     N     ALLOW
-02-basic                  all     close         4          N          N                    N        N     N     ALLOW
-02-basic                  all     rt_sigreturn  N          N          N                    N        N     N     ALLOW
-02-basic                  all     open          139898888  4          N                    N        N     N     KILL
-02-basic                  x86     0-2           N          N          N                    N        N     N     KILL
-02-basic                  x86     7-172         N          N          N                    N        N     N     KILL
-02-basic                  x86     174-350       N          N          N                    N        N     N     KILL
-02-basic                  x86_64  4-14          N          N          N                    N        N     N     KILL
-02-basic                  x86_64  16-350        N          N          N                    N        N     N     KILL
+# Testname	Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+02-basic	all	read		0		0x856B008	40	N	N	N	ALLOW
+02-basic	all	write		1		0x856B008	40	N	N	N	ALLOW
+02-basic	all	close		4		N		N	N	N	N	ALLOW
+02-basic	all	rt_sigreturn	N		N		N	N	N	N	ALLOW
+02-basic	all	open		0x856B008	4		N	N	N	N	KILL
+02-basic	x86	0-2		N		N		N	N	N	N	KILL
+02-basic	x86	7-172		N		N		N	N	N	N	KILL
+02-basic	x86	174-350		N		N		N	N	N	N	KILL
+02-basic	x86_64	4-14		N		N		N	N	N	N	KILL
+02-basic	x86_64	16-350		N		N		N	N	N	N	KILL
