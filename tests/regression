@@ -202,7 +202,7 @@ function run_test_command() {
 function run_test_bpf_sim() {
 	local LOW=1
 	local HIGH=2
-	local -a COL_WIDTH=(26 08 14 11 11 21 09 06 06)
+	local -a COL_WIDTH=(26 08 14 11 17 21 09 06 06)
 	local rangetest=false
 	local subtestnum=1
 	local testdata=""
