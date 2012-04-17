@@ -25,3 +25,8 @@ test type: bpf-sim
 05-long-jumps	all	3	N	N		N			N	N	N	KILL
 05-long-jumps	all	4	1	2		3			4	5	6	ALLOW
 05-long-jumps	all	5	N	N		N			N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+05-long-jumps	150

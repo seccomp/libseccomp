@@ -20,3 +20,8 @@ test type: bpf-sim
 03-basic-chains	x86	174-350		N		N		N	N	N	N	KILL
 03-basic-chains	x86_64	4-14		N		N		N	N	N	N	KILL
 03-basic-chains	x86_64	16-350		N		N		N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+03-basic-chains	150

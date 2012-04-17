@@ -178,6 +178,125 @@ function run_test_command() {
 }
 
 #
+# Generate pseudo-random string of alphanumeric characters
+#
+# The generated string will be no larger than the corresponding
+# architecture's register size.
+#
+function generate_random_data() {
+	local rcount
+	local rdata
+	if [[ $arch == "x86_64" ]]; then
+		rcount=$[ ($RANDOM % 16) + 1 ]
+	else
+		rcount=$[ ($RANDOM % 8) + 1 ]
+	fi
+	rdata=$(echo `</dev/urandom tr -dc A-Za-z0-9 | head -c"$rcount"`)
+	echo "$rdata"
+}
+
+#
+# Run the specified "bpf-sim-fuzz" test
+#
+# Tests that belong to the "bpf-sim-fuzz" test type generate a BPF filter and
+# then run a simulated system call test with pseudo-random fuzz data for the
+# syscall and argument values.  Tests that belong to this test type provide the
+# following data on a single line in the input batch file:
+#
+#     Testname - The executable test name (e.g. 01-allow, 02-basic, etc.)
+#     StressCount - The number of fuzz tests to run against the filter
+#
+# The following test data is output to the logfile for each generated test:
+#
+#     Testname - The executable test name (e.g. 01-allow, 02-basic, etc.)
+#     Syscall - The fuzzed syscall value to be simulated against the filter
+#     Arg0-5 - The fuzzed syscall arg values to be simulated against the filter
+#
+# Arguments:
+#     1    value of test number from batch file
+#     2    string containing line of test data from batch file
+#
+function run_test_bpf_sim_fuzz() {
+	local -a COL_WIDTH=(26 17 17 17 17 17 17)
+	local subtestnum=1
+	local testdata=""
+	local -a data
+
+	#Begin splitting the test data from the line into individual variables
+	local line=($2)
+	local testname=${line[0]}
+	local stress_count=${line[1]}
+
+	# Generate the test number string for the line of batch test data
+	local testnumstr=$(generate_test_num $1 0)
+
+	# Set up log file test data line for the input test data.  Spacing is
+	# added to align the output in the correct columns.
+	data[0]=$(printf "%-${COL_WIDTH[0]}s" ${line[0]})
+	testdata=("$testdata${data[0]}")
+	data[1]=$(printf "%s" ${line[1]})
+	testdata=("$testdata${data[1]}")
+
+	# Print out the input test data to the log file
+	print_data "$testnumstr" "$testdata"
+
+	for i in `seq 0 $stress_count`;
+	do
+		local sys=$(generate_random_data)
+		local -a arg=($(generate_random_data) $(generate_random_data) \
+			      $(generate_random_data) $(generate_random_data) \
+			      $(generate_random_data) $(generate_random_data))
+		data=()
+		testdata=""
+
+		# Get the generated sub-test num string
+		testnumstr=$(generate_test_num $1 $subtestnum)
+
+		# Set up log file test data line for this individual test.
+		# Spacing is added to align the output in the correct columns.
+		data[0]=$(printf "%-${COL_WIDTH[0]}s" $testname)
+		data[1]=$(printf "%-${COL_WIDTH[1]}s" $sys)
+		data[2]=$(printf "%-${COL_WIDTH[2]}s" ${arg[0]})
+		data[3]=$(printf "%-${COL_WIDTH[3]}s" ${arg[1]})
+		data[4]=$(printf "%-${COL_WIDTH[4]}s" ${arg[2]})
+		data[5]=$(printf "%-${COL_WIDTH[5]}s" ${arg[3]})
+		data[6]=$(printf "%-${COL_WIDTH[6]}s" ${arg[4]})
+		data[7]=$(printf "%s" ${arg[5]})
+		for i in {0..7}; do
+			testdata=("$testdata${data[$i]}")
+		done
+
+		# Print out the generated test data to the log file
+		print_data "$testnumstr" "$testdata"
+
+		# Set up the syscall argument values to be passed to bpf_sim
+		for i in {0..5}; do
+			arg[$i]=" -$i ${arg[$i]} "
+		done
+
+		# Run the test command and put the BPF filter in a temp file
+		run_test_command "$testnumstr" "$testname -b > $tmpfile"
+		if [[ $? -ne 0 ]]; then
+			print_result $testnumstr "ERROR" "$testname rc=$?"
+			return
+		fi
+
+		# Simulate the fuzzed syscall data against the BPF filter.  We
+		# don't verify the resulting action since we're just testing for
+		# stability.
+		allow=`../tools/bpf_sim -a $arch -f $tmpfile -s $sys \
+		    ${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} ${arg[5]}`
+		if [[ $? -ne 0 ]]; then
+			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
+		else
+			print_result $testnumstr "SUCCESS" ""
+		fi
+
+		subtestnum=$(($subtestnum+1))
+	done
+}
+
+#
 # Run the specified "bpf-sim" test
 #
 # Tests that belong to the "bpf-sim" test type generate a BPF filter and then
@@ -225,7 +344,11 @@ function run_test_bpf_sim() {
 	# Set up log file test data line for the input test data.  Spacing is
 	# added to align the output in the correct columns.
 	for i in {0..9}; do
-		data[$i]=$(printf "%-${COL_WIDTH[$i]}s" ${line[$i]})
+		if [[ $i -le 9 ]]; then
+			data[$i]=$(printf "%-${COL_WIDTH[$i]}s" ${line[$i]})
+		else
+			data[$i]=$(printf "%s" ${line[$i]})
+		fi
 		testdata=("$testdata${data[$i]}")
 	done
 
@@ -408,6 +531,8 @@ function run_test() {
 		run_test_basic "$testnumstr" "$2"
 	elif [[ "$3" == "bpf-sim" ]]; then
 		run_test_bpf_sim $1 "$2"
+	elif [[ "$3" == "bpf-sim-fuzz" ]]; then
+		run_test_bpf_sim_fuzz $1 "$2"
 	else
 		print_result $testnumstr "ERROR" "test type $3 not supported"
 	fi
@@ -455,6 +580,8 @@ function run_tests() {
 			if [[ $line =~ ^"test type": ]]; then
 				test_type=`echo "$line" |
 					    sed -e 's/^test type: //;'`
+				# Print test type to log file
+				echo "test type: $test_type" >&$logfd
 				continue
 			elif [[ ${single_list[@]} ]]; then
 				for i in ${single_list[@]}; do

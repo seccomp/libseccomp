@@ -14,3 +14,8 @@ test type: bpf-sim
 09-syscall-priority-pre	all	1001-1002	0	2	N	N	N	N	ALLOW
 09-syscall-priority-pre	all	1000-1001	1	1	N	N	N	N	KILL
 09-syscall-priority-pre	all	1003		N	N	N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+09-syscall-priority-pre	150

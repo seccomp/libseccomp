@@ -30,3 +30,8 @@ test type: bpf-sim
 04-multilevel-chains	x86	174-350		N		N		N			N	N	N	KILL
 04-multilevel-chains	x86_64	4-14		N		N		N			N	N	N	KILL
 04-multilevel-chains	x86_64	16-350		N		N		N			N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+04-multilevel-chains	150

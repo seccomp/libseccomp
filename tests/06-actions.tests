@@ -15,3 +15,8 @@ test type: bpf-sim
 06-actions	x86	0-2	N		N		N	N	N	N	KILL
 06-actions	x86	7-350	N		N		N	N	N	N	KILL
 06-actions	x86_64	4-350	N		N		N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+06-actions	150

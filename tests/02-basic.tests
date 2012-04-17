@@ -18,3 +18,8 @@ test type: bpf-sim
 02-basic	x86	174-350		N		N		N	N	N	N	KILL
 02-basic	x86_64	4-14		N		N		N	N	N	N	KILL
 02-basic	x86_64	16-350		N		N		N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+02-basic	150

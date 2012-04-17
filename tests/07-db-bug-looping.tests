@@ -11,3 +11,8 @@ test type: bpf-sim
 07-db-bug-looping	all	read	1	0x856B008	10	N	N	N	ALLOW
 07-db-bug-looping	all	read	2-10	0		10	N	N	N	ALLOW
 07-db-bug-looping	all	read	0	0x856B008	10	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+07-db-bug-looping	150

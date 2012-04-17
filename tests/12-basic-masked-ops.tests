@@ -30,3 +30,8 @@ test type: bpf-sim
 12-basic-masked-ops	all	1000	0	0x400		2	N	N	N	KILL
 12-basic-masked-ops	all	1000	0	0x402-0x4FF	2	N	N	N	KILL
 12-basic-masked-ops	all	1000	0	0x10300-0x103FF	2	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+12-basic-masked-ops	150

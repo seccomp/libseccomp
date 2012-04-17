@@ -9,3 +9,8 @@ test type: bpf-sim
 
 # Testname	Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
 01-allow	all	0-350	N	N	N	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+01-allow	150

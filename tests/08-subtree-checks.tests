@@ -34,3 +34,8 @@ test type: bpf-sim
 08-subtree-checks	all	1007	1	1	2	0-2	1	1	ALLOW
 08-subtree-checks	all	1007	1	1	2	4-6	1	1	ALLOW
 08-subtree-checks	all	1007	1	1	0	3	1	1	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+08-subtree-checks	150
