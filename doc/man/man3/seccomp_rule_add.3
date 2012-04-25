@@ -88,7 +88,7 @@ match any of the configured seccomp filter rules.
 .B SCMP_ACT_ERRNO(uint16_t errno)
 The process will receive a return value of
 .I errno
-when it calls a syscall that does not match any of the configure seccomp filter
+when it calls a syscall that does not match any of the configured seccomp filter
 rules.
 .TP
 .B SCMP_ACT_TRACE(uint16_t msg_num)
@@ -150,7 +150,7 @@ SCMP_CMP(
 )
 .TP
 .B SCMP_CMP_GE
-Matches when the argument value is greather than or equal to the datum value,
+Matches when the argument value is greater than or equal to the datum value,
 example:
 .sp
 SCMP_CMP(
