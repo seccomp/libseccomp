@@ -264,24 +264,24 @@ int seccomp_rule_add_exact(uint32_t action,
 			   int syscall, unsigned int arg_cnt, ...);
 
 /**
- * Generate seccomp Pseudo Filter Code (PFC)
+ * Generate seccomp Pseudo Filter Code (PFC) and export it to a file
  * @param fd the destination fd
  *
  * This function generates seccomp Pseudo Filter Code (PFC) and writes it to
  * the given fd.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_gen_pfc(int fd);
+int seccomp_export_pfc(int fd);
 
 /**
- * Generate seccomp Berkley Packet Filter (BPF) code
+ * Generate seccomp Berkley Packet Filter (BPF) code and export it to a file
  * @param fd the destination fd
  *
  * This function generates seccomp Berkley Packer Filter (BPF) code and writes
  * it to the given fd.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_gen_bpf(int fd);
+int seccomp_export_bpf(int fd);
 
 /*
  * pseudo syscall definitions

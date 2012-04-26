@@ -259,7 +259,7 @@ int seccomp_rule_add_exact(uint32_t action,
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_gen_pfc(int fd)
+int seccomp_export_pfc(int fd)
 {
 	if (filter == NULL)
 		return -EFAULT;
@@ -268,7 +268,7 @@ int seccomp_gen_pfc(int fd)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_gen_bpf(int fd)
+int seccomp_export_bpf(int fd)
 {
 	int rc;
 	struct bpf_program *program;

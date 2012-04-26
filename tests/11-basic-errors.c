@@ -132,8 +132,8 @@ int main(int argc, char *argv[])
 	}
 	seccomp_release();
 
-	/* seccomp_gen_pfc errors */
-	rc = seccomp_gen_pfc(STDOUT_FILENO);
+	/* seccomp_export_pfc errors */
+	rc = seccomp_export_pfc(STDOUT_FILENO);
 	if (rc != -EFAULT)
 		return -1;
 
@@ -141,14 +141,14 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 	else {
-		rc = seccomp_gen_pfc(sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_pfc(sysconf(_SC_OPEN_MAX)-1);
 		if (rc != EBADF)
 			return -1;
 	}
 	seccomp_release();
 
-	/* seccomp_gen_bpf errors */
-	rc = seccomp_gen_bpf(STDOUT_FILENO);
+	/* seccomp_export_bpf errors */
+	rc = seccomp_export_bpf(STDOUT_FILENO);
 	if (rc != -EFAULT)
 		return -1;
 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		return rc;
 	else {
-		rc = seccomp_gen_bpf(sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_bpf(sysconf(_SC_OPEN_MAX)-1);
 		if (rc != -EBADF)
 			return -1;
 	}

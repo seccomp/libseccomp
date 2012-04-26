@@ -99,9 +99,9 @@ int util_filter_output(const struct util_options *opts)
 		return -EFAULT;
 
 	if (opts->bpf_flg)
-		rc = seccomp_gen_bpf(STDOUT_FILENO);
+		rc = seccomp_export_bpf(STDOUT_FILENO);
 	else
-		rc = seccomp_gen_pfc(STDOUT_FILENO);
+		rc = seccomp_export_pfc(STDOUT_FILENO);
 
 	return rc;
 }
