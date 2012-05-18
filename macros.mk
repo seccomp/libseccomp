@@ -50,11 +50,13 @@ LDFLAGS ?= -z relro -g
 # build tools
 #
 
+LN ?= ln
 MV ?= mv
 CAT ?= cat
 ECHO ?= echo
 
 SED ?= sed
+AWK ?= awk
 
 # we require gcc specific functionality
 GCC ?= gcc
@@ -95,8 +97,8 @@ COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
 LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
 LINK_LIB = \
 	@link_lib_func() { \
-		name=$${1//.so.*/.so}; \
-		echo " LD $$name ($$1)"; \
+		name=$${1//.so.*/.so}.$(VERSION_MAJOR); \
+		echo " LD $@ ($$name)"; \
 		$(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$$name; \
 	}; \
 	link_lib_func $@;
@@ -158,10 +160,20 @@ INSTALL_LIB_MACRO = \
 		else \
 			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
 		fi; \
+		basename=$$(echo $^ | sed -e 's/.so.*$$/.so/'); \
+		soname=$$(objdump -p $^ | grep "SONAME" | awk '{print $$2}'); \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$$dir"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
 			$^ "$$dir"; \
+		if [[ "$$soname" != "$^" ]]; then \
+			(cd "$$dir"; $(RM) -f $$soname); \
+			(cd "$$dir"; $(LN) -s $^ $$soname); \
+		fi; \
+		if [[ "$$basename" != "$^" ]]; then \
+			(cd "$$dir"; $(RM) -f $$basename); \
+			(cd "$$dir"; $(LN) -s $^ $$basename); \
+		fi; \
 	}; \
 	install_lib_func
 
