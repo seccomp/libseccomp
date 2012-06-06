@@ -25,7 +25,7 @@ SHELL = /bin/bash
 # simple /bin/bash script to find the top of the tree
 #
 
-TOPDIR = $$(\
+TOPDIR := $(shell \
 	ftd() { \
 		cd $$1; \
 		if [[ -r "macros.mk" ]]; then \
@@ -40,10 +40,11 @@ TOPDIR = $$(\
 # build configuration
 #
 
-INCFLAGS = -I$(TOPDIR) -I$(TOPDIR)/include
+CPPFLAGS += -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
-CFLAGS  ?= -fPIC -Wl,-z,relro -Wall -O0 -g
+CFLAGS  ?= -Wl,-z,relro -Wall -O0 -g
+CFLAGS  += -fPIC
 LDFLAGS ?= -z relro -g
 
 #
@@ -67,9 +68,9 @@ INSTALL ?= install
 # auto dependencies
 #
 
-MAKEDEP = @$(GCC) $(INCFLAGS) -MM -MF $(patsubst %.o,%.d,$@) $<;
+MAKEDEP = @$(GCC) $(CPPFLAGS) -MM -MF $(patsubst %.o,%.d,$@) $<;
 MAKEDEP_EXEC = \
-	@$(GCC) $(INCFLAGS) -MM -MT $(patsubst %.d,%,$@) \
+	@$(GCC) $(CPPFLAGS) -MM -MT $(patsubst %.d,%,$@) \
 		-MF $@ $(patsubst %.d,%.c,$@);
 
 ADDDEP = \
@@ -92,8 +93,8 @@ VERSION_HDR = version.h
 #
 
 ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
-COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ -c $<;
-COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(INCFLAGS) -o $@ $< $(LDFLAGS);
+COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<;
+COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ $< $(LDFLAGS);
 LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
 LINK_LIB = \
 	@link_lib_func() { \
