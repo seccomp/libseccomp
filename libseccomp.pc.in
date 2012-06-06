@@ -20,8 +20,8 @@
 #
 
 prefix=%%INSTALL_PREFIX%%
+libdir=%%INSTALL_LIBDIR%%
 includedir=${prefix}/include
-libdir=${prefix}/lib
 
 Name: libseccomp
 Description: The enhanced seccomp library
