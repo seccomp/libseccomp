@@ -23,7 +23,7 @@
 
 # configuration defaults
 opt_prefix="/usr/local"
-opt_libexecdir=""
+opt_libdir=""
 opt_sysinc_seccomp="yes"
 
 # output files
@@ -53,7 +53,7 @@ Options:
   -h, --help		display this help and exit
 * installation configuration
   --prefix=PREFIX	installation base [/usr/local]
-  --libexecdir=DIR	library directory [/usr/local/lib]
+  --libdir=DIR		library directory [/usr/local/lib]
 EOF
 }
 
@@ -62,7 +62,7 @@ function msg_summary() {
  CONFIGURATION SUMMARY
   libseccomp version:	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
   installation base:	$opt_prefix
-  library directory:	$opt_libexecdir
+  library directory:	$opt_libdir
   use system includes:	$opt_sysinc_seccomp
 EOF
 }
@@ -162,7 +162,7 @@ verify_deps getopt
 
 # parse the command line options
 opt_str="$@"
-opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libexecdir:" -- "$@")
+opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libdir:" -- "$@")
 eval set -- "$opt"
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -170,8 +170,8 @@ while [[ $# -gt 0 ]]; do
 		opt_prefix="$2"
 		shift 2
 		;;
-	--libexecdir)
-		opt_libexecdir="$2"
+	--libdir)
+		opt_libdir="$2"
 		shift 2
 		;;
 	-h|--help)
@@ -192,11 +192,11 @@ if [[ ! -d $opt_prefix ]]; then
 	msg_error "install prefix ($opt_prefix) is not a directory"
 	exit 1
 fi
-if [[ -z $opt_libexecdir ]]; then
-	opt_libexecdir="$opt_prefix/lib"
+if [[ -z $opt_libdir ]]; then
+	opt_libdir="$opt_prefix/lib"
 fi
-if [[ ! -d $opt_libexecdir ]]; then
-	msg_error "libexecdir ($opt_libexecdir) is not a directory"
+if [[ ! -d $opt_libdir ]]; then
+	msg_error "libdir ($opt_libdir) is not a directory"
 	exit 1
 fi
 
@@ -223,7 +223,7 @@ echo "VERSION_RELEASE=$VERSION_RELEASE" >> ./version_info.mk
 
 # generate the pkg-config metadata
 INSTALL_PREFIX="$opt_prefix"
-INSTALL_LIBDIR="$opt_libexecdir"
+INSTALL_LIBDIR="$opt_libdir"
 rm -f ./libseccomp.pc
 cat ./libseccomp.pc.in | \
 	tmpl_filter INSTALL_PREFIX | \
@@ -241,7 +241,7 @@ cnf_header
 
 # output the configuration files
 cnf_mk_entry "CONF_INSTALL_PREFIX" "$opt_prefix"
-cnf_mk_entry "CONF_INSTALL_LIBDIR" "$opt_libexecdir"
+cnf_mk_entry "CONF_INSTALL_LIBDIR" "$opt_libdir"
 cnf_entry "CONF_SYSINC_SECCOMP" "$opt_sysinc_seccomp"
 
 # configuration footer
