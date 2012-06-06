@@ -43,8 +43,8 @@ TOPDIR := $(shell \
 CPPFLAGS += -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
-CFLAGS  ?= -Wl,-z,relro -Wall -O0 -g
-CFLAGS  += -fPIC
+CFLAGS ?= -Wl,-z,relro -Wall -O0 -g
+CFLAGS += -fPIC
 LDFLAGS ?= -z relro -g
 
 #
