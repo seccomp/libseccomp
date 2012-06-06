@@ -165,7 +165,7 @@ INSTALL_LIB_MACRO = \
 		soname=$$(objdump -p $^ | grep "SONAME" | awk '{print $$2}'); \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$$dir"; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
 			$^ "$$dir"; \
 		if [[ "$$soname" != "$^" ]]; then \
 			(cd "$$dir"; $(RM) -f $$soname); \
