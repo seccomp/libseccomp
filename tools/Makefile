@@ -29,7 +29,7 @@ include ../macros.mk
 # configuration
 #
 
--include ../configure.mk
+include $(TOPDIR)/configure.mk
 
 TOOLS = bpf_disasm \
 	bpf_sim

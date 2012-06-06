@@ -29,9 +29,9 @@ include ../macros.mk
 # configuration
 #
 
-include ../version_info.mk
-include ../configure.mk
-include ../install.mk
+include $(TOPDIR)/version_info.mk
+include $(TOPDIR)/configure.mk
+include $(TOPDIR)/install.mk
 
 LIB_STATIC = libseccomp.a
 LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)

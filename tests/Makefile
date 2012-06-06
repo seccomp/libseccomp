@@ -29,8 +29,8 @@ include ../macros.mk
 # configuration
 #
 
-include ../version_info.mk
--include ../configure.mk
+include $(TOPDIR)/version_info.mk
+include $(TOPDIR)/configure.mk
 
 OBJS = util.o
 

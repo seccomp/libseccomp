@@ -46,8 +46,8 @@ SUBDIRS_INSTALL = src include doc
 all: $(SUBDIRS_BUILD)
 
 $(CONFIGS): version_info
-	@echo "INFO: automatically generating configuration ..."; \
-	./configure
+	@echo "INFO: automatically generating configuration ..."
+	@./configure
 
 tarball: clean
 	@ver=$(VERSION_RELEASE); \
@@ -99,5 +99,5 @@ clean:
 	done
 
 dist-clean: clean
-	@echo "INFO: removing the configuration files"; \
-	rm -f $(CONFIGS)
+	@echo "INFO: removing the configuration files"
+	@rm -f $(CONFIGS)
