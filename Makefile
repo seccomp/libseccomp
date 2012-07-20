@@ -71,7 +71,15 @@ $(VERSION_HDR): version_info.mk
 	echo "#define VERSION_RELEASE \"$(VERSION_RELEASE)\"" >> $$hdr; \
 	echo "#endif" >> $$hdr;
 
-$(SUBDIRS_BUILD): $(VERSION_HDR) $(CONFIGS)
+src: $(VERSION_HDR) $(CONFIGS)
+	@echo "INFO: building in directory $@/ ..."
+	@$(MAKE) -s -C $@
+
+tests: src
+	@echo "INFO: building in directory $@/ ..."
+	@$(MAKE) -s -C $@
+
+tools: src
 	@echo "INFO: building in directory $@/ ..."
 	@$(MAKE) -s -C $@
 
