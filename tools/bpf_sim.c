@@ -19,6 +19,7 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <elf.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -235,6 +236,8 @@ int main(int argc, char *argv[])
 				sys_data.arch = AUDIT_ARCH_X86_64;
 			else if (strcmp(optarg, "x32") == 0)
 				sys_data.arch = AUDIT_ARCH_X86_64;
+			else if (strcmp(optarg, "arm") == 0)
+				sys_data.arch = AUDIT_ARCH_ARM;
 			else if (strcmp(optarg, "ia64") == 0)
 				sys_data.arch = AUDIT_ARCH_IA64;
 			else if (strcmp(optarg, "ppc") == 0)

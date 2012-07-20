@@ -30,6 +30,7 @@ cdef extern from "seccomp.h":
         SCMP_ARCH_X86
         SCMP_ARCH_X86_64
         SCMP_ARCH_X32
+        SCMP_ARCH_ARM
 
     cdef enum scmp_filter_attr:
         SCMP_FLTATR_ACT_DEFAULT

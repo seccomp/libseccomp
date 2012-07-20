@@ -19,6 +19,7 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <elf.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,7 @@
 #include "arch-i386.h"
 #include "arch-x86_64.h"
 #include "arch-x32.h"
+#include "arch-arm.h"
 #include "system.h"
 
 #if __i386__
@@ -41,6 +43,8 @@ const struct arch_def *arch_def_native = &arch_def_x32;
 #else
 const struct arch_def *arch_def_native = &arch_def_x86_64;
 #endif /* __ILP32__ */
+#elif __arm__
+const struct arch_def *arch_def_native = &arch_def_arm;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -58,6 +62,7 @@ int arch_valid(uint32_t arch)
 	case SCMP_ARCH_X86:
 	case SCMP_ARCH_X86_64:
 	case SCMP_ARCH_X32:
+	case SCMP_ARCH_ARM:
 		return 0;
 	}
 
@@ -76,13 +81,12 @@ static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 	switch (token) {
 	case SCMP_ARCH_X86:
 		return i386_syscall_table;
-		break;
 	case SCMP_ARCH_X86_64:
 		return x86_64_syscall_table;
-		break;
 	case SCMP_ARCH_X32:
 		return x32_syscall_table;
-		break;
+	case SCMP_ARCH_ARM:
+		return arm_syscall_table;
 	}
 
 	return NULL;
@@ -100,13 +104,12 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 	switch (token) {
 	case SCMP_ARCH_X86:
 		return &arch_def_i386;
-		break;
 	case SCMP_ARCH_X86_64:
 		return &arch_def_x86_64;
-		break;
 	case SCMP_ARCH_X32:
 		return &arch_def_x32;
-		break;
+	case SCMP_ARCH_ARM:
+		return &arch_def_arm;
 	}
 
 	return NULL;
@@ -129,9 +132,11 @@ int arch_arg_count_max(const struct arch_def *arch)
 		return x86_64_arg_count_max;
 	case SCMP_ARCH_X32:
 		return x32_arg_count_max;
-	default:
-		return -EDOM;
+	case SCMP_ARCH_ARM:
+		return arm_arg_count_max;
 	}
+
+	return -EDOM;
 }
 
 /**
