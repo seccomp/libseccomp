@@ -1,4 +1,4 @@
-.TH "seccomp_syscall_priority" 3 "5 April 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_syscall_priority" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -9,9 +9,12 @@ seccomp_syscall_priority \- Prioritize syscalls in the seccomp filter
 .nf
 .B #include <seccomp.h>
 .sp
+.B typedef void * scmp_filter_ctx;
+.sp
 .BI "int SCMP_SYS(" syscall_name ");"
 .sp
-.BI "int seccomp_syscall_priority(int " syscall ", uint8_t " priority ");"
+.BI "int seccomp_syscall_priority(scmp_filter_ctx " ctx ","
+.BI "                             int " syscall ", uint8_t " priority ");"
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION
@@ -39,6 +42,11 @@ The
 .I priority
 parameter takes an 8-bit value ranging from 0 - 255; a higher value represents
 a higher priority.
+.P
+The filter context
+.I ctx
+is the value returned by the call to
+.BR seccomp_init ().
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
@@ -58,22 +66,23 @@ value in
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	int rc = -1;
+	scmp_filter_ctx ctx;
 
-	rc = seccomp_init(SCMP_ACT_KILL);
-	if (rc < 0)
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
 		goto out;
 
 	/* ... */
 
-	rc = seccomp_syscall_priority(SCMP_SYS(read), 200);
+	rc = seccomp_syscall_priority(ctx, SCMP_SYS(read), 200);
 	if (rc < 0)
 		goto out;
 
 	/* ... */
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return -rc;
 }
 .fi

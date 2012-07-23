@@ -1,4 +1,4 @@
-.TH "seccomp_init" 3 "5 April 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_init" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -9,8 +9,10 @@ seccomp_init, seccomp_reset \- Initialize the seccomp filter state
 .nf
 .B #include <seccomp.h>
 .sp
-.BI "int seccomp_init(uint32_t " def_action ");"
-.BI "int seccomp_reset(uint32_t " def_action ");"
+.B typedef void * scmp_filter_ctx;
+.sp
+.BI "scmp_filter_ctx seccomp_init(uint32_t " def_action ");"
+.BI "int seccomp_reset(scmp_filter_ctx " ctx ", uint32_t " def_action ");"
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION
@@ -20,24 +22,24 @@ The
 .BR seccomp_init ()
 and
 .BR seccomp_reset ()
-functions initialize the internal seccomp filter state, prepares it for use, and
-sets the default action based on the
+functions (re)initialize the internal seccomp filter state, prepares it for
+use, and sets the default action based on the
 .I def_action
 parameter.  The
 .BR seccomp_init ()
 function must be called before any other libseccomp functions as the rest
-of the library API will fail if the filter state is not initialized properly.
+of the library API will fail if the filter context is not initialized properly.
 The
 .BR seccomp_reset ()
-function releases the existing filter state before reinitializing it and can
-only be called after a call to
+function releases the existing filter context state before reinitializing it
+and can only be called after a call to
 .BR seccomp_init ()
 has succeeded.
 .P
 When the caller is finished configuring the seccomp filter and has loaded it
 into the kernel, the caller should call
 .BR seccomp_release (3)
-to release all of the internal filter state.
+to release all of the filter context state.
 .P
 Valid
 .I def_action
@@ -76,7 +78,11 @@ does not match any of the configured seccomp filter rules.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
-Returns zero on success, negative errno values on failure.
+The
+.BR seccomp_init ()
+function returns a filter context on success, NULL on failure.  The
+.BR seccomp_reset ()
+function returns zero on success, negative errno values on failure.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////
@@ -85,22 +91,23 @@ Returns zero on success, negative errno values on failure.
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	int rc = -1;
+	scmp_filter_ctx ctx;
 
-	rc = seccomp_init(SCMP_ACT_KILL);
-	if (rc < 0)
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
 		goto out;
 
 	/* ... */
 
-	rc = seccomp_reset(SCMP_ACT_KILL);
+	rc = seccomp_reset(ctx, SCMP_ACT_KILL);
 	if (rc < 0)
 		goto out;
 
 	/* ... */
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return -rc;
 }
 .fi

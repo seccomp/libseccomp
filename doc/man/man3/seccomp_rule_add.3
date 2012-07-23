@@ -1,4 +1,4 @@
-.TH "seccomp_rule_add" 3 "5 April 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_rule_add" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -8,6 +8,8 @@ seccomp_rule_add, seccomp_rule_add_exact \- Add a seccomp filter rule
 .\" //////////////////////////////////////////////////////////////////////////
 .nf
 .B #include <seccomp.h>
+.sp
+.B typedef void * scmp_filter_ctx;
 .sp
 .BI "int SCMP_SYS(" syscall_name ");"
 .sp
@@ -20,9 +22,9 @@ seccomp_rule_add, seccomp_rule_add_exact \- Add a seccomp filter rule
 .BI "struct scmp_arg_cmp SCMP_A4(enum scmp_compare " op ", " ... ");"
 .BI "struct scmp_arg_cmp SCMP_A5(enum scmp_compare " op ", " ... ");"
 .sp
-.BI "int seccomp_rule_add(uint32_t " action ","
+.BI "int seccomp_rule_add(scmp_filter_ctx " ctx ", uint32_t " action ","
 .BI "                     int " syscall ", unsigned int " arg_cnt ", " ... ");"
-.BI "int seccomp_rule_add_exact(uint32_t " action ","
+.BI "int seccomp_rule_add_exact(scmp_filter_ctx " ctx ", uint32_t " action ","
 .BI "                           int " syscall ", unsigned int " arg_cnt ", " ... ");"
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
@@ -72,6 +74,11 @@ values, in order to ensure proper operation across multiple architectures it
 is highly recommended to use the
 .BR SCMP_SYS ()
 macro instead.  See the EXAMPLES section below.
+.P
+The filter context
+.I ctx
+is the value returned by the call to
+.BR seccomp_init (3).
 .P
 Valid
 .I action
@@ -200,12 +207,13 @@ functions return zero on success, negative errno values on failure.
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	int rc = -1;
+	scmp_filter_ctx ctx;
 	int fd;
 	unsigned char buf[BUF_SIZE];
 
-	rc = seccomp_init(SCMP_ACT_KILL);
-	if (rc < 0)
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
 		goto out;
 
 	/* ... */
@@ -214,30 +222,30 @@ int main(int argc, char *argv[])
 
 	/* ... */
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
 			      SCMP_A0(SCMP_CMP_EQ, fd),
 			      SCMP_A1(SCMP_CMP_EQ, (scmp_datum_t)buf),
 			      SCMP_A2(SCMP_CMP_LE, BUF_SIZE));
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
 			      SCMP_CMP(0, SCMP_CMP_EQ, fd));
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_load();
+	rc = seccomp_load(ctx);
 	if (rc < 0)
 		goto out;
 
 	/* ... */
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return -rc;
 }
 .fi
