@@ -20,6 +20,7 @@
  */
 
 #include <errno.h>
+#include <unistd.h>
 
 #include <seccomp.h>
 
@@ -29,36 +30,39 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	struct util_options opts;
+	scmp_filter_ctx ctx;
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_init(SCMP_ACT_KILL);
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
+		goto out;
+
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+	rc = seccomp_rule_add_exact(ctx,
+				    SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_TRAP, SCMP_SYS(close), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(SCMP_ACT_TRAP, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add_exact(ctx,
+				    SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = util_filter_output(&opts);
+	rc = util_filter_output(&opts, ctx);
 	if (rc)
 		goto out;
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return (rc < 0 ? -rc : rc);
 }

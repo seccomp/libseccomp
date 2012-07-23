@@ -307,6 +307,40 @@ int db_action_valid(uint32_t action)
 }
 
 /**
+ * Free and reset the seccomp filter DB
+ * @param db the seccomp filter DB
+ * @param def_action the default filter action
+ *
+ * This function frees any existing filters and resets the filter DB to a
+ * default state; only the DB architecture is preserved.
+ *
+ */
+void db_reset(struct db_filter *db, uint32_t def_action)
+{
+	struct db_sys_list *s_iter;
+
+	if (db == NULL)
+		return;
+
+	/* free any filters */
+	if (db->syscalls != NULL) {
+		s_iter = db->syscalls;
+		while (s_iter != NULL) {
+			db->syscalls = s_iter->next;
+			_db_tree_free(s_iter->chains);
+			free(s_iter);
+			s_iter = db->syscalls;
+		}
+		db->syscalls = NULL;
+	}
+
+	/* set the default attribute values */
+	db->attr.act_default = def_action;
+	db->attr.act_badarch = SCMP_ACT_KILL;
+	db->attr.nnp_enable = 1;
+}
+
+/**
  * Intitalize a seccomp filter DB
  * @param arch the architecture definition
  * @param def_action the default filter action
@@ -325,10 +359,8 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 	memset(db, 0, sizeof(*db));
 	db->arch = arch;
 
-	/* default attribute values */
-	db->attr.act_default = def_action;
-	db->attr.act_badarch = SCMP_ACT_KILL;
-	db->attr.nnp_enable = 1;
+	/* reset the DB to a known state */
+	db_reset(db, def_action);
 
 	return db;
 }
@@ -343,18 +375,11 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
  */
 void db_release(struct db_filter *db)
 {
-	struct db_sys_list *s_iter;
-
 	if (db == NULL)
 		return;
 
-	s_iter = db->syscalls;
-	while (s_iter != NULL) {
-		db->syscalls = s_iter->next;
-		_db_tree_free(s_iter->chains);
-		free(s_iter);
-		s_iter = db->syscalls;
-	}
+	/* free and reset the DB */
+	db_reset(db, 0);
 	free(db);
 }
 
@@ -368,7 +393,7 @@ void db_release(struct db_filter *db)
  * on success, negative values on failure.
  *
  */
-int db_attr_get(struct db_filter *db,
+int db_attr_get(const struct db_filter *db,
 		enum scmp_filter_attr attr, uint32_t *value)
 {
 	switch (attr) {

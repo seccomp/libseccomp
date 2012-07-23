@@ -27,42 +27,42 @@
 int main(int argc, char *argv[])
 {
 	int rc;
+	scmp_filter_ctx ctx;
 
 	/* seccomp_init errors */
-	rc = seccomp_init(SCMP_ACT_ALLOW+1);
-	if (rc != -EINVAL)
+	ctx = seccomp_init(SCMP_ACT_ALLOW+1);
+	if (ctx != NULL)
 		return -1;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
-	else {
-		rc = seccomp_init(SCMP_ACT_KILL);
-		if (rc != -EEXIST)
-			return -1;
-	}
-	seccomp_release();
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	/* seccomp_reset error */
-	rc = seccomp_reset(SCMP_ACT_KILL+1);
+	rc = seccomp_reset(ctx, SCMP_ACT_KILL+1);
+	if (rc != -EINVAL)
+		return -1;
+	rc = seccomp_reset(ctx, SCMP_ACT_KILL);
 	if (rc != -EINVAL)
 		return -1;
 
 	/* seccomp_load error */
-	rc = seccomp_load();
-	if (rc != -EFAULT)
+	rc = seccomp_load(ctx);
+	if (rc != -EINVAL)
 		return -1;
 
 	/* seccomp_syscall_priority errors */
-	rc = seccomp_syscall_priority(SCMP_SYS(read), 1);
-	if (rc != -EFAULT)
+	rc = seccomp_syscall_priority(ctx, SCMP_SYS(read), 1);
+	if (rc != -EINVAL)
 		return -1;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
 	else {
-		rc = seccomp_syscall_priority(-1000, 1);
+		rc = seccomp_syscall_priority(ctx, -1000, 1);
 #if __i386__
 		if (rc != -EINVAL)
 			return -1;
@@ -71,28 +71,29 @@ int main(int argc, char *argv[])
 			return -1;
 #endif
 	}
-	seccomp_release();
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	/* seccomp_rule_add errors */
-	rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, 0));
-	if (rc != -EFAULT)
+	if (rc != -EINVAL)
 		return -1;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
 	else {
-		rc = seccomp_rule_add(SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 		if (rc != -EPERM)
 			return -1;
-		rc = seccomp_rule_add(SCMP_ACT_KILL-1, SCMP_SYS(read), 0);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL-1, SCMP_SYS(read), 0);
 		if (rc != -EINVAL)
 			return -1;
-		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 6);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 6);
 		if (rc != -EINVAL)
 			return -1;
-		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 7,
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 7,
 				      SCMP_A0(SCMP_CMP_EQ, 0),
 				      SCMP_A1(SCMP_CMP_EQ, 0),
 				      SCMP_A2(SCMP_CMP_EQ, 0),
@@ -102,65 +103,70 @@ int main(int argc, char *argv[])
 				      SCMP_CMP(6, SCMP_CMP_EQ, 0));
 		if (rc != -EINVAL)
 			return -1;
-		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 1,
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 1,
 				      SCMP_A0(_SCMP_CMP_MIN, 0));
 		if (rc != -EINVAL)
 			return -1;
-		rc = seccomp_rule_add(SCMP_ACT_KILL, SCMP_SYS(read), 1,
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 1,
 				      SCMP_A0(_SCMP_CMP_MAX, 0));
 		if (rc != -EINVAL)
 			return -1;
 #if __i386__
-		rc = seccomp_rule_add(SCMP_ACT_KILL, -1001, 0);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, -1001, 0);
 		if (rc != -EINVAL)
 			return -1;
 #endif
 	}
-	seccomp_release();
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	/* seccomp_rule_add_exact error */
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
 	else {
 #if __i386__
-		rc = seccomp_rule_add_exact(SCMP_ACT_KILL, SCMP_SYS(socket), 1,
+		rc = seccomp_rule_add_exact(ctx,
+					    SCMP_ACT_KILL, SCMP_SYS(socket), 1,
 					    SCMP_A0(SCMP_CMP_EQ, 2));
 		if (rc != -EINVAL)
 			return -1;
 #endif
 	}
-	seccomp_release();
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	/* seccomp_export_pfc errors */
-	rc = seccomp_export_pfc(STDOUT_FILENO);
-	if (rc != -EFAULT)
+	rc = seccomp_export_pfc(ctx, STDOUT_FILENO);
+	if (rc != -EINVAL)
 		return -1;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
 	else {
-		rc = seccomp_export_pfc(sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_pfc(ctx, sysconf(_SC_OPEN_MAX)-1);
 		if (rc != EBADF)
 			return -1;
 	}
-	seccomp_release();
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	/* seccomp_export_bpf errors */
-	rc = seccomp_export_bpf(STDOUT_FILENO);
-	if (rc != -EFAULT)
+	rc = seccomp_export_bpf(ctx, STDOUT_FILENO);
+	if (rc != -EINVAL)
 		return -1;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
-		return rc;
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
 	else {
-		rc = seccomp_export_bpf(sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_bpf(ctx, sysconf(_SC_OPEN_MAX)-1);
 		if (rc != -EBADF)
 			return -1;
 	}
-	seccomp_release();
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	return 0;
 }

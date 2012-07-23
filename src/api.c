@@ -36,53 +36,44 @@
 #include "gen_bpf.h"
 #include "system.h"
 
-/* the underlying code supports multiple simultaneous seccomp filters, but in
- * practice we really only need one per-process right now, and this is it */
-static struct db_filter *filter = NULL;
-
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_init(uint32_t def_action)
+scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
-	int rc;
+	if (db_action_valid(def_action) < 0)
+		return NULL;
 
-	rc = db_action_valid(def_action);
-	if (rc < 0)
-		return rc;
-
-	if (filter != NULL)
-		return -EEXIST;
-	filter = db_init(&arch_def_native, def_action);
-
-	return (filter ? 0 : -ENOMEM);
+	return db_init(&arch_def_native, def_action);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_reset(uint32_t def_action)
+int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
-	if (filter != NULL)
-		db_release(filter);
+	if (ctx == NULL || db_action_valid(def_action) < 0)
+		return -EINVAL;
 
-	return seccomp_init(def_action);
+	db_reset((struct db_filter *)ctx, def_action);
+	return 0;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-void seccomp_release(void)
+void seccomp_release(scmp_filter_ctx ctx)
 {
-	if (filter == NULL)
+	if (ctx == NULL)
 		return;
 
-	db_release(filter);
-	filter = NULL;
+	db_release((struct db_filter *)ctx);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_load(void)
+int seccomp_load(const scmp_filter_ctx ctx)
 {
 	int rc;
+	struct db_filter *filter;
 	struct bpf_program *program;
 
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
+	filter = (struct db_filter *)ctx;
 
 	program = gen_bpf_generate(filter);
 	if (program == NULL)
@@ -103,30 +94,34 @@ int seccomp_load(void)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_attr_get(enum scmp_filter_attr attr, uint32_t *value)
+int seccomp_attr_get(const scmp_filter_ctx ctx,
+		     enum scmp_filter_attr attr, uint32_t *value)
 {
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
 
-	return db_attr_get(filter, attr, value);
+	return db_attr_get((const struct db_filter *)ctx, attr, value);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_attr_set(enum scmp_filter_attr attr, uint32_t value)
+int seccomp_attr_set(scmp_filter_ctx ctx,
+		     enum scmp_filter_attr attr, uint32_t value)
 {
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
 
-	return db_attr_set(filter, attr, value);
+	return db_attr_set((struct db_filter *)ctx, attr, value);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_syscall_priority(int syscall, uint8_t priority)
+int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 {
 	int rc;
+	struct db_filter *filter;
 
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
+	filter = (struct db_filter *)ctx;
 
 	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
 	 * the syscall for some arch specific reason */
@@ -141,6 +136,7 @@ int seccomp_syscall_priority(int syscall, uint8_t priority)
 
 /**
  * Add a new rule to the current filter
+ * @param filter the DB filter
  * @param strict the strict flag
  * @param action the filter action
  * @param syscall the syscall number
@@ -156,7 +152,8 @@ int seccomp_syscall_priority(int syscall, uint8_t priority)
  * zero on success, negative values on failure.
  *
  */
-static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
+static int _seccomp_rule_add(struct db_filter *filter,
+			     unsigned int strict, uint32_t action, int syscall,
 			     unsigned int arg_cnt, va_list arg_list)
 {
 	int rc;
@@ -167,7 +164,7 @@ static int _seccomp_rule_add(unsigned int strict, uint32_t action, int syscall,
 	struct scmp_arg_cmp arg_data;
 
 	if (filter == NULL)
-		return -EFAULT;
+		return -EINVAL;
 
 	rc = db_action_valid(action);
 	if (rc < 0)
@@ -232,51 +229,54 @@ rule_add_return:
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...)
+int seccomp_rule_add(scmp_filter_ctx ctx,
+		     uint32_t action, int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
 	va_list arg_list;
 
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add(0, action, syscall, arg_cnt, arg_list);
+	rc = _seccomp_rule_add((struct db_filter *)ctx,
+			       0, action, syscall, arg_cnt, arg_list);
 	va_end(arg_list);
 
 	return rc;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_rule_add_exact(uint32_t action,
+int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
 			   int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
 	va_list arg_list;
 
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add(1, action, syscall, arg_cnt, arg_list);
+	rc = _seccomp_rule_add((struct db_filter *)ctx,
+			       1, action, syscall, arg_cnt, arg_list);
 	va_end(arg_list);
 
 	return rc;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_export_pfc(int fd)
+int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 {
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
 
-	return gen_pfc_generate(filter, fd);
+	return gen_pfc_generate((struct db_filter *)ctx, fd);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_export_bpf(int fd)
+int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 {
 	int rc;
 	struct bpf_program *program;
 
-	if (filter == NULL)
-		return -EFAULT;
+	if (ctx == NULL)
+		return -EINVAL;
 
-	program = gen_bpf_generate(filter);
+	program = gen_bpf_generate((struct db_filter *)ctx);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));

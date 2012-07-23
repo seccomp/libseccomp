@@ -19,6 +19,8 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <unistd.h>
+
 #include <seccomp.h>
 
 #include "util.h"
@@ -27,46 +29,47 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	struct util_options opts;
+	scmp_filter_ctx ctx;
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_init(SCMP_ACT_KILL);
-	if (rc != 0)
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
 		goto out;
 
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
 
-	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1000, 2,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1001, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1001, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 0));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(SCMP_ACT_ALLOW, 1002, 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1002, 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_syscall_priority(1000, 3);
+	rc = seccomp_syscall_priority(ctx, 1000, 3);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_syscall_priority(1001, 2);
+	rc = seccomp_syscall_priority(ctx, 1001, 2);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_syscall_priority(1002, 1);
+	rc = seccomp_syscall_priority(ctx, 1002, 1);
 	if (rc != 0)
 		goto out;
 
-	rc = util_filter_output(&opts);
+	rc = util_filter_output(&opts, ctx);
 	if (rc)
 		goto out;
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return (rc < 0 ? -rc : rc);
 }

@@ -29,20 +29,21 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	struct util_options opts;
+	scmp_filter_ctx ctx;
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
 		goto out;
 
-	rc = util_filter_output(&opts);
+	rc = util_filter_output(&opts, ctx);
 	if (rc)
 		goto out;
 
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return (rc < 0 ? -rc : rc);
 }

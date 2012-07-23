@@ -30,28 +30,29 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	uint32_t val = (uint32_t)-1;
+	scmp_filter_ctx ctx;
 
-	rc = seccomp_init(SCMP_ACT_ALLOW);
-	if (rc != 0)
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
 		goto out;
 
-	rc = seccomp_attr_get(SCMP_FLTATR_ACT_DEFAULT, &val);
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_ACT_DEFAULT, &val);
 	if (rc != 0)
 		goto out;
 	if (val != SCMP_ACT_ALLOW) {
 		rc = -1;
 		goto out;
 	}
-	rc = seccomp_attr_set(SCMP_FLTATR_ACT_DEFAULT, val);
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_ACT_DEFAULT, val);
 	if (rc != -EACCES) {
 		rc = -1;
 		goto out;
 	}
 
-	rc = seccomp_attr_set(SCMP_FLTATR_ACT_BADARCH, SCMP_ACT_ALLOW);
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_ACT_BADARCH, SCMP_ACT_ALLOW);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_attr_get(SCMP_FLTATR_ACT_BADARCH, &val);
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_ACT_BADARCH, &val);
 	if (rc != 0)
 		goto out;
 	if (val != SCMP_ACT_ALLOW) {
@@ -59,10 +60,10 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	rc = seccomp_attr_set(SCMP_FLTATR_CTL_NNP, 0);
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_NNP, 0);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_attr_get(SCMP_FLTATR_CTL_NNP, &val);
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_CTL_NNP, &val);
 	if (rc != 0)
 		goto out;
 	if (val != 0) {
@@ -72,6 +73,6 @@ int main(int argc, char *argv[])
 
 	rc = 0;
 out:
-	seccomp_release();
+	seccomp_release(ctx);
 	return (rc < 0 ? -rc : rc);
 }

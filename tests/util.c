@@ -86,12 +86,14 @@ int util_getopt(int argc, char *argv[], struct util_options *opts)
 /**
  * Output the filter in either BPF or PFC
  * @param opts the options structure
+ * @param ctx the filter context
  *
  * This function outputs the seccomp filter to in either BPF or PFC format
  * depending on the test paramaeters supplied by @opts.
  *
  */
-int util_filter_output(const struct util_options *opts)
+int util_filter_output(const struct util_options *opts,
+		       const scmp_filter_ctx ctx)
 {
 	int rc;
 
@@ -99,9 +101,9 @@ int util_filter_output(const struct util_options *opts)
 		return -EFAULT;
 
 	if (opts->bpf_flg)
-		rc = seccomp_export_bpf(STDOUT_FILENO);
+		rc = seccomp_export_bpf(ctx, STDOUT_FILENO);
 	else
-		rc = seccomp_export_pfc(STDOUT_FILENO);
+		rc = seccomp_export_pfc(ctx, STDOUT_FILENO);
 
 	return rc;
 }

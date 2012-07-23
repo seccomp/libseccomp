@@ -30,6 +30,11 @@
  */
 
 /**
+ * Filter context/handle
+ */
+typedef void * scmp_filter_ctx;
+
+/**
  * Filter attributes
  */
 enum scmp_filter_attr {
@@ -154,48 +159,51 @@ struct scmp_arg_cmp {
  *
  * This function initializes the internal seccomp filter state and should
  * be called before any other functions in this library to ensure the filter
- * state is initialized.  Returns zero on success, negative values on failure.
+ * state is initialized.  Returns a filter context on success, NULL on failure.
  *
  */
-int seccomp_init(uint32_t def_action);
+scmp_filter_ctx seccomp_init(uint32_t def_action);
 
 /**
  * Reset the current filter state
+ * @param ctx the filter context
  * @param def_action the default filter action
  *
- * This function resets the internal seccomp filter state and ensures the
+ * This function resets the given seccomp filter state and ensures the
  * filter state is reinitialized.  This function does not reset any seccomp
  * filters already loaded into the kernel.  Returns zero on success, negative
  * values on failure.
  *
  */
-int seccomp_reset(uint32_t def_action);
+int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action);
 
 /**
  * Destroys the current filter state and releases any resources
+ * @param ctx the filter context
  *
- * This functions destroys the internal seccomp filter state and releases any
+ * This functions destroys the given seccomp filter state and releases any
  * resources, including memory, associated with the filter state.  This
  * function does not reset any seccomp filters already loaded into the kernel.
- * The function seccomp_reset() must be called before the filter can be
- * reconfigured after calling this function.
+ * The filter context can no longer be used after calling this function.
  *
  */
-void seccomp_release(void);
+void seccomp_release(scmp_filter_ctx ctx);
 
 /**
  * Loads the current filter into the kernel
+ * @param ctx the filter context
  *
- * This function loads the currently configured seccomp filter into the kernel.
- * If the filter was loaded correctly, the kernel will be enforcing the filter
+ * This function loads the given seccomp filter context into the kernel.  If
+ * the filter was loaded correctly, the kernel will be enforcing the filter
  * when this function returns.  Returns zero on success, negative values on
  * error.
  *
  */
-int seccomp_load(void);
+int seccomp_load(const scmp_filter_ctx ctx);
 
 /**
  * Get the value of a filter attribute
+ * @param ctx the filter context
  * @param attr the filter attribute name
  * @param value the filter attribute value
  *
@@ -203,10 +211,12 @@ int seccomp_load(void);
  * via @value.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_attr_get(enum scmp_filter_attr attr, uint32_t *value);
+int seccomp_attr_get(const scmp_filter_ctx ctx,
+		     enum scmp_filter_attr attr, uint32_t *value);
 
 /**
  * Set the value of a filter attribute
+ * @param ctx the filter context
  * @param attr the filter attribute name
  * @param value the filter attribute value
  *
@@ -214,10 +224,12 @@ int seccomp_attr_get(enum scmp_filter_attr attr, uint32_t *value);
  * success, negative values on failure.
  *
  */
-int seccomp_attr_set(enum scmp_filter_attr attr, uint32_t value);
+int seccomp_attr_set(scmp_filter_ctx ctx,
+		     enum scmp_filter_attr attr, uint32_t value);
 
 /**
  * Set the priority of a given syscall
+ * @param ctx the filter context
  * @param syscall the syscall number
  * @param priority priority value, higher value == higher priority
  *
@@ -227,10 +239,12 @@ int seccomp_attr_set(enum scmp_filter_attr attr, uint32_t value);
  * filter.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_syscall_priority(int syscall, uint8_t priority);
+int seccomp_syscall_priority(scmp_filter_ctx ctx,
+			     int syscall, uint8_t priority);
 
 /**
  * Add a new rule to the current filter
+ * @param ctx the filter context
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
@@ -244,10 +258,12 @@ int seccomp_syscall_priority(int syscall, uint8_t priority);
  * values on failure.
  *
  */
-int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
+int seccomp_rule_add(scmp_filter_ctx ctx,
+		     uint32_t action, int syscall, unsigned int arg_cnt, ...);
 
 /**
  * Add a new rule to the current filter
+ * @param ctx the filter context
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
@@ -260,28 +276,30 @@ int seccomp_rule_add(uint32_t action, int syscall, unsigned int arg_cnt, ...);
  * function will fail.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_rule_add_exact(uint32_t action,
+int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
 			   int syscall, unsigned int arg_cnt, ...);
 
 /**
  * Generate seccomp Pseudo Filter Code (PFC) and export it to a file
+ * @param ctx the filter context
  * @param fd the destination fd
  *
  * This function generates seccomp Pseudo Filter Code (PFC) and writes it to
  * the given fd.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_export_pfc(int fd);
+int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd);
 
 /**
  * Generate seccomp Berkley Packet Filter (BPF) code and export it to a file
+ * @param ctx the filter context
  * @param fd the destination fd
  *
  * This function generates seccomp Berkley Packer Filter (BPF) code and writes
  * it to the given fd.  Returns zero on success, negative values on failure.
  *
  */
-int seccomp_export_bpf(int fd);
+int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 
 /*
  * pseudo syscall definitions

@@ -154,10 +154,11 @@ struct db_filter {
 
 int db_action_valid(uint32_t action);
 
+void db_reset(struct db_filter *db, uint32_t def_action);
 struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
 void db_release(struct db_filter *db);
 
-int db_attr_get(struct db_filter *db,
+int db_attr_get(const struct db_filter *db,
 		enum scmp_filter_attr attr, uint32_t *value);
 int db_attr_set(struct db_filter *db,
 		enum scmp_filter_attr attr, uint32_t value);

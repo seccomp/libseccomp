@@ -28,6 +28,7 @@ struct util_options {
 
 int util_getopt(int argc, char *argv[], struct util_options *opts);
 
-int util_filter_output(const struct util_options *opts);
+int util_filter_output(const struct util_options *opts,
+		       const scmp_filter_ctx ctx);
 
 #endif
