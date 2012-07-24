@@ -31,6 +31,10 @@
 #include "arch.h"
 #include "db.h"
 
+/* state values */
+#define _DB_STA_VALID			0xA1B2C3D4
+#define _DB_STA_FREED			0x1A2B3C4D
+
 /* the priority field is fairly simple - without any user hints, or in the case
  * of a hint "tie", we give higher priority to syscalls with less chain nodes
  * (filter is easier to evaluate) */
@@ -338,6 +342,9 @@ void db_reset(struct db_filter *db, uint32_t def_action)
 	db->attr.act_default = def_action;
 	db->attr.act_badarch = SCMP_ACT_KILL;
 	db->attr.nnp_enable = 1;
+
+	/* set the state */
+	db->state = _DB_STA_VALID;
 }
 
 /**
@@ -356,6 +363,8 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 	db = malloc(sizeof(*db));
 	if (db == NULL)
 		return NULL;
+
+	/* clear the buffer for the first time and set the arch */
 	memset(db, 0, sizeof(*db));
 	db->arch = arch;
 
@@ -378,9 +387,27 @@ void db_release(struct db_filter *db)
 	if (db == NULL)
 		return;
 
+	/* set the state, just in case */
+	db->state = _DB_STA_FREED;
+
 	/* free and reset the DB */
 	db_reset(db, 0);
 	free(db);
+}
+
+/**
+ * Validate a filter DB
+ * @param db the seccomp filter DB
+ *
+ * This function validates a seccomp filter DB.  Returns zero if the DB is
+ * valid, negative values on failure.
+ *
+ */
+int db_valid(struct db_filter *db)
+{
+	if (db != NULL && db->state == _DB_STA_VALID)
+		return 0;
+	return -EINVAL;
 }
 
 /**

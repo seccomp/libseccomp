@@ -36,6 +36,19 @@
 #include "gen_bpf.h"
 #include "system.h"
 
+/**
+ * Validate a filter context
+ * @param ctx the filter context
+ *
+ * Attempt to validate the provided filter context.  Returns zero if the
+ * context is valid, negative values on failure.
+ *
+ */
+static int _ctx_valid(const scmp_filter_ctx *ctx)
+{
+	return db_valid((struct db_filter *)ctx);
+}
+
 /* NOTE - function header comment in include/seccomp.h */
 scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
@@ -48,7 +61,7 @@ scmp_filter_ctx seccomp_init(uint32_t def_action)
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
-	if (ctx == NULL || db_action_valid(def_action) < 0)
+	if (_ctx_valid(ctx) || db_action_valid(def_action) < 0)
 		return -EINVAL;
 
 	db_reset((struct db_filter *)ctx, def_action);
@@ -58,7 +71,7 @@ int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 /* NOTE - function header comment in include/seccomp.h */
 void seccomp_release(scmp_filter_ctx ctx)
 {
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return;
 
 	db_release((struct db_filter *)ctx);
@@ -71,7 +84,7 @@ int seccomp_load(const scmp_filter_ctx ctx)
 	struct db_filter *filter;
 	struct bpf_program *program;
 
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 	filter = (struct db_filter *)ctx;
 
@@ -97,7 +110,7 @@ int seccomp_load(const scmp_filter_ctx ctx)
 int seccomp_attr_get(const scmp_filter_ctx ctx,
 		     enum scmp_filter_attr attr, uint32_t *value)
 {
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 
 	return db_attr_get((const struct db_filter *)ctx, attr, value);
@@ -107,7 +120,7 @@ int seccomp_attr_get(const scmp_filter_ctx ctx,
 int seccomp_attr_set(scmp_filter_ctx ctx,
 		     enum scmp_filter_attr attr, uint32_t value)
 {
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 
 	return db_attr_set((struct db_filter *)ctx, attr, value);
@@ -119,7 +132,7 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 	int rc;
 	struct db_filter *filter;
 
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 	filter = (struct db_filter *)ctx;
 
@@ -163,7 +176,7 @@ static int _seccomp_rule_add(struct db_filter *filter,
 	struct db_api_arg *chain = NULL;
 	struct scmp_arg_cmp arg_data;
 
-	if (filter == NULL)
+	if (db_valid(filter))
 		return -EINVAL;
 
 	rc = db_action_valid(action);
@@ -261,7 +274,7 @@ int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 {
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 
 	return gen_pfc_generate((struct db_filter *)ctx, fd);
@@ -273,7 +286,7 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 	int rc;
 	struct bpf_program *program;
 
-	if (ctx == NULL)
+	if (_ctx_valid(ctx))
 		return -EINVAL;
 
 	program = gen_bpf_generate((struct db_filter *)ctx);
