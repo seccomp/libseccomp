@@ -21,7 +21,7 @@ In order to build the library you should follow the familiar three step
 process used by most applications:
 
 	# ./configure
-	# make
+	# make [V=0|1]
 	# make install
 
 As usual, running "./configure -h" will display a list of build-time

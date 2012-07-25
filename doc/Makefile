@@ -57,4 +57,4 @@ all:
 install: install_man3
 
 install_man3: $(MAN3)
-	$(INSTALL_MAN_MACRO) man3 "manpages"
+	$(INSTALL_MAN3_MACRO)

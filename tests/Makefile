@@ -72,4 +72,4 @@ $(TESTS):
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) -f $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(OBJS)
+	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(OBJS)

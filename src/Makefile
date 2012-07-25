@@ -64,4 +64,4 @@ install: $(LIB_SHARED)
 	$(INSTALL_LIB_MACRO)
 
 clean:
-	$(RM) -f $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
+	$(RM) $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)

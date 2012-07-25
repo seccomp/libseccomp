@@ -53,4 +53,4 @@ $(TOOLS):
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) -f $(DEPS) $(TOOLS)
+	$(RM) $(DEPS) $(TOOLS)

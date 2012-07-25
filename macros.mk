@@ -40,6 +40,8 @@ TOPDIR := $(shell \
 # build configuration
 #
 
+V ?= 0
+
 CPPFLAGS += -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
@@ -55,6 +57,8 @@ LN ?= ln
 MV ?= mv
 CAT ?= cat
 ECHO ?= echo
+TAR ?= tar
+MKDIR ?= mkdir
 
 SED ?= sed
 AWK ?= awk
@@ -92,66 +96,63 @@ VERSION_HDR = version.h
 # build macros
 #
 
-ARCHIVE = @echo " AR $@ (add/update: $?)"; $(AR) -cru $@ $?;
-COMPILE = @echo " CC $@"; $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<;
-COMPILE_EXEC = @echo " CC $@"; $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ $< $(LDFLAGS);
-LINK_EXEC = @echo " LD $@"; $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
-LINK_LIB = \
-	@link_lib_func() { \
-		name=$${1//.so.*/.so}.$(VERSION_MAJOR); \
-		echo " LD $@ ($$name)"; \
-		$(GCC) $(LDFLAGS) -o $@ $^ -shared -Wl,-soname=$$name; \
-	}; \
-	link_lib_func $@;
+ifeq ($(V),0)
+	ARCHIVE = @echo " AR $@ (add/update: $?)";
+endif
+ARCHIVE += $(AR) -cru $@ $?;
+
+ifeq ($(V),0)
+	COMPILE = @echo " CC $@";
+endif
+COMPILE += $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<;
+
+ifeq ($(V),0)
+	COMPILE_EXEC = @echo " CC $@";
+endif
+COMPILE_EXEC += $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ $< $(LDFLAGS);
+
+ifeq ($(V),0)
+	LINK_EXEC = @echo " LD $@";
+endif
+LINK_EXEC += $(GCC) $(LDFLAGS) -o $@ $^ $(LIBFLAGS);
+
+ifeq ($(V),0)
+	LINK_LIB = @echo " LD $@" \
+	       "($(patsubst %.so.$(VERSION_RELEASE),%.so.$(VERSION_MAJOR),$@))";
+endif
+LINK_LIB += $(GCC) $(LDFLAGS) -o $@ $^ -shared \
+	-Wl,-soname=$(patsubst %.so.$(VERSION_RELEASE),%.so.$(VERSION_MAJOR),$@)
 
 #
 # install macros
 #
 
-INSTALL_MACRO = \
-	@install_func() { \
-		dir="$$1"; \
-		if [[ -n "$$3" ]]; then \
-			$(ECHO) " INSTALL $$3"; \
-		else \
-			$(ECHO) " INSTALL $$2 ($$dir/$$2)"; \
-		fi; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$$2 "$$dir"; \
-	}; \
-	install_func
+ifeq ($(V),0)
+	INSTALL_MACRO = \
+	  @echo " INSTALL $$(cat /proc/$$$$/cmdline | awk '{print $$(NF-1)}')" \
+	   " ($$(cat /proc/$$$$/cmdline | awk '{print $$NF}'))";
+endif
+INSTALL_MACRO += \
+	$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644
 
-INSTALL_SBIN_MACRO = \
-	@install_sbin_func() { \
-		dir="$(INSTALL_SBIN_DIR)"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
-		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
-		fi; \
+ifeq ($(V),0)
+	INSTALL_SBIN_MACRO = @echo " INSTALL $^ ($(INSTALL_SBIN_DIR))";
+endif
+INSTALL_SBIN_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
+			-d "$(INSTALL_SBIN_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$$dir"; \
-	}; \
-	install_sbin_func
+			$^ "$(INSTALL_SBIN_DIR)"; \
 
-INSTALL_BIN_MACRO = \
-	@install_bin_func() { \
-		dir="$(INSTALL_BIN_DIR)"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
-		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
-		fi; \
+ifeq ($(V),0)
+	INSTALL_BIN_MACRO = @echo " INSTALL $^ ($(INSTALL_BIN_DIR))";
+endif
+INSTALL_BIN_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
+			-d "$(INSTALL_BIN_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$$dir"; \
-	}; \
-	install_bin_func
+			$^ "$(INSTALL_BIN_DIR)"; \
+
 
 INSTALL_LIB_MACRO = \
 	@install_lib_func() { \
@@ -178,35 +179,23 @@ INSTALL_LIB_MACRO = \
 	}; \
 	install_lib_func
 
-INSTALL_INC_MACRO = \
-	@install_inc_func() { \
-		dir="$(INSTALL_INC_DIR)"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
-		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
-		fi; \
+ifeq ($(V),0)
+	INSTALL_INC_MACRO = @echo " INSTALL $^ ($(INSTALL_INC_DIR))";
+endif
+INSTALL_INC_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
+			-d "$(INSTALL_INC_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$$dir"; \
-	}; \
-	install_inc_func
+			$^ "$(INSTALL_INC_DIR)"; \
 
-INSTALL_MAN_MACRO = \
-	@install_man_func() { \
-		dir="$(INSTALL_MAN_DIR)"/"$$1"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
-		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
-		fi; \
+ifeq ($(V),0)
+	INSTALL_MAN3_MACRO = @echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man3)";
+endif
+INSTALL_MAN3_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
+			-d "$(INSTALL_MAN_DIR)/man3"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$$dir"; \
-	}; \
-	install_man_func
+			$^ "$(INSTALL_MAN_DIR)/man3"; \
 
 #
 # default build targets
