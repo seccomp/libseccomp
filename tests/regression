@@ -280,6 +280,7 @@ function run_test_bpf_sim_fuzz() {
 		run_test_command "$testnumstr" "$testname -b > $tmpfile"
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "$testname rc=$?"
+			stats_error=$(($stats_error+1))
 			return
 		fi
 
@@ -290,9 +291,12 @@ function run_test_bpf_sim_fuzz() {
 		    ${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} ${arg[5]}`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
+			stats_error=$(($stats_error+1))
 		else
 			print_result $testnumstr "SUCCESS" ""
+			stats_success=$(($stats_success+1))
 		fi
+		stats_all=$(($stats_all+1))
 
 		subtestnum=$(($subtestnum+1))
 	done
@@ -362,6 +366,7 @@ function run_test_bpf_sim() {
 	if [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
 		print_result $testnumstr "INFO" \
 		       "Test skipped due to test/system architecture difference"
+		stats_skipped=$(($stats_skipped+1))
 		return
 	fi
 
@@ -372,6 +377,7 @@ function run_test_bpf_sim() {
 		low_syscall=`../tools/sys_resolver $low_syscall`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "sys_resolver rc=$?"
+			stats_error=$(($stats_error+1))
 			return
 		fi
 	fi
@@ -380,6 +386,7 @@ function run_test_bpf_sim() {
 		high_syscall=`../tools/sys_resolver $high_syscall`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "sys_resolver rc=$?"
+			stats_error=$(($stats_error+1))
 			return
 		fi
 	fi
@@ -467,6 +474,7 @@ function run_test_bpf_sim() {
 		run_test_command "$testnumstr" "$testname -b > $tmpfile"
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "$testname rc=$?"
+			stats_error=$(($stats_error+1))
 			return
 		fi
 
@@ -476,12 +484,16 @@ function run_test_bpf_sim() {
 		    ${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} ${arg[5]}`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
+			stats_error=$(($stats_error+1))
 		elif [[ "$action" != "$result" ]]; then
 			print_result $testnumstr "FAILURE" \
 						 "bpf_sim resulted in $action"
+			stats_failure=$(($stats_failure+1))
 		else
 			print_result $testnumstr "SUCCESS" ""
+			stats_success=$(($stats_success+1))
 		fi
+		stats_all=$(($stats_all+1))
 
 		subtestnum=$(($subtestnum+1))
 	done
@@ -512,9 +524,12 @@ function run_test_basic() {
 	run_test_command "$1" "$2"
 	if [[ $? -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$?"
+		stats_failure=$(($stats_failure+1))
 	else
 		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
 	fi
+	stats_all=$(($stats_all+1))
 }
 
 #
@@ -539,6 +554,7 @@ function run_test() {
 		run_test_bpf_sim_fuzz "$1" $2 "$3"
 	else
 		print_result $testnumstr "ERROR" "test type $4 not supported"
+		stats_error=$(($stats_error+1))
 	fi
 }
 
@@ -569,7 +585,7 @@ function run_tests() {
 		fi
 
 		# Print batch name to log file
-		echo "batch name: $batch_name" >&$logfd
+		echo " batch name: $batch_name" >&$logfd
 
 		# Loop through each line of the file and run the requested tests
 		while read line; do
@@ -585,7 +601,7 @@ function run_tests() {
 				test_type=`echo "$line" |
 					    sed -e 's/^test type: //;'`
 				# Print test type to log file
-				echo "test type: $test_type" >&$logfd
+				echo " test type: $test_type" >&$logfd
 				continue
 			elif [[ ${single_list[@]} ]]; then
 				for i in ${single_list[@]}; do
@@ -627,6 +643,11 @@ tmpfile=""
 tmpdir=""
 use_valgrind=false
 verbose=false
+stats_all=0
+stats_skipped=0
+stats_success=0
+stats_failure=0
+stats_error=0
 
 while getopts "ab:gl:s:t:vh" opt; do
 	case $opt in
@@ -697,6 +718,12 @@ fi
 echo "=============== `date` ===============" >&$logfd
 echo "Regression Test Report (\"regression $*\")" >&$logfd
 run_tests
+echo "Regression Test Summary" >&$logfd
+echo " tests run: $stats_all" >&$logfd
+echo " tests skipped: $stats_skipped" >&$logfd
+echo " tests passed: $stats_success" >&$logfd
+echo " tests failed: $stats_failure" >&$logfd
+echo " tests errored: $stats_error" >&$logfd
 echo "============================================================" >&$logfd
 
 # cleanup and exit
