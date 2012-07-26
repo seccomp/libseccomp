@@ -63,8 +63,9 @@ EOF
 # Generate a string representing the test number
 #
 # Arguments:
-#     1    value of the test number from the input test data file
-#     2    value of the subtest number that corresponds to argument 1
+#     1    string containing the batch name
+#     2    value of the test number from the input test data file
+#     3    value of the subtest number that corresponds to argument 1
 #
 #  The actual test number from the input test data file is 1 for the first
 #  test found in the file, 2 for the second, etc.
@@ -76,7 +77,7 @@ EOF
 #  zero if the corresponding test data is generated.
 #
 function generate_test_num() {
-	local testnumstr=$(printf '%03d-%05d' $1 $2)
+	local testnumstr=$(printf '%s%%%%%03d-%05d' "$1" $2 $3)
 	echo "$testnumstr"
 }
 
@@ -213,8 +214,9 @@ function generate_random_data() {
 #     Arg0-5 - The fuzzed syscall arg values to be simulated against the filter
 #
 # Arguments:
-#     1    value of test number from batch file
-#     2    string containing line of test data from batch file
+#     1    string containing the batch name
+#     2    value of test number from batch file
+#     3    string containing line of test data from batch file
 #
 function run_test_bpf_sim_fuzz() {
 	local -a COL_WIDTH=(26 17 17 17 17 17 17)
@@ -223,12 +225,12 @@ function run_test_bpf_sim_fuzz() {
 	local -a data
 
 	#Begin splitting the test data from the line into individual variables
-	local line=($2)
+	local line=($3)
 	local testname=${line[0]}
 	local stress_count=${line[1]}
 
 	# Generate the test number string for the line of batch test data
-	local testnumstr=$(generate_test_num $1 0)
+	local testnumstr=$(generate_test_num "$1" $2 0)
 
 	# Set up log file test data line for the input test data.  Spacing is
 	# added to align the output in the correct columns.
@@ -250,7 +252,7 @@ function run_test_bpf_sim_fuzz() {
 		testdata=""
 
 		# Get the generated sub-test num string
-		testnumstr=$(generate_test_num $1 $subtestnum)
+		testnumstr=$(generate_test_num "$1" $2 $subtestnum)
 
 		# Set up log file test data line for this individual test.
 		# Spacing is added to align the output in the correct columns.
@@ -315,8 +317,9 @@ function run_test_bpf_sim_fuzz() {
 # test is run.
 #
 # Arguments:
-#     1    value of test number from batch file
-#     2    string containing line of test data from batch file
+#     1    string containing the batch name
+#     2    value of test number from batch file
+#     3    string containing line of test data from batch file
 #
 function run_test_bpf_sim() {
 	local LOW=1
@@ -329,7 +332,7 @@ function run_test_bpf_sim() {
 	local -a data
 
 	#Begin splitting the test data from the line into individual variables
-	local line=($2)
+	local line=($3)
 	local testname=${line[0]}
 	local testarch=${line[1]}
 	local low_syscall  #line[2]
@@ -339,7 +342,7 @@ function run_test_bpf_sim() {
 	local result=${line[9]}
 
 	# Generate the test number string for the line of batch test data
-	local testnumstr=$(generate_test_num $1 0)
+	local testnumstr=$(generate_test_num "$1" $2 0)
 
 	# Set up log file test data line for the input test data.  Spacing is
 	# added to align the output in the correct columns.
@@ -421,7 +424,7 @@ function run_test_bpf_sim() {
 
 		if $rangetest; then
 			# Get the generated sub-test num string
-			testnumstr=$(generate_test_num $1 $subtestnum)
+			testnumstr=$(generate_test_num "$1" $2 $subtestnum)
 
 			# Format any empty arg vals to print to log file
 			for i in {0..5}; do
@@ -518,23 +521,24 @@ function run_test_basic() {
 # Run a single test from the specified batch
 #
 # Arguments:
-#     1    value of test number from batch file
-#     2    string containing line of test data from batch file
-#     3    string containing test type that this test belongs to
+#     1    string containing the batch name
+#     2    value of test number from batch file
+#     3    string containing line of test data from batch file
+#     4    string containing test type that this test belongs to
 #
 function run_test() {
 	# Generate the test number string for the line of batch test data
-	local testnumstr=$(generate_test_num $1 0)
+	local testnumstr=$(generate_test_num "$1" $2 0)
 
 	# Execute the function corresponding to the test type
-	if [[ "$3" == "basic" ]]; then
-		run_test_basic "$testnumstr" "$2"
-	elif [[ "$3" == "bpf-sim" ]]; then
-		run_test_bpf_sim $1 "$2"
-	elif [[ "$3" == "bpf-sim-fuzz" ]]; then
-		run_test_bpf_sim_fuzz $1 "$2"
+	if [[ "$4" == "basic" ]]; then
+		run_test_basic "$testnumstr" "$3"
+	elif [[ "$4" == "bpf-sim" ]]; then
+		run_test_bpf_sim "$1" $2 "$3"
+	elif [[ "$4" == "bpf-sim-fuzz" ]]; then
+		run_test_bpf_sim_fuzz "$1" $2 "$3"
 	else
-		print_result $testnumstr "ERROR" "test type $3 not supported"
+		print_result $testnumstr "ERROR" "test type $4 not supported"
 	fi
 }
 
@@ -588,14 +592,16 @@ function run_tests() {
 					if [ $i -eq $testnum ]; then
 						# If we're here, we're running a
 						# requested individual test.
-						run_test $testnum "$line" \
+						run_test "$batch_name" \
+							 $testnum "$line" \
 							 "$test_type"
 					fi
 				done
 			else
 				# If we're here, we're running a test from a
 				# requested batch or from all tests.
-				run_test $testnum "$line" "$test_type"
+				run_test "$batch_name" \
+					 $testnum "$line" "$test_type"
 			fi
 			testnum=$(($testnum+1))
 		done < "$file"
