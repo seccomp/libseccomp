@@ -128,56 +128,19 @@ LINK_LIB += $(GCC) $(LDFLAGS) -o $@ $^ -shared \
 #
 
 ifeq ($(V),0)
-	INSTALL_MACRO = \
-	  @echo " INSTALL $$(cat /proc/$$$$/cmdline | awk '{print $$(NF-1)}')" \
-	   " ($$(cat /proc/$$$$/cmdline | awk '{print $$NF}'))";
+	INSTALL_LIB_MACRO = @echo " INSTALL $^ ($(INSTALL_LIB_DIR)/$^)";
 endif
-INSTALL_MACRO += \
-	$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644
-
-ifeq ($(V),0)
-	INSTALL_SBIN_MACRO = @echo " INSTALL $^ ($(INSTALL_SBIN_DIR))";
-endif
-INSTALL_SBIN_MACRO += \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$(INSTALL_SBIN_DIR)"; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$(INSTALL_SBIN_DIR)"; \
-
-ifeq ($(V),0)
-	INSTALL_BIN_MACRO = @echo " INSTALL $^ ($(INSTALL_BIN_DIR))";
-endif
-INSTALL_BIN_MACRO += \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$(INSTALL_BIN_DIR)"; \
-		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$(INSTALL_BIN_DIR)"; \
-
-
-INSTALL_LIB_MACRO = \
-	@install_lib_func() { \
-		dir="$(INSTALL_LIB_DIR)"; \
-		if [[ -n "$$2" ]]; then \
-			$(ECHO) " INSTALL $$2"; \
-		else \
-			$(ECHO) " INSTALL $^ ($$dir/$^)"; \
-		fi; \
+INSTALL_LIB_MACRO += \
 		basename=$$(echo $^ | sed -e 's/.so.*$$/.so/'); \
 		soname=$$(objdump -p $^ | grep "SONAME" | awk '{print $$2}'); \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
-			-d "$$dir"; \
+			-d "$(INSTALL_LIB_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
-			$^ "$$dir"; \
-		if [[ "$$soname" != "$^" ]]; then \
-			(cd "$$dir"; $(RM) -f $$soname); \
-			(cd "$$dir"; $(LN) -s $^ $$soname); \
-		fi; \
-		if [[ "$$basename" != "$^" ]]; then \
-			(cd "$$dir"; $(RM) -f $$basename); \
-			(cd "$$dir"; $(LN) -s $^ $$basename); \
-		fi; \
-	}; \
-	install_lib_func
+			$^ "$(INSTALL_LIB_DIR)"; \
+		(cd "$(INSTALL_LIB_DIR)"; $(RM) $$soname); \
+		(cd "$(INSTALL_LIB_DIR)"; $(LN) -s $^ $$soname); \
+		(cd "$(INSTALL_LIB_DIR)"; $(RM) $$basname); \
+		(cd "$(INSTALL_LIB_DIR)"; $(LN) -s $^ $$basename);
 
 ifeq ($(V),0)
 	INSTALL_PC_MACRO = \
@@ -198,7 +161,7 @@ INSTALL_INC_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$(INSTALL_INC_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$(INSTALL_INC_DIR)"; \
+			$^ "$(INSTALL_INC_DIR)";
 
 ifeq ($(V),0)
 	INSTALL_MAN3_MACRO = @echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man3)";
@@ -207,7 +170,7 @@ INSTALL_MAN3_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$(INSTALL_MAN_DIR)/man3"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
-			$^ "$(INSTALL_MAN_DIR)/man3"; \
+			$^ "$(INSTALL_MAN_DIR)/man3";
 
 #
 # default build targets
