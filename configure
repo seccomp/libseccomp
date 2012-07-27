@@ -188,14 +188,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 # validate the options
-if [[ ! -d $opt_prefix ]]; then
+if [[ -e "$opt_prefix" && ! -d "$opt_prefix" ]]; then
 	msg_error "install prefix ($opt_prefix) is not a directory"
 	exit 1
 fi
 if [[ -z $opt_libdir ]]; then
 	opt_libdir="$opt_prefix/lib"
 fi
-if [[ ! -d $opt_libdir ]]; then
+if [[ -e "$opt_libdir" && ! -d "$opt_libdir" ]]; then
 	msg_error "libdir ($opt_libdir) is not a directory"
 	exit 1
 fi

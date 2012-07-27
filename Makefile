@@ -85,7 +85,7 @@ tools: src
 
 install: $(SUBDIRS_BUILD)
 	@$(ECHO) "INFO: installing in $(INSTALL_PREFIX) ..."
-	$(INSTALL_MACRO) libseccomp.pc $(INSTALL_LIB_DIR)/pkgconfig
+	$(INSTALL_PC_MACRO) libseccomp.pc
 	@for dir in $(SUBDIRS_INSTALL); do \
 		$(ECHO) "INFO: installing from $$dir/"; \
 		$(MAKE) -C $$dir install; \

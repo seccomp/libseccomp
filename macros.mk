@@ -180,6 +180,18 @@ INSTALL_LIB_MACRO = \
 	install_lib_func
 
 ifeq ($(V),0)
+	INSTALL_PC_MACRO = \
+	    @echo " INSTALL $$(cat /proc/$$$$/cmdline | awk '{print $$(NF)}')" \
+		  " ($(INSTALL_LIB_DIR)/pkgconfig)";
+endif
+INSTALL_PC_MACRO += \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$(INSTALL_LIB_DIR)/pkgconfig"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			"$$(cat /proc/$$$$/cmdline | awk '{print $$(NF)}')" \
+			"$(INSTALL_LIB_DIR)/pkgconfig"; \#
+
+ifeq ($(V),0)
 	INSTALL_INC_MACRO = @echo " INSTALL $^ ($(INSTALL_INC_DIR))";
 endif
 INSTALL_INC_MACRO += \
