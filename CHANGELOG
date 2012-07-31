@@ -2,5 +2,12 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
+* Version 1.0.0 - July 31, 2012
+- Change the API to be context-aware; eliminates all internal state but breaks
+  compatibility with the previous 0.1.0 release
+- Added support for multiple build jobs ("make -j8") and verbose builds using
+  the "V=1" build variable ("make V=1")
+- Minor tweaks to the regression test script output
+
 * Version 0.1.0 - June 8, 2012
 - Initial release
