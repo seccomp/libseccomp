@@ -25,6 +25,10 @@
 #include <inttypes.h>
 #include <asm/unistd.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * types
  */
@@ -457,5 +461,9 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_shmctl
 #define __NR_shmctl		__PNR_shmctl
 #endif /* __NR_shmctl */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
