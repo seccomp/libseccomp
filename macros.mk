@@ -63,6 +63,8 @@ MKDIR ?= mkdir
 SED ?= sed
 AWK ?= awk
 
+PYTHON ?= /usr/bin/env python
+
 # we require gcc specific functionality
 GCC ?= gcc
 
@@ -96,10 +98,28 @@ VERSION_HDR = version.h
 # build macros
 #
 
+PY_DISTUTILS = \
+	VERSION_RELEASE="$(VERSION_RELEASE)" \
+	CFLAGS="$(CFLAGS) $(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	$(PYTHON) ./setup.py
+
 ifeq ($(V),0)
-	ARCHIVE = @echo " AR $@ (add/update: $?)";
+	PY_BUILD = @echo " PYTHON build";
 endif
-ARCHIVE += $(AR) -cru $@ $?;
+PY_BUILD += $(PY_DISTUTILS)
+ifeq ($(V),0)
+	PY_BUILD += -q
+endif
+PY_BUILD += build
+
+ifeq ($(V),0)
+	PY_INSTALL = @echo " PYTHON install";
+endif
+PY_INSTALL += $(PY_DISTUTILS)
+ifeq ($(V),0)
+	PY_INSTALL += -q
+endif
+PY_INSTALL += install
 
 ifeq ($(V),0)
 	COMPILE = @echo " CC $@";
@@ -110,6 +130,11 @@ ifeq ($(V),0)
 	COMPILE_EXEC = @echo " CC $@";
 endif
 COMPILE_EXEC += $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ $< $(LDFLAGS);
+
+ifeq ($(V),0)
+	ARCHIVE = @echo " AR $@";
+endif
+ARCHIVE += $(AR) -cru $@ $?;
 
 ifeq ($(V),0)
 	LINK_EXEC = @echo " LD $@";
@@ -164,7 +189,8 @@ INSTALL_INC_MACRO += \
 			$^ "$(INSTALL_INC_DIR)";
 
 ifeq ($(V),0)
-	INSTALL_MAN3_MACRO = @echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man3)";
+	INSTALL_MAN3_MACRO = \
+		@echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man3)";
 endif
 INSTALL_MAN3_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \

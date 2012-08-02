@@ -46,12 +46,22 @@ OBJS = \
 DEPS = $(OBJS:%.o=%.d)
 
 #
+# bindings configuration
+#
+
+BINDINGS =
+
+ifeq ($(CONF_BINDINGS_PYTHON), 1)
+	BINDINGS += python
+endif
+
+#
 # targets
 #
 
-.PHONY: all install clean
+.PHONY: all install clean python
 
-all: $(LIB_STATIC) $(LIB_SHARED)
+all: $(LIB_STATIC) $(LIB_SHARED) $(BINDINGS)
 
 -include $(DEPS)
 
@@ -61,8 +71,20 @@ $(LIB_STATIC): $(OBJS)
 $(LIB_SHARED): $(OBJS)
 	$(LINK_LIB)
 
+python: $(LIB_STATIC)
+	@$(ECHO) ">> INFO: building in directory $@/ ..."
+	@$(MAKE) -C $@
+
 install: $(LIB_SHARED)
 	$(INSTALL_LIB_MACRO)
+	@for dir in $(BINDINGS); do \
+		$(ECHO) ">> INFO: installing from $$dir/"; \
+		$(MAKE) -C $$dir install; \
+	done
 
 clean:
 	$(RM) $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
+	@for dir in $(BINDINGS); do \
+		$(MAKE) -C $$dir clean; \
+	done
+

@@ -25,6 +25,7 @@
 opt_prefix="/usr/local"
 opt_libdir=""
 opt_sysinc_seccomp="yes"
+opt_bindings_python="no"
 
 # output files
 cnf_mk_file="configure.mk"
@@ -33,9 +34,15 @@ cnf_h_file="configure.h"
 ####
 # functions
 
+function test_deps() {
+	[[ -z "$1" ]] && return 0
+	which "$1" >& /dev/null && return 0
+	return 1
+}
+
 function verify_deps() {
 	[[ -z "$1" ]] && return
-	if ! which "$1" >& /dev/null; then
+	if ! test_deps "$1"; then
 		echo "error: install \"$1\" and include it in your \$PATH"
 		exit 1
 	fi
@@ -54,6 +61,8 @@ Options:
 * installation configuration
   --prefix=PREFIX	installation base [/usr/local]
   --libdir=DIR		library directory [/usr/local/lib]
+* build options
+  --enable-python	build the python bindings, requires cython
 EOF
 }
 
@@ -64,6 +73,7 @@ function msg_summary() {
   installation base:	$opt_prefix
   library directory:	$opt_libdir
   use system includes:	$opt_sysinc_seccomp
+  python bindings:	$opt_bindings_python
 EOF
 }
 
@@ -162,7 +172,7 @@ verify_deps getopt
 
 # parse the command line options
 opt_str="$@"
-opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libdir:" -- "$@")
+opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libdir:,enable-python" -- "$@")
 eval set -- "$opt"
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -173,6 +183,10 @@ while [[ $# -gt 0 ]]; do
 	--libdir)
 		opt_libdir="$2"
 		shift 2
+		;;
+	--enable-python)
+		opt_bindings_python="yes"
+		shift
 		;;
 	-h|--help)
 		msg_usage
@@ -198,6 +212,12 @@ fi
 if [[ -e "$opt_libdir" && ! -d "$opt_libdir" ]]; then
 	msg_error "libdir ($opt_libdir) is not a directory"
 	exit 1
+fi
+if [[ "$opt_bindings_python" = "yes" ]]; then
+	if ! test_deps cython; then
+		msg_error "python bindings require the cython package"
+		exit 1
+	fi
 fi
 
 #
@@ -243,6 +263,7 @@ cnf_header
 cnf_mk_entry "CONF_INSTALL_PREFIX" "$opt_prefix"
 cnf_mk_entry "CONF_INSTALL_LIBDIR" "$opt_libdir"
 cnf_entry "CONF_SYSINC_SECCOMP" "$opt_sysinc_seccomp"
+cnf_entry "CONF_BINDINGS_PYTHON" "$opt_bindings_python"
 
 # configuration footer
 cnf_footer
