@@ -13,6 +13,8 @@ seccomp_export_bpf, seccomp_export_pfc \- Export the seccomp filter
 .sp
 .BI "int seccomp_export_bpf(const scmp_filter_ctx " ctx ", int " fd ");"
 .BI "int seccomp_export_pfc(const scmp_filter_ctx " ctx ", int " fd ");"
+.sp
+Link with \fI\-lseccomp\fP.
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION

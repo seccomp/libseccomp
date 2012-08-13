@@ -26,6 +26,8 @@ seccomp_rule_add, seccomp_rule_add_exact \- Add a seccomp filter rule
 .BI "                     int " syscall ", unsigned int " arg_cnt ", " ... ");"
 .BI "int seccomp_rule_add_exact(scmp_filter_ctx " ctx ", uint32_t " action ","
 .BI "                           int " syscall ", unsigned int " arg_cnt ", " ... ");"
+.sp
+Link with \fI\-lseccomp\fP.
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION

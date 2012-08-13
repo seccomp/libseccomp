@@ -13,6 +13,8 @@ seccomp_init, seccomp_reset \- Initialize the seccomp filter state
 .sp
 .BI "scmp_filter_ctx seccomp_init(uint32_t " def_action ");"
 .BI "int seccomp_reset(scmp_filter_ctx " ctx ", uint32_t " def_action ");"
+.sp
+Link with \fI\-lseccomp\fP.
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION

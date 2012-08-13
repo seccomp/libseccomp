@@ -16,6 +16,8 @@ seccomp_attr_set, seccomp_attr_get \- Manage the seccomp filter attributes
 .BI "                     enum scmp_filter_attr " attr ", uint32_t " value ");"
 .BI "int seccomp_attr_get(scmp_filter_ctx " ctx ","
 .BI "                     enum scmp_filter_attr " attr ", uint32_t *" value ");"
+.sp
+Link with \fI\-lseccomp\fP.
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
 .SH DESCRIPTION
