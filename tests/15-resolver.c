@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp x86_64 Specific Code
+ * Seccomp Library test program
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,19 +19,18 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-#ifndef _ARCH_x86_64_H
-#define _ARCH_x86_64_H
+#include <seccomp.h>
 
-#include <inttypes.h>
+int main(int argc, char *argv[])
+{
+	if (seccomp_syscall_resolve_name("open") != __NR_open)
+		return 1;
 
-#include "arch.h"
-#include "system.h"
+	if (seccomp_syscall_resolve_name("socket") != __NR_socket)
+		return 1;
 
-#define x86_64_arg_count_max		6
+	if (seccomp_syscall_resolve_name("INVALID") != __NR_SCMP_ERROR)
+		return 1;
 
-extern const struct arch_syscall_def x86_64_syscall_table[];
-
-#define x86_64_arg_offset_lo(x)		(arch_arg_offset(x))
-#define x86_64_arg_offset_hi(x)		(arch_arg_offset(x) + 4)
-
-#endif
+	return 0;
+}

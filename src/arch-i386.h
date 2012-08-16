@@ -28,6 +28,8 @@
 
 #define i386_arg_count_max		6
 
+extern const struct arch_syscall_def i386_syscall_table[];
+
 int i386_syscall_rewrite(const struct arch_def *arch, int *syscall);
 
 int i386_filter_rewrite(const struct arch_def *arch,

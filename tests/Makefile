@@ -49,7 +49,8 @@ TESTS = 01-allow \
 	11-basic-errors \
 	12-basic-masked-ops \
 	13-attrs \
-	14-reset
+	14-reset \
+	15-resolver
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)

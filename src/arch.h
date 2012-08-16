@@ -45,8 +45,27 @@ struct arch_def {
 	} endian;
 };
 
-/* arch_def for the current process */
+/* arch_def for the current architecture */
 extern const struct arch_def arch_def_native;
+
+/* NOTE: Syscall mappings can be found by running the following commands
+ *	 on the specific architecture's include file:
+ *	   # gcc -E -dM <file> | grep '__NR_'
+ *	 where <file> in many cases is /usr/include/asm/unistd.h, however,
+ *	 depending on the architecture you may need to use a different header.
+ *	 Further, you can automatically format this list for use as a struct
+ *	 initializer with the following command:
+ *	   # gcc -E -dM <file> | grep '__NR_' | \
+ *	     sed -e 's/#define[ \t]\+__NR_//' | sort | \
+ *	     sed -e 's/\([^ \t]\+\)\([ \t]\+\)\([0-9]\+\)/\t{ \"\1\", \3 },/'
+ *	 Finally, when creating a table/array of this structure, the final
+ *	 sentinel entry should be "{ NULL, __NR_SCMP_ERROR }"; see the existing
+ *	 tables as an example.
+ */
+struct arch_syscall_def {
+	const char *name;
+	unsigned int num;
+};
 
 #define DATUM_MAX	((scmp_datum_t)-1)
 #define D64_LO(x)	((uint32_t)((uint64_t)(x) & 0x00000000ffffffff))
@@ -66,6 +85,9 @@ int arch_arg_count_max(const struct arch_def *arch);
 
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
+
+int arch_syscall_resolve_name(const struct arch_def *arch, const char *name);
+const char *arch_syscall_resolve_num(const struct arch_def *arch, int num);
 
 int arch_syscall_rewrite(const struct arch_def *arch, int *syscall);
 

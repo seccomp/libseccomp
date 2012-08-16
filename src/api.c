@@ -49,6 +49,21 @@ static int _ctx_valid(const scmp_filter_ctx *ctx)
 	return db_valid((struct db_filter *)ctx);
 }
 
+/**
+ * Validate a syscall number
+ * @param syscall the syscall number
+ *
+ * Attempt to perform basic syscall number validation.  Returns zero of the
+ * syscall appears valid, negative values on failure.
+ *
+ */
+static int _syscall_valid(int syscall)
+{
+	if (syscall <= -1 && syscall >= -99)
+		return -EINVAL;
+	return 0;
+}
+
 /* NOTE - function header comment in include/seccomp.h */
 scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
@@ -127,12 +142,21 @@ int seccomp_attr_set(scmp_filter_ctx ctx,
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+int seccomp_syscall_resolve_name(const char *name)
+{
+	if (name == NULL)
+		return -EINVAL;
+
+	return arch_syscall_resolve_name(&arch_def_native, name);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 {
 	int rc;
 	struct db_filter *filter;
 
-	if (_ctx_valid(ctx))
+	if (_ctx_valid(ctx) || _syscall_valid(syscall))
 		return -EINVAL;
 	filter = (struct db_filter *)ctx;
 
@@ -176,7 +200,7 @@ static int _seccomp_rule_add(struct db_filter *filter,
 	struct db_api_arg *chain = NULL;
 	struct scmp_arg_cmp arg_data;
 
-	if (db_valid(filter))
+	if (db_valid(filter) || _syscall_valid(syscall))
 		return -EINVAL;
 
 	rc = db_action_valid(action);

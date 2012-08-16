@@ -41,6 +41,7 @@ MAN3 = \
 	man/man3/seccomp_rule_add.3 \
 	man/man3/seccomp_rule_add_exact.3 \
 	man/man3/seccomp_syscall_priority.3 \
+	man/man3/seccomp_syscall_resolve_name.3 \
 	man/man3/seccomp_export_bpf.3 \
 	man/man3/seccomp_export_pfc.3 \
 	man/man3/seccomp_attr_set.3 \
