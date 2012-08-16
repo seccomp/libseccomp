@@ -21,8 +21,11 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <asm/bitsperlong.h>
 #include <linux/audit.h>
+
+#include <seccomp.h>
 
 #include "arch.h"
 #include "arch-i386.h"
@@ -113,6 +116,76 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 	default:
 		return -EDOM;
 	}
+}
+
+/**
+ * Resolve a syscall name to a number
+ * @param arch the architecture definition
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number based on the given
+ * architecture.  Returns the syscall number on success, including negative
+ * pseudo syscall numbers; returns -1 on failure.
+ *
+ */
+int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
+{
+	unsigned int iter;
+	const struct arch_syscall_def *table;
+
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		table = i386_syscall_table;
+		break;
+	case AUDIT_ARCH_X86_64:
+		table = x86_64_syscall_table;
+		break;
+	default:
+		return __NR_SCMP_ERROR;
+	}
+
+	/* XXX - plenty of room for future improvement here */
+	for (iter = 0; table[iter].name != NULL; iter++) {
+		if (strcmp(name, table[iter].name) == 0)
+			return table[iter].num;
+	}
+
+	return __NR_SCMP_ERROR;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param arch the architecture definition
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name based on the given
+ * architecture.  Returns a pointer to the syscall name string on success,
+ * including pseudo syscall names; returns NULL on failure.
+ *
+ */
+const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
+{
+	unsigned int iter;
+	const struct arch_syscall_def *table;
+
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		table = i386_syscall_table;
+		break;
+	case AUDIT_ARCH_X86_64:
+		table = x86_64_syscall_table;
+		break;
+	default:
+		return NULL;
+	}
+
+	/* XXX - plenty of room for future improvement here */
+	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
+		if (num == table[iter].num)
+			return table[iter].name;
+	}
+
+	return NULL;
 }
 
 /**
