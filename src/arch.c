@@ -59,6 +59,27 @@ const struct arch_def arch_def_native = {
 };
 
 /**
+ * Lookup the syscall table for an architecture
+ * @param token the architecure token
+ *
+ * Return the architecture's syscall table, returns NULL on failure.
+ *
+ */
+const struct arch_syscall_def *_arch_def_lookup(uint32_t token)
+{
+	switch (token) {
+	case AUDIT_ARCH_I386:
+		return i386_syscall_table;
+		break;
+	case AUDIT_ARCH_X86_64:
+		return x86_64_syscall_table;
+		break;
+	}
+
+	return NULL;
+}
+
+/**
  * Determine the maximum number of syscall arguments
  * @param arch the architecture definition
  *
@@ -133,16 +154,9 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	unsigned int iter;
 	const struct arch_syscall_def *table;
 
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		table = i386_syscall_table;
-		break;
-	case AUDIT_ARCH_X86_64:
-		table = x86_64_syscall_table;
-		break;
-	default:
+	table = _arch_def_lookup(arch->token);
+	if (table == NULL)
 		return __NR_SCMP_ERROR;
-	}
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].name != NULL; iter++) {
@@ -168,16 +182,9 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	unsigned int iter;
 	const struct arch_syscall_def *table;
 
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		table = i386_syscall_table;
-		break;
-	case AUDIT_ARCH_X86_64:
-		table = x86_64_syscall_table;
-		break;
-	default:
+	table = _arch_def_lookup(arch->token);
+	if (table == NULL)
 		return NULL;
-	}
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
@@ -186,6 +193,36 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	}
 
 	return NULL;
+}
+
+/**
+ * Translate the syscall number
+ * @param arch the architecture definition
+ * @param syscall the syscall number
+ *
+ * Translate the syscall number, in the context of the native architecure, to
+ * the provided architecure.  Returns zero on success, negative values on
+ * failure.
+ *
+ */
+int arch_syscall_translate(const struct arch_def *arch, int *syscall)
+{
+	int sc_num;
+	const char *sc_name;
+
+	if (arch->token != arch_def_native.token) {
+		sc_name = arch_syscall_resolve_num(&arch_def_native, *syscall);
+		if (sc_name == NULL)
+			return -EFAULT;
+
+		sc_num = arch_syscall_resolve_name(arch, sc_name);
+		if (sc_num == __NR_SCMP_ERROR)
+			return -EFAULT;
+
+		*syscall = sc_num;
+	}
+
+	return 0;
 }
 
 /**

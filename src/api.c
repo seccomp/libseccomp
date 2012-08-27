@@ -160,6 +160,10 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 		return -EINVAL;
 	filter = (struct db_filter *)ctx;
 
+	rc = arch_syscall_translate(filter->arch, &syscall);
+	if (rc < 0)
+		return rc;
+
 	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
 	 * the syscall for some arch specific reason */
 	if (syscall < 0) {
@@ -208,6 +212,10 @@ static int _seccomp_rule_add(struct db_filter *filter,
 		return rc;
 	if (action == filter->attr.act_default)
 		return -EPERM;
+
+	rc = arch_syscall_translate(filter->arch, &syscall);
+	if (rc < 0)
+		return rc;
 
 	/* collect the arguments for the filter rule */
 	chain_len_max = arch_arg_count_max(filter->arch);
