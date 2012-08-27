@@ -46,7 +46,7 @@
  */
 static int _ctx_valid(const scmp_filter_ctx *ctx)
 {
-	return db_valid((struct db_filter *)ctx);
+	return db_col_valid((struct db_filter_col *)ctx);
 }
 
 /**
@@ -67,20 +67,51 @@ static int _syscall_valid(int syscall)
 /* NOTE - function header comment in include/seccomp.h */
 scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
+	struct db_filter_col *col;
+	struct db_filter *db;
+
 	if (db_action_valid(def_action) < 0)
 		return NULL;
 
-	return db_init(&arch_def_native, def_action);
+	col = db_col_init(def_action);
+	if (col == NULL)
+		return NULL;
+	db = db_init(&arch_def_native);
+	if (db == NULL)
+		goto init_failure_col;
+
+	if (db_col_db_add(col, db) < 0)
+		goto init_failure_db;
+
+	return col;
+
+init_failure_db:
+	db_release(db);
+init_failure_col:
+	db_col_release(col);
+	return NULL;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
-	if (_ctx_valid(ctx) || db_action_valid(def_action) < 0)
+	int rc;
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
+	struct db_filter *db;
+
+	if (db_col_valid(col) || db_action_valid(def_action) < 0)
 		return -EINVAL;
 
-	db_reset((struct db_filter *)ctx, def_action);
-	return 0;
+	db_col_reset(col, def_action);
+
+	db = db_init(&arch_def_native);
+	if (db == NULL)
+		return -ENOMEM;
+	rc = db_col_db_add(col, db);
+	if (rc < 0)
+		db_release(db);
+
+	return rc;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -89,25 +120,25 @@ void seccomp_release(scmp_filter_ctx ctx)
 	if (_ctx_valid(ctx))
 		return;
 
-	db_release((struct db_filter *)ctx);
+	db_col_release((struct db_filter_col *)ctx);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_load(const scmp_filter_ctx ctx)
 {
 	int rc;
-	struct db_filter *filter;
+	struct db_filter_col *col;
 	struct bpf_program *program;
 
 	if (_ctx_valid(ctx))
 		return -EINVAL;
-	filter = (struct db_filter *)ctx;
+	col = (struct db_filter_col *)ctx;
 
-	program = gen_bpf_generate(filter);
+	program = gen_bpf_generate((struct db_filter_col *)ctx);
 	if (program == NULL)
 		return -ENOMEM;
-	/* attempt to set NO_NEW_PRIVS but don't fail if it doesn't work */
-	if (filter->attr.nnp_enable) {
+	/* attempt to set NO_NEW_PRIVS */
+	if (col->attr.nnp_enable) {
 		rc = prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 		if (rc < 0)
 			return -errno;
@@ -128,7 +159,7 @@ int seccomp_attr_get(const scmp_filter_ctx ctx,
 	if (_ctx_valid(ctx))
 		return -EINVAL;
 
-	return db_attr_get((const struct db_filter *)ctx, attr, value);
+	return db_col_attr_get((const struct db_filter_col *)ctx, attr, value);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -138,7 +169,7 @@ int seccomp_attr_set(scmp_filter_ctx ctx,
 	if (_ctx_valid(ctx))
 		return -EINVAL;
 
-	return db_attr_set((struct db_filter *)ctx, attr, value);
+	return db_col_attr_set((struct db_filter_col *)ctx, attr, value);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -153,31 +184,46 @@ int seccomp_syscall_resolve_name(const char *name)
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 {
-	int rc;
+	int rc = 0, rc_tmp;
+	unsigned int iter;
+	int syscall_tmp;
+	struct db_filter_col *col;
 	struct db_filter *filter;
 
 	if (_ctx_valid(ctx) || _syscall_valid(syscall))
 		return -EINVAL;
-	filter = (struct db_filter *)ctx;
+	col = (struct db_filter_col *)ctx;
 
-	rc = arch_syscall_translate(filter->arch, &syscall);
-	if (rc < 0)
-		return rc;
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		filter = col->filters[iter];
+		syscall_tmp = syscall;
 
-	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
-	 * the syscall for some arch specific reason */
-	if (syscall < 0) {
-		rc = arch_syscall_rewrite(filter->arch, &syscall);
-		if (rc < 0)
-			return rc;
+		rc_tmp = arch_syscall_translate(filter->arch, &syscall_tmp);
+		if (rc_tmp < 0)
+			goto syscall_priority_failure;
+
+		/* if this is a pseudo syscall (syscall < 0) then we need to
+		 * rewrite the syscall for some arch specific reason */
+		if (syscall_tmp < 0) {
+			rc_tmp = arch_syscall_rewrite(filter->arch,
+						      &syscall_tmp);
+			if (rc_tmp < 0)
+				goto syscall_priority_failure;
+		}
+
+		rc_tmp = db_syscall_priority(filter, syscall_tmp, priority);
+
+syscall_priority_failure:
+		if (rc == 0 && rc_tmp < 0)
+			rc = rc_tmp;
 	}
 
-	return db_syscall_priority(filter, syscall, priority);
+	return rc;
 }
 
 /**
  * Add a new rule to the current filter
- * @param filter the DB filter
+ * @param col the filter collection
  * @param strict the strict flag
  * @param action the filter action
  * @param syscall the syscall number
@@ -193,32 +239,30 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
  * zero on success, negative values on failure.
  *
  */
-static int _seccomp_rule_add(struct db_filter *filter,
+static int _seccomp_rule_add(struct db_filter_col *col,
 			     unsigned int strict, uint32_t action, int syscall,
 			     unsigned int arg_cnt, va_list arg_list)
 {
-	int rc;
+	int rc = 0, rc_tmp;
+	int syscall_tmp;
 	unsigned int iter;
 	unsigned int chain_len_max;
 	unsigned int arg_num;
+	struct db_filter *filter;
 	struct db_api_arg *chain = NULL;
 	struct scmp_arg_cmp arg_data;
 
-	if (db_valid(filter) || _syscall_valid(syscall))
+	if (db_col_valid(col) || _syscall_valid(syscall))
 		return -EINVAL;
 
 	rc = db_action_valid(action);
 	if (rc < 0)
 		return rc;
-	if (action == filter->attr.act_default)
+	if (action == col->attr.act_default)
 		return -EPERM;
 
-	rc = arch_syscall_translate(filter->arch, &syscall);
-	if (rc < 0)
-		return rc;
-
 	/* collect the arguments for the filter rule */
-	chain_len_max = arch_arg_count_max(filter->arch);
+	chain_len_max = ARG_COUNT_MAX;
 	chain = malloc(sizeof(*chain) * chain_len_max);
 	if (chain == NULL)
 		return -ENOMEM;
@@ -256,16 +300,30 @@ static int _seccomp_rule_add(struct db_filter *filter,
 		}
 	}
 
-	/* if this is a pseudo syscall (syscall < 0) then we need to rewrite
-	 * the rule for some arch specific reason */
-	if (syscall < 0) {
-		rc = arch_filter_rewrite(filter->arch, strict, &syscall, chain);
-		if (rc < 0)
-			goto rule_add_return;
-	}
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		filter = col->filters[iter];
+		syscall_tmp = syscall;
 
-	/* add the new rule to the existing filter */
-	rc = db_rule_add(filter, action, syscall, chain);
+		rc_tmp = arch_syscall_translate(filter->arch, &syscall_tmp);
+		if (rc_tmp < 0)
+			goto rule_add_failure;
+
+		/* if this is a pseudo syscall (syscall < 0) then we need to
+		 * rewrite the rule for some arch specific reason */
+		if (syscall_tmp < 0) {
+			rc_tmp = arch_filter_rewrite(filter->arch, strict,
+						     &syscall_tmp, chain);
+			if (rc_tmp < 0)
+				goto rule_add_failure;
+		}
+
+		/* add the new rule to the existing filter */
+		rc_tmp = db_rule_add(filter, action, syscall_tmp, chain);
+
+rule_add_failure:
+		if (rc == 0 && rc_tmp < 0)
+			rc = rc_tmp;
+	}
 
 rule_add_return:
 	if (chain != NULL)
@@ -281,7 +339,7 @@ int seccomp_rule_add(scmp_filter_ctx ctx,
 	va_list arg_list;
 
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add((struct db_filter *)ctx,
+	rc = _seccomp_rule_add((struct db_filter_col *)ctx,
 			       0, action, syscall, arg_cnt, arg_list);
 	va_end(arg_list);
 
@@ -296,7 +354,7 @@ int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
 	va_list arg_list;
 
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add((struct db_filter *)ctx,
+	rc = _seccomp_rule_add((struct db_filter_col *)ctx,
 			       1, action, syscall, arg_cnt, arg_list);
 	va_end(arg_list);
 
@@ -309,7 +367,7 @@ int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 	if (_ctx_valid(ctx))
 		return -EINVAL;
 
-	return gen_pfc_generate((struct db_filter *)ctx, fd);
+	return gen_pfc_generate((struct db_filter_col *)ctx, fd);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -321,7 +379,7 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 	if (_ctx_valid(ctx))
 		return -EINVAL;
 
-	program = gen_bpf_generate((struct db_filter *)ctx);
+	program = gen_bpf_generate((struct db_filter_col *)ctx);
 	if (program == NULL)
 		return -ENOMEM;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));

@@ -131,16 +131,23 @@ struct db_filter_attr {
 };
 
 struct db_filter {
-	/* verification / state */
-	int state;
-
 	/* target architecture */
 	const struct arch_def *arch;
-	/* attributes */
-	struct db_filter_attr attr;
 
 	/* syscall filters, kept as a sorted single-linked list */
 	struct db_sys_list *syscalls;
+};
+
+struct db_filter_col {
+	/* verification / state */
+	int state;
+
+	/* attributes */
+	struct db_filter_attr attr;
+
+	/* individual filters */
+	struct db_filter **filters;
+	unsigned int filter_cnt;
 };
 
 /**
@@ -157,16 +164,22 @@ struct db_filter {
 
 int db_action_valid(uint32_t action);
 
-void db_reset(struct db_filter *db, uint32_t def_action);
-struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action);
+struct db_filter_col *db_col_init(uint32_t def_action);
+void db_col_reset(struct db_filter_col *col, uint32_t def_action);
+void db_col_release(struct db_filter_col *col);
+
+int db_col_valid(struct db_filter_col *col);
+
+int db_col_attr_get(const struct db_filter_col *col,
+		    enum scmp_filter_attr attr, uint32_t *value);
+int db_col_attr_set(struct db_filter_col *col,
+		    enum scmp_filter_attr attr, uint32_t value);
+
+int db_col_db_add(struct db_filter_col *col, struct db_filter *db);
+
+struct db_filter *db_init(const struct arch_def *arch);
+void db_reset(struct db_filter *db);
 void db_release(struct db_filter *db);
-
-int db_valid(struct db_filter *db);
-
-int db_attr_get(const struct db_filter *db,
-		enum scmp_filter_attr attr, uint32_t *value);
-int db_attr_set(struct db_filter *db,
-		enum scmp_filter_attr attr, uint32_t value);
 
 int db_syscall_priority(struct db_filter *db,
 			unsigned int syscall, uint8_t priority);

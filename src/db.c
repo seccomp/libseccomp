@@ -311,6 +311,195 @@ int db_action_valid(uint32_t action)
 }
 
 /**
+ * Free and reset the seccomp filter collection
+ * @param col the seccomp filter collection
+ * @param def_action the default filter action
+ *
+ * This function frees any existing filter DBs and resets the collection to a
+ * default state.
+ *
+ */
+void db_col_reset(struct db_filter_col *col, uint32_t def_action)
+{
+	unsigned int iter;
+
+	if (col == NULL)
+		return;
+
+	/* free any filters */
+	for (iter = 0; iter < col->filter_cnt; iter++)
+		db_release(col->filters[iter]);
+	col->filter_cnt = 0;
+	free(col->filters);
+	col->filters = NULL;
+
+	/* set the default attribute values */
+	col->attr.act_default = def_action;
+	col->attr.act_badarch = SCMP_ACT_KILL;
+	col->attr.nnp_enable = 1;
+
+	/* set the state */
+	col->state = _DB_STA_VALID;
+}
+
+/**
+ * Intitalize a seccomp filter collection
+ * @param def_action the default filter action
+ *
+ * This function initializes a seccomp filter collection and readies it for
+ * use.  Returns a pointer to the collection on success, NULL on failure.
+ *
+ */
+struct db_filter_col *db_col_init(uint32_t def_action)
+{
+	struct db_filter_col *col;
+
+	col = malloc(sizeof(*col));
+	if (col == NULL)
+		return NULL;
+
+	/* clear the buffer for the first time */
+	memset(col, 0, sizeof(*col));
+
+	/* reset the DB to a known state */
+	db_col_reset(col, def_action);
+
+	return col;
+}
+
+/**
+ * Destroy a seccomp filter collection
+ * @param col the seccomp filter collection
+ *
+ * This function destroys a seccomp filter collection.  After calling this
+ * function, the filter should no longer be referenced.
+ *
+ */
+void db_col_release(struct db_filter_col *col)
+{
+	if (col == NULL)
+		return;
+
+	/* set the state, just in case */
+	col->state = _DB_STA_FREED;
+
+	/* free and reset the DB */
+	db_col_reset(col, 0);
+	free(col);
+}
+
+/**
+ * Validate a filter collection
+ * @param col the seccomp filter collection
+ *
+ * This function validates a seccomp filter collection.  Returns zero if the
+ * collection is valid, negative values on failure.
+ *
+ */
+int db_col_valid(struct db_filter_col *col)
+{
+	if (col != NULL && col->state == _DB_STA_VALID)
+		return 0;
+	return -EINVAL;
+}
+
+/**
+ * Get a filter attribute
+ * @param col the seccomp filter collection
+ * @param attr the filter attribute
+ * @param value the filter attribute value
+ *
+ * Get the requested filter attribute and provide it via @value.  Returns zero
+ * on success, negative values on failure.
+ *
+ */
+int db_col_attr_get(const struct db_filter_col *col,
+		    enum scmp_filter_attr attr, uint32_t *value)
+{
+	switch (attr) {
+	case SCMP_FLTATR_ACT_DEFAULT:
+		*value = col->attr.act_default;
+		break;
+	case SCMP_FLTATR_ACT_BADARCH:
+		*value = col->attr.act_badarch;
+		break;
+	case SCMP_FLTATR_CTL_NNP:
+		*value = col->attr.nnp_enable;
+		break;
+	default:
+		return -EEXIST;
+		break;
+	}
+
+	return 0;
+}
+
+/**
+ * Set a filter attribute
+ * @param db the seccomp filter collection
+ * @param attr the filter attribute
+ * @param value the filter attribute value
+ *
+ * Set the requested filter attribute with the given value.  Returns zero on
+ * success, negative values on failure.
+ *
+ */
+int db_col_attr_set(struct db_filter_col *col,
+		    enum scmp_filter_attr attr, uint32_t value)
+{
+	switch (attr) {
+	case SCMP_FLTATR_ACT_DEFAULT:
+		/* read only */
+		return -EACCES;
+		break;
+	case SCMP_FLTATR_ACT_BADARCH:
+		if (db_action_valid(value) == 0)
+			col->attr.act_badarch = value;
+		else
+			return -EINVAL;
+		break;
+	case SCMP_FLTATR_CTL_NNP:
+		col->attr.nnp_enable = (value ? 1 : 0);
+		break;
+	default:
+		return -EEXIST;
+		break;
+	}
+
+	return 0;
+}
+
+/**
+ * Add a new filter DB to a filter collection
+ * @param col the seccomp filter collection
+ * @param db the seccomp filter DB
+ *
+ * This function adds an existing seccomp filter DB to an existing seccomp
+ * filter collection assuming there isn't a filter DB already present with the
+ * same architecture.  Returns zero on success, negative values on failure.
+ *
+ */
+int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
+{
+	unsigned int iter;
+	struct db_filter **dbs;
+
+	for (iter = 0; iter < col->filter_cnt; iter++)
+		if (col->filters[iter]->arch->token == db->arch->token)
+			return -EEXIST;
+
+	dbs = realloc(col->filters,
+		      sizeof(struct db_filter *) * (col->filter_cnt + 1));
+	if (dbs == NULL)
+		return -ENOMEM;
+	col->filters = dbs;
+	col->filter_cnt++;
+	col->filters[col->filter_cnt - 1] = db;
+
+	return 0;
+}
+
+/**
  * Free and reset the seccomp filter DB
  * @param db the seccomp filter DB
  * @param def_action the default filter action
@@ -319,7 +508,7 @@ int db_action_valid(uint32_t action)
  * default state; only the DB architecture is preserved.
  *
  */
-void db_reset(struct db_filter *db, uint32_t def_action)
+void db_reset(struct db_filter *db)
 {
 	struct db_sys_list *s_iter;
 
@@ -337,26 +526,17 @@ void db_reset(struct db_filter *db, uint32_t def_action)
 		}
 		db->syscalls = NULL;
 	}
-
-	/* set the default attribute values */
-	db->attr.act_default = def_action;
-	db->attr.act_badarch = SCMP_ACT_KILL;
-	db->attr.nnp_enable = 1;
-
-	/* set the state */
-	db->state = _DB_STA_VALID;
 }
 
 /**
  * Intitalize a seccomp filter DB
  * @param arch the architecture definition
- * @param def_action the default filter action
  *
  * This function initializes a seccomp filter DB and readies it for use.
  * Returns a pointer to the DB on success, NULL on failure.
  *
  */
-struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
+struct db_filter *db_init(const struct arch_def *arch)
 {
 	struct db_filter *db;
 
@@ -369,7 +549,7 @@ struct db_filter *db_init(const struct arch_def *arch, uint32_t def_action)
 	db->arch = arch;
 
 	/* reset the DB to a known state */
-	db_reset(db, def_action);
+	db_reset(db);
 
 	return db;
 }
@@ -387,93 +567,9 @@ void db_release(struct db_filter *db)
 	if (db == NULL)
 		return;
 
-	/* set the state, just in case */
-	db->state = _DB_STA_FREED;
-
 	/* free and reset the DB */
-	db_reset(db, 0);
+	db_reset(db);
 	free(db);
-}
-
-/**
- * Validate a filter DB
- * @param db the seccomp filter DB
- *
- * This function validates a seccomp filter DB.  Returns zero if the DB is
- * valid, negative values on failure.
- *
- */
-int db_valid(struct db_filter *db)
-{
-	if (db != NULL && db->state == _DB_STA_VALID)
-		return 0;
-	return -EINVAL;
-}
-
-/**
- * Get a filter attribute
- * @param db the seccomp filter DB
- * @param attr the filter attribute
- * @param value the filter attribute value
- *
- * Get the requested filter attribute and provide it via @value.  Returns zero
- * on success, negative values on failure.
- *
- */
-int db_attr_get(const struct db_filter *db,
-		enum scmp_filter_attr attr, uint32_t *value)
-{
-	switch (attr) {
-	case SCMP_FLTATR_ACT_DEFAULT:
-		*value = db->attr.act_default;
-		break;
-	case SCMP_FLTATR_ACT_BADARCH:
-		*value = db->attr.act_badarch;
-		break;
-	case SCMP_FLTATR_CTL_NNP:
-		*value = db->attr.nnp_enable;
-		break;
-	default:
-		return -EEXIST;
-		break;
-	}
-
-	return 0;
-}
-
-/**
- * Set a filter attribute
- * @param db the seccomp filter DB
- * @param attr the filter attribute
- * @param value the filter attribute value
- *
- * Set the requested filter attribute with the given value.  Returns zero on
- * success, negative values on failure.
- *
- */
-int db_attr_set(struct db_filter *db,
-		enum scmp_filter_attr attr, uint32_t value)
-{
-	switch (attr) {
-	case SCMP_FLTATR_ACT_DEFAULT:
-		/* read only */
-		return -EACCES;
-		break;
-	case SCMP_FLTATR_ACT_BADARCH:
-		if (db_action_valid(value) == 0)
-			db->attr.act_badarch = value;
-		else
-			return -EINVAL;
-		break;
-	case SCMP_FLTATR_CTL_NNP:
-		db->attr.nnp_enable = (value ? 1 : 0);
-		break;
-	default:
-		return -EEXIST;
-		break;
-	}
-
-	return 0;
 }
 
 /**

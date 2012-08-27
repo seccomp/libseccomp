@@ -24,6 +24,6 @@
 
 #include "db.h"
 
-int gen_pfc_generate(const struct db_filter *db, int fd);
+int gen_pfc_generate(const struct db_filter_col *col, int fd);
 
 #endif

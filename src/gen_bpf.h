@@ -35,7 +35,7 @@ struct bpf_program {
 #define BPF_PGM_SIZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
 
-struct bpf_program *gen_bpf_generate(const struct db_filter *db);
+struct bpf_program *gen_bpf_generate(const struct db_filter_col *col);
 void gen_bpf_release(struct bpf_program *program);
 
 #endif
