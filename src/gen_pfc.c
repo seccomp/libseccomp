@@ -198,21 +198,27 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
 
 /**
  * Generate a pseudo filter code string representation
- * @param db the seccomp filter DB
+ * @param col the seccomp filter collection
  * @param fd the fd to send the output
  *
  * This function generates a pseudo filter code representation of the given
- * filter DB and writes it to the given fd.  Returns zero on success, negative
- * values on failure.
+ * filter collection and writes it to the given fd.  Returns zero on success,
+ * negative values on failure.
  *
  */
-int gen_pfc_generate(const struct db_filter *db, int fd)
+int gen_pfc_generate(const struct db_filter_col *col, int fd)
 {
 	int rc = 0;
 	int newfd;
 	FILE *fds;
+	struct db_filter *db;
 	struct db_sys_list *s_iter;
 	struct pfc_sys_list *p_iter = NULL, *p_new, *p_head = NULL, *p_prev;
+
+	/* NOTE: temporary until we fully support filter collections */
+	if (col->filter_cnt != 1 || col->filters[0]->arch != &arch_def_native)
+		return -EFAULT;
+	db = col->filters[0];
 
 	newfd = dup(fd);
 	if (newfd < 0)
@@ -263,7 +269,7 @@ int gen_pfc_generate(const struct db_filter *db, int fd)
 		p_iter = p_iter->next;
 	}
 	fprintf(fds, "# default action\n");
-	_pfc_action(fds, db->attr.act_default);
+	_pfc_action(fds, col->attr.act_default);
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");

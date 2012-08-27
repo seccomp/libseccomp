@@ -71,8 +71,9 @@ struct arch_syscall_def {
 #define D64_LO(x)	((uint32_t)((uint64_t)(x) & 0x00000000ffffffff))
 #define D64_HI(x)	((uint32_t)((uint64_t)(x) >> 32))
 
-int arch_arg_count_max(const struct arch_def *arch);
+#define ARG_COUNT_MAX	6
 
+int arch_arg_count_max(const struct arch_def *arch);
 
 /**
  * Determine the argument offset

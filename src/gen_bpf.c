@@ -1459,20 +1459,26 @@ build_bpf_free_blks:
 
 /**
  * Generate a BPF representation of the filter DB
- * @param db the seccomp filter DB
+ * @param col the seccomp filter collection
  *
- * This function generates a BPF representation of the given filter DB.
+ * This function generates a BPF representation of the given filter collection.
  * Returns a pointer to a valid bpf_program on success, NULL on failure.
  *
  */
-struct bpf_program *gen_bpf_generate(const struct db_filter *db)
+struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 {
 	int rc;
+	struct db_filter *db;
 	struct bpf_state state;
+
+	/* NOTE: temporary until we fully support filter collections */
+	if (col->filter_cnt != 1 || col->filters[0]->arch != &arch_def_native)
+		return NULL;
+	db = col->filters[0];
 
 	memset(&state, 0, sizeof(state));
 	state.arch = db->arch;
-	state.attr = &db->attr;
+	state.attr = &col->attr;
 
 	state.bpf = malloc(sizeof(*(state.bpf)));
 	if (state.bpf == NULL)
