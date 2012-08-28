@@ -59,12 +59,13 @@ struct bpf_jump {
 		uint32_t imm_k;
 		uint64_t hash;
 		void *ptr;
+		unsigned int nxt;
 	} tgt;
 };
 #define _BPF_JMP_NO \
 	((struct bpf_jump) { TGT_NONE, { .ptr = 0 } })
-#define _BPF_JMP_NXT \
-	((struct bpf_jump) { TGT_NXT, { .ptr = 0 } })  /* be careful! */
+#define _BPF_JMP_NXT(x) \
+	((struct bpf_jump) { TGT_NXT, { .nxt = (x) } })  /* be careful! */
 #define _BPF_JMP_IMM(x) \
 	((struct bpf_jump) { TGT_IMM, { .imm_j = (x) } })
 #define _BPF_JMP_DB(x) \
@@ -98,11 +99,12 @@ struct bpf_blk {
 	/* original db_arg_chain_tree node */
 	const struct db_arg_chain_tree *node;
 
-	/* used during final block assembly */
+	/* used during block assembly */
 	unsigned int hashed_flag;
 	uint64_t hash;
 	struct bpf_blk *hash_nxt;
 	struct bpf_blk *prev, *next;
+	struct bpf_blk *lvl_next;
 };
 #define _BLK_MSZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
@@ -118,13 +120,13 @@ struct bpf_hash_bkt {
 #define _BPF_HASH_SIZE			(1 << _BPF_HASH_BITS)
 #define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
-	/* target arch */
-	const struct arch_def *arch;
 	/* filter attributes */
 	const struct db_filter_attr *attr;
-
 	/* default action */
 	uint64_t def_hsh;
+
+	/* target arch - NOTE: be careful, temporary use only! */
+	const struct arch_def *arch;
 
 	/* block hash table */
 	struct bpf_hash_bkt *htbl[_BPF_HASH_SIZE];
@@ -245,7 +247,7 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
  *
  * Add the new BPF instruction to the end of the give instruction block.  If
  * the given instruction block is NULL, a new block will be allocated.  Returns
- * a pointer to the block on success, NULL on failure and in the case of
+ * a pointer to the block on success, NULL on failure, and in the case of
  * failure the instruction block is free'd.
  *
  */
@@ -273,6 +275,43 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 	memcpy(&blk->blks[blk->blk_cnt++], instr, sizeof(*instr));
 
 	return blk;
+}
+
+/**
+ * Append a BPF instruction block to another BPF instruction block
+ * @param state the BPF state
+ * @param dst the destination instruction block
+ * @param src the source instruction block
+ *
+ * Append the source instruction block to the end of the destination block.
+ * Returns a pointer to dst on success, NULL on failure, and in the case of
+ * failure the destination block is free'd.
+ *
+ */
+static struct bpf_blk *_blk_append_blk(struct bpf_state *state,
+				       struct bpf_blk *dst,
+				       const struct bpf_blk *src)
+{
+	unsigned int size;
+	struct bpf_instr *new;
+
+	size = dst->blk_cnt + src->blk_cnt;
+	if (size > dst->blk_alloc) {
+		dst->blk_alloc = size;
+		new = realloc(dst->blks, dst->blk_alloc * sizeof(*(dst->blks)));
+		if (new == NULL) {
+			_blk_free(state, dst);
+			return NULL;
+		}
+		dst->blks = new;
+	}
+	memcpy(&dst->blks[dst->blk_cnt], src->blks,
+	       src->blk_cnt * sizeof(*(src->blks)));
+	dst->blk_cnt += src->blk_cnt;
+	if (src->priority > dst->priority)
+		dst->priority = src->priority;
+
+	return dst;
 }
 
 /**
@@ -353,29 +392,6 @@ bpf_append_blk_failure:
 	prg->blk_cnt = 0;
 	free(prg->blks);
 	return rc;
-}
-
-/**
- * Append a single BPF instruction to the final BPF program
- * @param prg the BPF program
- * @param instr the BPF instruction
- *
- * Add the BPF instruction to the end of the BPF program and perform the
- * necssary translation.  Returns zero on success, negative values on failure
- * and in the case of failure the BPF program is free'd.
- *
- */
-static int _bpf_append_instr(struct bpf_program *prg,
-			     struct bpf_instr *instr)
-{
-	struct bpf_blk blk;
-
-	memset(&blk, 0, sizeof(blk));
-	blk.blk_cnt = 1;
-	blk.blk_alloc = 1;
-	blk.blks = instr;
-
-	return _bpf_append_blk(prg, &blk);
 }
 
 /**
@@ -748,13 +764,13 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	else if (node->act_t_flg)
 		instr.jt = _BPF_JMP_HSH(act_t_hash);
 	else
-		instr.jt = _BPF_JMP_NXT;
+		instr.jt = _BPF_JMP_NXT(0);
 	if (node->nxt_f != NULL)
 		instr.jf = _BPF_JMP_DB(node->nxt_f);
 	else if (node->act_f_flg)
 		instr.jf = _BPF_JMP_HSH(act_f_hash);
 	else
-		instr.jf = _BPF_JMP_NXT;
+		instr.jf = _BPF_JMP_NXT(0);
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_failure;
@@ -809,10 +825,9 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 		blk = _gen_bpf_node(state, l_iter, &a_state);
 		if (blk == NULL)
 			goto chain_lvl_failure;
-		if (b_head != NULL) {
-			b_prev->next = blk;
-			blk->prev = b_prev;
-		} else
+		if (b_head != NULL)
+			b_prev->lvl_next = blk;
+		else
 			b_head = blk;
 
 		b_prev = blk;
@@ -827,15 +842,21 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 	/* resolve the TGT_NXT jumps */
 	b_iter = b_head;
 	do {
-		b_next = b_iter->next;
+		b_next = b_iter->lvl_next;
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
 			i_iter = &b_iter->blks[iter];
-			if (i_iter->jt.type == TGT_NXT)
+			if (i_iter->jt.type == TGT_NXT) {
+				if (i_iter->jt.tgt.nxt != 0)
+					goto chain_lvl_failure;
 				i_iter->jt = (b_next == NULL ?
 					      def_jump : _BPF_JMP_BLK(b_next));
-			if (i_iter->jf.type == TGT_NXT)
+			}
+			if (i_iter->jf.type == TGT_NXT) {
+				if (i_iter->jf.tgt.nxt != 0)
+					goto chain_lvl_failure;
 				i_iter->jf = (b_next == NULL ?
 					      def_jump : _BPF_JMP_BLK(b_next));
+			}
 		}
 		b_iter = b_next;
 	} while (b_iter != NULL);
@@ -845,7 +866,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
 chain_lvl_failure:
 	while (b_head != NULL) {
 		b_iter = b_head;
-		b_head = b_iter->next;
+		b_head = b_iter->lvl_next;
 		_blk_free(state, b_iter);
 	}
 	return NULL;
@@ -880,7 +901,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 	if (state->arch->size == ARCH_SIZE_64 && blk->node != NULL &&
 	    blk->node->arg_offset == arch_arg_offset_hi(state->arch,
 							blk->node->arg))
-		next = blk->next;
+		next = blk->lvl_next;
 	else
 		next = NULL;
 
@@ -953,6 +974,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 			return NULL;
 		}
 	}
+	blk->lvl_next = NULL;
 
 	/* insert the block into the hash table */
 	rc = _hsh_add(state, &blk, 0);
@@ -992,13 +1014,15 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
  * @param sys the syscall filter DB entry
  *
  * Generate the BPF instruction blocks for the given syscall filter and return
- * a pointer to the first block on success; returns NULL on failure.
+ * a pointer to the first block on success; returns NULL on failure.  It is
+ * important to note that the block returned has not been added to the hash
+ * table, however, any linked/referenced blocks have been added to the hash
+ * table.
  *
  */
 static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 					const struct db_sys_list *sys)
 {
-	int rc;
 	struct bpf_instr instr;
 	struct bpf_blk *blk_c, *blk_s;
 
@@ -1009,16 +1033,171 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 
 	/* syscall check (syscall number is still in the accumulator) */
 	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT, _BPF_K(sys->num));
+		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_NXT(0),
+		   _BPF_K(sys->num));
 	blk_s = _blk_append(state, NULL, &instr);
 	if (blk_s == NULL)
 		return NULL;
 	blk_s->priority = sys->priority;
-	rc = _hsh_add(state, &blk_s, 1);
-	if (rc < 0)
-		return NULL;
 
 	return blk_s;
+}
+
+/**
+ * Generate the BPF instruction blocks for a given filter/architecture
+ * @param state the BPF state
+ * @param db the filter DB
+ *
+ * Generate the BPF instruction block for the given filter DB/architecture and
+ * return a pointer to the block on succes, NULL on failure.  The resulting
+ * block assumes that the architecture token has already been loaded into the
+ * BPF accumulator.
+ *
+ */
+static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
+				     const struct db_filter *db)
+{
+	int rc;
+	unsigned int blk_cnt = 0;
+	struct bpf_instr instr;
+	struct db_sys_list *s_iter;
+	struct bpf_blk *b_hdr = NULL;
+	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new;
+
+	state->arch = db->arch;
+
+	/* create the syscall filters and add them to block list group */
+	db_list_foreach(s_iter, db->syscalls) {
+		if (s_iter->valid == 0)
+			continue;
+
+		/* build the syscall filter */
+		b_new = _gen_bpf_syscall(state, s_iter);
+		if (b_new == NULL)
+			goto arch_failure;
+
+		/* add the filter to the list, sorting based on priority */
+		if (b_head != NULL) {
+			b_iter = b_head;
+			do {
+				if (b_new->priority > b_iter->priority) {
+					if (b_iter == b_head) {
+						b_new->next = b_head;
+						b_head->prev = b_new;
+						b_head = b_new;
+					} else {
+						b_iter->prev->next = b_new;
+						b_new->prev = b_iter->prev;
+						b_new->next = b_iter;
+						b_iter->prev = b_new;
+					}
+					b_iter = NULL;
+				} else {
+					if (b_iter->next == NULL) {
+						b_iter->next = b_new;
+						b_new->prev = b_iter;
+						b_iter = NULL;
+					} else
+						b_iter = b_iter->next;
+				}
+			} while (b_iter != NULL);
+		} else {
+			b_new->prev = NULL;
+			b_new->next = NULL;
+			b_head = b_new;
+			b_tail = b_head;
+		}
+		if (b_tail->next != NULL)
+			b_tail = b_tail->next;
+		blk_cnt++;
+	}
+
+	/* do the architecture check and load the syscall number */
+	if (db->syscalls != NULL) {
+		/* arch check */
+		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+			   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt - 1),
+			   _BPF_K(db->arch->token));
+		b_hdr = _blk_append(state, NULL, &instr);
+		if (b_hdr == NULL)
+			goto arch_failure;
+
+		/* load the syscall into the accumulator */
+		_BPF_INSTR(instr, BPF_LD+BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_SYSCALL);
+		b_hdr = _blk_append(state, b_hdr, &instr);
+		if (b_hdr == NULL)
+			goto arch_failure;
+
+		/* smush b_hdr and b_head together */
+		b_hdr = _blk_append_blk(state, b_hdr, b_head);
+		if (b_hdr == NULL)
+			goto arch_failure;
+		b_hdr->next = b_head->next;
+		if (b_head->next)
+			b_head->next->prev = b_hdr;
+		__blk_free(state, b_head);
+		b_head = b_hdr;
+	} else {
+		/* arch check */
+		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
+			   _BPF_JMP_HSH(state->def_hsh), _BPF_JMP_NXT(0),
+			   _BPF_K(db->arch->token));
+		b_hdr = _blk_append(state, NULL, &instr);
+		if (b_hdr == NULL)
+			goto arch_failure;
+		b_head = b_hdr;
+	}
+
+	/* add all of the fitlers to the hash table and add a default action */
+	b_iter = b_head;
+	while (b_iter != NULL) {
+		/* add a jump to the default action if we are at the end */
+		if (b_iter->next == NULL)
+			b_iter->blks[0].jf = _BPF_JMP_HSH(state->def_hsh);
+
+		/* add to the hash table */
+		rc = _hsh_add(state, &b_iter, 1);
+		if (rc < 0)
+			goto arch_failure;
+		b_iter = b_iter->next;
+	}
+
+	state->arch = NULL;
+	return b_head;
+
+arch_failure:
+	/* NOTE: we do the cleanup here and not just return an error as all of
+	 * the instruction blocks may not be added to the hash table when we
+	 * hit an error */
+	state->arch = NULL;
+	b_iter = b_head;
+	while (b_iter != NULL) {
+		b_new = b_iter->next;
+		_blk_free(state, b_iter);
+		b_iter = b_new;
+	}
+	return NULL;
+}
+
+/**
+ * Find the target block for the "next" jump
+ * @param blk the instruction block
+ * @param nxt the next offset
+ *
+ * Find the target block for the TGT_NXT jump using the given offset.  Returns
+ * a pointer to the target block on success or NULL on failure.
+ *
+ */
+static struct bpf_blk *_gen_bpf_find_nxt(const struct bpf_blk *blk,
+					 unsigned int nxt)
+{
+	struct bpf_blk *iter = blk->next;
+
+	for (; (iter != NULL) && (nxt > 0); nxt--)
+		iter = iter->next;
+
+	return iter;
 }
 
 /**
@@ -1178,16 +1357,16 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 }
 
 /**
- * Generate the BPF program for the given filter DB
+ * Generate the BPF program for the given filter collection
  * @param state the BPF state
- * @param db the filter DB
+ * @param col the filter collection
  *
- * Generate the BPF program for the given filter DB.  Returns zero on success,
- * negative values on failure.
+ * Generate the BPF program for the given filter collection.  Returns zero on
+ * success, negative values on failure.
  *
  */
 static int _gen_bpf_build_bpf(struct bpf_state *state,
-			      const struct db_filter *db)
+			      const struct db_filter_col *col)
 {
 	int rc;
 	int iter;
@@ -1196,83 +1375,77 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	unsigned int jmp_len;
 	struct bpf_instr instr;
 	struct bpf_instr *i_iter;
-	struct db_sys_list *s_iter;
-	struct bpf_blk *def_blk;
+	struct bpf_blk *b_badarch, *b_default;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 
-	/* create the default action */
-	def_blk = _gen_bpf_action(state, NULL, state->attr->act_default);
-	if (def_blk == NULL)
+	if (col->filter_cnt == 0)
+		return -EINVAL;
+
+	/* generate the badarch action */
+	b_badarch = _gen_bpf_action(state, NULL, state->attr->act_badarch);
+	if (b_badarch == NULL)
 		return -ENOMEM;
-	rc = _hsh_add(state, &def_blk, 1);
+	rc = _hsh_add(state, &b_badarch, 1);
 	if (rc < 0)
 		return rc;
-	state->def_hsh = def_blk->hash;
 
-	/* create the syscall filters and add them to the top block group */
-	db_list_foreach(s_iter, db->syscalls) {
-		if (s_iter->valid == 0)
-			continue;
+	/* generate the default action */
+	b_default = _gen_bpf_action(state, NULL, state->attr->act_default);
+	if (b_default == NULL)
+		return -ENOMEM;
+	rc = _hsh_add(state, &b_default, 0);
+	if (rc < 0)
+		return rc;
+	state->def_hsh = b_default->hash;
 
-		/* build the syscall filter */
-		b_new = _gen_bpf_syscall(state, s_iter);
+	/* load the architecture token/number */
+	_BPF_INSTR(instr, BPF_LD+BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
+		   _BPF_K(offsetof(struct seccomp_data, arch)));
+	b_head = _blk_append(state, NULL, &instr);
+	if (b_head == NULL)
+		return -ENOMEM;
+	rc = _hsh_add(state, &b_head, 1);
+	if (rc < 0)
+		return rc;
+	b_tail = b_head;
+
+	/* generate the per-architecture filters */
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		b_new = _gen_bpf_arch(state, col->filters[iter]);
 		if (b_new == NULL)
 			return -ENOMEM;
-		/* add the filter to the list, sorting based on priority */
-		if (b_head != NULL) {
-			b_iter = b_head;
-			do {
-				if (b_new->priority > b_iter->priority) {
-					if (b_iter == b_head) {
-						b_new->next = b_head;
-						b_head->prev = b_new;
-						b_head = b_new;
-					} else {
-						b_iter->prev->next = b_new;
-						b_new->prev = b_iter->prev;
-						b_new->next = b_iter;
-						b_iter->prev = b_new;
-					}
-					b_iter = NULL;
-				} else {
-					if (b_iter->next == NULL) {
-						b_iter->next = b_new;
-						b_new->prev = b_iter;
-						b_iter = NULL;
-					} else
-						b_iter = b_iter->next;
-				}
-			} while (b_iter != NULL);
-			if (b_tail->next != NULL)
-				b_tail = b_tail->next;
-		} else {
-			b_head = b_new;
-			b_tail = b_head;
-			b_head->prev = NULL;
-			b_head->next = NULL;
-		}
+		b_new->prev = b_tail;
+		b_tail->next = b_new;
+		b_tail = b_new;
+		while (b_tail->next != NULL)
+			b_tail = b_tail->next;
 	}
 
-	/* tack on the default action to the end of the top block group */
-	if (b_tail != NULL) {
-		b_tail->next = def_blk;
-		def_blk->prev = b_tail;
-		b_tail = def_blk;
-	} else {
-		b_head = def_blk;
-		b_tail = b_head;
-	}
+	/* add a badarch action to the end */
+	b_badarch->prev = b_tail;
+	b_badarch->next = NULL;
+	b_tail->next = b_badarch;
+	b_tail = b_badarch;
 
 	/* resolve any TGT_NXT jumps at the top level */
 	b_iter = b_head;
 	do {
-		b_jmp = b_iter->next;
 		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
 			i_iter = &b_iter->blks[iter];
-			if (i_iter->jt.type == TGT_NXT)
+			if (i_iter->jt.type == TGT_NXT) {
+				b_jmp = _gen_bpf_find_nxt(b_iter,
+							  i_iter->jt.tgt.nxt);
+				if (b_jmp == NULL)
+					return -EFAULT;
 				i_iter->jt = _BPF_JMP_HSH(b_jmp->hash);
-			if (i_iter->jf.type == TGT_NXT)
+			}
+			if (i_iter->jf.type == TGT_NXT) {
+				b_jmp = _gen_bpf_find_nxt(b_iter,
+							  i_iter->jf.tgt.nxt);
+				if (b_jmp == NULL)
+					return -EFAULT;
 				i_iter->jf = _BPF_JMP_HSH(b_jmp->hash);
+			}
 			/* we shouldn't need to worry about a TGT_NXT in k */
 		}
 		b_iter = b_iter->next;
@@ -1283,7 +1456,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	do {
 		b_jmp = NULL;
 		/* look for jumps - backwards (shorter jumps) */
-		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
+		for (iter = b_iter->blk_cnt - 1;
+		     (iter >= 0) && (b_jmp == NULL);
+		     iter--) {
 			i_iter = &b_iter->blks[iter];
 			if (i_iter->jt.type == TGT_PTR_HSH)
 				b_jmp = _hsh_find_once(state,
@@ -1301,7 +1476,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				b_iter->next = b_jmp;
 				if (b_jmp->next)
 					b_jmp->next->prev=b_jmp;
-				break;
 			}
 		}
 		if (b_jmp != NULL) {
@@ -1311,32 +1485,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		} else
 			b_iter = b_iter->prev;
 	} while (b_iter != NULL);
-
-	/* verify the architecture and kill ourselves if different */
-	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-		   _BPF_JMP_NO, _BPF_JMP_NO,
-		   _BPF_K(offsetof(struct seccomp_data, arch)));
-	rc = _bpf_append_instr(state->bpf, &instr);
-	if (rc < 0)
-		return rc;
-	_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
-		   _BPF_JMP_IMM(1), _BPF_JMP_NO,
-		   _BPF_K(state->arch->token));
-	rc = _bpf_append_instr(state->bpf, &instr);
-	if (rc < 0)
-		return rc;
-	_BPF_INSTR(instr, BPF_RET,
-		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(state->attr->act_badarch));
-	rc = _bpf_append_instr(state->bpf, &instr);
-	if (rc < 0)
-		return rc;
-
-	/* load the syscall into the accumulator */
-	_BPF_INSTR(instr, BPF_LD+BPF_ABS,
-		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL);
-	rc = _bpf_append_instr(state->bpf, &instr);
-	if (rc < 0)
-		return rc;
 
 	/* NOTE - from here to the end of the function we need to fail via the
 	 *	  the build_bpf_free_blks label, not just return an error; see
@@ -1468,16 +1616,9 @@ build_bpf_free_blks:
 struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 {
 	int rc;
-	struct db_filter *db;
 	struct bpf_state state;
 
-	/* NOTE: temporary until we fully support filter collections */
-	if (col->filter_cnt != 1 || col->filters[0]->arch != &arch_def_native)
-		return NULL;
-	db = col->filters[0];
-
 	memset(&state, 0, sizeof(state));
-	state.arch = db->arch;
 	state.attr = &col->attr;
 
 	state.bpf = malloc(sizeof(*(state.bpf)));
@@ -1485,7 +1626,7 @@ struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 		return NULL;
 	memset(state.bpf, 0, sizeof(*(state.bpf)));
 
-	rc = _gen_bpf_build_bpf(&state, db);
+	rc = _gen_bpf_build_bpf(&state, col);
 	if (rc < 0)
 		goto bpf_generate_end;
 
