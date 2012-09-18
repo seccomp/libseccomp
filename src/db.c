@@ -961,7 +961,7 @@ add_reset:
 					ec_iter->act_f = action;
 				}
 				s_iter->node_cnt -= n_cnt;
-				return 0;
+				goto add_free_ok;
 			} else if (c_iter->nxt_t != NULL) {
 				if (ec_iter->nxt_t != NULL) {
 					/* jump to the next level */
@@ -976,6 +976,7 @@ add_reset:
 					goto add_free_exist;
 				} else {
 					/* add a new branch */
+					c_prev = c_iter;
 					ec_iter->nxt_t = c_iter->nxt_t;
 					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
@@ -994,6 +995,7 @@ add_reset:
 					goto add_free_exist;
 				} else {
 					/* add a new branch */
+					c_prev = c_iter;
 					ec_iter->nxt_f = c_iter->nxt_f;
 					s_iter->node_cnt += (s_new->node_cnt-1);
 					goto add_free_match;
