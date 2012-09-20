@@ -570,7 +570,7 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	int chain_len_max;
 	struct db_sys_list *s_new;
 	struct db_arg_chain_tree *c_iter_hi = NULL, *c_iter_lo = NULL;
-	struct db_arg_chain_tree *c_prev_hi = NULL, *c_prev_lo = NULL;
+	struct db_arg_chain_tree *c_prev_lo = NULL;
 	unsigned int tf_flag;
 
 	s_new = malloc(sizeof(*s_new));
@@ -653,7 +653,6 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		/* link the hi and lo chain nodes */
 		c_iter_hi->nxt_t = c_iter_lo;
 
-		c_prev_hi = c_iter_hi;
 		c_prev_lo = c_iter_lo;
 	}
 	if (c_iter_lo != NULL) {
