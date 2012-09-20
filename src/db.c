@@ -598,15 +598,12 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		memset(c_iter_lo, 0, sizeof(*c_iter_lo));
 		c_iter_lo->refcnt = 1;
 
-		/* link the hi node to the previous level */
-		if (c_prev_hi != NULL) {
+		/* link this level to the previous level */
+		if (c_prev_lo != NULL) {
 			if (tf_flag)
 				c_prev_lo->nxt_t = c_iter_hi;
-			else {
-				c_iter_hi->refcnt++;
-				c_prev_hi->nxt_f = c_iter_hi;
+			else
 				c_prev_lo->nxt_f = c_iter_hi;
-			}
 		} else
 			s_new->chains = c_iter_hi;
 		s_new->node_cnt += 2;
