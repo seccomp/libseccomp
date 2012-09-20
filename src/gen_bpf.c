@@ -784,95 +784,6 @@ node_failure:
 }
 
 /**
- * Generate a BPF instruction block for a given filter DB level
- * @param state the BPF state
- * @param sys the syscall filter DB node
- * @param node the filter DB node
- * @param next the filter node to fallthrough to at the end of the level
- *
- * Generate a BPF instruction block which executes the filter specified by the
- * given filter DB level.  Returns a pointer to the instruction block on
- * success, NULL on failure.  The given BPF block is free'd on failure.
- *
- */
-static struct bpf_blk *_gen_bpf_chain_lvl(struct bpf_state *state,
-					  const struct db_sys_list *sys,
-					  const struct db_arg_chain_tree *node,
-					  struct bpf_blk *next)
-{
-	struct bpf_blk *blk;
-	struct bpf_blk *b_head = NULL, *b_prev = NULL, *b_next, *b_iter;
-	struct bpf_instr *i_iter;
-	const struct db_arg_chain_tree *l_iter;
-	struct acc_state a_state = { -1, ARG_MASK_MAX };
-	struct bpf_jump def_jump;
-	unsigned int iter;
-
-	if (node == NULL) {
-		blk = _gen_bpf_action(state, NULL, sys->action);
-		if (blk == NULL)
-			goto chain_lvl_failure;
-		return blk;
-	}
-
-	/* find the starting node of the level */
-	l_iter = node;
-	while (l_iter->lvl_prv != NULL)
-		l_iter = l_iter->lvl_prv;
-
-	/* build all of the blocks for this level */
-	do {
-		blk = _gen_bpf_node(state, l_iter, &a_state);
-		if (blk == NULL)
-			goto chain_lvl_failure;
-		if (b_head != NULL)
-			b_prev->lvl_next = blk;
-		else
-			b_head = blk;
-
-		b_prev = blk;
-		l_iter = l_iter->lvl_nxt;
-	} while (l_iter != NULL);
-
-	if (next != NULL)
-		def_jump = _BPF_JMP_BLK(next);
-	else
-		def_jump = _BPF_JMP_HSH(state->def_hsh);
-
-	/* resolve the TGT_NXT jumps */
-	b_iter = b_head;
-	do {
-		b_next = b_iter->lvl_next;
-		for (iter = 0; iter < b_iter->blk_cnt; iter++) {
-			i_iter = &b_iter->blks[iter];
-			if (i_iter->jt.type == TGT_NXT) {
-				if (i_iter->jt.tgt.nxt != 0)
-					goto chain_lvl_failure;
-				i_iter->jt = (b_next == NULL ?
-					      def_jump : _BPF_JMP_BLK(b_next));
-			}
-			if (i_iter->jf.type == TGT_NXT) {
-				if (i_iter->jf.tgt.nxt != 0)
-					goto chain_lvl_failure;
-				i_iter->jf = (b_next == NULL ?
-					      def_jump : _BPF_JMP_BLK(b_next));
-			}
-		}
-		b_iter = b_next;
-	} while (b_iter != NULL);
-
-	return b_head;
-
-chain_lvl_failure:
-	while (b_head != NULL) {
-		b_iter = b_head;
-		b_head = b_iter->lvl_next;
-		_blk_free(state, b_iter);
-	}
-	return NULL;
-}
-
-/**
  * Resolve the jump targets in a BPF instruction block
  * @param state the BPF state
  * @param sys the syscall filter
@@ -1000,12 +911,76 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				      const struct db_arg_chain_tree *chain,
 				      struct bpf_blk *next)
 {
-	struct bpf_blk *blk;
+	struct bpf_blk *b_head = NULL, *b_prev = NULL, *b_next, *b_iter;
+	struct bpf_instr *i_iter;
+	const struct db_arg_chain_tree *c_iter;
+	struct acc_state a_state = { -1, ARG_MASK_MAX };
+	struct bpf_jump def_jump;
+	unsigned int iter;
 
-	blk = _gen_bpf_chain_lvl(state, sys, chain, next);
-	if (blk == NULL)
-		return NULL;
-	return _gen_bpf_chain_lvl_res(state, sys, blk);
+	if (chain == NULL) {
+		b_head = _gen_bpf_action(state, NULL, sys->action);
+		if (b_head == NULL)
+			goto chain_failure;
+	} else {
+		/* find the starting node of the level */
+		c_iter = chain;
+		while (c_iter->lvl_prv != NULL)
+			c_iter = c_iter->lvl_prv;
+
+		/* build all of the blocks for this level */
+		do {
+			b_iter = _gen_bpf_node(state, c_iter, &a_state);
+			if (b_iter == NULL)
+				goto chain_failure;
+			if (b_head != NULL)
+				b_prev->lvl_next = b_iter;
+			else
+				b_head = b_iter;
+
+			b_prev = b_iter;
+			c_iter = c_iter->lvl_nxt;
+		} while (c_iter != NULL);
+
+		if (next != NULL)
+			def_jump = _BPF_JMP_BLK(next);
+		else
+			def_jump = _BPF_JMP_HSH(state->def_hsh);
+
+		/* resolve the TGT_NXT jumps */
+		b_iter = b_head;
+		do {
+			b_next = b_iter->lvl_next;
+			for (iter = 0; iter < b_iter->blk_cnt; iter++) {
+				i_iter = &b_iter->blks[iter];
+				if (i_iter->jt.type == TGT_NXT) {
+					if (i_iter->jt.tgt.nxt != 0)
+						goto chain_failure;
+					i_iter->jt = (b_next == NULL ?
+						      def_jump :
+						      _BPF_JMP_BLK(b_next));
+				}
+				if (i_iter->jf.type == TGT_NXT) {
+					if (i_iter->jf.tgt.nxt != 0)
+						goto chain_failure;
+					i_iter->jf = (b_next == NULL ?
+						      def_jump :
+						      _BPF_JMP_BLK(b_next));
+				}
+			}
+			b_iter = b_next;
+		} while (b_iter != NULL);
+	}
+
+	return _gen_bpf_chain_lvl_res(state, sys, b_head);
+
+chain_failure:
+	while (b_head != NULL) {
+		b_iter = b_head;
+		b_head = b_iter->lvl_next;
+		_blk_free(state, b_iter);
+	}
+	return NULL;
 }
 
 /**
