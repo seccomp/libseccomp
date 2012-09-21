@@ -26,6 +26,9 @@
 #include <string.h>
 #include <unistd.h>
 
+/* NOTE: needed for the arch->token decoding in _pfc_arch() */
+#include <linux/audit.h>
+
 #include <seccomp.h>
 
 #include "arch.h"
@@ -38,6 +41,22 @@ struct pfc_sys_list {
 };
 
 /* XXX - we should check the fprintf() return values */
+
+/**
+ * Display a string representation of the architecture
+ * @param arch the architecture definition
+ */
+static const char *_pfc_arch(const struct arch_def *arch)
+{
+	switch (arch->token) {
+	case AUDIT_ARCH_I386:
+		return "x86";
+	case AUDIT_ARCH_X86_64:
+		return "x86_64";
+	default:
+		return "UNKNOWN";
+	}
+}
 
 /**
  * Display a string representation of the node argument
@@ -67,22 +86,22 @@ static void _pfc_action(FILE *fds, uint32_t action)
 {
 	switch (action & 0xffff0000) {
 	case SCMP_ACT_KILL:
-		fprintf(fds, " action KILL;\n");
+		fprintf(fds, "action KILL;\n");
 		break;
 	case SCMP_ACT_TRAP:
-		fprintf(fds, " action TRAP;\n");
+		fprintf(fds, "action TRAP;\n");
 		break;
 	case SCMP_ACT_ERRNO(0):
-		fprintf(fds, " action ERRNO(%u);\n", (action & 0x0000ffff));
+		fprintf(fds, "action ERRNO(%u);\n", (action & 0x0000ffff));
 		break;
 	case SCMP_ACT_TRACE(0):
-		fprintf(fds, " action TRACE(%u);\n", (action & 0x0000ffff));
+		fprintf(fds, "action TRACE(%u);\n", (action & 0x0000ffff));
 		break;
 	case SCMP_ACT_ALLOW:
-		fprintf(fds, " action ALLOW;\n");
+		fprintf(fds, "action ALLOW;\n");
 		break;
 	default:
-		fprintf(fds, " action 0x%x;\n", action);
+		fprintf(fds, "action 0x%x;\n", action);
 	}
 }
 
@@ -97,7 +116,7 @@ static void _pfc_action(FILE *fds, uint32_t action)
 static void _indent(FILE *fds, unsigned int lvl)
 {
 	while (lvl-- > 0)
-		fprintf(fds, " ");
+		fprintf(fds, "  ");
 }
 
 /**
@@ -125,7 +144,7 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 	while (c_iter != NULL) {
 		/* comparison operation */
 		_indent(fds, lvl);
-		fprintf(fds, " if (");
+		fprintf(fds, "if (");
 		_pfc_arg(fds, arch, c_iter);
 		switch (c_iter->op) {
 			case SCMP_CMP_EQ:
@@ -155,12 +174,12 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 		/* false result */
 		if (c_iter->act_f_flg) {
 			_indent(fds, lvl);
-			fprintf(fds, " else\n");
+			fprintf(fds, "else\n");
 			_indent(fds, lvl + 1);
 			_pfc_action(fds, c_iter->act_f);
 		} else if (c_iter->nxt_f != NULL) {
 			_indent(fds, lvl);
-			fprintf(fds, " else\n");
+			fprintf(fds, "else\n");
 			_gen_pfc_chain(arch, c_iter->nxt_f, lvl + 1, fds);
 		}
 
@@ -183,58 +202,42 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
 {
 	unsigned int sys_num = sys->num;
 
-	fprintf(fds, "# filter code for syscall #%d (priority: %d)\n",
+	_indent(fds, 1);
+	fprintf(fds, "# filter for syscall #%d (priority: %d)\n",
 		sys_num, sys->priority);
-	if (sys->chains != NULL) {
-		fprintf(fds, " if ($syscall != %d) goto syscal_%d_end;\n",
-			sys_num, sys_num);
-		_gen_pfc_chain(arch, sys->chains, 0, fds);
-		fprintf(fds, " syscall_%d_end:\n", sys_num);
-	} else {
-		fprintf(fds, " if ($syscall == %d)", sys_num);
+	_indent(fds, 1);
+	fprintf(fds, "if ($syscall == %d)\n", sys_num);
+	if (sys->chains == NULL) {
+		_indent(fds, 2);
 		_pfc_action(fds, sys->action);
-	}
+	} else
+		_gen_pfc_chain(arch, sys->chains, 2, fds);
 }
 
 /**
- * Generate a pseudo filter code string representation
+ * Generate pseudo filter code for an architecture
  * @param col the seccomp filter collection
- * @param fd the fd to send the output
+ * @param db the single seccomp filter
+ * @param fds the file stream to send the output
  *
  * This function generates a pseudo filter code representation of the given
- * filter collection and writes it to the given fd.  Returns zero on success,
- * negative values on failure.
+ * filter DB and writes it to the given output stream.  Returns zero on
+ * success, negative values on failure.
  *
  */
-int gen_pfc_generate(const struct db_filter_col *col, int fd)
+static int _gen_pfc_arch(const struct db_filter_col *col,
+			 const struct db_filter *db, FILE *fds)
 {
-	int rc = 0;
-	int newfd;
-	FILE *fds;
-	struct db_filter *db;
+	int rc;
 	struct db_sys_list *s_iter;
 	struct pfc_sys_list *p_iter = NULL, *p_new, *p_head = NULL, *p_prev;
-
-	/* NOTE: temporary until we fully support filter collections */
-	if (col->filter_cnt != 1 || col->filters[0]->arch != &arch_def_native)
-		return -EFAULT;
-	db = col->filters[0];
-
-	newfd = dup(fd);
-	if (newfd < 0)
-		return errno;
-	fds = fdopen(newfd, "a");
-	if (fds == NULL) {
-		close(newfd);
-		return errno;
-	}
 
 	/* sort the syscall list */
 	db_list_foreach(s_iter, db->syscalls) {
 		p_new = malloc(sizeof(*p_new));
 		if (p_new == NULL) {
 			rc = -ENOMEM;
-			goto generate_return;
+			goto arch_return;
 		}
 		memset(p_new, 0, sizeof(*p_new));
 		p_new->sys = s_iter;
@@ -257,10 +260,9 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 		}
 	}
 
-	/* generate the pfc */
-	fprintf(fds, "#\n");
-	fprintf(fds, "# pseudo filter code start\n");
-	fprintf(fds, "#\n");
+	fprintf(fds, "# filter for arch %s (%u)\n",
+		_pfc_arch(db->arch), db->arch->token);
+	fprintf(fds, "if ($arch == %u)\n", db->arch->token);
 	p_iter = p_head;
 	while (p_iter != NULL) {
 		if (p_iter->sys->valid == 0)
@@ -268,8 +270,56 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 		_gen_pfc_syscall(db->arch, p_iter->sys, fds);
 		p_iter = p_iter->next;
 	}
+	_indent(fds, 1);
 	fprintf(fds, "# default action\n");
+	_indent(fds, 1);
 	_pfc_action(fds, col->attr.act_default);
+
+arch_return:
+	while (p_head != NULL) {
+		p_iter = p_head;
+		p_head = p_head->next;
+		free(p_iter);
+	}
+	return rc;
+}
+
+/**
+ * Generate a pseudo filter code string representation
+ * @param col the seccomp filter collection
+ * @param fd the fd to send the output
+ *
+ * This function generates a pseudo filter code representation of the given
+ * filter collection and writes it to the given fd.  Returns zero on success,
+ * negative values on failure.
+ *
+ */
+int gen_pfc_generate(const struct db_filter_col *col, int fd)
+{
+	int rc = 0;
+	int newfd;
+	unsigned int iter;
+	FILE *fds;
+
+	newfd = dup(fd);
+	if (newfd < 0)
+		return errno;
+	fds = fdopen(newfd, "a");
+	if (fds == NULL) {
+		close(newfd);
+		return errno;
+	}
+
+	/* generate the pfc */
+	fprintf(fds, "#\n");
+	fprintf(fds, "# pseudo filter code start\n");
+	fprintf(fds, "#\n");
+
+	for (iter = 0; iter < col->filter_cnt; iter++)
+		_gen_pfc_arch(col, col->filters[iter], fds);
+
+	fprintf(fds, "# invalid architecture action\n");
+	_pfc_action(fds, col->attr.act_badarch);
 	fprintf(fds, "#\n");
 	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");
@@ -277,11 +327,5 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 	fflush(fds);
 	fclose(fds);
 
-generate_return:
-	while (p_head != NULL) {
-		p_iter = p_head;
-		p_head = p_head->next;
-		free(p_iter);
-	}
 	return rc;
 }
