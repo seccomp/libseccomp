@@ -170,12 +170,17 @@ void db_col_release(struct db_filter_col *col);
 
 int db_col_valid(struct db_filter_col *col);
 
+int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src);
+
+int db_col_arch_exist(struct db_filter_col *col, uint32_t arch_token);
+
 int db_col_attr_get(const struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t *value);
 int db_col_attr_set(struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t value);
 
 int db_col_db_add(struct db_filter_col *col, struct db_filter *db);
+int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token);
 
 struct db_filter *db_init(const struct arch_def *arch);
 void db_reset(struct db_filter *db);

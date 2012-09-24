@@ -59,13 +59,31 @@ const struct arch_def arch_def_native = {
 };
 
 /**
+ * Validate the architecture token
+ * @param arch the architecture token
+ *
+ * Verify the given architecture token; return zero if valid, -EINVAL if not.
+ *
+ */
+int arch_valid(uint32_t arch)
+{
+	switch (arch) {
+	case AUDIT_ARCH_I386:
+	case AUDIT_ARCH_X86_64:
+		return 0;
+	}
+
+	return -EINVAL;
+}
+
+/**
  * Lookup the syscall table for an architecture
  * @param token the architecure token
  *
  * Return the architecture's syscall table, returns NULL on failure.
  *
  */
-const struct arch_syscall_def *_arch_def_lookup(uint32_t token)
+static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 {
 	switch (token) {
 	case AUDIT_ARCH_I386:
@@ -73,6 +91,27 @@ const struct arch_syscall_def *_arch_def_lookup(uint32_t token)
 		break;
 	case AUDIT_ARCH_X86_64:
 		return x86_64_syscall_table;
+		break;
+	}
+
+	return NULL;
+}
+
+/**
+ * Lookup the architecture definition
+ * @param token the architecure token
+ *
+ * Return the matching architecture definition, returns NULL on failure.
+ *
+ */
+const struct arch_def *arch_def_lookup(uint32_t token)
+{
+	switch (token) {
+	case AUDIT_ARCH_I386:
+		return &arch_def_i386;
+		break;
+	case AUDIT_ARCH_X86_64:
+		return &arch_def_x86_64;
 		break;
 	}
 
@@ -154,7 +193,7 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	unsigned int iter;
 	const struct arch_syscall_def *table;
 
-	table = _arch_def_lookup(arch->token);
+	table = _arch_syscall_lookup(arch->token);
 	if (table == NULL)
 		return __NR_SCMP_ERROR;
 
@@ -182,7 +221,7 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	unsigned int iter;
 	const struct arch_syscall_def *table;
 
-	table = _arch_def_lookup(arch->token);
+	table = _arch_syscall_lookup(arch->token);
 	if (table == NULL)
 		return NULL;
 

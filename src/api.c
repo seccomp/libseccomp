@@ -124,6 +124,82 @@ void seccomp_release(scmp_filter_ctx ctx)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
+{
+	struct db_filter_col *col_dst = (struct db_filter_col *)ctx_dst;
+	struct db_filter_col *col_src = (struct db_filter_col *)ctx_src;
+
+	if (db_col_valid(col_dst) || db_col_valid(col_src))
+		return -EINVAL;
+
+	/* NOTE: only the default action and NNP settings must match */
+	if ((col_dst->attr.act_default != col_src->attr.act_default) ||
+	    (col_dst->attr.nnp_enable != col_src->attr.nnp_enable))
+		return -EINVAL;
+
+	return db_col_merge(col_dst, col_src);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token)
+{
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
+
+	if (arch_token == 0)
+		arch_token = arch_def_native.token;
+
+	if (arch_valid(arch_token))
+		return -EINVAL;
+
+	return (db_col_arch_exist(col, arch_token) ? 0 : -EEXIST);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token)
+{
+	int rc;
+	const struct arch_def *arch;
+	struct db_filter *db;
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
+
+	if (arch_token == 0)
+		arch_token = arch_def_native.token;
+
+	if (arch_valid(arch_token))
+		return -EINVAL;
+	if (db_col_arch_exist(col, arch_token))
+		return -EEXIST;
+
+	arch = arch_def_lookup(arch_token);
+	if (arch == NULL)
+		return -EFAULT;
+	db = db_init(arch);
+	if (db == NULL)
+		return -ENOMEM;
+	rc = db_col_db_add(col, db);
+	if (rc < 0)
+		db_release(db);
+
+	return rc;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_arch_remove(scmp_filter_ctx ctx, uint32_t arch_token)
+{
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
+
+	if (arch_token == 0)
+		arch_token = arch_def_native.token;
+
+	if (arch_valid(arch_token))
+		return -EINVAL;
+	if (db_col_arch_exist(col, arch_token) != -EEXIST)
+		return -EEXIST;
+
+	return db_col_db_remove(col, arch_token);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_load(const scmp_filter_ctx ctx)
 {
 	int rc;
