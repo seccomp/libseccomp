@@ -73,6 +73,10 @@ struct arch_syscall_def {
 
 #define ARG_COUNT_MAX	6
 
+int arch_valid(uint32_t arch);
+
+const struct arch_def *arch_def_lookup(uint32_t token);
+
 int arch_arg_count_max(const struct arch_def *arch);
 
 /**

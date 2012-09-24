@@ -404,6 +404,72 @@ int db_col_valid(struct db_filter_col *col)
 }
 
 /**
+ * Merge two filter collections
+ * @param col_dst the destination filter collection
+ * @param col_src the source filter collection
+ *
+ * This function merges two filter collections into the given destination
+ * collection.  The source filter collection is no longer valid if the function
+ * returns successfully.  Returns zero on success, negative values on failure.
+ *
+ */
+int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
+{
+	unsigned int iter_a, iter_b;
+	struct db_filter **dbs;
+
+	/* make sure we don't have any arch/filter collisions */
+	for (iter_a = 0; iter_a < col_dst->filter_cnt; iter_a++) {
+		for (iter_b = 0; iter_b < col_src->filter_cnt; iter_b++) {
+			if (col_dst->filters[iter_a]->arch->token ==
+			    col_src->filters[iter_b]->arch->token)
+				return -EEXIST;
+		}
+	}
+
+	/* expand the destination */
+	dbs = realloc(col_dst->filters,
+		      sizeof(struct db_filter *) *
+		      (col_dst->filter_cnt + col_src->filter_cnt));
+	if (dbs == NULL)
+		return -ENOMEM;
+
+	/* transfer the architecture filters */
+	for (iter_a = col_dst->filter_cnt, iter_b = 0;
+	     iter_b < col_src->filter_cnt; iter_a++, iter_b++) {
+		col_dst->filters[iter_a] = col_src->filters[iter_b];
+		col_dst->filter_cnt++;
+	}
+
+	/* free the source */
+	col_src->filter_cnt = 0;
+	db_col_release(col_src);
+
+	return 0;
+}
+
+/**
+ * Check to see if an architecture filter exists in the filter collection
+ * @param col the seccomp filter collection
+ * @param arch_token the architecture token
+ *
+ * Iterate through the given filter collection checking to see if a filter
+ * exists for the specified architecture.  Returns -EEXIST if a filter is found,
+ * zero if a matching filter does not exist.
+ *
+ */
+int db_col_arch_exist(struct db_filter_col *col, uint32_t arch_token)
+{
+	unsigned int iter;
+
+	for (iter = 0; iter < col->filter_cnt; iter++)
+		if (col->filters[iter]->arch->token == arch_token)
+			return -EEXIST;
+
+	return 0;
+}
+
+/**
  * Get a filter attribute
  * @param col the seccomp filter collection
  * @param attr the filter attribute
@@ -481,12 +547,10 @@ int db_col_attr_set(struct db_filter_col *col,
  */
 int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
 {
-	unsigned int iter;
 	struct db_filter **dbs;
 
-	for (iter = 0; iter < col->filter_cnt; iter++)
-		if (col->filters[iter]->arch->token == db->arch->token)
-			return -EEXIST;
+	if (db_col_arch_exist(col, db->arch->token))
+		return -EEXIST;
 
 	dbs = realloc(col->filters,
 		      sizeof(struct db_filter *) * (col->filter_cnt + 1));
@@ -495,6 +559,44 @@ int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
 	col->filters = dbs;
 	col->filter_cnt++;
 	col->filters[col->filter_cnt - 1] = db;
+
+	return 0;
+}
+
+/**
+ * Remove a filter DB from a filter collection
+ * @param col the seccomp filter collection
+ * @param arch_token the architecture token
+ *
+ * This function removes an existing seccomp filter DB from an existing seccomp
+ * filter collection.  Returns zero on success, negative values on failure.
+ *
+ */
+int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
+{
+	unsigned int iter;
+	unsigned int found;
+	struct db_filter **dbs;
+
+	if ((col->filter_cnt <= 1) || (db_col_arch_exist(col, arch_token) == 0))
+		return -EINVAL;
+
+	for (found = 0, iter = 0; iter < col->filter_cnt; iter++) {
+		if (found)
+			col->filters[iter - 1] = col->filters[iter];
+		else if (col->filters[iter]->arch->token == arch_token) {
+			db_release(col->filters[iter]);
+			found = 1;
+		}
+	}
+	col->filters[--col->filter_cnt] = NULL;
+
+	/* NOTE: if we can't do the realloc it isn't fatal, we just have some
+	 *       extra space that will get cleaned up later */
+	dbs = realloc(col->filters,
+		      sizeof(struct db_filter *) * col->filter_cnt);
+	if (dbs != NULL)
+		col->filters = dbs;
 
 	return 0;
 }
