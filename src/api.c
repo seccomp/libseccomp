@@ -261,6 +261,9 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 	if (action == col->attr.act_default)
 		return -EPERM;
 
+	if (strict && col->filter_cnt > 1)
+		return -EOPNOTSUPP;
+
 	/* collect the arguments for the filter rule */
 	chain_len_max = ARG_COUNT_MAX;
 	chain = malloc(sizeof(*chain) * chain_len_max);
