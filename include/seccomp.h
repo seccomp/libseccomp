@@ -169,7 +169,7 @@ struct scmp_arg_cmp {
 scmp_filter_ctx seccomp_init(uint32_t def_action);
 
 /**
- * Reset the current filter state
+ * Reset the filter state
  * @param ctx the filter context
  * @param def_action the default filter action
  *
@@ -182,7 +182,7 @@ scmp_filter_ctx seccomp_init(uint32_t def_action);
 int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action);
 
 /**
- * Destroys the current filter state and releases any resources
+ * Destroys the filter state and releases any resources
  * @param ctx the filter context
  *
  * This functions destroys the given seccomp filter state and releases any
@@ -194,7 +194,7 @@ int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action);
 void seccomp_release(scmp_filter_ctx ctx);
 
 /**
- * Loads the current filter into the kernel
+ * Loads the filter into the kernel
  * @param ctx the filter context
  *
  * This function loads the given seccomp filter context into the kernel.  If
@@ -247,7 +247,7 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx,
 			     int syscall, uint8_t priority);
 
 /**
- * Add a new rule to the current filter
+ * Add a new rule to the filter
  * @param ctx the filter context
  * @param action the filter action
  * @param syscall the syscall number
@@ -266,7 +266,7 @@ int seccomp_rule_add(scmp_filter_ctx ctx,
 		     uint32_t action, int syscall, unsigned int arg_cnt, ...);
 
 /**
- * Add a new rule to the current filter
+ * Add a new rule to the filter
  * @param ctx the filter context
  * @param action the filter action
  * @param syscall the syscall number
