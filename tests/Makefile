@@ -50,7 +50,9 @@ TESTS = 01-allow \
 	12-basic-masked-ops \
 	13-attrs \
 	14-reset \
-	15-resolver
+	15-resolver \
+	16-arch-basic \
+	17-arch-merge
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)
