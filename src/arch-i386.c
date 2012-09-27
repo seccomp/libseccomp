@@ -77,21 +77,23 @@ int i386_filter_rewrite(const struct arch_def *arch,
 			if (chain[iter].valid != 0)
 				goto filter_rewrite_failure;
 		}
-		*syscall = __i386_NR_socketcall;
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
-		chain[0].datum = abs((*syscall) % 100);
+		chain[0].mask = DATUM_MAX;
+		chain[0].datum = abs(*syscall) % 100;
 		chain[0].valid = 1;
+		*syscall = __i386_NR_socketcall;
 	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
 		for (iter = 0; iter < i386_arg_count_max; iter++) {
 			if (chain[iter].valid != 0)
 				goto filter_rewrite_failure;
 		}
-		*syscall = __i386_NR_ipc;
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
-		chain[0].datum = abs((*syscall) % 200);
+		chain[0].mask = DATUM_MAX;
+		chain[0].datum = abs(*syscall) % 200;
 		chain[0].valid = 1;
+		*syscall = __i386_NR_ipc;
 	} else if ((*syscall) < 0)
 		return -EINVAL;
 
