@@ -45,7 +45,10 @@ MAN3 = \
 	man/man3/seccomp_export_bpf.3 \
 	man/man3/seccomp_export_pfc.3 \
 	man/man3/seccomp_attr_set.3 \
-	man/man3/seccomp_attr_get.3
+	man/man3/seccomp_attr_get.3 \
+	man/man3/seccomp_arch_add.3 \
+	man/man3/seccomp_arch_remove.3 \
+	man/man3/seccomp_merge.3
 
 #
 # targets
