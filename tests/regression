@@ -43,12 +43,13 @@ function verify_deps() {
 #
 function usage() {
 cat << EOF
-usage: regression [-h] [-a] [-b BATCH_NAME] [-g] [-l [LOG]]
+usage: regression [-h] [-m MODE] [-a] [-b BATCH_NAME] [-g] [-l [LOG]]
                   [-s SINGLE_TEST] [-t [TEMP_DIR]] [-v]
 
 libseccomp regression test automation script
 optional arguments:
   -h             show this help message and exit
+  -m MODE        specified the test mode [c (default), python]
   -a             specifies all tests are to be run
   -b BATCH_NAME  specifies batch of tests to be run
   -g             specifies that tests are to be run with valgrind
@@ -148,7 +149,8 @@ function get_range() {
 #
 # Arguments:
 #     1    string containing generated test number
-#     2    string containing command to run
+#     2    string containing command name
+#     3    string containing command options and redirects
 #
 function run_test_command() {
 	local cmd
@@ -156,19 +158,23 @@ function run_test_command() {
 	if $use_valgrind && $verbose; then
 		print_valgrind $1
 		if [[ $logfd -eq 3 ]]; then
-			cmd="/usr/bin/valgrind --log-fd=$logfd ./$2"
+			cmd="/usr/bin/valgrind --log-fd=$logfd ./$2 $3"
 		else
-			cmd="/usr/bin/valgrind ./$2"
+			cmd="/usr/bin/valgrind ./$2 $3"
 		fi
 	elif $use_valgrind; then
 		# With -q, valgrind will only print error messages
 		if [[ $logfd -eq 3 ]]; then
-			cmd="/usr/bin/valgrind -q --log-fd=$logfd ./$2"
+			cmd="/usr/bin/valgrind -q --log-fd=$logfd ./$2 $3"
 		else
-			cmd="/usr/bin/valgrind -q ./$2"
+			cmd="/usr/bin/valgrind -q ./$2 $3"
 		fi
+	elif [[ $mode == "python" ]]; then
+		cmd="PYTHONPATH=$PYTHONPATH"
+		cmd="$cmd:$(cd $(pwd)/../src/python/build/lib.*; pwd)"
+		cmd="$cmd /usr/bin/env python ./$2.py $3"
 	else
-		cmd="./$2"
+		cmd="./$2 $3"
 	fi
 
 	#Run the command
@@ -277,7 +283,7 @@ function run_test_bpf_sim_fuzz() {
 		done
 
 		# Run the test command and put the BPF filter in a temp file
-		run_test_command "$testnumstr" "$testname -b > $tmpfile"
+		run_test_command "$testnumstr" "$testname" "-b > $tmpfile"
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "$testname rc=$?"
 			stats_error=$(($stats_error+1))
@@ -471,7 +477,7 @@ function run_test_bpf_sim() {
 		done
 
 		# Run the test command and put the BPF filter in a temp file
-		run_test_command "$testnumstr" "$testname -b > $tmpfile"
+		run_test_command "$testnumstr" "$testname" "-b > $tmpfile"
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "$testname rc=$?"
 			stats_error=$(($stats_error+1))
@@ -521,7 +527,7 @@ function run_test_basic() {
 	print_data "$1" "$2"
 
 	# Run the command
-	run_test_command "$1" "$2"
+	run_test_command "$1" "$2" ""
 	if [[ $? -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$?"
 		stats_failure=$(($stats_failure+1))
@@ -586,6 +592,8 @@ function run_tests() {
 
 		# Print batch name to log file
 		echo " batch name: $batch_name" >&$logfd
+		# Print test mode to log file
+		echo " test mode:  $mode" >&$logfd
 
 		# Loop through each line of the file and run the requested tests
 		while read line; do
@@ -601,7 +609,7 @@ function run_tests() {
 				test_type=`echo "$line" |
 					    sed -e 's/^test type: //;'`
 				# Print test type to log file
-				echo " test type: $test_type" >&$logfd
+				echo " test type:  $test_type" >&$logfd
 				continue
 			elif [[ ${single_list[@]} ]]; then
 				for i in ${single_list[@]}; do
@@ -637,6 +645,7 @@ arch=
 batch_count=0
 logfile=
 logfd=
+mode=c
 runall=false
 singlecount=0
 tmpfile=""
@@ -649,7 +658,7 @@ stats_success=0
 stats_failure=0
 stats_error=0
 
-while getopts "ab:gl:s:t:vh" opt; do
+while getopts "ab:gl:m:s:t:vh" opt; do
 	case $opt in
 	a)
 		runall=true
@@ -664,6 +673,19 @@ while getopts "ab:gl:s:t:vh" opt; do
 		;;
 	l)
 		logfile="$OPTARG"
+		;;
+	m)
+		case $OPTARG in
+		c)
+			mode=c
+			;;
+		python)
+			mode=python
+			;;
+		*)
+			usage
+			exit 1
+		esac
 		;;
 	s)
 		single_list[single_count]=$OPTARG

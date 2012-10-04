@@ -88,8 +88,8 @@ int util_getopt(int argc, char *argv[], struct util_options *opts)
  * @param opts the options structure
  * @param ctx the filter context
  *
- * This function outputs the seccomp filter to in either BPF or PFC format
- * depending on the test paramaeters supplied by @opts.
+ * This function outputs the seccomp filter to stdout in either BPF or PFC
+ * format depending on the test paramaeters supplied by @opts.
  *
  */
 int util_filter_output(const struct util_options *opts,

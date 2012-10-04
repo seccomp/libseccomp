@@ -1,4 +1,5 @@
 *.bpf
+util.pyc
 01-allow
 02-basic
 03-basic-chains
