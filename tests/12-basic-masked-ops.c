@@ -39,6 +39,9 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		goto out;
 
+	/* the syscall and argument numbers are all fake to make the test
+	 * simpler */
+
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
