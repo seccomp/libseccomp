@@ -31,8 +31,11 @@ include ../macros.mk
 
 include $(TOPDIR)/configure.mk
 
+LDFLAGS := ../src/libseccomp.a
+
 TOOLS = bpf_disasm \
-	bpf_sim
+	bpf_sim \
+	sys_resolver
 
 DEPS = $(TOOLS:%=%.d)
 
