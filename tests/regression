@@ -368,19 +368,25 @@ function run_test_bpf_sim() {
 	# Print out the input test data to the log file
 	print_data "$testnumstr" "$testdata"
 
-	# Only run tests that match the current architecture
-	if [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
+	if [[ "${testarch:0:1}" == "+" ]]; then
+		# Run the tests on the specified architecture
+		simarch="${testarch:1}"
+	elif [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
+		# Only run tests that match the current architecture
 		print_result $testnumstr "INFO" \
 		       "Test skipped due to test/system architecture difference"
 		stats_skipped=$(($stats_skipped+1))
 		return
+	else
+		# Run the tests on the native architecture
+		simarch="$arch"
 	fi
 
 	# Get low and high range syscall values and convert them to numbers if
 	# either were specified by name.
 	low_syscall=$(get_range $LOW "${line[2]}")
 	if [[ ! $low_syscall =~ ^[0-9]+$ ]]; then
-		low_syscall=`../tools/sys_resolver $low_syscall`
+		low_syscall=`../tools/sys_resolver -a $simarch $low_syscall`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "sys_resolver rc=$?"
 			stats_error=$(($stats_error+1))
@@ -389,7 +395,7 @@ function run_test_bpf_sim() {
 	fi
 	high_syscall=$(get_range $HIGH "${line[2]}")
 	if [[ ! $high_syscall =~ ^[0-9]+$ ]]; then
-		high_syscall=`../tools/sys_resolver $high_syscall`
+		high_syscall=`../tools/sys_resolver -a $simarch $high_syscall`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "sys_resolver rc=$?"
 			stats_error=$(($stats_error+1))
@@ -486,7 +492,7 @@ function run_test_bpf_sim() {
 
 		# Simulate the specifed syscall against the BPF filter and
 		# verify the results.
-		action=`../tools/bpf_sim -a $arch -f $tmpfile -s $sys \
+		action=`../tools/bpf_sim -a $simarch -f $tmpfile -s $sys \
 		    ${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} ${arg[5]}`
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
