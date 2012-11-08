@@ -119,6 +119,8 @@ struct db_sys_list {
 	uint32_t action;
 
 	struct db_sys_list *next;
+	/* temporary use only by the BPF generator */
+	struct db_sys_list *pri_prv, *pri_nxt;
 };
 
 struct db_filter_attr {
