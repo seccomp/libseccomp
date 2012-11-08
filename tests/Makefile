@@ -52,7 +52,8 @@ TESTS = 01-allow \
 	14-reset \
 	15-resolver \
 	16-arch-basic \
-	17-arch-merge
+	17-arch-merge \
+	18-basic-whitelist
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)
