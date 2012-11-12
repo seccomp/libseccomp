@@ -1086,6 +1086,9 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 			b_tail = b_tail->next;
 		blk_cnt++;
 	}
+	if (db->syscalls != NULL)
+		/* fixup last syscall false jump (fail to default action) */
+		b_tail->blks[0].jf = _BPF_JMP_HSH(state->def_hsh);
 
 	/* do the architecture check and load the syscall number */
 	if (db->syscalls != NULL) {
@@ -1124,13 +1127,9 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		b_head = b_hdr;
 	}
 
-	/* add all of the fitlers to the hash table and add a default action */
+	/* add all of the fitlers to the hash table */
 	b_iter = b_head;
 	while (b_iter != NULL) {
-		/* add a jump to the default action if we are at the end */
-		if (b_iter->next == NULL)
-			b_iter->blks[0].jf = _BPF_JMP_HSH(state->def_hsh);
-
 		/* add to the hash table */
 		rc = _hsh_add(state, &b_iter, 1);
 		if (rc < 0)
