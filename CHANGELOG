@@ -2,6 +2,13 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
+* Version 1.0.1 - November 12, 2012
+- The header file is now easier to use with C++ compilers
+- Minor documentation fixes
+- Minor memory leak fixes
+- Corrected x86 filter generation on x86_64 systems
+- Corrected problems with small filters and filters with arguments
+
 * Version 1.0.0 - July 31, 2012
 - Change the API to be context-aware; eliminates all internal state but breaks
   compatibility with the previous 0.1.0 release
