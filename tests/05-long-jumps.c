@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 		goto out;
 
 	/* same syscall, many chains */
-	for (iter = 0; iter < 600; iter++) {
+	for (iter = 0; iter < 100; iter++) {
 		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
 					    SCMP_A0(SCMP_CMP_EQ, iter),
 					    SCMP_A1(SCMP_CMP_NE, 0x0),
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* many syscalls, same chain */
-	for (iter = 100; iter < 700; iter++) {
+	for (iter = 100; iter < 200; iter++) {
 		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, iter, 1,
 					    SCMP_A0(SCMP_CMP_NE, 0));
 		if (rc != 0)
