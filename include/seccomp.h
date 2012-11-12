@@ -210,63 +210,6 @@ int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action);
 void seccomp_release(scmp_filter_ctx ctx);
 
 /**
- * Merge two filters
- * @param ctx_dst the destination filter context
- * @param ctx_src the source filter context
- *
- * This function merges two filter contexts into a single filter context and
- * destroys the second filter context.  The two filter contexts must have the
- * same attribute values and not contain any of the same architectures; if they
- * do, the merge operation will fail.  On success, the source filter context
- * will be destroyed and should no longer be used; it is not necessary to
- * call seccomp_release() on the source filter context.  Returns zero on
- * success, negative values on failure.
- *
- */
-int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src);
-
-/**
- * Check to see if an existing architecture is present in the filter
- * @param ctx the filter context
- * @param arch_token the architecture token, e.g. SCMP_ARCH_*
- *
- * This function tests to see if a given architecture is included in the filter
- * context.  If the architecture token is SCMP_ARCH_NATIVE then the native
- * architecture will be assumed.  Returns zero if the architecture exists in
- * the filter, -EEXIST if it is not present, and other negative values on
- * failure.
- *
- */
-int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token);
-
-/**
- * Adds an architecture to the filter
- * @param ctx the filter context
- * @param arch_token the architecture token, e.g. SCMP_ARCH_*
- *
- * This function adds a new architecture to the given seccomp filter context.
- * Any new rules added after this function successfully returns will be added
- * to this architecture but existing rules will not be added to this
- * architecture.  If the architecture token is SCMP_ARCH_NATIVE then the native
- * architecture will be assumed.  Returns zero on success, negative values on
- * failure.
- *
- */
-int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token);
-
-/**
- * Removes an architecture from the filter
- * @param ctx the filter context
- * @param arch_token the architecture token, e.g. SCMP_ARCH_*
- *
- * This function removes an architecture from the given seccomp filter context.
- * If the architecture token is SCMP_ARCH_NATIVE then the native architecture
- * will be assumed.  Returns zero on success, negative values on failure.
- *
- */
-int seccomp_arch_remove(scmp_filter_ctx ctx, uint32_t arch_token);
-
-/**
  * Loads the filter into the kernel
  * @param ctx the filter context
  *
