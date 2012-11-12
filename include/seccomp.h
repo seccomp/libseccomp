@@ -232,17 +232,6 @@ int seccomp_attr_set(scmp_filter_ctx ctx,
 		     enum scmp_filter_attr attr, uint32_t value);
 
 /**
- * Resolve a syscall name to a number
- * @param name the syscall name
- *
- * Resolve the given syscall name to the syscall number.  Returns the syscall
- * number on success, including negative pseudo syscall numbers (e.g. __PNR_*);
- * returns __NR_SCMP_ERROR on failure.
- *
- */
-int seccomp_syscall_resolve_name(const char *name);
-
-/**
  * Set the priority of a given syscall
  * @param ctx the filter context
  * @param syscall the syscall number
