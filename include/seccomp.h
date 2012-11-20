@@ -328,92 +328,102 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 /* NOTE - pseudo syscall values {-1..-99} are reserved */
 #define __NR_SCMP_ERROR		-1
 
-#define __PNR_socket		-100
+#define __PNR_socket		-101
 #ifndef __NR_socket
 #define __NR_socket		__PNR_socket
 #endif /* __NR_socket */
 
-#define __PNR_bind		-101
+#define __PNR_bind		-102
 #ifndef __NR_bind
 #define __NR_bind		__PNR_bind
 #endif /* __NR_bind */
 
-#define __PNR_connect		-102
+#define __PNR_connect		-103
 #ifndef __NR_connect
 #define __NR_connect		__PNR_connect
 #endif /* __NR_connect */
 
-#define __PNR_listen		-103
+#define __PNR_listen		-104
 #ifndef __NR_listen
 #define __NR_listen		__PNR_listen
 #endif /* __NR_listen */
 
-#define __PNR_accept		-104
+#define __PNR_accept		-105
 #ifndef __NR_accept
 #define __NR_accept		__PNR_accept
 #endif /* __NR_accept */
 
-#define __PNR_getsockname	-105
+#define __PNR_getsockname	-106
 #ifndef __NR_getsockname
 #define __NR_getsockname	__PNR_getsockname
 #endif /* __NR_getsockname */
 
-#define __PNR_getpeername	-106
+#define __PNR_getpeername	-107
 #ifndef __NR_getpeername
 #define __NR_getpeername	__PNR_getpeername
 #endif /* __NR_getpeername */
 
-#define __PNR_socketpair	-107
+#define __PNR_socketpair	-108
 #ifndef __NR_socketpair
 #define __NR_socketpair		__PNR_socketpair
 #endif /* __NR_socketpair */
 
-#define __PNR_send		-108
+#define __PNR_send		-109
 #ifndef __NR_send
 #define __NR_send		__PNR_send
 #endif /* __NR_send */
 
-#define __PNR_recv		-109
+#define __PNR_recv		-110
 #ifndef __NR_recv
 #define __NR_recv		__PNR_recv
 #endif /* __NR_recv */
 
-#define __PNR_sendto		-110
+#define __PNR_sendto		-111
 #ifndef __NR_sendto
 #define __NR_sendto		__PNR_sendto
 #endif /* __NR_sendto */
 
-#define __PNR_recvfrom		-111
+#define __PNR_recvfrom		-112
 #ifndef __NR_recvfrom
 #define __NR_recvfrom		__PNR_recvfrom
 #endif /* __NR_recvfrom */
 
-#define __PNR_shutdown		-112
+#define __PNR_shutdown		-113
 #ifndef __NR_shutdown
 #define __NR_shutdown		__PNR_shutdown
 #endif /* __NR_shutdown */
 
-#define __PNR_getsockopt	-113
+#define __PNR_setsockopt	-114
+#ifndef __NR_setsockopt
+#define __NR_setsockopt		__PNR_setsockopt
+#endif /* __NR_getsockopt */
+
+#define __PNR_getsockopt	-115
 #ifndef __NR_getsockopt
 #define __NR_getsockopt		__PNR_getsockopt
 #endif /* __NR_getsockopt */
 
-#define __PNR_sendmsg		-114
+#define __PNR_sendmsg		-116
 #ifndef __NR_sendmsg
 #define __NR_sendmsg		__PNR_sendmsg
 #endif /* __NR_sendmsg */
 
-#define __PNR_recvmsg		-115
+#define __PNR_recvmsg		-117
 #ifndef __NR_recvmsg
 #define __NR_recvmsg		__PNR_recvmsg
 #endif /* __NR_recvmsg */
 
-#define __PNR_recvmmsg		-116
+#define __PNR_accept4		-118
+#ifndef __NR_accept4
+#define __NR_accept4		__PNR_accept4
+#endif /* __NR_accept4 */
+
+#define __PNR_recvmmsg		-119
 #ifndef __NR_recvmmsg
 #define __NR_recvmmsg		__PNR_recvmmsg
 #endif /* __NR_recvmmsg */
 
-#define __PNR_sendmmsg		-117
+#define __PNR_sendmmsg		-120
 #ifndef __NR_sendmmsg
 #define __NR_sendmmsg		__PNR_sendmmsg
 #endif /* __NR_sendmmsg */
