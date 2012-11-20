@@ -28,6 +28,7 @@
 const struct arch_syscall_def i386_syscall_table[] = \
 {
 	{ "accept", __PNR_accept },
+	{ "accept4", __PNR_accept4 },
 	{ "access", 33 },
 	{ "acct", 51 },
 	{ "add_key", 286 },
@@ -320,6 +321,7 @@ const struct arch_syscall_def i386_syscall_table[] = \
 	{ "setreuid32", 203 },
 	{ "setrlimit", 75 },
 	{ "setsid", 66 },
+	{ "setsockopt", __PNR_setsockopt },
 	{ "settimeofday", 79 },
 	{ "setuid", 23 },
 	{ "setuid32", 213 },
