@@ -99,10 +99,17 @@ cdef class Arch:
     X86 - 32-bit x86
     X86_64 - 64-bit x86
     """
-
     NATIVE = libseccomp.SCMP_ARCH_NATIVE
     X86 = libseccomp.SCMP_ARCH_X86
     X86_64 = libseccomp.SCMP_ARCH_X86_64
+
+    def system(self):
+        """ Return the system's architecture
+
+        Description:
+        Return an integer value matching the native architecture.
+        """
+        return libseccomp.seccomp_arch_native()
 
 cdef class Attr:
     """ Python object representing the SyscallFilter attributes.

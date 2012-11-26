@@ -141,6 +141,12 @@ int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+uint32_t seccomp_arch_native(void)
+{
+	return arch_def_native.token;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token)
 {
 	struct db_filter_col *col = (struct db_filter_col *)ctx;

@@ -1,8 +1,8 @@
-.TH "seccomp_arch_add" 3 "28 September 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_arch_add" 3 "26 November 2012" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
-seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist \- Manage seccomp filter architectures
+seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist, seccomp_arch_native \- Manage seccomp filter architectures
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SYNOPSIS
 .\" //////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@ seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist \- Manage seccomp filt
 .B #define SCMP_ARCH_X86
 .B #define SCMP_ARCH_X86_64
 .sp
+.BI "uint32_t seccomp_arch_native();"
 .BI "int seccomp_arch_exist(const scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
 .BI "int seccomp_arch_add(scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
 .BI "int seccomp_arch_remove(scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
@@ -41,7 +42,11 @@ should be the
 .BR SCMP_ARCH_*
 defined constants; with the
 .BR SCMP_ARCH_NATIVE
-constant always referring to the native compiled architecture.
+constant always referring to the native compiled architecture.  The
+.BR seccomp_arch_native ()
+function returns the system's architecture such that it will match one of the
+.BR SCMP_ARCH_*
+constants.
 .P
 When a seccomp filter is initialized with the call to
 .BR seccomp_init (3)

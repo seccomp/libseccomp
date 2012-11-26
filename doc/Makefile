@@ -47,6 +47,8 @@ MAN3 = \
 	man/man3/seccomp_attr_set.3 \
 	man/man3/seccomp_attr_get.3 \
 	man/man3/seccomp_arch_add.3 \
+	man/man3/seccomp_arch_exist.3 \
+	man/man3/seccomp_arch_native.3 \
 	man/man3/seccomp_arch_remove.3 \
 	man/man3/seccomp_merge.3
 

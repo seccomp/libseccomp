@@ -40,12 +40,12 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		goto out;
 
-	if (seccomp_arch_exist(ctx, SCMP_ARCH_X86) == -EEXIST) {
+	if (seccomp_arch_native() != SCMP_ARCH_X86) {
 		rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
 		if (rc != 0)
 			goto out;
 	}
-	if (seccomp_arch_exist(ctx, SCMP_ARCH_X86_64) == -EEXIST) {
+	if (seccomp_arch_native() != SCMP_ARCH_X86_64) {
 		rc = seccomp_arch_add(ctx, SCMP_ARCH_X86_64);
 		if (rc != 0)
 			goto out;

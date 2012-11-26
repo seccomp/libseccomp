@@ -226,6 +226,14 @@ void seccomp_release(scmp_filter_ctx ctx);
 int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src);
 
 /**
+ * Return the native architecture token
+ *
+ * This function returns the native architecture token value, e.g. SCMP_ARCH_*.
+ *
+ */
+uint32_t seccomp_arch_native(void);
+
+/**
  * Check to see if an existing architecture is present in the filter
  * @param ctx the filter context
  * @param arch_token the architecture token, e.g. SCMP_ARCH_*

@@ -30,9 +30,9 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    if not f.exist_arch(Arch.X86):
+    if not Arch.system() == Arch.X86:
         f.add_arch(Arch.X86)
-    if not f.exist_arch(Arch.X86_64):
+    if not Arch.system() == Arch.X86_64:
         f.add_arch(Arch.X86_64)
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout))
