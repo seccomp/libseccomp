@@ -9,9 +9,7 @@ seccomp_syscall_resolve_name \- Resolve a syscall name
 .nf
 .B #include <seccomp.h>
 .sp
-.B typedef void * scmp_filter_ctx;
-.sp
-.BI "int seccomp_rule_add(const char *" name ");"
+.BI "int seccomp_syscall_resolve_name(const char *" name ");"
 .sp
 Link with \fI\-lseccomp\fP.
 .fi
