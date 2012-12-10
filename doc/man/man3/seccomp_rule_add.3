@@ -209,7 +209,7 @@ functions return zero on success, negative errno values on failure.
 
 int main(int argc, char *argv[])
 {
-	int rc = -1;
+	int rc = \-1;
 	scmp_filter_ctx ctx;
 	int fd;
 	unsigned char buf[BUF_SIZE];
@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
 
 out:
 	seccomp_release(ctx);
-	return -rc;
+	return \-rc;
 }
 .fi
 .\" //////////////////////////////////////////////////////////////////////////

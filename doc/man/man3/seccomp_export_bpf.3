@@ -54,7 +54,7 @@ Returns zero on success, negative errno values on failure.
 
 int main(int argc, char *argv[])
 {
-	int rc = -1;
+	int rc = \-1;
 	scmp_filter_ctx ctx;
 	int filter_fd;
 
@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
 	/* ... */
 
 	filter_fd = open("/tmp/seccomp_filter.bpf", O_WRONLY);
-	if (filter_fd == -1) {
-		rc = -errno;
+	if (filter_fd == \-1) {
+		rc = \-errno;
 		goto out;
 	}
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
 out:
 	seccomp_release(ctx);
-	return -rc;
+	return \-rc;
 }
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
