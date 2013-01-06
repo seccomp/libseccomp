@@ -1,7 +1,7 @@
 #
 # Seccomp Library Python Bindings
 #
-# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <pmoore@redhat.com>
 #
 
@@ -77,6 +77,8 @@ cdef extern from "seccomp.h":
     int seccomp_attr_set(scmp_filter_ctx ctx,
                          scmp_filter_attr attr, uint32_t value)
 
+    char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num)
+    int seccomp_syscall_resolve_name_arch(uint32_t arch_token, char *name)
     int seccomp_syscall_resolve_name(char *name)
     int seccomp_syscall_priority(scmp_filter_ctx ctx,
                                  int syscall, uint8_t priority)

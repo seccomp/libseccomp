@@ -1,7 +1,7 @@
 /**
  * Seccomp Library API
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
 
@@ -255,12 +255,49 @@ int seccomp_attr_set(scmp_filter_ctx ctx,
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-int seccomp_syscall_resolve_name(const char *name)
+char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num)
 {
+	const struct arch_def *arch;
+	const char *name;
+
+	if (arch_token == 0)
+		arch_token = arch_def_native.token;
+	if (arch_valid(arch_token))
+		return NULL;
+	arch = arch_def_lookup(arch_token);
+	if (arch == NULL)
+		return NULL;
+
+	name = arch_syscall_resolve_num(arch, num);
+	if (name == NULL)
+		return NULL;
+
+	return strdup(name);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
+{
+	const struct arch_def *arch;
+
 	if (name == NULL)
 		return -EINVAL;
 
-	return arch_syscall_resolve_name(&arch_def_native, name);
+	if (arch_token == 0)
+		arch_token = arch_def_native.token;
+	if (arch_valid(arch_token))
+		return -EINVAL;
+	arch = arch_def_lookup(arch_token);
+	if (arch == NULL)
+		return -EFAULT;
+
+	return arch_syscall_resolve_name(arch, name);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_syscall_resolve_name(const char *name)
+{
+	return seccomp_syscall_resolve_name_arch(SCMP_ARCH_NATIVE, name);
 }
 
 /* NOTE - function header comment in include/seccomp.h */

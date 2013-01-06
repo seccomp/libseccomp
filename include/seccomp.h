@@ -1,7 +1,7 @@
 /**
  * Seccomp Library
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
 
@@ -311,6 +311,30 @@ int seccomp_attr_get(const scmp_filter_ctx ctx,
  */
 int seccomp_attr_set(scmp_filter_ctx ctx,
 		     enum scmp_filter_attr attr, uint32_t value);
+
+/**
+ * Resolve a syscall number to a name
+ * @param arch_token the architecture token, e.g. SCMP_ARCH_*
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name for the given
+ * architecture; it is up to the caller to free the returned string.  Returns
+ * the syscall name on success, NULL on failure.
+ *
+ */
+char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num);
+
+/**
+ * Resolve a syscall name to a number
+ * @param arch_token the architecture token, e.g. SCMP_ARCH_*
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number for the given
+ * architecture.  Returns the syscall number on success, including negative
+ * pseudo syscall numbers (e.g. __PNR_*); returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name);
 
 /**
  * Resolve a syscall name to a number

@@ -1,7 +1,7 @@
 #
 # Seccomp Library Python Bindings
 #
-# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <pmoore@redhat.com>
 #
 
@@ -68,7 +68,7 @@ Example:
     f.load()
 """
 __author__ =  'Paul Moore <paul@paul-moore.com>'
-__date__ = "31 October 2012"
+__date__ = "7 January 2013"
 
 from libc.stdint cimport uint32_t
 import errno
@@ -98,6 +98,24 @@ def system_arch():
     Returns the native system architecture value.
     """
     return libseccomp.seccomp_arch_native()
+
+def resolve_syscall(arch, syscall):
+    """ Resolve the syscall.
+
+    Arguments:
+    arch - the architecture value, e.g. Arch.*
+    syscall - the syscall name or number
+
+    Description:
+    Resolve an architecture's syscall name to the correct number or the
+    syscall number to the correct name.
+    """
+    if (isinstance(syscall, basestring)):
+        return libseccomp.seccomp_syscall_resolve_name_arch(arch, syscall)
+    elif (isinstance(syscall, int)):
+        return libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
+    else:
+        raise TypeError("Syscall must either be an int or str type")
 
 cdef class Arch:
     """ Python object representing the SyscallFilter architecture values.
@@ -349,14 +367,14 @@ cdef class SyscallFilter:
         from 0 to 255 inclusive.
         """
         if priority < 0 or priority > 255:
-            raise ValueError("Syscall priority must be between 0 and 255");
+            raise ValueError("Syscall priority must be between 0 and 255")
         if isinstance(syscall, str):
             syscall_str = syscall.encode()
             syscall_num = libseccomp.seccomp_syscall_resolve_name(syscall_str)
         elif isinstance(syscall, int):
             syscall_num = syscall
         else:
-            raise TypeError("Syscall must either be an int or str type");
+            raise TypeError("Syscall must either be an int or str type")
         rc = libseccomp.seccomp_syscall_priority(self._ctx,
                                                  syscall_num, priority)
         if rc != 0:
@@ -389,7 +407,7 @@ cdef class SyscallFilter:
         elif isinstance(syscall, int):
             syscall_num = syscall
         else:
-            raise TypeError("Syscall must either be an int or str type");
+            raise TypeError("Syscall must either be an int or str type")
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add() function and the inability of Cython
         to handle this automatically """
@@ -468,7 +486,7 @@ cdef class SyscallFilter:
         elif isinstance(syscall, int):
             syscall_num = syscall
         else:
-            raise TypeError("Syscall must either be an int or str type");
+            raise TypeError("Syscall must either be an int or str type")
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add_exact() function and the inability of
         Cython to handle this automatically """
