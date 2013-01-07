@@ -39,6 +39,15 @@ def test():
     except RuntimeError:
         pass
 
+    sys_num = resolve_syscall(Arch.NATIVE, "open")
+    sys_name = resolve_syscall(Arch.NATIVE, sys_num)
+    if (sys_name != "open"):
+        raise RuntimeError("Test failure")
+    sys_num = resolve_syscall(Arch.NATIVE, "socket")
+    sys_name = resolve_syscall(Arch.NATIVE, sys_num)
+    if (sys_name != "socket"):
+        raise RuntimeError("Test failure")
+
 test()
 
 # kate: syntax python;
