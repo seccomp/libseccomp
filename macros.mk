@@ -70,6 +70,10 @@ GCC ?= gcc
 
 INSTALL ?= install
 
+ifeq ($(V),0)
+	MAKE += --quiet --no-print-directory
+endif
+
 #
 # auto dependencies
 #
