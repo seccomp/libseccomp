@@ -33,14 +33,14 @@ def test(args):
     # syscalls referenced by number to make the test simpler
     f.add_rule_exactly(ALLOW, 1)
     i = 0
-    while i < 600:
+    while i < 100:
         f.add_rule_exactly(ALLOW, 1000,
                            Arg(0, EQ, i),
                            Arg(1, NE, 0),
                            Arg(2, LT, sys.maxsize))
         i += 1
     i = 100
-    while i < 700:
+    while i < 200:
         f.add_rule_exactly(ALLOW, i,
                            Arg(0, NE, 0))
         i += 1
