@@ -46,13 +46,13 @@ SUBDIRS_INSTALL = src include doc
 all: $(SUBDIRS_BUILD)
 
 $(CONFIGS): version_info
-	@$(ECHO) ">> INFO: automatically generating configuration ..."
+	@$(ECHO_INFO) "automatically generating configuration ..."
 	@./configure
 
 tarball: clean
 	@ver=$(VERSION_RELEASE); \
 	tarball=libseccomp-$$ver.tar.gz; \
-	$(ECHO) ">> INFO: creating the tarball ../$$tarball"; \
+	$(ECHO_INFO) "creating the tarball ../$$tarball"; \
 	tmp_dir=$$(mktemp -d /tmp/libseccomp.XXXXX); \
 	rel_dir=$$tmp_dir/libseccomp-$$ver; \
 	$(MKDIR) $$rel_dir; \
@@ -63,7 +63,7 @@ tarball: clean
 	$(RM) -rf $$tmp_dir;
 
 $(VERSION_HDR): version_info.mk
-	@$(ECHO) ">> INFO: creating the version header file"
+	@$(ECHO_INFO) "creating the version header file"
 	@hdr="$(VERSION_HDR)"; \
 	$(ECHO) "/* automatically generated - do not edit */" > $$hdr; \
 	$(ECHO) "#ifndef _VERSION_H" >> $$hdr; \
@@ -72,40 +72,40 @@ $(VERSION_HDR): version_info.mk
 	$(ECHO) "#endif" >> $$hdr;
 
 src: $(VERSION_HDR) $(CONFIGS)
-	@$(ECHO) ">> INFO: building in directory $@/ ..."
+	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
 tests: src
-	@$(ECHO) ">> INFO: building in directory $@/ ..."
+	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
 tools: src
-	@$(ECHO) ">> INFO: building in directory $@/ ..."
+	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
 install: $(SUBDIRS_BUILD)
-	@$(ECHO) ">> INFO: installing in $(INSTALL_PREFIX) ..."
+	@$(ECHO_INFO) "installing in $(INSTALL_PREFIX) ..."
 	$(INSTALL_PC_MACRO) libseccomp.pc
 	@for dir in $(SUBDIRS_INSTALL); do \
-		$(ECHO) ">> INFO: installing from $$dir/"; \
+		$(ECHO_INFO) "installing from $$dir/"; \
 		$(MAKE) -C $$dir install; \
 	done
 
 ctags:
-	@$(ECHO) ">> INFO: generating ctags for the project ..."
+	@$(ECHO_INFO) "generating ctags for the project ..."
 	@ctags -R *
 
 cstags:
-	@$(ECHO) ">> INFO: generating cscope tags for the project ..."
+	@$(ECHO_INFO) "generating cscope tags for the project ..."
 	@find -iname *.[ch] > cscope.files
 	@cscope -b -q -k
 
 clean:
-	@$(ECHO) ">> INFO: cleaning up libseccomp"
+	@$(ECHO_INFO) "cleaning up libseccomp"
 	@for dir in $(SUBDIRS_BUILD); do \
 		$(MAKE) -C $$dir clean; \
 	done
 
 dist-clean: clean
-	@$(ECHO) ">> INFO: removing the configuration files"
+	@$(ECHO_INFO) "removing the configuration files"
 	@$(RM) $(CONFIGS)

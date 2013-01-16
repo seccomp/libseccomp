@@ -72,6 +72,9 @@ INSTALL ?= install
 
 ifeq ($(V),0)
 	MAKE += --quiet --no-print-directory
+	ECHO_INFO ?= $(ECHO) ">> INFO:"
+else
+	ECHO_INFO ?= /bin/true || $(ECHO) ">> INFO:"
 endif
 
 #

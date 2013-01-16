@@ -72,7 +72,7 @@ $(LIB_SHARED): $(OBJS)
 	$(LINK_LIB)
 
 python: $(LIB_STATIC)
-	@$(ECHO) ">> INFO: building in directory $@/ ..."
+	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
 install: $(LIB_SHARED)
