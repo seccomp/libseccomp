@@ -15,4 +15,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-07-db-bug-looping	150
+07-db-bug-looping	50

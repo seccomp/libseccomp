@@ -34,4 +34,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-04-multilevel-chains	150
+04-multilevel-chains	50

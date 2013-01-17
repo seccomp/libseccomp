@@ -38,4 +38,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-08-subtree-checks	150
+08-subtree-checks	50

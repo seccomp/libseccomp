@@ -23,5 +23,5 @@ test type: bpf-sim
 
 test type: bpf-sim-fuzz
 
-# Testname	StressCount
-18-basic-whitelist	150
+# Testname		StressCount
+18-basic-whitelist	50

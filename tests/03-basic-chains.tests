@@ -24,4 +24,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname	StressCount
-03-basic-chains	150
+03-basic-chains	50

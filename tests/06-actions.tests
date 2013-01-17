@@ -19,4 +19,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname	StressCount
-06-actions	150
+06-actions	50

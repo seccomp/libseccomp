@@ -34,4 +34,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-12-basic-masked-ops	150
+12-basic-masked-ops	50

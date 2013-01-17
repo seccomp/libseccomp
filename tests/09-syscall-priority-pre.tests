@@ -18,4 +18,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-09-syscall-priority-pre	150
+09-syscall-priority-pre	50

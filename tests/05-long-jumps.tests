@@ -29,4 +29,4 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname	StressCount
-05-long-jumps	150
+05-long-jumps	50
