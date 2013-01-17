@@ -583,15 +583,12 @@ function run_tests() {
 			fi
 		fi
 
-		# Print batch name to log file
+		# Print a test batch header
 		echo " batch name: $batch_name" >&$logfd
-		# Print test mode to log file
-		echo " test mode:  $mode" >&$logfd
 
 		# Loop through each line of the file and run the requested tests
 		while read line; do
-			# Strip leading and trailing blanks and skip comments
-			# and blank lines.
+			# Strip whitespace, comments, and blank lines
 			line=`echo "$line" | sed -e 's/^[\t ]*//;s/[\t ]*$//;' |
 					     sed -e '/^[#].*$/d;/^$/d'`
 			if [[ -z $line ]]; then
@@ -601,22 +598,23 @@ function run_tests() {
 			if [[ $line =~ ^"test type": ]]; then
 				test_type=`echo "$line" |
 					    sed -e 's/^test type: //;'`
-				# Print test type to log file
+				# Print a test mode and type header
+				echo " test mode:  $mode" >&$logfd
 				echo " test type:  $test_type" >&$logfd
 				continue
-			elif [[ ${single_list[@]} ]]; then
+			fi
+
+			if [[ ${single_list[@]} ]]; then
 				for i in ${single_list[@]}; do
 					if [ $i -eq $testnum ]; then
-						# If we're here, we're running a
-						# requested individual test.
+						# We're running a single test.
 						run_test "$batch_name" \
 							 $testnum "$line" \
 							 "$test_type"
 					fi
 				done
 			else
-				# If we're here, we're running a test from a
-				# requested batch or from all tests.
+				# We're running a test from a batch.
 				run_test "$batch_name" \
 					 $testnum "$line" "$test_type"
 			fi
@@ -638,7 +636,7 @@ arch=
 batch_count=0
 logfile=
 logfd=
-mode=c
+mode_list=""
 runall=false
 singlecount=0
 tmpfile=""
@@ -670,10 +668,10 @@ while getopts "ab:gl:m:s:t:vh" opt; do
 	m)
 		case $OPTARG in
 		c)
-			mode=c
+			mode_list="$mode_list c"
 			;;
 		python)
-			mode=python
+			mode_list="$mode_list python"
 			;;
 		*)
 			usage
@@ -696,6 +694,11 @@ while getopts "ab:gl:m:s:t:vh" opt; do
 		;;
 	esac
 done
+
+# Default to running the C tests
+if [[ -z $mode_list ]]; then
+	mode_list="c"
+fi
 
 # Default to all tests if batch or single tests not requested
 if [[ -z $batch_list ]] && [[ -z $single_list ]]; then
@@ -732,7 +735,9 @@ fi
 # Display the test output and run the requested tests
 echo "=============== `date` ===============" >&$logfd
 echo "Regression Test Report (\"regression $*\")" >&$logfd
-run_tests
+for mode in $mode_list; do
+	run_tests
+done
 echo "Regression Test Summary" >&$logfd
 echo " tests run: $stats_all" >&$logfd
 echo " tests skipped: $stats_skipped" >&$logfd
