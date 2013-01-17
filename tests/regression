@@ -226,7 +226,7 @@ function generate_random_data() {
 #
 function run_test_bpf_sim_fuzz() {
 	local -a COL_WIDTH=(26 17 17 17 17 17 17)
-	local subtestnum=1
+	local subtestnum=0
 	local testdata=""
 	local -a data
 
@@ -234,19 +234,6 @@ function run_test_bpf_sim_fuzz() {
 	local line=($3)
 	local testname=${line[0]}
 	local stress_count=${line[1]}
-
-	# Generate the test number string for the line of batch test data
-	local testnumstr=$(generate_test_num "$1" $2 0)
-
-	# Set up log file test data line for the input test data.  Spacing is
-	# added to align the output in the correct columns.
-	data[0]=$(printf "%-${COL_WIDTH[0]}s" ${line[0]})
-	testdata=("$testdata${data[0]}")
-	data[1]=$(printf "%s" ${line[1]})
-	testdata=("$testdata${data[1]}")
-
-	# Print out the input test data to the log file
-	print_data "$testnumstr" "$testdata"
 
 	for i in `seq 0 $stress_count`;
 	do
@@ -258,7 +245,7 @@ function run_test_bpf_sim_fuzz() {
 		testdata=""
 
 		# Get the generated sub-test num string
-		testnumstr=$(generate_test_num "$1" $2 $subtestnum)
+		local testnumstr=$(generate_test_num "$1" $2 $subtestnum)
 
 		# Set up log file test data line for this individual test.
 		# Spacing is added to align the output in the correct columns.
