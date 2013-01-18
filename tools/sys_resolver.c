@@ -39,7 +39,8 @@
 static void exit_usage(const char *program)
 {
 	fprintf(stderr,
-		"usage: %s [-h] [-a x86|x86_64] <syscall_name>\n", program);
+		"usage: %s [-h] [-a x86|x86_64] [-t] <syscall_name>\n",
+		program);
 	exit(EINVAL);
 }
 
@@ -49,10 +50,12 @@ static void exit_usage(const char *program)
 int main(int argc, char *argv[])
 {
 	int opt;
+	int translate = 0;
 	const struct arch_def *arch = &arch_def_native;
+	int sys_num;
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "a:h"))> 0) {
+	while ((opt = getopt(argc, argv, "a:ht"))> 0) {
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)
@@ -61,6 +64,9 @@ int main(int argc, char *argv[])
 				arch = &arch_def_x86_64;
 			else
 				exit_usage(argv[0]);
+			break;
+		case 't':
+			translate = 1;
 			break;
 		case 'h':
 		default:
@@ -73,6 +79,11 @@ int main(int argc, char *argv[])
 	if (optind >= argc)
 		exit_usage(argv[0]);
 
-	printf("%d\n", arch_syscall_resolve_name(arch, argv[optind]));
+	sys_num = arch_syscall_resolve_name(arch, argv[optind]);
+	if (translate != 0)
+		/* we ignore errors and just output the resolved number */
+		arch_syscall_rewrite(arch, &sys_num);
+	printf("%d\n", sys_num);
+
 	return 0;
 }
