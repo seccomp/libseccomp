@@ -1,4 +1,5 @@
 *.bpf
+*.pfc
 util.pyc
 01-allow
 02-basic
@@ -18,3 +19,4 @@ util.pyc
 16-arch-basic
 17-arch-merge
 18-basic-whitelist
+19-missing-syscalls
