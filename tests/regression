@@ -138,10 +138,10 @@ function print_valgrind() {
 #
 function get_range() {
 	if [[ $2 =~ ^[0-9a-fA-Fx]+-[0-9a-fA-Fx]+$ ]]; then
-		# If there's a dash, get the low or high range value
-		range_val=`echo "$2" | cut -d'-' -f "$1"`
+		# if there's a dash, get the low or high range value
+		range_val=$(echo "$2" | cut -d'-' -f "$1")
 	else
-		# Otherwise there should just be a single value
+		# otherwise there should just be a single value
 		range_val="$2"
 	fi
 	echo "$range_val"
@@ -166,7 +166,7 @@ function run_test_command() {
 			cmd="/usr/bin/valgrind ./$2 $3"
 		fi
 	elif $use_valgrind; then
-		# With -q, valgrind will only print error messages
+		# with -q, valgrind will only print error messages
 		if [[ $logfd -eq 3 ]]; then
 			cmd="/usr/bin/valgrind -q --log-fd=$logfd ./$2 $3"
 		else
@@ -180,10 +180,10 @@ function run_test_command() {
 		cmd="./$2 $3"
 	fi
 
-	#Run the command
+	# run the command
 	eval $cmd
 
-	#Return the command's return code
+	# return the command's return code
 	return $?
 }
 
@@ -201,7 +201,7 @@ function generate_random_data() {
 	else
 		rcount=$[ ($RANDOM % 8) + 1 ]
 	fi
-	rdata=$(echo `</dev/urandom tr -dc A-Za-z0-9 | head -c"$rcount"`)
+	rdata=$(echo $(</dev/urandom tr -dc A-Za-z0-9 | head -c"$rcount"))
 	echo "$rdata"
 }
 
@@ -228,51 +228,41 @@ function generate_random_data() {
 #     3    string containing line of test data from batch file
 #
 function run_test_bpf_sim_fuzz() {
-	local -a COL_WIDTH=(26 17 17 17 17 17 17)
-	local subtestnum=0
-	local testdata=""
-	local -a data
-
-	#Begin splitting the test data from the line into individual variables
+	# begin splitting the test data from the line into individual variables
 	local line=($3)
 	local testname=${line[0]}
 	local stress_count=${line[1]}
 
-	for i in `seq 0 $stress_count`;
-	do
+	for i in $(seq 1 $stress_count); do
 		local sys=$(generate_random_data)
 		local -a arg=($(generate_random_data) $(generate_random_data) \
 			      $(generate_random_data) $(generate_random_data) \
 			      $(generate_random_data) $(generate_random_data))
-		data=()
-		testdata=""
 
-		# Get the generated sub-test num string
-		local testnumstr=$(generate_test_num "$1" $2 $subtestnum)
+		# get the generated sub-test num string
+		local testnumstr=$(generate_test_num "$1" $2 $i)
 
-		# Set up log file test data line for this individual test.
-		# Spacing is added to align the output in the correct columns.
-		data[0]=$(printf "%-${COL_WIDTH[0]}s" $testname)
-		data[1]=$(printf "%-${COL_WIDTH[1]}s" $sys)
-		data[2]=$(printf "%-${COL_WIDTH[2]}s" ${arg[0]})
-		data[3]=$(printf "%-${COL_WIDTH[3]}s" ${arg[1]})
-		data[4]=$(printf "%-${COL_WIDTH[4]}s" ${arg[2]})
-		data[5]=$(printf "%-${COL_WIDTH[5]}s" ${arg[3]})
-		data[6]=$(printf "%-${COL_WIDTH[6]}s" ${arg[4]})
-		data[7]=$(printf "%s" ${arg[5]})
-		for i in {0..7}; do
-			testdata=("$testdata${data[$i]}")
-		done
+		# set up log file test data line for this individual test,
+		# spacing is added to align the output in the correct columns
+		local -a COL_WIDTH=(26 17 17 17 17 17 17)
+		local testdata=$(printf "%-${COL_WIDTH[0]}s" $testname)
+		testdata+=$(printf "%-${COL_WIDTH[1]}s" $sys)
+		testdata+=$(printf "%-${COL_WIDTH[2]}s" ${arg[0]})
+		testdata+=$(printf "%-${COL_WIDTH[3]}s" ${arg[1]})
+		testdata+=$(printf "%-${COL_WIDTH[4]}s" ${arg[2]})
+		testdata+=$(printf "%-${COL_WIDTH[5]}s" ${arg[3]})
+		testdata+=$(printf "%-${COL_WIDTH[6]}s" ${arg[4]})
+		testdata+=$(printf "%s" ${arg[5]})
 
-		# Print out the generated test data to the log file
+		# print out the generated test data to the log file
 		print_data "$testnumstr" "$testdata"
 
-		# Set up the syscall argument values to be passed to bpf_sim
+		# set up the syscall argument values to be passed to bpf_sim
 		for i in {0..5}; do
 			arg[$i]=" -$i ${arg[$i]} "
 		done
 
-		# Run the test command and put the BPF filter in a temp file
+		# run the test command and put the BPF filter in a temp file
 		run_test_command "$testnumstr" "$testname" "-b > $tmpfile"
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "$testname rc=$?"
@@ -280,11 +270,12 @@ function run_test_bpf_sim_fuzz() {
 			return
 		fi
 
-		# Simulate the fuzzed syscall data against the BPF filter.  We
+		# simulate the fuzzed syscall data against the BPF filter, we
 		# don't verify the resulting action since we're just testing for
-		# stability.
-		allow=`../tools/bpf_sim -a $arch -f $tmpfile -s $sys \
-		    ${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} ${arg[5]}`
+		# stability
+		allow=$(../tools/bpf_sim -f $tmpfile -s $sys \
+			${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} \
+			${arg[5]})
 		if [[ $? -ne 0 ]]; then
 			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
 			stats_error=$(($stats_error+1))
@@ -293,8 +284,6 @@ function run_test_bpf_sim_fuzz() {
 			stats_success=$(($stats_success+1))
 		fi
 		stats_all=$(($stats_all+1))
-
-		subtestnum=$(($subtestnum+1))
 	done
 }
 
@@ -324,14 +313,9 @@ function run_test_bpf_sim_fuzz() {
 function run_test_bpf_sim() {
 	local LOW=1
 	local HIGH=2
-	local -a COL_WIDTH=(26 08 14 11 17 21 09 06 06)
-	local rangetest=false
-	local subtestnum=0
-	local testdata=""
 	local -a arg_empty=(false false false false false false)
-	local -a data
 
-	# Begin splitting the test data from the line into individual variables
+	# begin splitting the test data from the line into individual variables
 	local line=($3)
 	local testname=${line[0]}
 	local testarch=${line[1]}
@@ -342,54 +326,55 @@ function run_test_bpf_sim() {
 	local result=${line[9]}
 
 	if [[ "${testarch:0:1}" == "+" ]]; then
-		# Run the tests on the specified architecture(s)
+		# run the tests on the specified architecture(s)
 		simarch_list="${testarch:1}"
 		if [[ "$simarch_list" == "all" ]]; then
 			simarch_list="$GLBL_ARCH_SUPPORT"
 		fi
 	elif [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
-		# Only run tests that match the current architecture
-		print_result $testnumstr "INFO" \
+		# only run tests that match the current architecture
+		print_result $(generate_test_num "$1" $2 1) "INFO" \
 		       "Test skipped due to test/system architecture difference"
 		stats_skipped=$(($stats_skipped+1))
 		return
 	else
-		# Run the tests on the native architecture
+		# run the tests on the native architecture
 		simarch_list="$arch"
 	fi
 
-	# Loop through the architectures.
+	# get low and high range arg values
+	line_i=3
+	for arg_i in {0..5}; do
+		low_arg[$arg_i]=$(get_range $LOW "${line[$line_i]}")
+		high_arg[$arg_i]=$(get_range $HIGH "${line[$line_i]}")
+
+		# fix up empty arg values so the nested loops work
+		if [[ ${low_arg[$arg_i]} == "N" ]]; then
+			arg_empty[$arg_i]=true
+			low_arg[$arg_i]=0
+			high_arg[$arg_i]=0
+		fi
+
+		line_i=$(($line_i+1))
+	done
+
+	# loop through the selected architectures
 	for simarch in $simarch_list; do
-		# Print architecture header if necessary.
+		# print architecture header if necessary
 		if [[ $simarch != $simarch_list ]]; then
 			echo " test arch:  $simarch" >&$logfd
 		fi
 
-		# Generate the test number string for the batch test data
-		local testnumstr=$(generate_test_num "$1" $2 0)
+		# reset the subtest number
+		local subtestnum=1
 
-		# Set up log file test data line for the input test data.
-		# Spacing is added to align the output in the correct columns.
-		for i in {0..9}; do
-			if [[ $i -le 9 ]]; then
-				data[$i]=$(printf "%-${COL_WIDTH[$i]}s" \
-					   ${line[$i]})
-			else
-				data[$i]=$(printf "%s" ${line[$i]})
-			fi
-			testdata=("$testdata${data[$i]}")
-		done
-
-		# Print out the input test data to the log file
-		print_data "$testnumstr" "$testdata"
-
-		# Get low and high syscall values and convert them to numbers
+		# get low and high syscall values and convert them to numbers
 		low_syscall=$(get_range $LOW "${line[2]}")
 		if [[ ! $low_syscall =~ ^[0-9]+$ ]]; then
-			low_syscall=`$GLBL_SYS_RESOLVER -a $simarch -t \
-				     $low_syscall`
+			low_syscall=$($GLBL_SYS_RESOLVER -a $simarch -t \
+				      $low_syscall)
 			if [[ $? -ne 0 ]]; then
-				print_result $testnumstr \
+				print_result $(generate_test_num "$1" $2 1) \
 					     "ERROR" "sys_resolver rc=$?"
 				stats_error=$(($stats_error+1))
 				return
@@ -397,90 +382,59 @@ function run_test_bpf_sim() {
 		fi
 		high_syscall=$(get_range $HIGH "${line[2]}")
 		if [[ ! $high_syscall =~ ^[0-9]+$ ]]; then
-			high_syscall=`$GLBL_SYS_RESOLVER -a $simarch -t \
-				      $high_syscall`
+			high_syscall=$($GLBL_SYS_RESOLVER -a $simarch -t \
+				       $high_syscall)
 			if [[ $? -ne 0 ]]; then
-				print_result $testnumstr \
+				print_result $(generate_test_num "$1" $2 1) \
 					     "ERROR" "sys_resolver rc=$?"
 				stats_error=$(($stats_error+1))
 				return
 			fi
 		fi
 
-		if [[ "$low_syscall" != "$high_syscall" ]]; then
-			rangetest=true
-		fi
-
-		# Get low and high range arg values
-		line_i=3
-		for arg_i in {0..5}; do
-			low_arg[$arg_i]=$(get_range $LOW "${line[$line_i]}")
-			high_arg[$arg_i]=$(get_range $HIGH "${line[$line_i]}")
-
-			if [[ "${low_arg[$arg_i]}" != \
-			      "${high_arg[$arg_i]}" ]]; then
-				rangetest=true
-			fi
-
-			# Fix up empty arg values so the nested loops below work
-			if [[ ${low_arg[$arg_i]} == "N" ]]; then
-				arg_empty[$arg_i]=true
-				low_arg[$arg_i]=0
-				high_arg[$arg_i]=0
-			fi
-
-			line_i=$(($line_i+1))
-		done
-
-		# If ranges exist, the following will loop through all syscall
+		# if ranges exist, the following will loop through all syscall
 		# and arg ranges and generate/run every combination of requested
-		# tests.  If no ranges were specifed, then the single test is
-		# run.
-		for sys in `seq -f "%1.0f" $low_syscall $high_syscall`; do
-		for arg0 in `seq -f "%1.0f" ${low_arg[0]} ${high_arg[0]}`; do
-		for arg1 in `seq -f "%1.0f" ${low_arg[1]} ${high_arg[1]}`; do
-		for arg2 in `seq -f "%1.0f" ${low_arg[2]} ${high_arg[2]}`; do
-		for arg3 in `seq -f "%1.0f" ${low_arg[3]} ${high_arg[3]}`; do
-		for arg4 in `seq -f "%1.0f" ${low_arg[4]} ${high_arg[4]}`; do
-		for arg5 in `seq -f "%1.0f" ${low_arg[5]} ${high_arg[5]}`; do
+		# tests; if no ranges were specifed, then the single test is
+		# run
+		for sys in $(seq -f "%1.0f" $low_syscall $high_syscall); do
+		for arg0 in $(seq -f "%1.0f" ${low_arg[0]} ${high_arg[0]}); do
+		for arg1 in $(seq -f "%1.0f" ${low_arg[1]} ${high_arg[1]}); do
+		for arg2 in $(seq -f "%1.0f" ${low_arg[2]} ${high_arg[2]}); do
+		for arg3 in $(seq -f "%1.0f" ${low_arg[3]} ${high_arg[3]}); do
+		for arg4 in $(seq -f "%1.0f" ${low_arg[4]} ${high_arg[4]}); do
+		for arg5 in $(seq -f "%1.0f" ${low_arg[5]} ${high_arg[5]}); do
 			local -a arg=($arg0 $arg1 $arg2 $arg3 $arg4 $arg5)
-			data=()
-			testdata=""
 
-			if $rangetest; then
-				# Get the generated sub-test num string
-				testnumstr=$(generate_test_num "$1" $2 \
-					     $subtestnum)
+			# Get the generated sub-test num string
+			local testnumstr=$(generate_test_num "$1" $2 \
+					   $subtestnum)
 
-				# Format any empty arg vals to print to log file
-				for i in {0..5}; do
-					if ${arg_empty[$i]}; then
-						arg[$i]="N"
-					fi
-				done
+			# format any empty args to print to log file
+			for i in {0..5}; do
+				if ${arg_empty[$i]}; then
+					arg[$i]="N"
+				fi
+			done
 
-				# Set up log file test data line for this
-				# individual test.  Spacing is added to align
-				# the output in the correct columns.
-				data[0]=$(printf "%-${COL_WIDTH[0]}s" $testname)
-				data[1]=$(printf "%-${COL_WIDTH[1]}s" $testarch)
-				data[2]=$(printf "%-${COL_WIDTH[2]}s" $sys)
-				data[3]=$(printf "%-${COL_WIDTH[3]}s" ${arg[0]})
-				data[4]=$(printf "%-${COL_WIDTH[4]}s" ${arg[1]})
-				data[5]=$(printf "%-${COL_WIDTH[5]}s" ${arg[2]})
-				data[6]=$(printf "%-${COL_WIDTH[6]}s" ${arg[3]})
-				data[7]=$(printf "%-${COL_WIDTH[7]}s" ${arg[4]})
-				data[8]=$(printf "%-${COL_WIDTH[8]}s" ${arg[5]})
-				data[9]=$(printf "%-${COL_WIDTH[9]}s" $result)
-				for i in {0..9}; do
-					testdata=("$testdata${data[$i]}")
-				done
+			# set up log file test data line for this
+			# individual test, spacing is added to align
+			# the output in the correct columns
+			local -a COL_WIDTH=(26 08 14 11 17 21 09 06 06)
+			local testdata=$(printf "%-${COL_WIDTH[0]}s" $testname)
+			testdata+=$(printf "%-${COL_WIDTH[1]}s" $simarch)
+			testdata+=$(printf "%-${COL_WIDTH[2]}s" $sys)
+			testdata+=$(printf "%-${COL_WIDTH[3]}s" ${arg[0]})
+			testdata+=$(printf "%-${COL_WIDTH[4]}s" ${arg[1]})
+			testdata+=$(printf "%-${COL_WIDTH[5]}s" ${arg[2]})
+			testdata+=$(printf "%-${COL_WIDTH[6]}s" ${arg[3]})
+			testdata+=$(printf "%-${COL_WIDTH[7]}s" ${arg[4]})
+			testdata+=$(printf "%-${COL_WIDTH[8]}s" ${arg[5]})
+			testdata+=$(printf "%-${COL_WIDTH[9]}s" $result)
 
-				# Print out the test data to the log file
-				print_data "$testnumstr" "$testdata"
-			fi
+			# print out the test data to the log file
+			print_data "$testnumstr" "$testdata"
 
-			# Set up the syscall arguments to be passed to bpf_sim
+			# set up the syscall arguments to be passed to bpf_sim
 			for i in {0..5}; do
 				if ${arg_empty[$i]}; then
 					arg[$i]=""
@@ -489,7 +443,7 @@ function run_test_bpf_sim() {
 				fi
 			done
 
-			# Run the test command and put the BPF in a temp file
+			# run the test command and put the BPF in a temp file
 			run_test_command "$testnumstr" \
 					 "$testname" "-b > $tmpfile"
 			if [[ $? -ne 0 ]]; then
@@ -499,11 +453,11 @@ function run_test_bpf_sim() {
 				return
 			fi
 
-			# Simulate the specifed syscall against the BPF filter
-			# and verify the results.
-			action=`../tools/bpf_sim -a $simarch -f $tmpfile \
-				-s $sys ${arg[0]} ${arg[1]} ${arg[2]} \
-				${arg[3]} ${arg[4]} ${arg[5]}`
+			# simulate the specifed syscall against the BPF filter
+			# and verify the results
+			action=$(../tools/bpf_sim -a $simarch -f $tmpfile \
+				 -s $sys ${arg[0]} ${arg[1]} ${arg[2]} \
+				 ${arg[3]} ${arg[4]} ${arg[5]})
 			if [[ $? -ne 0 ]]; then
 				print_result $testnumstr "ERROR" "bpf_sim rc=$?"
 				stats_error=$(($stats_error+1))
@@ -540,10 +494,10 @@ function run_test_bpf_sim() {
 #     2    string containing line of test data from batch file
 #
 function run_test_basic() {
-	# Print out the input test data to the log file
+	# print out the input test data to the log file
 	print_data "$1" "$2"
 
-	# Run the command
+	# run the command
 	run_test_command "$1" "$2" ""
 	if [[ $? -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$?"
@@ -565,10 +519,10 @@ function run_test_basic() {
 #     4    string containing test type that this test belongs to
 #
 function run_test() {
-	# Generate the test number string for the line of batch test data
+	# generate the test number string for the line of batch test data
 	local testnumstr=$(generate_test_num "$1" $2 0)
 
-	# Execute the function corresponding to the test type
+	# execute the function corresponding to the test type
 	if [[ "$4" == "basic" ]]; then
 		run_test_basic "$testnumstr" "$3"
 	elif [[ "$4" == "bpf-sim" ]]; then
@@ -585,16 +539,16 @@ function run_test() {
 # Run the requested tests
 #
 function run_tests() {
-	# Loop through all test files
+	# loop through all test files
 	for file in *.tests; do
 		local testnum=1
 		local batch_requested=false
 		local batch_name=""
 
-		# Extract the batch name from the file name
+		# extract the batch name from the file name
 		batch_name=$(basename $file .tests)
 
-		# Check if this batch was requested
+		# check if this batch was requested
 		if [[ ${batch_list[@]} ]]; then
 			for b in ${batch_list[@]}; do
 				if [[ $b == $batch_name ]]; then
@@ -607,22 +561,23 @@ function run_tests() {
 			fi
 		fi
 
-		# Print a test batch header
+		# print a test batch header
 		echo " batch name: $batch_name" >&$logfd
 
-		# Loop through each line of the file and run the requested tests
+		# loop through each line and run the requested tests
 		while read line; do
-			# Strip whitespace, comments, and blank lines
-			line=`echo "$line" | sed -e 's/^[\t ]*//;s/[\t ]*$//;' |
-					     sed -e '/^[#].*$/d;/^$/d'`
+			# strip whitespace, comments, and blank lines
+			line=$(echo "$line" | \
+			       sed -e 's/^[\t ]*//;s/[\t ]*$//;' | \
+			       sed -e '/^[#].*$/d;/^$/d')
 			if [[ -z $line ]]; then
 				continue
 			fi
 
 			if [[ $line =~ ^"test type": ]]; then
-				test_type=`echo "$line" |
-					    sed -e 's/^test type: //;'`
-				# Print a test mode and type header
+				test_type=$(echo "$line" | \
+					    sed -e 's/^test type: //;')
+				# print a test mode and type header
 				echo " test mode:  $mode" >&$logfd
 				echo " test type:  $test_type" >&$logfd
 				continue
@@ -631,14 +586,14 @@ function run_tests() {
 			if [[ ${single_list[@]} ]]; then
 				for i in ${single_list[@]}; do
 					if [ $i -eq $testnum ]; then
-						# We're running a single test.
+						# we're running a single test
 						run_test "$batch_name" \
 							 $testnum "$line" \
 							 "$test_type"
 					fi
 				done
 			else
-				# We're running a test from a batch.
+				# we're running a test from a batch
 				run_test "$batch_name" \
 					 $testnum "$line" "$test_type"
 			fi
@@ -650,10 +605,13 @@ function run_tests() {
 ####
 # main
 
-# Verify general script dependencies
+# verify general script dependencies
+verify_deps head
 verify_deps sed
+verify_deps seq
+verify_deps tr
 
-# Global variables
+# global variables
 declare -a batch_list
 declare -a single_list
 arch=
@@ -695,6 +653,7 @@ while getopts "ab:gl:m:s:t:vh" opt; do
 			mode_list="$mode_list c"
 			;;
 		python)
+			verify_deps python
 			mode_list="$mode_list python"
 			;;
 		*)
@@ -719,23 +678,23 @@ while getopts "ab:gl:m:s:t:vh" opt; do
 	esac
 done
 
-# Default to running the C tests
+# default to running the C tests
 if [[ -z $mode_list ]]; then
 	mode_list="c"
 fi
 
-# Default to all tests if batch or single tests not requested
+# default to all tests if batch or single tests not requested
 if [[ -z $batch_list ]] && [[ -z $single_list ]]; then
 	runall=true
 fi
 
-# Drop any requested batch and single tests if all tests were requested
+# drop any requested batch and single tests if all tests were requested
 if $runall; then
 	batch_list=()
 	single_list=()
 fi
 
-# Open log file for append (default to stdout)
+# open log file for append (default to stdout)
 if [[ -n $logfile ]]; then
 	logfd=3
 	exec 3>>"$logfile"
@@ -743,21 +702,21 @@ else
 	logfd=1
 fi
 
-# Open temporary file
+# open temporary file
 if [[ -n $tmpdir ]]; then
 	tmpfile=$(mktemp -t regression_XXXXXX --tmpdir=$tmpdir)
 else
 	tmpfile=$(mktemp -t regression_XXXXXX)
 fi
 
-# Determine the current system's architecture
-arch=`uname -m`
+# determine the current system's architecture
+arch=$(uname -m)
 if [[ $arch != "x86_64" ]]; then
 	arch="x86"
 fi
 
-# Display the test output and run the requested tests
-echo "=============== `date` ===============" >&$logfd
+# display the test output and run the requested tests
+echo "=============== $(date) ===============" >&$logfd
 echo "Regression Test Report (\"regression $*\")" >&$logfd
 for mode in $mode_list; do
 	run_tests
