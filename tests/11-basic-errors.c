@@ -62,14 +62,9 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return -1;
 	else {
-		rc = seccomp_syscall_priority(ctx, -1000, 1);
-#if __i386__
+		rc = seccomp_syscall_priority(ctx, -10, 1);
 		if (rc != -EINVAL)
 			return -1;
-#else
-		if (rc != -EDOM)
-			return -1;
-#endif
 	}
 	seccomp_release(ctx);
 	ctx = NULL;

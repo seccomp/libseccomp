@@ -428,6 +428,8 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 /* NOTE - pseudo syscall values {-1..-99} are reserved */
 #define __NR_SCMP_ERROR		-1
 
+/* socket syscalls */
+
 #define __PNR_socket		-101
 #ifndef __NR_socket
 #define __NR_socket		__PNR_socket
@@ -528,6 +530,7 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_sendmmsg		__PNR_sendmmsg
 #endif /* __NR_sendmmsg */
 
+/* ipc syscalls */
 
 #define __PNR_semop		-201
 #ifndef __NR_semop
@@ -588,6 +591,373 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_shmctl
 #define __NR_shmctl		__PNR_shmctl
 #endif /* __NR_shmctl */
+
+/* single syscalls */
+
+#define __PNR_arch_prctl	-10001
+#ifndef __NR_arch_prctl
+#define __NR_arch_prctl		__PNR_arch_prctl
+#endif /* __NR_arch_prctl */
+
+#define __PNR_bdflush		-10002
+#ifndef __NR_bdflush
+#define __NR_bdflush		__PNR_bdflush
+#endif /* __NR_bdflush */
+
+#define __PNR_break		-10003
+#ifndef __NR_break
+#define __NR_break		__PNR_break
+#endif /* __NR_break */
+
+#define __PNR_chown32		-10004
+#ifndef __NR_chown32
+#define __NR_chown32		__PNR_chown32
+#endif /* __NR_chown32 */
+
+#define __PNR_epoll_ctl_old	-10005
+#ifndef __NR_epoll_ctl_old
+#define __NR_epoll_ctl_old	__PNR_epoll_ctl_old
+#endif /* __NR_epoll_ctl_old */
+
+#define __PNR_epoll_wait_old	-10006
+#ifndef __NR_epoll_wait_old
+#define __NR_epoll_wait_old	__PNR_epoll_wait_old
+#endif /* __NR_epoll_wait_old */
+
+#define __PNR_fadvise64_64	-10007
+#ifndef __NR_fadvise64_64
+#define __NR_fadvise64_64	__PNR_fadvise64_64
+#endif /* __NR_fadvise64_64 */
+
+#define __PNR_fchown32		-10008
+#ifndef __NR_fchown32
+#define __NR_fchown32		__PNR_fchown32
+#endif /* __NR_fchown32 */
+
+#define __PNR_fcntl64		-10009
+#ifndef __NR_fcntl64
+#define __NR_fcntl64		__PNR_fcntl64
+#endif /* __NR_fcntl64 */
+
+#define __PNR_fstat64		-10010
+#ifndef __NR_fstat64
+#define __NR_fstat64		__PNR_fstat64
+#endif /* __NR_fstat64 */
+
+#define __PNR_fstatat64		-10011
+#ifndef __NR_fstatat64
+#define __NR_fstatat64		__PNR_fstatat64
+#endif /* __NR_fstatat64 */
+
+#define __PNR_fstatfs64		-10012
+#ifndef __NR_fstatfs64
+#define __NR_fstatfs64		__PNR_fstatfs64
+#endif /* __NR_fstatfs64 */
+
+#define __PNR_ftime		-10013
+#ifndef __NR_ftime
+#define __NR_ftime		__PNR_ftime
+#endif /* __NR_ftime */
+
+#define __PNR_ftruncate64	-10014
+#ifndef __NR_ftruncate64
+#define __NR_ftruncate64	__PNR_ftruncate64
+#endif /* __NR_ftruncate64 */
+
+#define __PNR_getegid32		-10015
+#ifndef __NR_getegid32
+#define __NR_getegid32		__PNR_getegid32
+#endif /* __NR_getegid32 */
+
+#define __PNR_geteuid32		-10016
+#ifndef __NR_geteuid32
+#define __NR_geteuid32		__PNR_geteuid32
+#endif /* __NR_geteuid32 */
+
+#define __PNR_getgid32		-10017
+#ifndef __NR_getgid32
+#define __NR_getgid32		__PNR_getgid32
+#endif /* __NR_getgid32 */
+
+#define __PNR_getgroups32	-10018
+#ifndef __NR_getgroups32
+#define __NR_getgroups32	__PNR_getgroups32
+#endif /* __NR_getgroups32 */
+
+#define __PNR_getresgid32	-10019
+#ifndef __NR_getresgid32
+#define __NR_getresgid32	__PNR_getresgid32
+#endif /* __NR_getresgid32 */
+
+#define __PNR_getresuid32	-10020
+#ifndef __NR_getresuid32
+#define __NR_getresuid32	__PNR_getresuid32
+#endif /* __NR_getresuid32 */
+
+#define __PNR_getuid32		-10021
+#ifndef __NR_getuid32
+#define __NR_getuid32		__PNR_getuid32
+#endif /* __NR_getuid32 */
+
+#define __PNR_gtty		-10022
+#ifndef __NR_gtty
+#define __NR_gtty		__PNR_gtty
+#endif /* __NR_gtty */
+
+#define __PNR_idle		-10023
+#ifndef __NR_idle
+#define __NR_idle		__PNR_idle
+#endif /* __NR_idle */
+
+#define __PNR_ipc		-10024
+#ifndef __NR_ipc
+#define __NR_ipc		__PNR_ipc
+#endif /* __NR_ipc */
+
+#define __PNR_lchown32		-10025
+#ifndef __NR_lchown32
+#define __NR_lchown32		__PNR_lchown32
+#endif /* __NR_lchown32 */
+
+#define __PNR__llseek		-10026
+#ifndef __NR__llseek
+#define __NR__llseek		__PNR__llseek
+#endif /* __NR__llseek */
+
+#define __PNR_lock		-10027
+#ifndef __NR_lock
+#define __NR_lock		__PNR_lock
+#endif /* __NR_lock */
+
+#define __PNR_lstat64		-10028
+#ifndef __NR_lstat64
+#define __NR_lstat64		__PNR_lstat64
+#endif /* __NR_lstat64 */
+
+#define __PNR_mmap2		-10029
+#ifndef __NR_mmap2
+#define __NR_mmap2		__PNR_mmap2
+#endif /* __NR_mmap2 */
+
+#define __PNR_mpx		-10030
+#ifndef __NR_mpx
+#define __NR_mpx		__PNR_mpx
+#endif /* __NR_mpx */
+
+#define __PNR_newfstatat	-10031
+#ifndef __NR_newfstatat
+#define __NR_newfstatat		__PNR_newfstatat
+#endif /* __NR_newfstatat */
+
+#define __PNR__newselect	-10032
+#ifndef __NR__newselect
+#define __NR__newselect		__PNR__newselect
+#endif /* __NR__newselect */
+
+#define __PNR_nice		-10033
+#ifndef __NR_nice
+#define __NR_nice		__PNR_nice
+#endif /* __NR_nice */
+
+#define __PNR_oldfstat		-10034
+#ifndef __NR_oldfstat
+#define __NR_oldfstat		__PNR_oldfstat
+#endif /* __NR_oldfstat */
+
+#define __PNR_oldlstat		-10035
+#ifndef __NR_oldlstat
+#define __NR_oldlstat		__PNR_oldlstat
+#endif /* __NR_oldlstat */
+
+#define __PNR_oldolduname	-10036
+#ifndef __NR_oldolduname
+#define __NR_oldolduname	__PNR_oldolduname
+#endif /* __NR_oldolduname */
+
+#define __PNR_oldstat		-10037
+#ifndef __NR_oldstat
+#define __NR_oldstat		__PNR_oldstat
+#endif /* __NR_oldstat */
+
+#define __PNR_olduname		-10038
+#ifndef __NR_olduname
+#define __NR_olduname		__PNR_olduname
+#endif /* __NR_olduname */
+
+#define __PNR_prof		-10039
+#ifndef __NR_prof
+#define __NR_prof		__PNR_prof
+#endif /* __NR_prof */
+
+#define __PNR_profil		-10040
+#ifndef __NR_profil
+#define __NR_profil		__PNR_profil
+#endif /* __NR_profil */
+
+#define __PNR_readdir		-10041
+#ifndef __NR_readdir
+#define __NR_readdir		__PNR_readdir
+#endif /* __NR_readdir */
+
+#define __PNR_security		-10042
+#ifndef __NR_security
+#define __NR_security		__PNR_security
+#endif /* __NR_security */
+
+#define __PNR_sendfile64	-10043
+#ifndef __NR_sendfile64
+#define __NR_sendfile64		__PNR_sendfile64
+#endif /* __NR_sendfile64 */
+
+#define __PNR_setfsgid32	-10044
+#ifndef __NR_setfsgid32
+#define __NR_setfsgid32		__PNR_setfsgid32
+#endif /* __NR_setfsgid32 */
+
+#define __PNR_setfsuid32	-10045
+#ifndef __NR_setfsuid32
+#define __NR_setfsuid32		__PNR_setfsuid32
+#endif /* __NR_setfsuid32 */
+
+#define __PNR_setgid32		-10046
+#ifndef __NR_setgid32
+#define __NR_setgid32		__PNR_setgid32
+#endif /* __NR_setgid32 */
+
+#define __PNR_setgroups32	-10047
+#ifndef __NR_setgroups32
+#define __NR_setgroups32	__PNR_setgroups32
+#endif /* __NR_setgroups32 */
+
+#define __PNR_setregid32	-10048
+#ifndef __NR_setregid32
+#define __NR_setregid32		__PNR_setregid32
+#endif /* __NR_setregid32 */
+
+#define __PNR_setresgid32	-10049
+#ifndef __NR_setresgid32
+#define __NR_setresgid32	__PNR_setresgid32
+#endif /* __NR_setresgid32 */
+
+#define __PNR_setresuid32	-10050
+#ifndef __NR_setresuid32
+#define __NR_setresuid32	__PNR_setresuid32
+#endif /* __NR_setresuid32 */
+
+#define __PNR_setreuid32	-10051
+#ifndef __NR_setreuid32
+#define __NR_setreuid32		__PNR_setreuid32
+#endif /* __NR_setreuid32 */
+
+#define __PNR_setuid32		-10052
+#ifndef __NR_setuid32
+#define __NR_setuid32		__PNR_setuid32
+#endif /* __NR_setuid32 */
+
+#define __PNR_sgetmask		-10053
+#ifndef __NR_sgetmask
+#define __NR_sgetmask		__PNR_sgetmask
+#endif /* __NR_sgetmask */
+
+#define __PNR_sigaction		-10054
+#ifndef __NR_sigaction
+#define __NR_sigaction		__PNR_sigaction
+#endif /* __NR_sigaction */
+
+#define __PNR_signal		-10055
+#ifndef __NR_signal
+#define __NR_signal		__PNR_signal
+#endif /* __NR_signal */
+
+#define __PNR_sigpending	-10056
+#ifndef __NR_sigpending
+#define __NR_sigpending		__PNR_sigpending
+#endif /* __NR_sigpending */
+
+#define __PNR_sigprocmask	-10057
+#ifndef __NR_sigprocmask
+#define __NR_sigprocmask	__PNR_sigprocmask
+#endif /* __NR_sigprocmask */
+
+#define __PNR_sigreturn		-10058
+#ifndef __NR_sigreturn
+#define __NR_sigreturn		__PNR_sigreturn
+#endif /* __NR_sigreturn */
+
+#define __PNR_sigsuspend	-10059
+#ifndef __NR_sigsuspend
+#define __NR_sigsuspend		__PNR_sigsuspend
+#endif /* __NR_sigsuspend */
+
+#define __PNR_socketcall	-10060
+#ifndef __NR_socketcall
+#define __NR_socketcall		__PNR_socketcall
+#endif /* __NR_socketcall */
+
+#define __PNR_ssetmask		-10061
+#ifndef __NR_ssetmask
+#define __NR_ssetmask		__PNR_ssetmask
+#endif /* __NR_ssetmask */
+
+#define __PNR_stat64		-10062
+#ifndef __NR_stat64
+#define __NR_stat64		__PNR_stat64
+#endif /* __NR_stat64 */
+
+#define __PNR_statfs64		-10063
+#ifndef __NR_statfs64
+#define __NR_statfs64		__PNR_statfs64
+#endif /* __NR_statfs64 */
+
+#define __PNR_stime		-10064
+#ifndef __NR_stime
+#define __NR_stime		__PNR_stime
+#endif /* __NR_stime */
+
+#define __PNR_stty		-10065
+#ifndef __NR_stty
+#define __NR_stty		__PNR_stty
+#endif /* __NR_stty */
+
+#define __PNR_truncate64	-10066
+#ifndef __NR_truncate64
+#define __NR_truncate64		__PNR_truncate64
+#endif /* __NR_truncate64 */
+
+#define __PNR_tuxcall		-10067
+#ifndef __NR_tuxcall
+#define __NR_tuxcall		__PNR_tuxcall
+#endif /* __NR_tuxcall */
+
+#define __PNR_ugetrlimit	-10068
+#ifndef __NR_ugetrlimit
+#define __NR_ugetrlimit		__PNR_ugetrlimit
+#endif /* __NR_ugetrlimit */
+
+#define __PNR_ulimit		-10069
+#ifndef __NR_ulimit
+#define __NR_ulimit		__PNR_ulimit
+#endif /* __NR_ulimit */
+
+#define __PNR_umount		-10070
+#ifndef __NR_umount
+#define __NR_umount		__PNR_umount
+#endif /* __NR_umount */
+
+#define __PNR_vm86		-10071
+#ifndef __NR_vm86
+#define __NR_vm86		__PNR_vm86
+#endif /* __NR_vm86 */
+
+#define __PNR_vm86old		-10072
+#ifndef __NR_vm86old
+#define __NR_vm86old		__PNR_vm86old
+#endif /* __NR_vm86old */
+
+#define __PNR_waitpid		-10073
+#ifndef __NR_waitpid
+#define __NR_waitpid		__PNR_waitpid
+#endif /* __NR_waitpid */
 
 #ifdef __cplusplus
 }

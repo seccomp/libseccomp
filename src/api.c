@@ -324,8 +324,14 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 		/* if this is a pseudo syscall (syscall < 0) then we need to
 		 * rewrite the syscall for some arch specific reason */
 		if (syscall_tmp < 0) {
-			rc_tmp = arch_syscall_rewrite(filter->arch,
+			/* we set this as a strict op - we don't really care
+			 * since priorities are a "best effort" thing - as we
+			 * want to catch the -EDOM error and bail on this
+			 * architecture */
+			rc_tmp = arch_syscall_rewrite(filter->arch, 1,
 						      &syscall_tmp);
+			if (rc == -EDOM)
+				continue;
 			if (rc_tmp < 0)
 				goto syscall_priority_failure;
 		}
@@ -435,6 +441,8 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 		if (syscall_tmp < 0) {
 			rc_tmp = arch_filter_rewrite(filter->arch, strict,
 						     &syscall_tmp, chain);
+			if ((rc == -EDOM) && (!strict))
+				continue;
 			if (rc_tmp < 0)
 				goto rule_add_failure;
 		}

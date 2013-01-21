@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	sys_num = arch_syscall_resolve_name(arch, argv[optind]);
 	if (translate != 0)
 		/* we ignore errors and just output the resolved number */
-		arch_syscall_rewrite(arch, &sys_num);
+		arch_syscall_rewrite(arch, 0, &sys_num);
 	printf("%d\n", sys_num);
 
 	return 0;

@@ -31,7 +31,8 @@
 extern const struct arch_def arch_def_i386;
 extern const struct arch_syscall_def i386_syscall_table[];
 
-int i386_syscall_rewrite(const struct arch_def *arch, int *syscall);
+int i386_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
+			 int *syscall);
 
 int i386_filter_rewrite(const struct arch_def *arch,
 			unsigned int strict,

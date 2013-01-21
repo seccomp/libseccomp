@@ -267,21 +267,42 @@ int arch_syscall_translate(const struct arch_def *arch, int *syscall)
 /**
  * Rewrite a syscall value to match the architecture
  * @param arch the architecture definition
+ * @param strict strict flag
  * @param syscall the syscall number
  *
  * Syscalls can vary across different architectures so this function rewrites
- * the syscall into the correct value for the specified architecture.  Returns
- * zero on success, negative values on failure.
+ * the syscall into the correct value for the specified architecture.  If
+ * @strict is true then the function will fail if the syscall can not be
+ * preservered, however, if @strict is false the function will do a "best
+ * effort" rewrite and not fail. Returns zero on success, negative values on
+ * failure.
  *
  */
-int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
+int arch_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
+			 int *syscall)
 {
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_syscall_rewrite(arch, syscall);
-	default:
-		return -EDOM;
+	int sys = *syscall;
+
+	if (sys >= 0) {
+		/* we shouldn't be here - no rewrite needed */
+		return 0;
+	} else if (sys < 0 && sys > -100) {
+		/* reserved values */
+		return -EINVAL;
+	} else if (sys <= -100 && sys > -10000) {
+		/* rewritable syscalls */
+		switch (arch->token) {
+		case AUDIT_ARCH_I386:
+			return i386_syscall_rewrite(arch, strict, syscall);
+		}
+		/* NOTE: we fall through to the default handling (strict?) if
+		 *       we don't support any rewriting for the architecture */
 	}
+
+	/* syscalls not defined on this architecture */
+	if (strict)
+		return -EDOM;
+	return 0;
 }
 
 /**
@@ -303,10 +324,27 @@ int arch_filter_rewrite(const struct arch_def *arch,
 			unsigned int strict,
 			int *syscall, struct db_api_arg *chain)
 {
-	switch (arch->token) {
-	case AUDIT_ARCH_I386:
-		return i386_filter_rewrite(arch, strict, syscall, chain);
-	default:
-		return -EDOM;
+	int sys = *syscall;
+
+	if (sys >= 0) {
+		/* we shouldn't be here - no rewrite needed */
+		return 0;
+	} else if (sys < 0 && sys > -100) {
+		/* reserved values */
+		return -EINVAL;
+	} else if (sys <= -100 && sys > -10000) {
+		/* rewritable syscalls */
+		switch (arch->token) {
+		case AUDIT_ARCH_I386:
+			return i386_filter_rewrite(arch,
+						   strict, syscall, chain);
+		}
+		/* NOTE: we fall through to the default handling (strict?) if
+		 *       we don't support any rewriting for the architecture */
 	}
+
+	/* syscalls not defined on this architecture */
+	if (strict)
+		return -EDOM;
+	return 0;
 }

@@ -39,21 +39,26 @@ const struct arch_def arch_def_i386 = {
 /**
  * Rewrite a syscall value to match the architecture
  * @param arch the architecture definition
+ * @param strict strict flag
  * @param syscall the syscall number
  *
  * Syscalls can vary across different architectures so this function rewrites
- * the syscall into the correct value for the specified architecture.  Returns
- * zero on success, negative values on failure.
+ * the syscall into the correct value for the specified architecture.  If
+ * @strict is true then the function will fail if the syscall can not be
+ * preservered, however, if @strict is false the function will do a "best
+ * effort" rewrite and not fail. Returns zero on success, negative values on
+ * failure.
  *
  */
-int i386_syscall_rewrite(const struct arch_def *arch, int *syscall)
+int i386_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
+			 int *syscall)
 {
 	if ((*syscall) <= -100 && (*syscall) >= -117)
 		*syscall = __i386_NR_socketcall;
 	else if ((*syscall) <= -200 && (*syscall) >= -211)
 		*syscall = __i386_NR_ipc;
-	else if ((*syscall) < 0)
-		return -EINVAL;
+	else if (((*syscall) < 0) && (strict))
+		return -EDOM;
 
 	return 0;
 }
@@ -81,8 +86,8 @@ int i386_filter_rewrite(const struct arch_def *arch,
 
 	if ((*syscall) <= -100 && (*syscall) >= -117) {
 		for (iter = 0; iter < i386_arg_count_max; iter++) {
-			if (chain[iter].valid != 0)
-				goto filter_rewrite_failure;
+			if ((chain[iter].valid != 0) && (strict))
+				return -EINVAL;
 		}
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
@@ -92,8 +97,8 @@ int i386_filter_rewrite(const struct arch_def *arch,
 		*syscall = __i386_NR_socketcall;
 	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
 		for (iter = 0; iter < i386_arg_count_max; iter++) {
-			if (chain[iter].valid != 0)
-				goto filter_rewrite_failure;
+			if ((chain[iter].valid != 0) && (strict))
+				return -EINVAL;
 		}
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
@@ -101,13 +106,8 @@ int i386_filter_rewrite(const struct arch_def *arch,
 		chain[0].datum = abs(*syscall) % 200;
 		chain[0].valid = 1;
 		*syscall = __i386_NR_ipc;
-	} else if ((*syscall) < 0)
-		return -EINVAL;
+	} else if (((*syscall) < 0) && (strict))
+		return -EDOM;
 
-	return 0;
-
-filter_rewrite_failure:
-	if (strict)
-		return -EINVAL;
 	return 0;
 }
