@@ -43,7 +43,7 @@ def test():
 
     f = SyscallFilter(ALLOW)
     try:
-        f.syscall_priority(-1000, 1)
+        f.syscall_priority(-10000, 1)
     except RuntimeError:
         pass
 
@@ -74,11 +74,13 @@ def test():
         pass
 
     f = SyscallFilter(ALLOW)
-    if f.exist_arch(Arch.X86):
-        try:
-            f.add_rule_exactly(KILL, "socket", Arg(0, EQ, 2))
-        except RuntimeError:
-            pass
+    if not f.exist_arch(Arch.X86):
+        f.add_arch(Arch.X86)
+        f.remove_arch(Arch.NATIVE)
+    try:
+        f.add_rule_exactly(KILL, "socket", Arg(0, EQ, 2))
+    except RuntimeError:
+        pass
 
 test()
 
