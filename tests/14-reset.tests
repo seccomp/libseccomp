@@ -13,10 +13,10 @@ test type: bpf-sim
 14-reset	all	close		4		N		N	N	N	N	KILL
 14-reset	all	rt_sigreturn	N		N		N	N	N	N	KILL
 14-reset	all	open		0x856B008	4		N	N	N	N	KILL
-14-reset	x86	0-2		N		N		N	N	N	N	KILL
-14-reset	x86	4-350		N		N		N	N	N	N	KILL
+14-reset	x86	0-3		N		N		N	N	N	N	KILL
+14-reset	x86	5-360		N		N		N	N	N	N	KILL
 14-reset	x86_64	0		N		N		N	N	N	N	KILL
-14-reset	x86_64	2-350		N		N		N	N	N	N	KILL
+14-reset	x86_64	2-360		N		N		N	N	N	N	KILL
 
 test type: bpf-sim-fuzz
 
