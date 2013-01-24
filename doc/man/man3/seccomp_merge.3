@@ -50,7 +50,7 @@ Returns zero on success and negative values on failure.
 
 int main(int argc, char *argv[])
 {
-	int rc = -1;
+	int rc = \-1;
 	scmp_filter_ctx ctx_32, ctx_64;
 
 	ctx_32 = seccomp_init(SCMP_ACT_KILL);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	if (ctx_64 == NULL)
 		goto out_all;
 
-	if (seccomp_arch_exist(ctx_32, SCMP_ARCH_X86) == -EEXIST) {
+	if (seccomp_arch_exist(ctx_32, SCMP_ARCH_X86) == \-EEXIST) {
 		rc = seccomp_arch_add(ctx_32, SCMP_ARCH_X86);
 		if (rc != 0)
 			goto out_all;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		if (rc != 0)
 			goto out_all;
 	}
-	if (seccomp_arch_exist(ctx_64, SCMP_ARCH_X86_64) == -EEXIST) {
+	if (seccomp_arch_exist(ctx_64, SCMP_ARCH_X86_64) == \-EEXIST) {
 		rc = seccomp_arch_add(ctx_64, SCMP_ARCH_X86_64);
 		if (rc != 0)
 			goto out_all;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
 out:
 	seccomp_release(ctx_64);
-	return -rc;
+	return \-rc;
 out_all:
 	seccomp_release(ctx_32);
 	goto out;
