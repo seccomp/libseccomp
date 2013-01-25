@@ -103,7 +103,7 @@ struct scmp_arg_cmp {
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
-#define SCMP_SYS(x)		(seccomp_syscall_resolve_name(#x))
+#define SCMP_SYS(x)		(__NR_##x)
 
 /**
  * Specify an argument comparison struct for use in declaring rules
