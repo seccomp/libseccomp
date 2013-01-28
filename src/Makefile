@@ -40,6 +40,7 @@ OBJS = \
 	api.o db.o arch.o \
 	arch-i386.o arch-i386-syscalls.o \
 	arch-x86_64.o arch-x86_64-syscalls.o \
+	arch-x32.o arch-x32-syscalls.o \
 	hash.o \
 	gen_pfc.o gen_bpf.o
 

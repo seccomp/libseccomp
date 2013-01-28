@@ -28,6 +28,7 @@
 #include "../src/arch.h"
 #include "../src/arch-i386.h"
 #include "../src/arch-x86_64.h"
+#include "../src/arch-x32.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -39,7 +40,7 @@
 static void exit_usage(const char *program)
 {
 	fprintf(stderr,
-		"usage: %s [-h] [-a x86|x86_64] [-t] <syscall_name>\n",
+		"usage: %s [-h] [-a <arch>] [-t] <syscall_name>\n",
 		program);
 	exit(EINVAL);
 }
@@ -62,6 +63,8 @@ int main(int argc, char *argv[])
 				arch = &arch_def_i386;
 			else if (strcmp(optarg, "x86_64") == 0)
 				arch = &arch_def_x86_64;
+			else if (strcmp(optarg, "x32") == 0)
+				arch = &arch_def_x32;
 			else
 				exit_usage(argv[0]);
 			break;

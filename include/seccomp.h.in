@@ -108,6 +108,14 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_X86_64	AUDIT_ARCH_X86_64
 
 /**
+ * The x32 (32-bit x86_64) architecture token
+ *
+ * NOTE: this is different from the value used by the kernel because we need to
+ * be able to distinguish between x32 and x86_64
+ */
+#define SCMP_ARCH_X32		(EM_X86_64|__AUDIT_ARCH_LE)
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
@@ -1007,6 +1015,51 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_waitpid
 #define __NR_waitpid		__PNR_waitpid
 #endif /* __NR_waitpid */
+
+#define __PNR_create_module	-10074
+#ifndef __NR_create_module
+#define __NR_create_module	__PNR_create_module
+#endif /* __NR_create_module */
+
+#define __PNR_get_kernel_syms	-10075
+#ifndef __NR_get_kernel_syms
+#define __NR_get_kernel_syms	__PNR_get_kernel_syms
+#endif /* __NR_get_kernel_syms */
+
+#define __PNR_get_thread_area	-10076
+#ifndef __NR_get_thread_area
+#define __NR_get_thread_area	__PNR_get_thread_area
+#endif /* __NR_get_thread_area */
+
+#define __PNR_nfsservctl	-10077
+#ifndef __NR_nfsservctl
+#define __NR_nfsservctl		__PNR_nfsservctl
+#endif /* __NR_nfsservctl */
+
+#define __PNR_query_module	-10078
+#ifndef __NR_query_module
+#define __NR_query_module __PNR_query_module
+#endif /* __NR_query_module */
+
+#define __PNR_set_thread_area	-10079
+#ifndef __NR_set_thread_area
+#define __NR_set_thread_area	__PNR_set_thread_area
+#endif /* __NR_set_thread_area */
+
+#define __PNR__sysctl		-10080
+#ifndef __NR__sysctl
+#define __NR__sysctl		__PNR__sysctl
+#endif /* __NR__sysctl */
+
+#define __PNR_uselib		-10081
+#ifndef __NR_uselib
+#define __NR_uselib		__PNR_uselib
+#endif /* __NR_uselib */
+
+#define __PNR_vserver		-10082
+#ifndef __NR_vserver
+#define __NR_vserver		__PNR_vserver
+#endif /* __NR_vserver */
 
 #ifdef __cplusplus
 }

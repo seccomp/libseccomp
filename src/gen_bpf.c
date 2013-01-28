@@ -1383,10 +1383,12 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	uint64_t h_val;
 	unsigned int res_cnt;
 	unsigned int jmp_len;
+	int arch_x86_64 = -1, arch_x32 = -1;
 	struct bpf_instr instr;
 	struct bpf_instr *i_iter;
 	struct bpf_blk *b_badarch, *b_default;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
+	struct db_filter *db_secondary = NULL;
 
 	if (col->filter_cnt == 0)
 		return -EINVAL;
@@ -1421,7 +1423,28 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* generate the per-architecture filters */
 	for (iter = 0; iter < col->filter_cnt; iter++) {
-		b_new = _gen_bpf_arch(state, col->filters[iter], NULL);
+		if (col->filters[iter]->arch->token == SCMP_ARCH_X86_64)
+			arch_x86_64 = iter;
+		if (col->filters[iter]->arch->token == SCMP_ARCH_X32)
+			arch_x32 = iter;
+	}
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		/* figure out the secondary arch filter mess */
+		if (iter == arch_x86_64) {
+			if (arch_x32 > iter)
+				db_secondary = col->filters[arch_x32];
+			else if (arch_x32 >= 0)
+				continue;
+		} else if (iter == arch_x32) {
+			if (arch_x86_64 > iter)
+				db_secondary = col->filters[arch_x86_64];
+			else if (arch_x86_64 >= 0)
+				continue;
+		} else
+			db_secondary = NULL;
+
+		/* create the filter for the architecture(s) */
+		b_new = _gen_bpf_arch(state, col->filters[iter], db_secondary);
 		if (b_new == NULL)
 			return -ENOMEM;
 		b_new->prev = b_tail;

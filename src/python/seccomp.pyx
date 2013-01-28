@@ -124,11 +124,13 @@ cdef class Arch:
     NATIVE - the native architecture
     X86 - 32-bit x86
     X86_64 - 64-bit x86
+    X32 - 64-bit x86 using the x32 ABI
     """
 
     NATIVE = libseccomp.SCMP_ARCH_NATIVE
     X86 = libseccomp.SCMP_ARCH_X86
     X86_64 = libseccomp.SCMP_ARCH_X86_64
+    X32 = libseccomp.SCMP_ARCH_X32
 
 cdef class Attr:
     """ Python object representing the SyscallFilter attributes.

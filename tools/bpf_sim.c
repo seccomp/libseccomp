@@ -233,6 +233,8 @@ int main(int argc, char *argv[])
 				sys_data.arch = AUDIT_ARCH_I386;
 			else if (strcmp(optarg, "x86_64") == 0)
 				sys_data.arch = AUDIT_ARCH_X86_64;
+			else if (strcmp(optarg, "x32") == 0)
+				sys_data.arch = AUDIT_ARCH_X86_64;
 			else if (strcmp(optarg, "ia64") == 0)
 				sys_data.arch = AUDIT_ARCH_IA64;
 			else if (strcmp(optarg, "ppc") == 0)

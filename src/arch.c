@@ -30,12 +30,17 @@
 #include "arch.h"
 #include "arch-i386.h"
 #include "arch-x86_64.h"
+#include "arch-x32.h"
 #include "system.h"
 
 #if __i386__
 const struct arch_def *arch_def_native = &arch_def_i386;
 #elif __x86_64__
+#ifdef __ILP32__
+const struct arch_def *arch_def_native = &arch_def_x32;
+#else
 const struct arch_def *arch_def_native = &arch_def_x86_64;
+#endif /* __ILP32__ */
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -52,6 +57,7 @@ int arch_valid(uint32_t arch)
 	switch (arch) {
 	case SCMP_ARCH_X86:
 	case SCMP_ARCH_X86_64:
+	case SCMP_ARCH_X32:
 		return 0;
 	}
 
@@ -74,6 +80,9 @@ static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 	case SCMP_ARCH_X86_64:
 		return x86_64_syscall_table;
 		break;
+	case SCMP_ARCH_X32:
+		return x32_syscall_table;
+		break;
 	}
 
 	return NULL;
@@ -95,6 +104,9 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 	case SCMP_ARCH_X86_64:
 		return &arch_def_x86_64;
 		break;
+	case SCMP_ARCH_X32:
+		return &arch_def_x32;
+		break;
 	}
 
 	return NULL;
@@ -115,6 +127,8 @@ int arch_arg_count_max(const struct arch_def *arch)
 		return i386_arg_count_max;
 	case SCMP_ARCH_X86_64:
 		return x86_64_arg_count_max;
+	case SCMP_ARCH_X32:
+		return x32_arg_count_max;
 	default:
 		return -EDOM;
 	}
