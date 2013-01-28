@@ -2,7 +2,7 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
-* Version X.X.X - XXX
+* Version 2.0.0 - January 28, 2013
 - Fixes for the x86 multiplexed syscalls
 - Additions to the API to better support non-native architecures
 - Additions to the API to support multiple architecures in one filter
@@ -11,8 +11,6 @@ http://libseccomp.sf.net
 - Improved build messages regardless of build verbosity
 - More automated tests added as well as a number of improvements to the test
   harness
-- Experimental Python bindings added using Cython; the Python API is still
-  unstable and subject to change in future versions
 
 * Version 1.0.1 - November 12, 2012
 - The header file is now easier to use with C++ compilers
