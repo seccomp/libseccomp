@@ -31,6 +31,14 @@ extern "C" {
 #endif
 
 /*
+ * version information
+ */
+
+#define SCMP_VER_MAJOR		%%VERSION_MAJOR%%
+#define SCMP_VER_MINOR		%%VERSION_MINOR%%
+#define SCMP_VER_MICRO		%%VERSION_MICRO%%
+
+/*
  * types
  */
 

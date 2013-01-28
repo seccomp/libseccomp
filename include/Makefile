@@ -33,15 +33,25 @@ include $(TOPDIR)/version_info.mk
 include $(TOPDIR)/configure.mk
 include $(TOPDIR)/install.mk
 
+HDR_BUILD = seccomp.h
+
 #
 # targets
 #
 
-.PHONY: all install install_hdr
+.PHONY: all install clean
 
-all:
+all: $(HDR_BUILD)
 
-install: install_hdr
-
-install_hdr: seccomp.h
+install: $(HDR_BUILD)
 	$(INSTALL_INC_MACRO)
+
+seccomp.h: seccomp.h.in
+	@$(ECHO) " GEN $@"
+	$(CAT) $< | \
+	$(SED) -e 's/%%VERSION_MAJOR%%/$(VERSION_MAJOR)/g' | \
+	$(SED) -e 's/%%VERSION_MINOR%%/$(VERSION_MINOR)/g' | \
+	$(SED) -e 's/%%VERSION_MICRO%%/$(VERSION_MICRO)/g' > $@
+
+clean:
+	@$(RM) $(HDR_BUILD)

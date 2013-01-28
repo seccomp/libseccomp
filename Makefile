@@ -38,8 +38,8 @@ include install.mk
 #
 
 CONFIGS = configure.mk configure.h version_info.mk libseccomp.pc
-SUBDIRS_BUILD = src tests tools
-SUBDIRS_INSTALL = src include doc
+SUBDIRS_BUILD = include src tests tools
+SUBDIRS_INSTALL = include src doc
 
 .PHONY: tarball install ctags cstags clean dist-clean $(SUBDIRS_BUILD)
 
@@ -69,7 +69,14 @@ $(VERSION_HDR): version_info.mk
 	$(ECHO) "#ifndef _VERSION_H" >> $$hdr; \
 	$(ECHO) "#define _VERSION_H" >> $$hdr; \
 	$(ECHO) "#define VERSION_RELEASE \"$(VERSION_RELEASE)\"" >> $$hdr; \
+	$(ECHO) "#define VERSION_MAJOR $(VERSION_MAJOR)" >> $$hdr; \
+	$(ECHO) "#define VERSION_MINOR $(VERSION_MINOR)" >> $$hdr; \
+	$(ECHO) "#define VERSION_MICRO $(VERSION_MICRO)" >> $$hdr; \
 	$(ECHO) "#endif" >> $$hdr;
+
+include: $(VERSION_HDR) $(CONFIGS)
+	@$(ECHO_INFO) "building in directory $@/ ..."
+	@$(MAKE) -C $@
 
 src: $(VERSION_HDR) $(CONFIGS)
 	@$(ECHO_INFO) "building in directory $@/ ..."
