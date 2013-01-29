@@ -49,9 +49,9 @@ struct pfc_sys_list {
 static const char *_pfc_arch(const struct arch_def *arch)
 {
 	switch (arch->token) {
-	case AUDIT_ARCH_I386:
+	case SCMP_ARCH_X86:
 		return "x86";
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return "x86_64";
 	default:
 		return "UNKNOWN";
@@ -261,8 +261,8 @@ static int _gen_pfc_arch(const struct db_filter_col *col,
 	}
 
 	fprintf(fds, "# filter for arch %s (%u)\n",
-		_pfc_arch(db->arch), db->arch->token);
-	fprintf(fds, "if ($arch == %u)\n", db->arch->token);
+		_pfc_arch(db->arch), db->arch->token_bpf);
+	fprintf(fds, "if ($arch == %u)\n", db->arch->token_bpf);
 	p_iter = p_head;
 	while (p_iter != NULL) {
 		if (p_iter->sys->valid == 0)

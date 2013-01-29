@@ -1150,7 +1150,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_HSH(b_head->hash),
 			   _BPF_JMP_NXT(blk_cnt),
-			   _BPF_K(db->arch->token));
+			   _BPF_K(db->arch->token_bpf));
 		b_head->prev = _blk_append(state, NULL, &instr);
 		if (b_head->prev == NULL)
 			goto arch_failure;
@@ -1160,7 +1160,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		/* arch check */
 		_BPF_INSTR(instr, BPF_JMP+BPF_JEQ,
 			   _BPF_JMP_HSH(state->def_hsh), _BPF_JMP_NXT(0),
-			   _BPF_K(db->arch->token));
+			   _BPF_K(db->arch->token_bpf));
 		b_head = _blk_append(state, NULL, &instr);
 		if (b_head == NULL)
 			goto arch_failure;

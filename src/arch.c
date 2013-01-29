@@ -32,31 +32,13 @@
 #include "arch-x86_64.h"
 #include "system.h"
 
-const struct arch_def arch_def_native = {
 #if __i386__
-	.token = AUDIT_ARCH_I386,
+const struct arch_def *arch_def_native = &arch_def_i386;
 #elif __x86_64__
-	.token = AUDIT_ARCH_X86_64,
+const struct arch_def *arch_def_native = &arch_def_x86_64;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
-
-#if __BITS_PER_LONG == 32
-	.size = ARCH_SIZE_32,
-#elif __BITS_PER_LONG == 64
-	.size = ARCH_SIZE_64,
-#else
-	.size = ARCH_SIZE_UNSPEC,
-#endif /* BITS_PER_LONG */
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	.endian = ARCH_ENDIAN_LITTLE,
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	.endian = ARCH_ENDIAN_BIG,
-#else
-	.endian = ARCH_ENDIAN_UNSPEC,
-#endif /* __BYTE_ORDER */
-};
 
 /**
  * Validate the architecture token
@@ -68,8 +50,8 @@ const struct arch_def arch_def_native = {
 int arch_valid(uint32_t arch)
 {
 	switch (arch) {
-	case AUDIT_ARCH_I386:
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86:
+	case SCMP_ARCH_X86_64:
 		return 0;
 	}
 
@@ -86,10 +68,10 @@ int arch_valid(uint32_t arch)
 static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 {
 	switch (token) {
-	case AUDIT_ARCH_I386:
+	case SCMP_ARCH_X86:
 		return i386_syscall_table;
 		break;
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return x86_64_syscall_table;
 		break;
 	}
@@ -107,10 +89,10 @@ static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 const struct arch_def *arch_def_lookup(uint32_t token)
 {
 	switch (token) {
-	case AUDIT_ARCH_I386:
+	case SCMP_ARCH_X86:
 		return &arch_def_i386;
 		break;
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return &arch_def_x86_64;
 		break;
 	}
@@ -129,9 +111,9 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 int arch_arg_count_max(const struct arch_def *arch)
 {
 	switch (arch->token) {
-	case AUDIT_ARCH_I386:
+	case SCMP_ARCH_X86:
 		return i386_arg_count_max;
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return x86_64_arg_count_max;
 	default:
 		return -EDOM;
@@ -151,7 +133,7 @@ int arch_arg_count_max(const struct arch_def *arch)
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return x86_64_arg_offset_lo(arg);
 	default:
 		return -EDOM;
@@ -171,7 +153,7 @@ int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 {
 	switch (arch->token) {
-	case AUDIT_ARCH_X86_64:
+	case SCMP_ARCH_X86_64:
 		return x86_64_arg_offset_hi(arg);
 	default:
 		return -EDOM;
@@ -249,8 +231,8 @@ int arch_syscall_translate(const struct arch_def *arch, int *syscall)
 	int sc_num;
 	const char *sc_name;
 
-	if (arch->token != arch_def_native.token) {
-		sc_name = arch_syscall_resolve_num(&arch_def_native, *syscall);
+	if (arch->token != arch_def_native->token) {
+		sc_name = arch_syscall_resolve_num(arch_def_native, *syscall);
 		if (sc_name == NULL)
 			return -EFAULT;
 
@@ -292,7 +274,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
 	} else if (sys <= -100 && sys > -10000) {
 		/* rewritable syscalls */
 		switch (arch->token) {
-		case AUDIT_ARCH_I386:
+		case SCMP_ARCH_X86:
 			return i386_syscall_rewrite(arch, strict, syscall);
 		}
 		/* NOTE: we fall through to the default handling (strict?) if
@@ -335,7 +317,7 @@ int arch_filter_rewrite(const struct arch_def *arch,
 	} else if (sys <= -100 && sys > -10000) {
 		/* rewritable syscalls */
 		switch (arch->token) {
-		case AUDIT_ARCH_I386:
+		case SCMP_ARCH_X86:
 			return i386_filter_rewrite(arch,
 						   strict, syscall, chain);
 		}

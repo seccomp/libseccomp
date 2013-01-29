@@ -31,7 +31,8 @@
 #define __i386_NR_ipc			117
 
 const struct arch_def arch_def_i386 = {
-	.token = AUDIT_ARCH_I386,
+	.token = SCMP_ARCH_X86,
+	.token_bpf = AUDIT_ARCH_I386,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
 };

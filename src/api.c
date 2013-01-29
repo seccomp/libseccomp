@@ -76,7 +76,7 @@ scmp_filter_ctx seccomp_init(uint32_t def_action)
 	col = db_col_init(def_action);
 	if (col == NULL)
 		return NULL;
-	db = db_init(&arch_def_native);
+	db = db_init(arch_def_native);
 	if (db == NULL)
 		goto init_failure_col;
 
@@ -104,7 +104,7 @@ int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 
 	db_col_reset(col, def_action);
 
-	db = db_init(&arch_def_native);
+	db = db_init(arch_def_native);
 	if (db == NULL)
 		return -ENOMEM;
 	rc = db_col_db_add(col, db);
@@ -143,7 +143,7 @@ int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
 /* NOTE - function header comment in include/seccomp.h */
 uint32_t seccomp_arch_native(void)
 {
-	return arch_def_native.token;
+	return arch_def_native->token;
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -152,7 +152,7 @@ int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token)
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
 	if (arch_token == 0)
-		arch_token = arch_def_native.token;
+		arch_token = arch_def_native->token;
 
 	if (arch_valid(arch_token))
 		return -EINVAL;
@@ -169,7 +169,7 @@ int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token)
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
 	if (arch_token == 0)
-		arch_token = arch_def_native.token;
+		arch_token = arch_def_native->token;
 
 	if (arch_valid(arch_token))
 		return -EINVAL;
@@ -195,7 +195,7 @@ int seccomp_arch_remove(scmp_filter_ctx ctx, uint32_t arch_token)
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
 	if (arch_token == 0)
-		arch_token = arch_def_native.token;
+		arch_token = arch_def_native->token;
 
 	if (arch_valid(arch_token))
 		return -EINVAL;
@@ -261,7 +261,7 @@ char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num)
 	const char *name;
 
 	if (arch_token == 0)
-		arch_token = arch_def_native.token;
+		arch_token = arch_def_native->token;
 	if (arch_valid(arch_token))
 		return NULL;
 	arch = arch_def_lookup(arch_token);
@@ -284,7 +284,7 @@ int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
 		return -EINVAL;
 
 	if (arch_token == 0)
-		arch_token = arch_def_native.token;
+		arch_token = arch_def_native->token;
 	if (arch_valid(arch_token))
 		return -EINVAL;
 	arch = arch_def_lookup(arch_token);

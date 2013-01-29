@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 {
 	int opt;
 	int translate = 0;
-	const struct arch_def *arch = &arch_def_native;
+	const struct arch_def *arch = arch_def_native;
 	int sys_num;
 
 	/* parse the command line */

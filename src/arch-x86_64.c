@@ -27,7 +27,8 @@
 #include "arch-x86_64.h"
 
 const struct arch_def arch_def_x86_64 = {
-	.token = AUDIT_ARCH_X86_64,
+	.token = SCMP_ARCH_X86_64,
+	.token_bpf = AUDIT_ARCH_X86_64,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_LITTLE,
 };

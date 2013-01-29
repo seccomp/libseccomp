@@ -33,6 +33,7 @@ struct db_api_arg;
 
 struct arch_def {
 	uint32_t token;
+	uint32_t token_bpf;
 	enum {
 		ARCH_SIZE_UNSPEC = 0,
 		ARCH_SIZE_32 = 32,
@@ -46,7 +47,7 @@ struct arch_def {
 };
 
 /* arch_def for the current architecture */
-extern const struct arch_def arch_def_native;
+extern const struct arch_def *arch_def_native;
 
 /* NOTE: Syscall mappings can be found by running the following commands
  *	 on the specific architecture's include file:
