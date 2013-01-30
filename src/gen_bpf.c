@@ -1065,15 +1065,17 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
  * Generate the BPF instruction blocks for a given filter/architecture
  * @param state the BPF state
  * @param db the filter DB
+ * @param db_secondary the secondary DB
  *
- * Generate the BPF instruction block for the given filter DB/architecture and
- * return a pointer to the block on succes, NULL on failure.  The resulting
+ * Generate the BPF instruction block for the given filter DB(s)/architecture(s)
+ * and return a pointer to the block on succes, NULL on failure.  The resulting
  * block assumes that the architecture token has already been loaded into the
  * BPF accumulator.
  *
  */
 static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
-				     const struct db_filter *db)
+				     const struct db_filter *db,
+				     const struct db_filter *db_secondary)
 {
 	int rc;
 	unsigned int blk_cnt = 0;
@@ -1112,6 +1114,38 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 			s_tail = s_iter;
 			s_head->pri_prv = NULL;
 			s_head->pri_nxt = NULL;
+		}
+	}
+	if (db_secondary != NULL) {
+		db_list_foreach(s_iter, db_secondary->syscalls) {
+			if (s_head != NULL) {
+				s_iter_b = s_head;
+				while ((s_iter_b->pri_nxt != NULL) &&
+				(s_iter->priority <= s_iter_b->priority))
+					s_iter_b = s_iter_b->pri_nxt;
+
+				if (s_iter->priority > s_iter_b->priority) {
+					s_iter->pri_prv = s_iter_b->pri_prv;
+					s_iter->pri_nxt = s_iter_b;
+					if (s_iter_b == s_head) {
+						s_head->pri_prv = s_iter;
+						s_head = s_iter;
+					} else {
+						s_iter->pri_prv->pri_nxt=s_iter;
+						s_iter->pri_nxt->pri_prv=s_iter;
+					}
+				} else {
+					s_iter->pri_prv = s_tail;
+					s_iter->pri_nxt = NULL;
+					s_iter->pri_prv->pri_nxt = s_iter;
+					s_tail = s_iter;
+				}
+			} else {
+				s_head = s_iter;
+				s_tail = s_iter;
+				s_head->pri_prv = NULL;
+				s_head->pri_nxt = NULL;
+			}
 		}
 	}
 
@@ -1417,7 +1451,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* generate the per-architecture filters */
 	for (iter = 0; iter < col->filter_cnt; iter++) {
-		b_new = _gen_bpf_arch(state, col->filters[iter]);
+		b_new = _gen_bpf_arch(state, col->filters[iter], NULL);
 		if (b_new == NULL)
 			return -ENOMEM;
 		b_new->prev = b_tail;
