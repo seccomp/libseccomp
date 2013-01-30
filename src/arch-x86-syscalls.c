@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp i386 Syscall Table
+ * Enhanced Seccomp x86 Syscall Table
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -22,10 +22,10 @@
 #include <seccomp.h>
 
 #include "arch.h"
-#include "arch-i386.h"
+#include "arch-x86.h"
 
 /* NOTE: based on Linux 3.4.7 */
-const struct arch_syscall_def i386_syscall_table[] = \
+const struct arch_syscall_def x86_syscall_table[] = \
 {
 	{ "accept", __PNR_accept },
 	{ "accept4", __PNR_accept4 },

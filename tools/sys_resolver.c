@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 #include "../src/arch.h"
-#include "../src/arch-i386.h"
+#include "../src/arch-x86.h"
 #include "../src/arch-x86_64.h"
 #include "../src/arch-x32.h"
 #include "../src/arch-arm.h"
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)
-				arch = &arch_def_i386;
+				arch = &arch_def_x86;
 			else if (strcmp(optarg, "x86_64") == 0)
 				arch = &arch_def_x86_64;
 			else if (strcmp(optarg, "x32") == 0)

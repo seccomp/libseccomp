@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp i386 Specific Code
+ * Enhanced Seccomp x86 Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -19,23 +19,22 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-#ifndef _ARCH_i386_H
-#define _ARCH_i386_H
+#ifndef _ARCH_X86_H
+#define _ARCH_X86_H
 
 #include "arch.h"
 #include "db.h"
 #include "system.h"
 
-#define i386_arg_count_max		6
+#define x86_arg_count_max		6
 
-extern const struct arch_def arch_def_i386;
-extern const struct arch_syscall_def i386_syscall_table[];
+extern const struct arch_def arch_def_x86;
+extern const struct arch_syscall_def x86_syscall_table[];
 
-int i386_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
-			 int *syscall);
+int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
+			int *syscall);
 
-int i386_filter_rewrite(const struct arch_def *arch,
-			unsigned int strict,
-			int *syscall, struct db_api_arg *chain);
+int x86_filter_rewrite(const struct arch_def *arch, unsigned int strict,
+		       int *syscall, struct db_api_arg *chain);
 
 #endif

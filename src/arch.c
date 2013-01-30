@@ -29,14 +29,14 @@
 #include <seccomp.h>
 
 #include "arch.h"
-#include "arch-i386.h"
+#include "arch-x86.h"
 #include "arch-x86_64.h"
 #include "arch-x32.h"
 #include "arch-arm.h"
 #include "system.h"
 
 #if __i386__
-const struct arch_def *arch_def_native = &arch_def_i386;
+const struct arch_def *arch_def_native = &arch_def_x86;
 #elif __x86_64__
 #ifdef __ILP32__
 const struct arch_def *arch_def_native = &arch_def_x32;
@@ -80,7 +80,7 @@ static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
 {
 	switch (token) {
 	case SCMP_ARCH_X86:
-		return i386_syscall_table;
+		return x86_syscall_table;
 	case SCMP_ARCH_X86_64:
 		return x86_64_syscall_table;
 	case SCMP_ARCH_X32:
@@ -103,7 +103,7 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 {
 	switch (token) {
 	case SCMP_ARCH_X86:
-		return &arch_def_i386;
+		return &arch_def_x86;
 	case SCMP_ARCH_X86_64:
 		return &arch_def_x86_64;
 	case SCMP_ARCH_X32:
@@ -127,7 +127,7 @@ int arch_arg_count_max(const struct arch_def *arch)
 {
 	switch (arch->token) {
 	case SCMP_ARCH_X86:
-		return i386_arg_count_max;
+		return x86_arg_count_max;
 	case SCMP_ARCH_X86_64:
 		return x86_64_arg_count_max;
 	case SCMP_ARCH_X32:
@@ -294,7 +294,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
 		/* rewritable syscalls */
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			return i386_syscall_rewrite(arch, strict, syscall);
+			return x86_syscall_rewrite(arch, strict, syscall);
 		}
 		/* NOTE: we fall through to the default handling (strict?) if
 		 *       we don't support any rewriting for the architecture */
@@ -337,8 +337,7 @@ int arch_filter_rewrite(const struct arch_def *arch,
 		/* rewritable syscalls */
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			return i386_filter_rewrite(arch,
-						   strict, syscall, chain);
+			return x86_filter_rewrite(arch, strict, syscall, chain);
 		}
 		/* NOTE: we fall through to the default handling (strict?) if
 		 *       we don't support any rewriting for the architecture */

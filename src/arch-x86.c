@@ -1,5 +1,5 @@
 /**
- * Enhanced Seccomp i386 Specific Code
+ * Enhanced Seccomp x86 Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -24,13 +24,13 @@
 #include <linux/audit.h>
 
 #include "arch.h"
-#include "arch-i386.h"
+#include "arch-x86.h"
 
-/* i386 syscall numbers */
-#define __i386_NR_socketcall		102
-#define __i386_NR_ipc			117
+/* x86 syscall numbers */
+#define __x86_NR_socketcall		102
+#define __x86_NR_ipc			117
 
-const struct arch_def arch_def_i386 = {
+const struct arch_def arch_def_x86 = {
 	.token = SCMP_ARCH_X86,
 	.token_bpf = AUDIT_ARCH_I386,
 	.size = ARCH_SIZE_32,
@@ -51,13 +51,13 @@ const struct arch_def arch_def_i386 = {
  * failure.
  *
  */
-int i386_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
-			 int *syscall)
+int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
+			int *syscall)
 {
 	if ((*syscall) <= -100 && (*syscall) >= -117)
-		*syscall = __i386_NR_socketcall;
+		*syscall = __x86_NR_socketcall;
 	else if ((*syscall) <= -200 && (*syscall) >= -211)
-		*syscall = __i386_NR_ipc;
+		*syscall = __x86_NR_ipc;
 	else if (((*syscall) < 0) && (strict))
 		return -EDOM;
 
@@ -79,14 +79,13 @@ int i386_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
  * fail.  Returns zero on success, negative values on failure.
  *
  */
-int i386_filter_rewrite(const struct arch_def *arch,
-			unsigned int strict,
-			int *syscall, struct db_api_arg *chain)
+int x86_filter_rewrite(const struct arch_def *arch, unsigned int strict,
+		       int *syscall, struct db_api_arg *chain)
 {
 	unsigned int iter;
 
 	if ((*syscall) <= -100 && (*syscall) >= -117) {
-		for (iter = 0; iter < i386_arg_count_max; iter++) {
+		for (iter = 0; iter < x86_arg_count_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -95,9 +94,9 @@ int i386_filter_rewrite(const struct arch_def *arch,
 		chain[0].mask = DATUM_MAX;
 		chain[0].datum = abs(*syscall) % 100;
 		chain[0].valid = 1;
-		*syscall = __i386_NR_socketcall;
+		*syscall = __x86_NR_socketcall;
 	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
-		for (iter = 0; iter < i386_arg_count_max; iter++) {
+		for (iter = 0; iter < x86_arg_count_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -106,7 +105,7 @@ int i386_filter_rewrite(const struct arch_def *arch,
 		chain[0].mask = DATUM_MAX;
 		chain[0].datum = abs(*syscall) % 200;
 		chain[0].valid = 1;
-		*syscall = __i386_NR_ipc;
+		*syscall = __x86_NR_ipc;
 	} else if (((*syscall) < 0) && (strict))
 		return -EDOM;
 

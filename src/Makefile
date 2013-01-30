@@ -38,7 +38,7 @@ LIB_SHARED = libseccomp.so.$(VERSION_RELEASE)
 
 OBJS = \
 	api.o db.o arch.o \
-	arch-i386.o arch-i386-syscalls.o \
+	arch-x86.o arch-x86-syscalls.o \
 	arch-x86_64.o arch-x86_64-syscalls.o \
 	arch-x32.o arch-x32-syscalls.o \
 	arch-arm.o arch-arm-syscalls.o \
