@@ -238,16 +238,6 @@ int main(int argc, char *argv[])
 				sys_data.arch = AUDIT_ARCH_X86_64;
 			else if (strcmp(optarg, "arm") == 0)
 				sys_data.arch = AUDIT_ARCH_ARM;
-			else if (strcmp(optarg, "ia64") == 0)
-				sys_data.arch = AUDIT_ARCH_IA64;
-			else if (strcmp(optarg, "ppc") == 0)
-				sys_data.arch = AUDIT_ARCH_PPC;
-			else if (strcmp(optarg, "ppc64") == 0)
-				sys_data.arch = AUDIT_ARCH_PPC64;
-			else if (strcmp(optarg, "s390") == 0)
-				sys_data.arch = AUDIT_ARCH_S390;
-			else if (strcmp(optarg, "s390x") == 0)
-				sys_data.arch = AUDIT_ARCH_S390X;
 			else
 				exit_fault(EINVAL);
 			break;
