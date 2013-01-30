@@ -21,7 +21,7 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-GLBL_ARCH_SUPPORT="x86 x86_64"
+GLBL_ARCH_SUPPORT="x86 x86_64 x32 arm"
 GLBL_SYS_RESOLVER="../tools/sys_resolver"
 
 ####
@@ -804,10 +804,7 @@ else
 fi
 
 # determine the current system's architecture
-arch=$(uname -m)
-if [[ $arch != "x86_64" ]]; then
-	arch="x86"
-fi
+arch=$(../tools/arch_detect)
 
 # display the test output and run the requested tests
 echo "=============== $(date) ===============" >&$logfd
