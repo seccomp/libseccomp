@@ -30,10 +30,14 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    if not system_arch() == Arch.X86:
+    if not f.exist_arch(Arch.X86):
         f.add_arch(Arch.X86)
-    if not system_arch() == Arch.X86_64:
+    if not f.exist_arch(Arch.X86_64):
         f.add_arch(Arch.X86_64)
+    if not f.exist_arch(Arch.X32):
+        f.add_arch(Arch.X32)
+    if not f.exist_arch(Arch.ARM):
+        f.add_arch(Arch.ARM)
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr))
