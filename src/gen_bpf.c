@@ -100,8 +100,12 @@ struct bpf_blk {
 	/* original db_arg_chain_tree node */
 	const struct db_arg_chain_tree *node;
 
+	/* status flags */
+	unsigned int flag_hash;		/* added to the hash table */
+	unsigned int flag_dup;		/* duplicate block and in use */
+	unsigned int flag_unique;	/* ->blks is unique to this block */
+
 	/* used during block assembly */
-	unsigned int hashed_flag;
 	uint64_t hash;
 	struct bpf_blk *hash_nxt;
 	struct bpf_blk *prev, *next;
@@ -181,9 +185,10 @@ static void __blk_free(struct bpf_state *state, struct bpf_blk *blk)
 	while (blk->hash_nxt != NULL) {
 		b_tmp = blk->hash_nxt;
 		blk->hash_nxt = b_tmp->hash_nxt;
-		free(b_tmp);
+		if (!b_tmp->flag_dup)
+			free(b_tmp);
 	}
-	if (blk->blks != NULL)
+	if (blk->blks != NULL && blk->flag_unique)
 		free(blk->blks);
 	free(blk);
 }
@@ -263,6 +268,7 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 		if (blk == NULL)
 			return NULL;
 		memset(blk, 0, sizeof(*blk));
+		blk->flag_unique = 1;
 	}
 	if ((blk->blk_cnt + 1) > blk->blk_alloc) {
 		blk->blk_alloc += AINC_BLK;
@@ -277,51 +283,6 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 
 	return blk;
 }
-
-#if 0 /* see NOTE in function description */
-/**
- * Append a BPF instruction block to another BPF instruction block
- * @param state the BPF state
- * @param dst the destination instruction block
- * @param src the source instruction block
- *
- * Append the source instruction block to the end of the destination block.
- * Returns a pointer to dst on success, NULL on failure, and in the case of
- * failure the destination block is free'd.
- *
- * NOTE: We're going to #if'def this function out and not simply remove it
- *	 because the need for such a function does seem to reoccur from time
- *	 to time and I don't feel like re-implementing it again in the near
- *	 future.  Once we've given the BPF generator a good scrubbing we can
- *	 remove this function if it still isn't used.
- *
- */
-static struct bpf_blk *_blk_append_blk(struct bpf_state *state,
-				       struct bpf_blk *dst,
-				       const struct bpf_blk *src)
-{
-	unsigned int size;
-	struct bpf_instr *new;
-
-	size = dst->blk_cnt + src->blk_cnt;
-	if (size > dst->blk_alloc) {
-		dst->blk_alloc = size;
-		new = realloc(dst->blks, dst->blk_alloc * sizeof(*(dst->blks)));
-		if (new == NULL) {
-			_blk_free(state, dst);
-			return NULL;
-		}
-		dst->blks = new;
-	}
-	memcpy(&dst->blks[dst->blk_cnt], src->blks,
-	       src->blk_cnt * sizeof(*(src->blks)));
-	dst->blk_cnt += src->blk_cnt;
-	if (src->priority > dst->priority)
-		dst->priority = src->priority;
-
-	return dst;
-}
-#endif /* see NOTE in function description */
 
 /**
  * Append a block of BPF instructions to the final BPF program
@@ -470,7 +431,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	struct bpf_blk *blk = *blk_p;
 	struct bpf_blk *b_iter;
 
-	if (blk->hashed_flag)
+	if (blk->flag_hash)
 		return 0;
 
 	h_new = malloc(sizeof(*h_new));
@@ -481,7 +442,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	/* generate the hash */
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
 	blk->hash = h_val;
-	blk->hashed_flag = 1;
+	blk->flag_hash = 1;
 	blk->node = NULL;
 	h_new->blk = blk;
 	h_new->found = (found ? 1 : 0);
@@ -497,6 +458,19 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				/* duplicate block */
 				free(h_new);
 
+				/* store the duplicate block */
+				b_iter = h_iter->blk;
+				while (b_iter->hash_nxt != NULL)
+					b_iter = b_iter->hash_nxt;
+				b_iter->hash_nxt = blk;
+
+				/* in some cases we want to return the
+				 * duplicate block */
+				if (found) {
+					blk->flag_dup = 1;
+					return 0;
+				}
+
 				/* update the priority if needed */
 				if (h_iter->blk->priority < blk->priority)
 					h_iter->blk->priority = blk->priority;
@@ -504,19 +478,15 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				/* try to save some memory */
 				free(blk->blks);
 				blk->blks = h_iter->blk->blks;
+				blk->flag_unique = 0;
 
-				/* store the duplicate block */
-				b_iter = h_iter->blk;
-				while (b_iter->hash_nxt != NULL)
-					b_iter = b_iter->hash_nxt;
-				b_iter->hash_nxt = blk;
 				*blk_p = h_iter->blk;
 				return 0;
 			} else if (h_iter->blk->hash == h_val) {
 				/* hash collision */
 				if ((h_val >> 32) == 0xffffffff) {
 					/* overflow */
-					blk->hashed_flag = 0;
+					blk->flag_hash = 0;
 					blk->hash = 0;
 					return -EFAULT;
 				}
@@ -816,7 +786,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 	struct bpf_instr *i_iter;
 	struct db_arg_chain_tree *node;
 
-	if (blk->hashed_flag)
+	if (blk->flag_hash)
 		return blk;
 
 	/* convert TGT_PTR_DB to TGT_PTR_HSH references */
