@@ -46,8 +46,8 @@ function verify_deps() {
 #
 function usage() {
 cat << EOF
-usage: regression [-h] [-m MODE] [-a] [-b BATCH_NAME] [-g] [-l [LOG]]
-                  [-s SINGLE_TEST] [-t [TEMP_DIR]] [-v]
+usage: regression [-h] [-m MODE] [-a] [-b BATCH_NAME] [-g] [-l <LOG>]
+                  [-s SINGLE_TEST] [-t <TEMP_DIR>] [-T <TEST_TYPE>] [-v]
 
 libseccomp regression test automation script
 optional arguments:
@@ -59,6 +59,7 @@ optional arguments:
   -l [LOG]       specifies log file to write test results to
   -s SINGLE_TEST specifies individual test number to be run
   -t [TEMP_DIR]  specifies directory to create temporary files in
+  -T [TEST_TYPE] only run tests matching the specified type
   -v             specifies that verbose output be provided
 EOF
 }
@@ -544,6 +545,9 @@ function run_test() {
 	# generate the test number string for the line of batch test data
 	local testnumstr=$(generate_test_num "$1" $2 0)
 
+	# ensure we only run tests which match the specified type
+	[[ -n $type && "$4" != "$type" ]] && return
+
 	# execute the function corresponding to the test type
 	if [[ "$4" == "basic" ]]; then
 		run_test_basic "$testnumstr" "$3"
@@ -645,6 +649,7 @@ runall=false
 singlecount=0
 tmpfile=""
 tmpdir=""
+type=
 use_valgrind=false
 verbose=false
 stats_all=0
@@ -653,7 +658,7 @@ stats_success=0
 stats_failure=0
 stats_error=0
 
-while getopts "ab:gl:m:s:t:vh" opt; do
+while getopts "ab:gl:m:s:t:T:vh" opt; do
 	case $opt in
 	a)
 		runall=true
@@ -689,6 +694,9 @@ while getopts "ab:gl:m:s:t:vh" opt; do
 		;;
 	t)
 		tmpdir="$OPTARG"
+		;;
+	T)
+		type="$OPTARG"
 		;;
 	v)
 		verbose=true
