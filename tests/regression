@@ -533,6 +533,63 @@ function run_test_basic() {
 }
 
 #
+# Run the specified "live" test
+#
+# Tests that belong to the "live" test type will attempt to run a live test
+# of the libseccomp library on the host system; for obvious reasons the host
+# system must support seccomp mode 2 for this to work correctly.
+#
+# Arguments:
+#     1    value of test number from batch file
+#     2    string containing line of test data from batch file
+#
+function run_test_live() {
+	local rc
+	local line=($2)
+
+	# parse the test line
+	line_cmd=${line[0]}
+	line_act=${line[1]}
+	line_test="$line_cmd $line_act"
+
+	# print out the input test data to the log file
+	print_data "$1" "$2"
+
+	# run the command
+	exec 4>/dev/null
+	run_test_command "$1" "$line_cmd" "$line_act" "" 4
+	rc=$?
+	exec 4>&-
+
+	# return value codes for this test type:
+	#  159: KILL
+	#  160: ALLOW
+	#  161: TRAP
+	#  162: TRACE (currently unsupported)
+	#  163: ERRNO
+	if [[ $line_act == "KILL" && $rc -eq 159 ]]; then
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	elif [[ $line_act == "ALLOW" && $rc -eq 160 ]]; then
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	elif [[ $line_act == "TRAP" && $rc -eq 161 ]]; then
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	elif [[ $line_act == "TRACE" ]]; then
+		print_result $1 "ERROR" "unsupported action \"$line_act\""
+		stats_error=$(($stats_error+1))
+	elif [[ $line_act == "ERRNO" && $rc -eq 163 ]]; then
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	else
+		print_result $1 "FAILURE" "$line_test rc=$rc"
+		stats_failure=$(($stats_failure+1))
+	fi
+	stats_all=$(($stats_all+1))
+}
+
+#
 # Run a single test from the specified batch
 #
 # Arguments:
@@ -555,6 +612,13 @@ function run_test() {
 		run_test_bpf_sim "$1" $2 "$3"
 	elif [[ "$4" == "bpf-sim-fuzz" ]]; then
 		run_test_bpf_sim_fuzz "$1" $2 "$3"
+	elif [[ "$4" == "live" ]]; then
+		# only run this test if explicitly requested
+		if [[ -n $type ]]; then
+			run_test_live "$testnumstr" "$3"
+		else
+			stats_skipped=$(($stats_skipped+1))
+		fi
 	else
 		print_result $testnumstr "ERROR" "test type $4 not supported"
 		stats_error=$(($stats_error+1))

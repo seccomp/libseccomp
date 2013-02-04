@@ -31,4 +31,10 @@ int util_getopt(int argc, char *argv[], struct util_options *opts);
 int util_filter_output(const struct util_options *opts,
 		       const scmp_filter_ctx ctx);
 
+int util_trap_install(void);
+
+int util_action_parse(const char *action);
+
+int util_file_write(const char *path);
+
 #endif

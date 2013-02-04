@@ -22,7 +22,16 @@
 """ Python utility code for the libseccomp test suite """
 
 import argparse
+import os
 import sys
+import signal
+
+from seccomp import *
+
+def trap_handler(signum, frame):
+    """ SIGSYS signal handler, internal use only
+    """
+    os._exit(161)
 
 def get_opt():
     """ Parse the arguments passed to main
@@ -51,6 +60,50 @@ def filter_output(args, ctx):
         ctx.export_bpf(sys.stdout)
     else:
         ctx.export_pfc(sys.stdout)
+
+def install_trap():
+    """ Install a TRAP action signal handler
+
+    Description:
+    Install the TRAP action signal handler.
+    """
+    signal.signal(signal.SIGSYS, trap_handler)
+
+def parse_action(action):
+    """ Parse a filter action string into an action value
+
+    Arguments:
+    action - the action string
+
+    Description:
+    Parse a seccomp action string into the associated integer value.
+    """
+    if action == "KILL":
+        return KILL
+    elif action == "TRAP":
+        return TRAP
+    elif action == "ERRNO":
+        return ERRNO(163)
+    elif action == "TRACE":
+        raise RuntimeError("the TRACE action is not currently supported")
+    elif action == "ALLOW":
+        return ALLOW
+    raise RuntimeError("invalid action string")
+
+
+def write_file(path):
+    """ Write a string to a file
+
+    Arguments:
+    path - the file path
+
+    Description:
+    Open the specified file, write a string to the file, and close the file.
+    """
+    fd = os.open(path, os.O_WRONLY|os.O_CREAT, 0600)
+    if not os.write(fd, "testing") == len("testing"):
+        raise IOError("failed to write the full test string in write_file()")
+    os.close(fd)
 
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;
