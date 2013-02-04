@@ -499,8 +499,9 @@ function run_test_basic() {
 
 	# run the command
 	run_test_command "$1" "$2" ""
-	if [[ $? -ne 0 ]]; then
-		print_result $1 "FAILURE" "$2 rc=$?"
+	local rc=$?
+	if [[ $rc -ne 0 ]]; then
+		print_result $1 "FAILURE" "$2 rc=$rc"
 		stats_failure=$(($stats_failure+1))
 	else
 		print_result $1 "SUCCESS" ""
