@@ -153,7 +153,9 @@ function get_range() {
 # Arguments:
 #     1    string containing generated test number
 #     2    string containing command name
-#     3    string containing command options and redirects
+#     3    string containing command options
+#     4    number for the stdout fd
+#     5    number for the stderr fd
 #
 function run_test_command() {
 	local cmd
@@ -180,8 +182,14 @@ function run_test_command() {
 		cmd="./$2 $3"
 	fi
 
+	# setup the stdout/stderr redirects
+	local stdout=$4
+	local stderr=$5
+	[[ -z $stdout ]] && stdout=$logfd
+	[[ -z $stderr ]] && stderr=$logfd
+
 	# run the command
-	eval $cmd
+	eval "$cmd" 1>&$stdout 2>&$stderr
 
 	# return the command's return code
 	return $?
@@ -228,6 +236,8 @@ function generate_random_data() {
 #     3    string containing line of test data from batch file
 #
 function run_test_bpf_sim_fuzz() {
+	local rc
+
 	# begin splitting the test data from the line into individual variables
 	local line=($3)
 	local testname=${line[0]}
@@ -263,9 +273,12 @@ function run_test_bpf_sim_fuzz() {
 		done
 
 		# run the test command and put the BPF filter in a temp file
-		run_test_command "$testnumstr" "$testname" "-b > $tmpfile"
-		if [[ $? -ne 0 ]]; then
-			print_result $testnumstr "ERROR" "$testname rc=$?"
+		exec 4>$tmpfile
+		run_test_command "$testnumstr" "$testname" "-b" 4 "" ""
+		rc=$?
+		exec 4>&-
+		if [[ $rc -ne 0 ]]; then
+			print_result $testnumstr "ERROR" "$testname rc=$rc"
 			stats_error=$(($stats_error+1))
 			return
 		fi
@@ -276,8 +289,9 @@ function run_test_bpf_sim_fuzz() {
 		allow=$(../tools/bpf_sim -f $tmpfile -s $sys \
 			${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} \
 			${arg[5]})
-		if [[ $? -ne 0 ]]; then
-			print_result $testnumstr "ERROR" "bpf_sim rc=$?"
+		rc=$?
+		if [[ $rc -ne 0 ]]; then
+			print_result $testnumstr "ERROR" "bpf_sim rc=$rc"
 			stats_error=$(($stats_error+1))
 		else
 			print_result $testnumstr "SUCCESS" ""
@@ -311,6 +325,7 @@ function run_test_bpf_sim_fuzz() {
 #     3    string containing line of test data from batch file
 #
 function run_test_bpf_sim() {
+	local rc
 	local LOW=1
 	local HIGH=2
 	local -a arg_empty=(false false false false false false)
@@ -444,11 +459,13 @@ function run_test_bpf_sim() {
 			done
 
 			# run the test command and put the BPF in a temp file
-			run_test_command "$testnumstr" \
-					 "$testname" "-b > $tmpfile"
-			if [[ $? -ne 0 ]]; then
+			exec 4>$tmpfile
+			run_test_command "$testnumstr" "$testname" "-b" 4 ""
+			rc=$?
+			exec 4>&-
+			if [[ $rc -ne 0 ]]; then
 				print_result $testnumstr \
-					     "ERROR" "$testname rc=$?"
+					     "ERROR" "$testname rc=$rc"
 				stats_error=$(($stats_error+1))
 				return
 			fi
@@ -458,8 +475,10 @@ function run_test_bpf_sim() {
 			action=$(../tools/bpf_sim -a $simarch -f $tmpfile \
 				 -s $sys ${arg[0]} ${arg[1]} ${arg[2]} \
 				 ${arg[3]} ${arg[4]} ${arg[5]})
-			if [[ $? -ne 0 ]]; then
-				print_result $testnumstr "ERROR" "bpf_sim rc=$?"
+			rc=$?
+			if [[ $rc -ne 0 ]]; then
+				print_result $testnumstr \
+					     "ERROR" "bpf_sim rc=$rc"
 				stats_error=$(($stats_error+1))
 			elif [[ "$action" != "$result" ]]; then
 				print_result $testnumstr "FAILURE" \
@@ -494,12 +513,14 @@ function run_test_bpf_sim() {
 #     2    string containing line of test data from batch file
 #
 function run_test_basic() {
+	local rc
+
 	# print out the input test data to the log file
 	print_data "$1" "$2"
 
 	# run the command
-	run_test_command "$1" "$2" ""
-	local rc=$?
+	run_test_command "$1" "$2" "" "" ""
+	rc=$?
 	if [[ $rc -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$rc"
 		stats_failure=$(($stats_failure+1))
