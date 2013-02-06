@@ -20,3 +20,5 @@ util.pyc
 17-sim-arch_merge
 18-sim-basic_whitelist
 19-sim-missing_syscalls
+20-live-basic_die
+21-live-basic_allow
