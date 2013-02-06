@@ -36,25 +36,25 @@ OBJS = util.o
 
 LDFLAGS := ../src/libseccomp.a $(OBJS)
 
-TESTS = 01-allow \
-	02-basic \
-	03-basic-chains \
-	04-multilevel-chains \
-	05-long-jumps \
-	06-actions \
-	07-db-bug-looping \
-	08-subtree-checks \
-	09-syscall-priority-pre \
-	10-syscall-priority-post \
-	11-basic-errors \
-	12-basic-masked-ops \
-	13-attrs \
-	14-reset \
-	15-resolver \
-	16-arch-basic \
-	17-arch-merge \
-	18-basic-whitelist \
-	19-missing-syscalls
+TESTS = 01-sim-allow \
+	02-sim-basic \
+	03-sim-basic_chains \
+	04-sim-multilevel_chains \
+	05-sim-long_jumps \
+	06-sim-actions \
+	07-sim-db_bug_looping \
+	08-sim-subtree_checks \
+	09-sim-syscall_priority_pre \
+	10-sim-syscall_priority_post \
+	11-basic-basic_errors \
+	12-sim-basic_masked_ops \
+	13-basic-attrs \
+	14-sim-reset \
+	15-basic-resolver \
+	16-sim-arch_basic \
+	17-sim-arch_merge \
+	18-sim-basic_whitelist \
+	19-sim-missing_syscalls
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)
