@@ -35,7 +35,8 @@ LDFLAGS := ../src/libseccomp.a
 
 TOOLS = bpf_disasm \
 	bpf_sim \
-	sys_resolver
+	sys_resolver \
+	arch_detect
 
 DEPS = $(TOOLS:%=%.d)
 
