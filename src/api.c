@@ -305,7 +305,7 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 {
 	int rc = 0, rc_tmp;
 	unsigned int iter;
-	int syscall_tmp;
+	int sc_tmp;
 	struct db_filter_col *col;
 	struct db_filter *filter;
 
@@ -315,28 +315,27 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
 		filter = col->filters[iter];
-		syscall_tmp = syscall;
+		sc_tmp = syscall;
 
-		rc_tmp = arch_syscall_translate(filter->arch, &syscall_tmp);
+		rc_tmp = arch_syscall_translate(filter->arch, &sc_tmp);
 		if (rc_tmp < 0)
 			goto syscall_priority_failure;
 
 		/* if this is a pseudo syscall (syscall < 0) then we need to
 		 * rewrite the syscall for some arch specific reason */
-		if (syscall_tmp < 0) {
+		if (sc_tmp < 0) {
 			/* we set this as a strict op - we don't really care
 			 * since priorities are a "best effort" thing - as we
 			 * want to catch the -EDOM error and bail on this
 			 * architecture */
-			rc_tmp = arch_syscall_rewrite(filter->arch, 1,
-						      &syscall_tmp);
+			rc_tmp = arch_syscall_rewrite(filter->arch, 1, &sc_tmp);
 			if (rc == -EDOM)
 				continue;
 			if (rc_tmp < 0)
 				goto syscall_priority_failure;
 		}
 
-		rc_tmp = db_syscall_priority(filter, syscall_tmp, priority);
+		rc_tmp = db_syscall_priority(filter, sc_tmp, priority);
 
 syscall_priority_failure:
 		if (rc == 0 && rc_tmp < 0)
@@ -369,12 +368,13 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 			     unsigned int arg_cnt, va_list arg_list)
 {
 	int rc = 0, rc_tmp;
-	int syscall_tmp;
+	int sc_tmp;
 	unsigned int iter;
-	unsigned int chain_len_max;
+	unsigned int chain_len;
 	unsigned int arg_num;
+	size_t chain_size;
 	struct db_filter *filter;
-	struct db_api_arg *chain = NULL;
+	struct db_api_arg *chain = NULL, *chain_tmp;
 	struct scmp_arg_cmp arg_data;
 
 	if (db_col_valid(col) || _syscall_valid(syscall))
@@ -390,15 +390,16 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 		return -EOPNOTSUPP;
 
 	/* collect the arguments for the filter rule */
-	chain_len_max = ARG_COUNT_MAX;
-	chain = malloc(sizeof(*chain) * chain_len_max);
+	chain_len = ARG_COUNT_MAX;
+	chain_size = sizeof(*chain) * chain_len;
+	chain = malloc(chain_size);
 	if (chain == NULL)
 		return -ENOMEM;
-	memset(chain, 0, sizeof(*chain) * chain_len_max);
+	memset(chain, 0, chain_size);
 	for (iter = 0; iter < arg_cnt; iter++) {
 		arg_data = va_arg(arg_list, struct scmp_arg_cmp);
 		arg_num = arg_data.arg;
-		if (arg_num < chain_len_max && chain[arg_num].valid == 0) {
+		if (arg_num < chain_len && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
 			chain[arg_num].op = arg_data.op;
@@ -430,25 +431,41 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
 		filter = col->filters[iter];
-		syscall_tmp = syscall;
+		sc_tmp = syscall;
 
-		rc_tmp = arch_syscall_translate(filter->arch, &syscall_tmp);
+		rc_tmp = arch_syscall_translate(filter->arch, &sc_tmp);
 		if (rc_tmp < 0)
 			goto rule_add_failure;
 
 		/* if this is a pseudo syscall (syscall < 0) then we need to
 		 * rewrite the rule for some arch specific reason */
-		if (syscall_tmp < 0) {
-			rc_tmp = arch_filter_rewrite(filter->arch, strict,
-						     &syscall_tmp, chain);
-			if ((rc == -EDOM) && (!strict))
-				continue;
-			if (rc_tmp < 0)
+		if (sc_tmp < 0) {
+			/* make a private copy of the chain */
+			chain_tmp = malloc(chain_size);
+			if (chain_tmp == NULL) {
+				rc = -ENOMEM;
 				goto rule_add_failure;
-		}
+			}
+			memcpy(chain_tmp, chain, chain_size);
 
-		/* add the new rule to the existing filter */
-		rc_tmp = db_rule_add(filter, action, syscall_tmp, chain);
+			/* mangle the private chain copy */
+			rc_tmp = arch_filter_rewrite(filter->arch, strict,
+						     &sc_tmp, chain_tmp);
+			if ((rc == -EDOM) && (!strict)) {
+				free(chain_tmp);
+				continue;
+			}
+			if (rc_tmp < 0) {
+				free(chain_tmp);
+				goto rule_add_failure;
+			}
+
+			/* add the new rule to the existing filter */
+			rc_tmp = db_rule_add(filter, action, sc_tmp, chain_tmp);
+			free(chain_tmp);
+		} else
+			/* add the new rule to the existing filter */
+			rc_tmp = db_rule_add(filter, action, sc_tmp, chain);
 
 rule_add_failure:
 		if (rc == 0 && rc_tmp < 0)
