@@ -19,6 +19,8 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <string.h>
+
 #include <seccomp.h>
 
 #include "arch.h"
@@ -421,3 +423,49 @@ const struct arch_syscall_def x32_syscall_table[] = \
 	{ "writev", (__X32_SYSCALL_BIT + 516) },
 	{ NULL, __NR_SCMP_ERROR },
 };
+
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int x32_syscall_resolve_name(const char *name)
+{
+	unsigned int iter;
+	const struct arch_syscall_def *table = x32_syscall_table;
+
+	/* XXX - plenty of room for future improvement here */
+	for (iter = 0; table[iter].name != NULL; iter++) {
+		if (strcmp(name, table[iter].name) == 0)
+			return table[iter].num;
+	}
+
+	return __NR_SCMP_ERROR;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *x32_syscall_resolve_num(int num)
+{
+	unsigned int iter;
+	const struct arch_syscall_def *table = x32_syscall_table;
+
+	/* XXX - plenty of room for future improvement here */
+	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
+		if (num == table[iter].num)
+			return table[iter].name;
+	}
+
+	return NULL;
+}

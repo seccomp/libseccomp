@@ -70,29 +70,6 @@ int arch_valid(uint32_t arch)
 }
 
 /**
- * Lookup the syscall table for an architecture
- * @param token the architecure token
- *
- * Return the architecture's syscall table, returns NULL on failure.
- *
- */
-static const struct arch_syscall_def *_arch_syscall_lookup(uint32_t token)
-{
-	switch (token) {
-	case SCMP_ARCH_X86:
-		return x86_syscall_table;
-	case SCMP_ARCH_X86_64:
-		return x86_64_syscall_table;
-	case SCMP_ARCH_X32:
-		return x32_syscall_table;
-	case SCMP_ARCH_ARM:
-		return arm_syscall_table;
-	}
-
-	return NULL;
-}
-
-/**
  * Lookup the architecture definition
  * @param token the architecure token
  *
@@ -186,22 +163,20 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
  *
  * Resolve the given syscall name to the syscall number based on the given
  * architecture.  Returns the syscall number on success, including negative
- * pseudo syscall numbers; returns -1 on failure.
+ * pseudo syscall numbers; returns __NR_SCMP_ERROR on failure.
  *
  */
 int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table;
-
-	table = _arch_syscall_lookup(arch->token);
-	if (table == NULL)
-		return __NR_SCMP_ERROR;
-
-	/* XXX - plenty of room for future improvement here */
-	for (iter = 0; table[iter].name != NULL; iter++) {
-		if (strcmp(name, table[iter].name) == 0)
-			return table[iter].num;
+	switch (arch->token) {
+	case SCMP_ARCH_X86:
+		return x86_syscall_resolve_name(name);
+	case SCMP_ARCH_X86_64:
+		return x86_64_syscall_resolve_name(name);
+	case SCMP_ARCH_X32:
+		return x32_syscall_resolve_name(name);
+	case SCMP_ARCH_ARM:
+		return arm_syscall_resolve_name(name);
 	}
 
 	return __NR_SCMP_ERROR;
@@ -219,17 +194,15 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
  */
 const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table;
-
-	table = _arch_syscall_lookup(arch->token);
-	if (table == NULL)
-		return NULL;
-
-	/* XXX - plenty of room for future improvement here */
-	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
-		if (num == table[iter].num)
-			return table[iter].name;
+	switch (arch->token) {
+	case SCMP_ARCH_X86:
+		return x86_syscall_resolve_num(num);
+	case SCMP_ARCH_X86_64:
+		return x86_64_syscall_resolve_num(num);
+	case SCMP_ARCH_X32:
+		return x32_syscall_resolve_num(num);
+	case SCMP_ARCH_ARM:
+		return arm_syscall_resolve_num(num);
 	}
 
 	return NULL;

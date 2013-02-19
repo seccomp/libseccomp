@@ -30,6 +30,8 @@
 #define arm_arg_count_max		6
 
 extern const struct arch_def arch_def_arm;
-extern const struct arch_syscall_def arm_syscall_table[];
+
+int arm_syscall_resolve_name(const char *name);
+const char *arm_syscall_resolve_num(int num);
 
 #endif

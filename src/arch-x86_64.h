@@ -30,9 +30,11 @@
 #define x86_64_arg_count_max		6
 
 extern const struct arch_def arch_def_x86_64;
-extern const struct arch_syscall_def x86_64_syscall_table[];
 
 #define x86_64_arg_offset_lo(x)		(arch_arg_offset(x))
 #define x86_64_arg_offset_hi(x)		(arch_arg_offset(x) + 4)
+
+int x86_64_syscall_resolve_name(const char *name);
+const char *x86_64_syscall_resolve_num(int num);
 
 #endif

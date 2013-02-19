@@ -29,7 +29,9 @@
 #define x86_arg_count_max		6
 
 extern const struct arch_def arch_def_x86;
-extern const struct arch_syscall_def x86_syscall_table[];
+
+int x86_syscall_resolve_name(const char *name);
+const char *x86_syscall_resolve_num(int num);
 
 int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
 			int *syscall);

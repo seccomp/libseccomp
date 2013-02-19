@@ -30,6 +30,8 @@
 #define x32_arg_count_max		6
 
 extern const struct arch_def arch_def_x32;
-extern const struct arch_syscall_def x32_syscall_table[];
+
+int x32_syscall_resolve_name(const char *name);
+const char *x32_syscall_resolve_num(int num);
 
 #endif
