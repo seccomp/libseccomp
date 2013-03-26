@@ -27,6 +27,15 @@ seccomp_rule_add, seccomp_rule_add_exact \- Add a seccomp filter rule
 .BI "int seccomp_rule_add_exact(scmp_filter_ctx " ctx ", uint32_t " action ","
 .BI "                           int " syscall ", unsigned int " arg_cnt ", " ... ");"
 .sp
+.BI "int seccomp_rule_add_array(scmp_filter_ctx " ctx ","
+.BI "                           uint32_t " action ", int " syscall ","
+.BI "                           unsigned int " arg_cnt ","
+.BI "                           const struct scmp_arg_cmp *"arg_array ");"
+.BI "int seccomp_rule_add_exact_array(scmp_filter_ctx " ctx ","
+.BI "                                 uint32_t " action ", int " syscall ","
+.BI "                                 unsigned int " arg_cnt ","
+.BI "                                 const struct scmp_arg_cmp *"arg_array ");"
+.sp
 Link with \fI\-lseccomp\fP.
 .fi
 .\" //////////////////////////////////////////////////////////////////////////
@@ -34,20 +43,28 @@ Link with \fI\-lseccomp\fP.
 .\" //////////////////////////////////////////////////////////////////////////
 .P
 The
+.BR seccomp_rule_add (),
+.BR seccomp_rule_add_array (),
+.BR seccomp_rule_add_exact (),
+and
+.BR seccomp_rule_add_exact_array ()
+functions all add a new filter rule to the current seccomp filter.  The
 .BR seccomp_rule_add ()
 and
-.BR seccomp_rule_add_exact ()
-functions add a new filter rule to the current seccomp filter.  The
-.BR seccomp_rule_add ()
-function will make a "best effort" to add the rule as specified, but may alter
+.BR seccomp_rule_add_array ()
+functions will make a "best effort" to add the rule as specified, but may alter
 the rule slightly due to architecture specifics, e.g. socket and ipc functions
 on x86.  The
 .BR seccomp_rule_add_exact ()
-function will attempt to add the rule exactly as specified so it may behave
+and
+.BR seccomp_rule_add_exact_array ()
+functions will attempt to add the rule exactly as specified so it may behave
 differently on different architectures.  While it does not guarantee a exact
 filter ruleset,
 .BR seccomp_rule_add ()
-does guarantee the same behavior regardless of the architecture.
+and
+.BR seccomp_rule_add_array ()
+do guarantee the same behavior regardless of the architecture.
 .P
 The newly added filter rule does not take effect until the entire filter is
 loaded into the kernel using
@@ -57,11 +74,7 @@ The
 .BR SCMP_CMP ()
 and
 .BR SCMP_A{0-5} ()
-macros generate a scmp_arg_cmp structure for use in
-.BR seccomp_rule_add ()
-and
-.BR seccomp_rule_add_exact ().
-The
+macros generate a scmp_arg_cmp structure for use with the above functions. The
 .BR SCMP_CMP ()
 macro allows the caller to specify an arbitrary argument along with the
 comparison operator, mask, and datum values where the
@@ -192,9 +205,11 @@ SCMP_CMP(
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
 The
-.BR seccomp_rule_add ()
+.BR seccomp_rule_add (),
+.BR seccomp_rule_add_array (),
+.BR seccomp_rule_add_exact (),
 and
-.BR seccomp_rule_add_exact ()
+.BR seccomp_rule_add_exact_array ()
 functions return zero on success, negative errno values on failure.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
@@ -211,6 +226,7 @@ int main(int argc, char *argv[])
 {
 	int rc = \-1;
 	scmp_filter_ctx ctx;
+	struct scmp_arg_cmp arg_cmp[] = { SCMP_A0(SCMP_CMP_EQ, 2) };
 	int fd;
 	unsigned char buf[BUF_SIZE];
 
@@ -237,6 +253,11 @@ int main(int argc, char *argv[])
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
 			      SCMP_CMP(0, SCMP_CMP_EQ, fd));
+	if (rc < 0)
+		goto out;
+
+	rc = seccomp_rule_add_array(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
+			            arg_cmp);
 	if (rc < 0)
 		goto out;
 
