@@ -56,7 +56,8 @@ TESTS = 01-sim-allow \
 	18-sim-basic_whitelist \
 	19-sim-missing_syscalls \
 	20-live-basic_die \
-	21-live-basic_allow
+	21-live-basic_allow \
+	22-sim-basic_chains_array
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)
