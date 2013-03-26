@@ -365,7 +365,8 @@ syscall_priority_failure:
  */
 static int _seccomp_rule_add(struct db_filter_col *col,
 			     unsigned int strict, uint32_t action, int syscall,
-			     unsigned int arg_cnt, va_list arg_list)
+			     unsigned int arg_cnt,
+			     const struct scmp_arg_cmp *arg_array)
 {
 	int rc = 0, rc_tmp;
 	int sc_tmp;
@@ -376,6 +377,9 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 	struct db_filter *filter;
 	struct db_api_arg *chain = NULL, *chain_tmp;
 	struct scmp_arg_cmp arg_data;
+
+	if (arg_cnt > 0 && arg_array == NULL)
+		return -EINVAL;
 
 	if (db_col_valid(col) || _syscall_valid(syscall))
 		return -EINVAL;
@@ -397,7 +401,7 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 		return -ENOMEM;
 	memset(chain, 0, chain_size);
 	for (iter = 0; iter < arg_cnt; iter++) {
-		arg_data = va_arg(arg_list, struct scmp_arg_cmp);
+		arg_data = arg_array[iter];
 		arg_num = arg_data.arg;
 		if (arg_num < chain_len && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
@@ -479,30 +483,71 @@ rule_add_return:
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+int seccomp_rule_add_array(scmp_filter_ctx ctx,
+			   uint32_t action, int syscall, unsigned int arg_cnt,
+			   const struct scmp_arg_cmp *arg_array)
+{
+	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+		return -EINVAL;
+
+	return _seccomp_rule_add((struct db_filter_col *)ctx,
+				 0, action, syscall, arg_cnt, arg_array);
+}
+
+
+/* NOTE - function header comment in include/seccomp.h */
 int seccomp_rule_add(scmp_filter_ctx ctx,
 		     uint32_t action, int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
+	int iter;
+	struct scmp_arg_cmp arg_array[ARG_COUNT_MAX];
 	va_list arg_list;
 
+	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+		return -EINVAL;
+
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add((struct db_filter_col *)ctx,
-			       0, action, syscall, arg_cnt, arg_list);
+	for (iter = 0; iter < arg_cnt; ++iter)
+		arg_array[iter] = va_arg(arg_list, struct scmp_arg_cmp);
+	rc = seccomp_rule_add_array(ctx, action, syscall, arg_cnt, arg_array);
 	va_end(arg_list);
 
 	return rc;
 }
+
+
+/* NOTE - function header comment in include/seccomp.h */
+int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
+				 uint32_t action, int syscall,
+				 unsigned int arg_cnt,
+				 const struct scmp_arg_cmp *arg_array)
+{
+	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+		return -EINVAL;
+
+	return _seccomp_rule_add((struct db_filter_col *)ctx,
+				 1, action, syscall, arg_cnt, arg_array);
+}
+
 
 /* NOTE - function header comment in include/seccomp.h */
 int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
 			   int syscall, unsigned int arg_cnt, ...)
 {
 	int rc;
+	int iter;
+	struct scmp_arg_cmp arg_array[ARG_COUNT_MAX];
 	va_list arg_list;
 
+	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+		return -EINVAL;
+
 	va_start(arg_list, arg_cnt);
-	rc = _seccomp_rule_add((struct db_filter_col *)ctx,
-			       1, action, syscall, arg_cnt, arg_list);
+	for (iter = 0; iter < arg_cnt; ++iter)
+		arg_array[iter] = va_arg(arg_list, struct scmp_arg_cmp);
+	rc = seccomp_rule_add_exact_array(ctx,
+					  action, syscall, arg_cnt, arg_array);
 	va_end(arg_list);
 
 	return rc;
