@@ -27,6 +27,8 @@
 #include "arch.h"
 #include "system.h"
 
+#define X32_SYSCALL_BIT			0x40000000
+
 #define x32_arg_count_max		6
 
 extern const struct arch_def arch_def_x32;

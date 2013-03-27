@@ -27,8 +27,6 @@
 #include "arch-x86_64.h"
 #include "arch-x32.h"
 
-#define __SCMP_X32_SYSCALL_BIT		0x40000000
-
 /**
  * Resolve a syscall name to a number
  * @param name the syscall name
@@ -44,7 +42,7 @@ int x32_syscall_resolve_name(const char *name)
 
 	syscall = x86_64_syscall_resolve_name(name);
 	if (syscall >= 0)
-		syscall |= __SCMP_X32_SYSCALL_BIT;
+		syscall |= X32_SYSCALL_BIT;
 
 	return syscall;
 }
@@ -63,7 +61,7 @@ const char *x32_syscall_resolve_num(int num)
 	int syscall = num;
 
 	if (syscall >= 0)
-		syscall &= (~__SCMP_X32_SYSCALL_BIT);
+		syscall &= (~X32_SYSCALL_BIT);
 
 	return x86_64_syscall_resolve_num(syscall);
 }
