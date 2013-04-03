@@ -201,11 +201,15 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-# validate the options
+#
+# validate the command line options
+#
+
 if [[ -e "$opt_prefix" && ! -d "$opt_prefix" ]]; then
 	msg_error "install prefix ($opt_prefix) is not a directory"
 	exit 1
 fi
+
 if [[ -z $opt_libdir ]]; then
 	opt_libdir="$opt_prefix/lib"
 fi
@@ -213,9 +217,16 @@ if [[ -e "$opt_libdir" && ! -d "$opt_libdir" ]]; then
 	msg_error "libdir ($opt_libdir) is not a directory"
 	exit 1
 fi
+
 if [[ "$opt_bindings_python" = "yes" ]]; then
 	if ! test_deps cython; then
 		msg_error "python bindings require the cython package"
+		exit 1
+	fi
+	cython_ver=$(cython -V 2>&1 | cut -d' ' -f 3)
+	if [[ $(echo $cython_ver | cut -d'.' -f 1) -lt 1 &&
+	      $(echo $cython_ver | cut -d'.' -f 2) -lt 16 ]]; then
+		msg_error "python bindings require cython 0.16 or higher"
 		exit 1
 	fi
 fi
