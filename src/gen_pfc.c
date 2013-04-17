@@ -205,10 +205,11 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
 			     const struct db_sys_list *sys, FILE *fds)
 {
 	unsigned int sys_num = sys->num;
+	const char *sys_name = arch_syscall_resolve_num(arch, sys_num);
 
 	_indent(fds, 1);
-	fprintf(fds, "# filter for syscall #%d (priority: %d)\n",
-		sys_num, sys->priority);
+	fprintf(fds, "# filter for syscall \"%s\" (%d) [priority: %d]\n",
+		(sys_name ? sys_name : "UNKNOWN"), sys_num, sys->priority);
 	_indent(fds, 1);
 	fprintf(fds, "if ($syscall == %d)\n", sys_num);
 	if (sys->chains == NULL) {
