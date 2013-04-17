@@ -59,7 +59,8 @@ TESTS = 01-sim-allow \
 	21-live-basic_allow \
 	22-sim-basic_chains_array \
 	23-sim-arch_all_basic \
-	24-live-arg_allow
+	24-live-arg_allow \
+	25-sim-multilevel_chains_adv
 
 DEPS_OBJS = $(OBJS:%.o=%.d)
 DEPS_TESTS = $(TESTS:%=%.d)

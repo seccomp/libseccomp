@@ -89,8 +89,6 @@ static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
  * Remove a node from an argument chain tree
  * @param tree the pointer to the tree
  * @param node the node to remove
- * @param action_flg the replacement action flag
- * @param action the replacement action
  *
  * This function searches the tree looking for the node and removes it once
  * found.  The function also removes any other nodes that are no longer needed
@@ -98,9 +96,7 @@ static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
  *
  */
 static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
-				    struct db_arg_chain_tree *node,
-				    unsigned int action_flg,
-				    uint32_t action)
+				    struct db_arg_chain_tree *node)
 {
 	int cnt = 0;
 	struct db_arg_chain_tree *c_iter;
@@ -134,10 +130,8 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 		}
 
 		/* check the true/false sub-trees */
-		cnt += _db_tree_remove(&(c_iter->nxt_t), node,
-				       action_flg, action);
-		cnt += _db_tree_remove(&(c_iter->nxt_f), node,
-				       action_flg, action);
+		cnt += _db_tree_remove(&(c_iter->nxt_t), node);
+		cnt += _db_tree_remove(&(c_iter->nxt_f), node);
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
@@ -210,80 +204,48 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **tree_head,
 
 	if (new == NULL || c_iter == NULL)
 		return 0;
-	if (!db_chain_one_result(new))
-		return 0;
 
 	while (c_iter->lvl_prv != NULL)
 		c_iter = c_iter->lvl_prv;
-
 	do {
-		if (c_iter->arg < new->arg) {
-			if (c_iter->nxt_t != NULL) {
-				rc = _db_tree_sub_prune(tree_head,
-							c_iter->nxt_t, new,
-							remove_flg);
-				if (rc > 0)
-					goto sub_prune_found_down;
-			}
-			if (c_iter->nxt_f != NULL) {
-				rc = _db_tree_sub_prune(tree_head,
-							c_iter->nxt_f, new,
-							remove_flg);
-				if (rc > 0)
-					goto sub_prune_found_down;
-			}
-		} else if (db_chain_eq(c_iter, new)) {
-			if (db_chain_leaf(new)) {
-				if (!db_chain_one_result(c_iter)) {
-					/* can't remove existing node */
-					if (new->act_t_flg && c_iter->act_t_flg
-					    && new->act_t == c_iter->act_t)
-						c_iter->act_t_flg = 0;
-					if (new->act_f_flg && c_iter->act_f_flg
-					    && new->act_f == c_iter->act_f)
-						c_iter->act_f_flg = 0;
-					goto sub_prune_return;
-				}
-				if ((db_chain_eq_result(c_iter, new)) ||
-				    ((new->act_t_flg && c_iter->nxt_t != NULL)||
-				     (new->act_f_flg && c_iter->nxt_f != NULL)))
-					/* exact or close match - remove node */
-					goto sub_prune_remove;
-				goto sub_prune_return;
-			}
-			if (new->nxt_t != NULL) {
-				rc = _db_tree_sub_prune(tree_head,
-							c_iter->nxt_t,
-							new->nxt_t,
-							remove_flg);
-				if (rc > 0)
-					goto sub_prune_found_down;
-			}
-			if (new->nxt_f != NULL) {
-				rc = _db_tree_sub_prune(tree_head,
-							c_iter->nxt_f,
-							new->nxt_f,
-							remove_flg);
-				if (rc > 0)
-					goto sub_prune_found_down;
-			}
+		if (db_chain_eq(c_iter, new)) {
+			if (new->act_t_flg) {
+				rc += _db_tree_remove(tree_head, c_iter->nxt_t);
+				c_iter->act_t = new->act_t;
+				c_iter->act_t_flg = 1;
+			} else if (new->nxt_t != NULL)
+				rc += _db_tree_sub_prune(tree_head,
+							 c_iter->nxt_t,
+							 new->nxt_t,
+							 remove_flg);
+			if (new->act_f_flg) {
+				rc += _db_tree_remove(tree_head, c_iter->nxt_f);
+				c_iter->act_f = new->act_f;
+				c_iter->act_f_flg = 1;
+			} else if (new->nxt_f != NULL)
+				rc += _db_tree_sub_prune(tree_head,
+							 c_iter->nxt_f,
+							 new->nxt_f,
+							 remove_flg);
+		} else if (db_chain_lt(c_iter, new)) {
+			if (c_iter->nxt_t != NULL)
+				rc += _db_tree_sub_prune(tree_head,
+							 c_iter->nxt_t, new,
+							 remove_flg);
+			if (c_iter->nxt_f != NULL)
+				rc += _db_tree_sub_prune(tree_head,
+							 c_iter->nxt_f, new,
+							 remove_flg);
+
 		} else if (db_chain_gt(c_iter, new))
 			goto sub_prune_return;
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
 
-	goto sub_prune_return;
-
-sub_prune_found_down:
-	if (db_chain_zombie(c_iter))
-		goto sub_prune_remove;
 sub_prune_return:
-	*remove_flg = 0;
-	return rc;
-sub_prune_remove:
-	rc += _db_tree_remove(tree_head, c_iter, 0, 0);
-	*remove_flg = 1;
+	if (rc > 0)
+		*remove_flg = 1;
 	return rc;
 }
 
@@ -768,7 +730,7 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	int chain_len_max;
 	struct db_sys_list *s_new;
 	struct db_arg_chain_tree *c_iter_hi = NULL, *c_iter_lo = NULL;
-	struct db_arg_chain_tree *c_prev_lo = NULL;
+	struct db_arg_chain_tree *c_prev_hi = NULL, *c_prev_lo = NULL;
 	unsigned int tf_flag;
 
 	s_new = malloc(sizeof(*s_new));
@@ -798,10 +760,12 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 
 		/* link this level to the previous level */
 		if (c_prev_lo != NULL) {
-			if (tf_flag)
-				c_prev_lo->nxt_t = c_iter_hi;
-			else
+			if (!tf_flag) {
 				c_prev_lo->nxt_f = c_iter_hi;
+				c_prev_hi->nxt_f = c_iter_hi;
+				c_iter_hi->refcnt++;
+			} else
+				c_prev_lo->nxt_t = c_iter_hi;
 		} else
 			s_new->chains = c_iter_hi;
 		s_new->node_cnt += 2;
@@ -851,16 +815,19 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		/* link the hi and lo chain nodes */
 		c_iter_hi->nxt_t = c_iter_lo;
 
+		c_prev_hi = c_iter_hi;
 		c_prev_lo = c_iter_lo;
 	}
 	if (c_iter_lo != NULL) {
 		/* set the leaf node */
-		if (tf_flag) {
-			c_iter_lo->act_t_flg = 1;
-			c_iter_lo->act_t = action;
-		} else {
+		if (!tf_flag) {
 			c_iter_lo->act_f_flg = 1;
 			c_iter_lo->act_f = action;
+			c_iter_hi->act_f_flg = 1;
+			c_iter_hi->act_f = action;
+		} else {
+			c_iter_lo->act_t_flg = 1;
+			c_iter_lo->act_t = action;
 		}
 	} else
 		s_new->action = action;
@@ -1076,12 +1043,11 @@ add_reset:
 		/* check for sub-tree matches in the existing tree */
 		rc = _db_tree_sub_prune(&(s_iter->chains), ec_iter, c_iter,
 					&rm_flag);
-		if (rc > 0)
+		if (rc > 0) {
 			s_iter->node_cnt -= rc;
-		else if (rc < 0)
-			goto add_free;
-		if (rm_flag)
 			goto add_reset;
+		} else if (rc < 0)
+			goto add_free;
 
 		/* check for sub-tree matches in the new tree */
 		ec_iter_b = ec_iter;
@@ -1095,10 +1061,7 @@ add_reset:
 		if (rc > 0) {
 			s_new->node_cnt -= rc;
 			if (s_new->node_cnt > 0)
-				/* XXX - are we ever going to hit this is a
-				 *       normal use case?  pretty sure we can't
-				 *       "reset" in this case ... */
-				return -EFAULT;
+				goto add_reset;
 			rc = 0;
 			goto add_free;
 		} else if (rc < 0)
@@ -1127,9 +1090,7 @@ add_reset:
 				    ec_iter->act_t == ec_iter->act_f) {
 					n_cnt = _db_tree_remove(
 							     &(s_iter->chains),
-							     ec_iter,
-							     1,
-							     ec_iter->act_t);
+							     ec_iter);
 					s_iter->node_cnt -= n_cnt;
 				}
 				goto add_free_ok;

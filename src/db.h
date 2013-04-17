@@ -89,8 +89,6 @@ struct db_arg_chain_tree {
 	 ((x)->nxt_t == NULL && (x)->nxt_f != NULL))
 #define db_chain_one_action(x) \
 	((x)->act_t_flg != (x)->act_f_flg)
-#define db_chain_one_result(x) \
-	(db_chain_one_nxt(x) != db_chain_one_action(x))
 #define db_chain_eq_result(x,y) \
 	((((x)->nxt_t != NULL && (y)->nxt_t != NULL) || \
 	  ((x)->nxt_t == NULL && (y)->nxt_t == NULL)) && \

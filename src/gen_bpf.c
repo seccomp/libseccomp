@@ -1005,8 +1005,12 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	int rc;
 	struct bpf_instr instr;
 	struct bpf_blk *blk_c, *blk_s = NULL;
-	struct bpf_jump def_jump = _BPF_JMP_HSH(state->def_hsh);
+	struct bpf_jump def_jump;
 	struct acc_state a_state;
+
+	/* we do the memset before the assignment to keep valgrind happy */
+	memset(&def_jump, 0, sizeof(def_jump));
+	def_jump = _BPF_JMP_HSH(state->def_hsh);
 
 	/* setup the accumulator state */
 	if (acc_reset) {
