@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <seccomp.h>
 
@@ -102,9 +103,9 @@ struct bpf_blk {
 	const struct db_arg_chain_tree *node;
 
 	/* status flags */
-	unsigned int flag_hash;		/* added to the hash table */
-	unsigned int flag_dup;		/* duplicate block and in use */
-	unsigned int flag_unique;	/* ->blks is unique to this block */
+	bool flag_hash;			/* added to the hash table */
+	bool flag_dup;			/* duplicate block and in use */
+	bool flag_unique;		/* ->blks is unique to this block */
 
 	/* used during block assembly */
 	struct acc_state acc_state;
@@ -271,7 +272,7 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 		if (blk == NULL)
 			return NULL;
 		memset(blk, 0, sizeof(*blk));
-		blk->flag_unique = 1;
+		blk->flag_unique = true;
 	}
 	if ((blk->blk_cnt + 1) > blk->blk_alloc) {
 		blk->blk_alloc += AINC_BLK;
@@ -445,7 +446,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	/* generate the hash */
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
 	blk->hash = h_val;
-	blk->flag_hash = 1;
+	blk->flag_hash = true;
 	blk->node = NULL;
 	h_new->blk = blk;
 	h_new->found = (found ? 1 : 0);
@@ -470,7 +471,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				/* in some cases we want to return the
 				 * duplicate block */
 				if (found) {
-					blk->flag_dup = 1;
+					blk->flag_dup = true;
 					return 0;
 				}
 
@@ -481,7 +482,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				/* try to save some memory */
 				free(blk->blks);
 				blk->blks = h_iter->blk->blks;
-				blk->flag_unique = 0;
+				blk->flag_unique = false;
 
 				*blk_p = h_iter->blk;
 				return 0;
@@ -489,7 +490,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 				/* hash collision */
 				if ((h_val >> 32) == 0xffffffff) {
 					/* overflow */
-					blk->flag_hash = 0;
+					blk->flag_hash = false;
 					blk->hash = 0;
 					return -EFAULT;
 				}
@@ -1000,7 +1001,7 @@ chain_failure:
 static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 					const struct db_sys_list *sys,
 					uint64_t nxt_hash,
-					int acc_reset)
+					bool acc_reset)
 {
 	int rc;
 	struct bpf_instr instr;
@@ -1069,7 +1070,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 {
 	int rc;
 	unsigned int blk_cnt = 0;
-	unsigned int acc_reset;
+	bool acc_reset;
 	struct bpf_instr instr;
 	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter, *s_iter_b;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new;
@@ -1142,20 +1143,20 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 
 	if ((db->arch->token == SCMP_ARCH_X86_64 ||
 	     db->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL))
-		acc_reset = 0;
+		acc_reset = false;
 	else
-		acc_reset = 1;
+		acc_reset = true;
 
 	/* create the syscall filters and add them to block list group */
 	for (s_iter = s_tail; s_iter != NULL; s_iter = s_iter->pri_prv) {
-		if (s_iter->valid == 0)
+		if (!s_iter->valid)
 			continue;
 
 		/* build the syscall filter */
 		b_new = _gen_bpf_syscall(state, s_iter,
 					 (b_head == NULL ?
 					  state->def_hsh : b_head->hash),
-					 (s_iter == s_head ? acc_reset : 0));
+					 (s_iter == s_head ? acc_reset:false));
 		if (b_new == NULL)
 			goto arch_failure;
 

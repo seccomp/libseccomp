@@ -51,8 +51,7 @@ const struct arch_def arch_def_x86 = {
  * failure.
  *
  */
-int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
-			int *syscall)
+int x86_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
 {
 	if ((*syscall) <= -100 && (*syscall) >= -117)
 		*syscall = __x86_NR_socketcall;
@@ -79,7 +78,7 @@ int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
  * fail.  Returns zero on success, negative values on failure.
  *
  */
-int x86_filter_rewrite(const struct arch_def *arch, unsigned int strict,
+int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		       int *syscall, struct db_api_arg *chain)
 {
 	unsigned int iter;

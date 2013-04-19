@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/prctl.h>
 
 #include <seccomp.h>
@@ -364,7 +365,7 @@ syscall_priority_failure:
  *
  */
 static int _seccomp_rule_add(struct db_filter_col *col,
-			     unsigned int strict, uint32_t action, int syscall,
+			     bool strict, uint32_t action, int syscall,
 			     unsigned int arg_cnt,
 			     const struct scmp_arg_cmp *arg_array)
 {

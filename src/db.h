@@ -22,7 +22,8 @@
 #ifndef _FILTER_DB_H
 #define _FILTER_DB_H
 
-#include "inttypes.h"
+#include <inttypes.h>
+#include <stdbool.h>
 
 #include <seccomp.h>
 
@@ -31,7 +32,7 @@
 /* XXX - need to provide doxygen comments for the types here */
 
 struct db_api_arg {
-	unsigned int valid;
+	bool valid;
 
 	unsigned int arg;
 	unsigned int op;
@@ -52,9 +53,9 @@ struct db_arg_chain_tree {
 	uint32_t datum;
 
 	/* actions */
-	unsigned int act_t_flg;
+	bool act_t_flg;
 	uint32_t act_t;
-	unsigned int act_f_flg;
+	bool act_f_flg;
 	uint32_t act_f;
 
 	/* list of nodes on this level */
@@ -80,7 +81,7 @@ struct db_arg_chain_tree {
 	 (((x)->arg == (y)->arg) && (((x)->op > (y)->op) || \
 	   (((x)->mask & (y)->mask) != (y)->mask))))
 #define db_chain_leaf(x) \
-	(((x)->act_t_flg != 0) || ((x)->act_f_flg != 0))
+	(((x)->act_t_flg) || ((x)->act_f_flg))
 #define db_chain_eq_result(x,y) \
 	((((x)->nxt_t != NULL && (y)->nxt_t != NULL) || \
 	  ((x)->nxt_t == NULL && (y)->nxt_t == NULL)) && \
@@ -96,7 +97,7 @@ struct db_arg_chain_tree {
 struct db_sys_list {
 	/* native syscall number */
 	unsigned int num;
-	unsigned int valid;
+	bool valid;
 
 	/* priority - higher is better */
 	unsigned int priority;

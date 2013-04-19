@@ -22,6 +22,8 @@
 #ifndef _ARCH_X86_H
 #define _ARCH_X86_H
 
+#include <stdbool.h>
+
 #include "arch.h"
 #include "db.h"
 #include "system.h"
@@ -33,10 +35,9 @@ extern const struct arch_def arch_def_x86;
 int x86_syscall_resolve_name(const char *name);
 const char *x86_syscall_resolve_num(int num);
 
-int x86_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
-			int *syscall);
+int x86_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall);
 
-int x86_filter_rewrite(const struct arch_def *arch, unsigned int strict,
+int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		       int *syscall, struct db_api_arg *chain);
 
 #endif

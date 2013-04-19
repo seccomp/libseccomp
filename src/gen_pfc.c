@@ -270,7 +270,7 @@ static int _gen_pfc_arch(const struct db_filter_col *col,
 	fprintf(fds, "if ($arch == %u)\n", db->arch->token_bpf);
 	p_iter = p_head;
 	while (p_iter != NULL) {
-		if (p_iter->sys->valid == 0)
+		if (!p_iter->sys->valid)
 			continue;
 		_gen_pfc_syscall(db->arch, p_iter->sys, fds);
 		p_iter = p_iter->next;

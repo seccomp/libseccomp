@@ -25,6 +25,7 @@
 #include <string.h>
 #include <asm/bitsperlong.h>
 #include <linux/audit.h>
+#include <stdbool.h>
 
 #include <seccomp.h>
 
@@ -252,8 +253,7 @@ int arch_syscall_translate(const struct arch_def *arch, int *syscall)
  * failure.
  *
  */
-int arch_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
-			 int *syscall)
+int arch_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
 {
 	int sys = *syscall;
 
@@ -295,8 +295,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, unsigned int strict,
  *
  */
 int arch_filter_rewrite(const struct arch_def *arch,
-			unsigned int strict,
-			int *syscall, struct db_api_arg *chain)
+			bool strict, int *syscall, struct db_api_arg *chain)
 {
 	int sys = *syscall;
 
