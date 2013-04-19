@@ -29,8 +29,8 @@
 #include "system.h"
 
 struct bpf_program {
-	uint16_t blk_cnt;
 	bpf_instr_raw *blks;
+	uint16_t blk_cnt;
 };
 #define BPF_PGM_SIZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))

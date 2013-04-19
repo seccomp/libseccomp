@@ -55,7 +55,6 @@ enum bpf_jump_type {
 };
 
 struct bpf_jump {
-	enum bpf_jump_type type;
 	union {
 		uint8_t imm_j;
 		uint32_t imm_k;
@@ -64,21 +63,22 @@ struct bpf_jump {
 		struct bpf_blk *blk;
 		unsigned int nxt;
 	} tgt;
+	enum bpf_jump_type type;
 };
 #define _BPF_JMP_NO \
-	((struct bpf_jump) { TGT_NONE })
+	((struct bpf_jump) { .type = TGT_NONE })
 #define _BPF_JMP_NXT(x) \
-	((struct bpf_jump) { TGT_NXT, { .nxt = (x) } })  /* be careful! */
+	((struct bpf_jump) { .type = TGT_NXT, .tgt = { .nxt = (x) } })
 #define _BPF_JMP_IMM(x) \
-	((struct bpf_jump) { TGT_IMM, { .imm_j = (x) } })
+	((struct bpf_jump) { .type = TGT_IMM, .tgt = { .imm_j = (x) } })
 #define _BPF_JMP_DB(x) \
-	((struct bpf_jump) { TGT_PTR_DB, { .db = (x) } })
+	((struct bpf_jump) { .type = TGT_PTR_DB, .tgt = { .db = (x) } })
 #define _BPF_JMP_BLK(x) \
-	((struct bpf_jump) { TGT_PTR_BLK, { .blk = (x) } })
+	((struct bpf_jump) { .type = TGT_PTR_BLK, .tgt = { .blk = (x) } })
 #define _BPF_JMP_HSH(x) \
-	((struct bpf_jump) { TGT_PTR_HSH, { .hash = (x) } })
+	((struct bpf_jump) { .type = TGT_PTR_HSH, .tgt = { .hash = (x) } })
 #define _BPF_K(x) \
-	((struct bpf_jump) { TGT_K, { .imm_k = (x) } })
+	((struct bpf_jump) { .type = TGT_K, .tgt = { .imm_k = (x) } })
 #define _BPF_JMP_MAX			255
 #define _BPF_JMP_MAX_RET		255
 
@@ -99,35 +99,37 @@ struct bpf_blk {
 	/* priority - higher is better */
 	unsigned int priority;
 
-	/* original db_arg_chain_tree node */
-	const struct db_arg_chain_tree *node;
-
 	/* status flags */
 	bool flag_hash;			/* added to the hash table */
 	bool flag_dup;			/* duplicate block and in use */
 	bool flag_unique;		/* ->blks is unique to this block */
 
+	/* original db_arg_chain_tree node */
+	const struct db_arg_chain_tree *node;
+
 	/* used during block assembly */
-	struct acc_state acc_state;
 	uint64_t hash;
 	struct bpf_blk *hash_nxt;
 	struct bpf_blk *prev, *next;
 	struct bpf_blk *lvl_prv, *lvl_nxt;
+	struct acc_state acc_state;
 };
 #define _BLK_MSZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
 
 struct bpf_hash_bkt {
 	struct bpf_blk *blk;
-	unsigned int found;
-
 	struct bpf_hash_bkt *next;
+	unsigned int found;
 };
 
 #define _BPF_HASH_BITS			8
 #define _BPF_HASH_SIZE			(1 << _BPF_HASH_BITS)
 #define _BPF_HASH_MASK			(_BPF_HASH_BITS - 1)
 struct bpf_state {
+	/* block hash table */
+	struct bpf_hash_bkt *htbl[_BPF_HASH_SIZE];
+
 	/* filter attributes */
 	const struct db_filter_attr *attr;
 	/* default action */
@@ -135,9 +137,6 @@ struct bpf_state {
 
 	/* target arch - NOTE: be careful, temporary use only! */
 	const struct arch_def *arch;
-
-	/* block hash table */
-	struct bpf_hash_bkt *htbl[_BPF_HASH_SIZE];
 
 	/* bpf program */
 	struct bpf_program *bpf;

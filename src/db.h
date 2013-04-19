@@ -32,12 +32,12 @@
 /* XXX - need to provide doxygen comments for the types here */
 
 struct db_api_arg {
-	bool valid;
-
 	unsigned int arg;
 	unsigned int op;
 	scmp_datum_t mask;
 	scmp_datum_t datum;
+
+	bool valid;
 };
 
 struct db_arg_chain_tree {
@@ -54,8 +54,8 @@ struct db_arg_chain_tree {
 
 	/* actions */
 	bool act_t_flg;
-	uint32_t act_t;
 	bool act_f_flg;
+	uint32_t act_t;
 	uint32_t act_f;
 
 	/* list of nodes on this level */
@@ -97,7 +97,6 @@ struct db_arg_chain_tree {
 struct db_sys_list {
 	/* native syscall number */
 	unsigned int num;
-	bool valid;
 
 	/* priority - higher is better */
 	unsigned int priority;
@@ -112,6 +111,8 @@ struct db_sys_list {
 	struct db_sys_list *next;
 	/* temporary use only by the BPF generator */
 	struct db_sys_list *pri_prv, *pri_nxt;
+
+	bool valid;
 };
 
 struct db_filter_attr {
