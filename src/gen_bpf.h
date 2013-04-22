@@ -28,9 +28,10 @@
 #include "db.h"
 #include "system.h"
 
+/* NOTE - do not change this structure, it is part of the prctl() API */
 struct bpf_program {
-	bpf_instr_raw *blks;
 	uint16_t blk_cnt;
+	bpf_instr_raw *blks;
 };
 #define BPF_PGM_SIZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
