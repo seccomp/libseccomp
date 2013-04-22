@@ -36,6 +36,8 @@ OBJS = util.o
 
 LDFLAGS := ../src/libseccomp.a $(OBJS)
 
+TEST_PRIVATE = 00-test
+
 TESTS = 01-sim-allow \
 	02-sim-basic \
 	03-sim-basic_chains \
@@ -83,5 +85,8 @@ $(DEPS_TESTS):
 $(TESTS):
 	$(COMPILE_EXEC)
 
+$(TEST_PRIVATE): 00-test.c $(OBJS) ../src/libseccomp.a
+	$(COMPILE_EXEC)
+
 clean:
-	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(OBJS)
+	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(TEST_PRIVATE) $(OBJS)

@@ -1,6 +1,8 @@
 *.bpf
 *.pfc
 util.pyc
+00-test.c
+00-test
 01-sim-allow
 02-sim-basic
 03-sim-basic_chains
