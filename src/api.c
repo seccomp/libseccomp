@@ -330,7 +330,7 @@ int seccomp_syscall_priority(scmp_filter_ctx ctx, int syscall, uint8_t priority)
 			 * want to catch the -EDOM error and bail on this
 			 * architecture */
 			rc_tmp = arch_syscall_rewrite(filter->arch, 1, &sc_tmp);
-			if (rc == -EDOM)
+			if (rc_tmp == -EDOM)
 				continue;
 			if (rc_tmp < 0)
 				goto syscall_priority_failure;
