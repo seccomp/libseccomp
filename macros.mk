@@ -205,6 +205,16 @@ INSTALL_INC_MACRO += \
 			$^ "$(INSTALL_INC_DIR)";
 
 ifeq ($(V),0)
+	INSTALL_MAN1_MACRO = \
+		@echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man1)";
+endif
+INSTALL_MAN1_MACRO += \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$(INSTALL_MAN_DIR)/man1"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0644 \
+			$^ "$(INSTALL_MAN_DIR)/man1";
+
+ifeq ($(V),0)
 	INSTALL_MAN3_MACRO = \
 		@echo " INSTALL manpages ($(INSTALL_MAN_DIR)/man3)";
 endif

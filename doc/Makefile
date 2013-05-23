@@ -33,6 +33,9 @@ include $(TOPDIR)/version_info.mk
 include $(TOPDIR)/configure.mk
 include $(TOPDIR)/install.mk
 
+MAN1 = \
+	man/man1/scmp_sys_resolver.1
+
 MAN3 = \
 	man/man3/seccomp_init.3 \
 	man/man3/seccomp_load.3 \
@@ -58,11 +61,14 @@ MAN3 = \
 # targets
 #
 
-.PHONY: all install install_man3
+.PHONY: all install install_man1 install_man3
 
 all:
 
-install: install_man3
+install: install_man1 install_man3
+
+install_man1: $(MAN1)
+	$(INSTALL_MAN1_MACRO)
 
 install_man3: $(MAN3)
 	$(INSTALL_MAN3_MACRO)
