@@ -33,10 +33,10 @@ include $(TOPDIR)/configure.mk
 
 LDFLAGS := ../src/libseccomp.a
 
-TOOLS = bpf_disasm \
-	bpf_sim \
-	sys_resolver \
-	arch_detect
+TOOLS = scmp_bpf_disasm \
+	scmp_bpf_sim \
+	scmp_sys_resolver \
+	scmp_arch_detect
 
 DEPS = $(TOOLS:%=%.d)
 

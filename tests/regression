@@ -22,7 +22,10 @@
 #
 
 GLBL_ARCH_SUPPORT="x86 x86_64 x32 arm"
-GLBL_SYS_RESOLVER="../tools/sys_resolver"
+
+GLBL_SYS_ARCH="../tools/scmp_arch_detect"
+GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
+GLBL_SYS_SIM="../tools/scmp_bpf_sim"
 
 ####
 # functions
@@ -287,7 +290,7 @@ function run_test_bpf_sim_fuzz() {
 		# simulate the fuzzed syscall data against the BPF filter, we
 		# don't verify the resulting action since we're just testing for
 		# stability
-		allow=$(../tools/bpf_sim -f $tmpfile -s $sys \
+		allow=$($GLBL_SYS_SIM -f $tmpfile -s $sys \
 			${arg[0]} ${arg[1]} ${arg[2]} ${arg[3]} ${arg[4]} \
 			${arg[5]})
 		rc=$?
@@ -473,7 +476,7 @@ function run_test_bpf_sim() {
 
 			# simulate the specifed syscall against the BPF filter
 			# and verify the results
-			action=$(../tools/bpf_sim -a $simarch -f $tmpfile \
+			action=$($GLBL_SYS_SIM -a $simarch -f $tmpfile \
 				 -s $sys ${arg[0]} ${arg[1]} ${arg[2]} \
 				 ${arg[3]} ${arg[4]} ${arg[5]})
 			rc=$?
@@ -804,7 +807,7 @@ else
 fi
 
 # determine the current system's architecture
-arch=$(../tools/arch_detect)
+arch=$($GLBL_SYS_ARCH)
 
 # display the test output and run the requested tests
 echo "=============== $(date) ===============" >&$logfd
