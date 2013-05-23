@@ -175,6 +175,15 @@ INSTALL_LIB_MACRO += \
 		(cd "$(INSTALL_LIB_DIR)"; $(LN) -s $^ $$basename);
 
 ifeq ($(V),0)
+	INSTALL_BIN_MACRO = @echo " INSTALL $^ ($(INSTALL_BIN_DIR)/$^)";
+endif
+INSTALL_BIN_MACRO += \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
+			-d "$(INSTALL_BIN_DIR)"; \
+		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
+			"$^" "$(INSTALL_BIN_DIR)";
+
+ifeq ($(V),0)
 	INSTALL_PC_MACRO = \
 	    @echo " INSTALL $$(cat /proc/$$$$/cmdline | awk '{print $$(NF)}')" \
 		  " ($(INSTALL_LIB_DIR)/pkgconfig)";

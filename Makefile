@@ -39,7 +39,7 @@ include install.mk
 
 CONFIGS = configure.mk configure.h version_info.mk libseccomp.pc
 SUBDIRS_BUILD = include src tests tools
-SUBDIRS_INSTALL = include src doc
+SUBDIRS_INSTALL = include src tools doc
 
 .PHONY: tarball install ctags cstags clean dist-clean $(SUBDIRS_BUILD)
 

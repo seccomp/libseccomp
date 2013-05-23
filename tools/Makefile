@@ -30,6 +30,7 @@ include ../macros.mk
 #
 
 include $(TOPDIR)/configure.mk
+include $(TOPDIR)/install.mk
 
 LDFLAGS := ../src/libseccomp.a
 
@@ -38,13 +39,15 @@ TOOLS = scmp_bpf_disasm \
 	scmp_sys_resolver \
 	scmp_arch_detect
 
+TOOLS_INSTALL = scmp_sys_resolver
+
 DEPS = $(TOOLS:%=%.d)
 
 #
 # targets
 #
 
-.PHONY: clean
+.PHONY: install clean
 
 all: $(TOOLS)
 
@@ -55,6 +58,9 @@ $(DEPS):
 
 $(TOOLS):
 	$(COMPILE_EXEC)
+
+install: $(TOOLS_INSTALL)
+	$(INSTALL_BIN_MACRO)
 
 clean:
 	$(RM) $(DEPS) $(TOOLS)
