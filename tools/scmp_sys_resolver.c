@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -41,7 +42,7 @@
 static void exit_usage(const char *program)
 {
 	fprintf(stderr,
-		"usage: %s [-h] [-a <arch>] [-t] <syscall_name>\n",
+		"usage: %s [-h] [-a <arch>] [-t] <name>|<number>\n",
 		program);
 	exit(EINVAL);
 }
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
 	int translate = 0;
 	const struct arch_def *arch = arch_def_native;
 	int sys_num;
+	const char *sys_name;
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:ht"))> 0) {
@@ -85,11 +87,18 @@ int main(int argc, char *argv[])
 	if (optind >= argc)
 		exit_usage(argv[0]);
 
-	sys_num = arch_syscall_resolve_name(arch, argv[optind]);
-	if (translate != 0)
-		/* we ignore errors and just output the resolved number */
-		arch_syscall_rewrite(arch, 0, &sys_num);
-	printf("%d\n", sys_num);
+	/* perform the syscall lookup */
+	if (isdigit(argv[optind][0]) || argv[optind][0] == '-') {
+		sys_num = atoi(argv[optind]);
+		sys_name = arch_syscall_resolve_num(arch, sys_num);
+		printf("%s\n", sys_name);
+	} else {
+		sys_num = arch_syscall_resolve_name(arch, argv[optind]);
+		if (translate != 0)
+			/* ignore errors and just output the resolved number */
+			arch_syscall_rewrite(arch, 0, &sys_num);
+		printf("%d\n", sys_num);
+	}
 
 	return 0;
 }
