@@ -61,8 +61,6 @@ Options:
 * installation configuration
   --prefix=PREFIX	installation base [/usr/local]
   --libdir=DIR		library directory [/usr/local/lib]
-* build options
-  --enable-python	build the python bindings, requires cython
 EOF
 }
 
@@ -73,7 +71,6 @@ function msg_summary() {
   installation base:	$opt_prefix
   library directory:	$opt_libdir
   use system includes:	$opt_sysinc_seccomp
-  python bindings:	$opt_bindings_python
 EOF
 }
 
@@ -172,7 +169,7 @@ verify_deps getopt
 
 # parse the command line options
 opt_str="$@"
-opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libdir:,enable-python" -- "$@")
+opt=$(getopt -n "$0" --options "h" --longoptions "help,prefix:,libdir:" -- "$@")
 eval set -- "$opt"
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -183,10 +180,6 @@ while [[ $# -gt 0 ]]; do
 	--libdir)
 		opt_libdir="$2"
 		shift 2
-		;;
-	--enable-python)
-		opt_bindings_python="yes"
-		shift
 		;;
 	-h|--help)
 		msg_usage
