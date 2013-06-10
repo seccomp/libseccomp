@@ -6,6 +6,13 @@ http://libseccomp.sf.net
 - Experimental Python bindings added using Cython; the Python API is still
   unstable and subject to change in future versions
 
+* Version 2.1.0 - June 11, 2013
+- Add support for the x32 and ARM architectures
+- Improvements to the regression tests, including support for live tests
+- More verbose PFC output, including translation of syscall numbers to names
+- Several assorted bugfixes affecting the seccomp BPF generation
+- The syscall number/name resolver tool is now available to install
+
 * Version 2.0.0 - January 28, 2013
 - Fixes for the x86 multiplexed syscalls
 - Additions to the API to better support non-native architecures
