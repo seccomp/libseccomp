@@ -2,10 +2,6 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
-* Version X.X.X - XXX
-- Experimental Python bindings added using Cython; the Python API is still
-  unstable and subject to change in future versions
-
 * Version 2.1.0 - June 11, 2013
 - Add support for the x32 and ARM architectures
 - Improvements to the regression tests, including support for live tests
