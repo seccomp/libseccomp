@@ -40,6 +40,6 @@ setup(
 	cmdclass = {'build_ext': build_ext},
 	ext_modules = [
 		Extension("seccomp", ["seccomp.pyx"],
-			extra_objects=["../libseccomp.a"])
+			extra_objects=["../.libs/libseccomp.so"])
 		]
 )

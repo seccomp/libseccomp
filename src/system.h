@@ -25,9 +25,9 @@
 #include <linux/filter.h>
 #include <linux/prctl.h>
 
-#include <configure.h>
+#include "configure.h"
 
-#ifdef CONF_SYSINC_SECCOMP
+#ifdef HAVE_LINUX_SECCOMP_H
 
 /* system header file */
 #include <linux/seccomp.h>
