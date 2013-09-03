@@ -825,4 +825,8 @@ echo "============================================================" >&$logfd
 
 # cleanup and exit
 rm -f $tmpfile
-exit 0
+rc=0
+[[ $stats_failure -gt 0 ]] && rc=$(($rc + 2))
+[[ $stats_error -gt 0 ]] && rc=$(($rc + 4))
+
+exit $rc
