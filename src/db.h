@@ -80,8 +80,13 @@ struct db_arg_chain_tree {
 	(((x)->arg > (y)->arg) || \
 	 (((x)->arg == (y)->arg) && (((x)->op > (y)->op) || \
 	   (((x)->mask & (y)->mask) != (y)->mask))))
-#define db_chain_leaf(x) \
+#define db_chain_action(x) \
 	(((x)->act_t_flg) || ((x)->act_f_flg))
+#define db_chain_zombie(x) \
+	((x)->nxt_t == NULL && !((x)->act_t_flg) && \
+	 (x)->nxt_f == NULL && !((x)->act_f_flg))
+#define db_chain_leaf(x) \
+	((x)->nxt_t == NULL && (x)->nxt_f == NULL)
 #define db_chain_eq_result(x,y) \
 	((((x)->nxt_t != NULL && (y)->nxt_t != NULL) || \
 	  ((x)->nxt_t == NULL && (y)->nxt_t == NULL)) && \
