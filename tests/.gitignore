@@ -1,4 +1,5 @@
 *.bpf
+*.bpfd
 *.pfc
 util.pyc
 00-test.c
