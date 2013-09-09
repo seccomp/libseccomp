@@ -71,7 +71,7 @@ DEPS_TESTS = $(TESTS:%=%.d)
 # targets
 #
 
-.PHONY: clean
+.PHONY: check clean
 
 all: $(TESTS) $(OBJS)
 
@@ -87,6 +87,9 @@ $(TESTS):
 
 $(TEST_PRIVATE): 00-test.c $(OBJS) ../src/libseccomp.a
 	$(COMPILE_EXEC)
+
+check: $(TESTS)
+	./regression
 
 clean:
 	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(TEST_PRIVATE) $(OBJS) *.pyc
