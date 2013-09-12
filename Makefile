@@ -78,15 +78,15 @@ include: $(VERSION_HDR) $(CONFIGS)
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-src: $(VERSION_HDR) $(CONFIGS)
+src: $(VERSION_HDR) $(CONFIGS) include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-tests: src
+tests: src include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-tools: src
+tools: src include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
