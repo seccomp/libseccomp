@@ -37,14 +37,14 @@ Filter action values:
                tracing process via PTRACE_EVENT_SECCOMP and the
                PTRACE_GETEVENTMSG option
 
-Argument comparison values:
+Argument comparison values (see the Arg class):
 
-    NE - argument not equal the value
-    LT - argument less than the value
-    LE - argument less than, or equal to, the value
-    EQ - argument equal the value
-    GT - argument greater than the value
-    GE - argument greater than, or equal to, the value
+    NE - arg != datum_a
+    LT - arg < datum_a
+    LE - arg <= datum_a
+    EQ - arg == datum_a
+    GT - arg > datum_a
+    GE - arg >= datum_a
     MASKED_EQ - (arg & datum_b) == datum_a
 
 
