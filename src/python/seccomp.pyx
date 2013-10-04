@@ -45,7 +45,7 @@ Argument comparison values:
     EQ - argument equal the value
     GT - argument greater than the value
     GE - argument greater than, or equal to, the value
-    MASKED_EQ - masked argument is equal to the value
+    MASKED_EQ - (arg & datum_b) == datum_a
 
 
 Example:
