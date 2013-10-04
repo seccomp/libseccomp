@@ -181,7 +181,7 @@ INSTALL_BIN_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$(INSTALL_BIN_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
-			"$^" "$(INSTALL_BIN_DIR)";
+			$^ "$(INSTALL_BIN_DIR)";
 
 ifeq ($(V),0)
 	INSTALL_PC_MACRO = \
