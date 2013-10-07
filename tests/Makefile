@@ -89,4 +89,4 @@ $(TEST_PRIVATE): 00-test.c $(OBJS) ../src/libseccomp.a
 	$(COMPILE_EXEC)
 
 clean:
-	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(TEST_PRIVATE) $(OBJS)
+	$(RM) $(DEPS_TESTS) $(DEPS_OBJS) $(TESTS) $(TEST_PRIVATE) $(OBJS) *.pyc

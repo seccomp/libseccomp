@@ -49,7 +49,7 @@ $(CONFIGS): version_info
 	@$(ECHO_INFO) "automatically generating configuration ..."
 	@./configure
 
-tarball: clean
+tarball: dist-clean
 	@ver=$(VERSION_RELEASE); \
 	tarball=libseccomp-$$ver.tar.gz; \
 	$(ECHO_INFO) "creating the tarball ../$$tarball"; \
