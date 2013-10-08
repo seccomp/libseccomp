@@ -191,6 +191,12 @@ cdef class SyscallFilter:
     cdef libseccomp.scmp_filter_ctx _ctx
 
     def __cinit__(self, int defaction):
+        self._ctx = libseccomp.seccomp_init(defaction)
+        if self._ctx == NULL:
+            raise RuntimeError("Library error")
+        _defaction = defaction
+
+    def __init__(self, defaction):
         """ Initialize the filter state
 
         Arguments:
@@ -199,10 +205,6 @@ cdef class SyscallFilter:
         Description:
         Initializes the seccomp filter state to the defaults.
         """
-        self._ctx = libseccomp.seccomp_init(defaction)
-        if self._ctx == NULL:
-            raise RuntimeError("Library error")
-        _defaction = defaction
 
     def __dealloc__(self):
         """ Destroys the filter state and releases any resources.
