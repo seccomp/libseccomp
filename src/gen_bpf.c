@@ -892,6 +892,7 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 	struct bpf_instr *i_iter;
 	const struct db_arg_chain_tree *c_iter;
 	unsigned int iter;
+	struct bpf_jump nxt_jump_tmp;
 
 	if (chain == NULL) {
 		b_head = _gen_bpf_action(state, NULL, sys->action);
@@ -929,16 +930,18 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 				if (i_iter->jt.type == TGT_NXT) {
 					if (i_iter->jt.tgt.nxt != 0)
 						goto chain_failure;
-					i_iter->jt = (b_next == NULL ?
-						      *nxt_jump :
-						      _BPF_JMP_BLK(b_next));
+					if (b_next == NULL)
+						i_iter->jt = *nxt_jump;
+					else
+						i_iter->jt=_BPF_JMP_BLK(b_next);
 				}
 				if (i_iter->jf.type == TGT_NXT) {
 					if (i_iter->jf.tgt.nxt != 0)
 						goto chain_failure;
-					i_iter->jf = (b_next == NULL ?
-						      *nxt_jump :
-						      _BPF_JMP_BLK(b_next));
+					if (b_next == NULL)
+						i_iter->jf = *nxt_jump;
+					else
+						i_iter->jf=_BPF_JMP_BLK(b_next);
 				}
 			}
 			b_iter = b_next;
@@ -946,16 +949,18 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 	}
 
 	/* resolve all of the blocks */
+	memset(&nxt_jump_tmp, 0, sizeof(nxt_jump_tmp));
 	b_iter = b_tail;
 	do {
 		/* b_iter may change after resolving, so save the linkage */
 		b_prev = b_iter->lvl_prv;
 		b_next = b_iter->lvl_nxt;
 
+		nxt_jump_tmp = _BPF_JMP_BLK(b_next);
 		b_iter = _gen_bpf_chain_lvl_res(state, sys, b_iter,
 						(b_next == NULL ?
 						 nxt_jump :
-						 &_BPF_JMP_BLK(b_next)));
+						 &nxt_jump_tmp));
 		if (b_iter == NULL)
 			goto chain_failure;
 
