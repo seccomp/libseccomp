@@ -21,3 +21,8 @@ test type: bpf-sim-fuzz
 
 # Testname		StressCount
 23-sim-arch_all_basic	50
+
+test type: bpf-valgrind
+
+# Testname
+23-sim-arch_all_basic

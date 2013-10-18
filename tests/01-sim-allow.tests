@@ -14,3 +14,8 @@ test type: bpf-sim-fuzz
 
 # Testname	StressCount
 01-sim-allow	50
+
+test type: bpf-valgrind
+
+# Testname
+01-sim-allow

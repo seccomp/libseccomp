@@ -20,3 +20,8 @@ test type: bpf-sim-fuzz
 
 # Testname	StressCount
 06-sim-actions	50
+
+test type: bpf-valgrind
+
+# Testname
+06-sim-actions

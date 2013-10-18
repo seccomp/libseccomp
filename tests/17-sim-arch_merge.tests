@@ -22,3 +22,8 @@ test type: bpf-sim-fuzz
 
 # Testname		StressCount
 17-sim-arch_merge	50
+
+test type: bpf-valgrind
+
+# Testname
+17-sim-arch_merge

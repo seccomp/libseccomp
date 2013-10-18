@@ -23,3 +23,8 @@ test type: bpf-sim-fuzz
 
 # Testname	StressCount
 02-sim-basic	50
+
+test type: bpf-valgrind
+
+# Testname
+02-sim-basic
