@@ -118,7 +118,7 @@ stats_failure=0
 
 # display the test output and run the requested tests
 echo "=============== $(date) ==============="
-echo "Comparing Test Output (\"testgen $*\")"
+echo "Comparing Test Output (\"testdiff $*\")"
 diff_tests "$1" "$2"
 echo "============================================================"
 
