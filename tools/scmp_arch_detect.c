@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	uint32_t arch;
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "ht"))> 0) {
+	while ((opt = getopt(argc, argv, "ht")) > 0) {
 		switch (opt) {
 		case 't':
 			token = 1;

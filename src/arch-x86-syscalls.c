@@ -27,8 +27,7 @@
 #include "arch-x86.h"
 
 /* NOTE: based on Linux 3.4.7 */
-static const struct arch_syscall_def x86_syscall_table[] = \
-{
+static const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "accept", __PNR_accept },
 	{ "accept4", __PNR_accept4 },
 	{ "access", 33 },

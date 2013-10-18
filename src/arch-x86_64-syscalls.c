@@ -27,8 +27,7 @@
 #include "arch-x86_64.h"
 
 /* NOTE: based on Linux 3.4.7 */
-const struct arch_syscall_def x86_64_syscall_table[] = \
-{
+const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "accept", 43 },
 	{ "accept4", 288 },
 	{ "access", 21 },

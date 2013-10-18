@@ -151,20 +151,20 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 		fprintf(fds, "if (");
 		_pfc_arg(fds, arch, c_iter);
 		switch (c_iter->op) {
-			case SCMP_CMP_EQ:
-				fprintf(fds, " == ");
-				break;
-			case SCMP_CMP_GE:
-				fprintf(fds, " >= ");
-				break;
-			case SCMP_CMP_GT:
-				fprintf(fds, " > ");
-				break;
-			case SCMP_CMP_MASKED_EQ:
-				fprintf(fds, " & 0x%.8x == ", c_iter->mask);
-				break;
-			default:
-				fprintf(fds, " ??? ");
+		case SCMP_CMP_EQ:
+			fprintf(fds, " == ");
+			break;
+		case SCMP_CMP_GE:
+			fprintf(fds, " >= ");
+			break;
+		case SCMP_CMP_GT:
+			fprintf(fds, " > ");
+			break;
+		case SCMP_CMP_MASKED_EQ:
+			fprintf(fds, " & 0x%.8x == ", c_iter->mask);
+			break;
+		default:
+			fprintf(fds, " ??? ");
 		}
 		fprintf(fds, "%u)\n", c_iter->datum);
 

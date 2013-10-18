@@ -29,7 +29,7 @@
 int main(int argc, char *argv[])
 {
 	int rc;
-	uint32_t val = (uint32_t)-1;
+	uint32_t val = (uint32_t)(-1);
 	scmp_filter_ctx ctx;
 
 	ctx = seccomp_init(SCMP_ACT_ALLOW);

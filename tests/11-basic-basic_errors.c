@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	scmp_filter_ctx ctx;
 
 	/* seccomp_init errors */
-	ctx = seccomp_init(SCMP_ACT_ALLOW+1);
+	ctx = seccomp_init(SCMP_ACT_ALLOW + 1);
 	if (ctx != NULL)
 		return -1;
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 	ctx = NULL;
 
 	/* seccomp_reset error */
-	rc = seccomp_reset(ctx, SCMP_ACT_KILL+1);
+	rc = seccomp_reset(ctx, SCMP_ACT_KILL + 1);
 	if (rc != -EINVAL)
 		return -1;
 	rc = seccomp_reset(ctx, SCMP_ACT_KILL);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 		rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 		if (rc != -EPERM)
 			return -1;
-		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL-1, SCMP_SYS(read), 0);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL - 1, SCMP_SYS(read), 0);
 		if (rc != -EINVAL)
 			return -1;
 		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 6);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return -1;
 	else {
-		rc = seccomp_export_pfc(ctx, sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_pfc(ctx, sysconf(_SC_OPEN_MAX) - 1);
 		if (rc != EBADF)
 			return -1;
 	}
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return -1;
 	else {
-		rc = seccomp_export_bpf(ctx, sysconf(_SC_OPEN_MAX)-1);
+		rc = seccomp_export_bpf(ctx, sysconf(_SC_OPEN_MAX) - 1);
 		if (rc != -EBADF)
 			return -1;
 	}

@@ -59,9 +59,10 @@ static unsigned int opt_verbose = 0;
  */
 static void exit_usage(const char *program)
 {
-	fprintf(stderr, "usage: %s -f <bpf_file> [-v]"
-			" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
-			program);
+	fprintf(stderr,
+		"usage: %s -f <bpf_file> [-v]"
+		" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
+		program);
 	exit(EINVAL);
 }
 

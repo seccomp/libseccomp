@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	const char *sys_name;
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "a:ht"))> 0) {
+	while ((opt = getopt(argc, argv, "a:ht")) > 0) {
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)

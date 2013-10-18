@@ -200,9 +200,9 @@ static int _db_tree_act_check(struct db_arg_chain_tree *tree, uint32_t action)
  *
  */
 static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
-			       struct db_arg_chain_tree *existing,
-			       struct db_arg_chain_tree *new,
-			       struct db_prune_state *state)
+			      struct db_arg_chain_tree *existing,
+			      struct db_arg_chain_tree *new,
+			      struct db_prune_state *state)
 {
 	int rc = 0;
 	int rc_tmp;
@@ -292,10 +292,10 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 
 			if (ec_iter->nxt_t) {
 				rc_tmp = _db_tree_sub_prune((prev ?
-							      &ec_iter : NULL),
-							     ec_iter->nxt_t,
-							     c_iter,
-							     &state_new);
+							     &ec_iter : NULL),
+							    ec_iter->nxt_t,
+							    c_iter,
+							    &state_new);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 			}
 			if (ec_iter->nxt_f) {
@@ -542,6 +542,8 @@ int db_col_arch_exist(struct db_filter_col *col, uint32_t arch_token)
 int db_col_attr_get(const struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t *value)
 {
+	int rc = 0;
+
 	switch (attr) {
 	case SCMP_FLTATR_ACT_DEFAULT:
 		*value = col->attr.act_default;
@@ -553,11 +555,11 @@ int db_col_attr_get(const struct db_filter_col *col,
 		*value = col->attr.nnp_enable;
 		break;
 	default:
-		return -EEXIST;
+		rc = -EEXIST;
 		break;
 	}
 
-	return 0;
+	return rc;
 }
 
 /**
@@ -573,6 +575,8 @@ int db_col_attr_get(const struct db_filter_col *col,
 int db_col_attr_set(struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t value)
 {
+	int rc = 0;
+
 	switch (attr) {
 	case SCMP_FLTATR_ACT_DEFAULT:
 		/* read only */
@@ -588,11 +592,11 @@ int db_col_attr_set(struct db_filter_col *col,
 		col->attr.nnp_enable = (value ? 1 : 0);
 		break;
 	default:
-		return -EEXIST;
+		rc = -EEXIST;
 		break;
 	}
 
-	return 0;
+	return rc;
 }
 
 /**
@@ -876,30 +880,30 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		c_iter_lo->arg_offset = arch_arg_offset_lo(arch,
 							   c_iter_lo->arg);
 		switch (chain[iter].op) {
-			case SCMP_CMP_GT:
-				c_iter_hi->op = SCMP_CMP_GE;
-				c_iter_lo->op = SCMP_CMP_GT;
-				tf_flag = true;
-				break;
-			case SCMP_CMP_NE:
-				c_iter_hi->op = SCMP_CMP_EQ;
-				c_iter_lo->op = SCMP_CMP_EQ;
-				tf_flag = false;
-				break;
-			case SCMP_CMP_LT:
-				c_iter_hi->op = SCMP_CMP_GE;
-				c_iter_lo->op = SCMP_CMP_GE;
-				tf_flag = false;
-				break;
-			case SCMP_CMP_LE:
-				c_iter_hi->op = SCMP_CMP_GE;
-				c_iter_lo->op = SCMP_CMP_GT;
-				tf_flag = false;
-				break;
-			default:
-				c_iter_hi->op = chain[iter].op;
-				c_iter_lo->op = chain[iter].op;
-				tf_flag = true;
+		case SCMP_CMP_GT:
+			c_iter_hi->op = SCMP_CMP_GE;
+			c_iter_lo->op = SCMP_CMP_GT;
+			tf_flag = true;
+			break;
+		case SCMP_CMP_NE:
+			c_iter_hi->op = SCMP_CMP_EQ;
+			c_iter_lo->op = SCMP_CMP_EQ;
+			tf_flag = false;
+			break;
+		case SCMP_CMP_LT:
+			c_iter_hi->op = SCMP_CMP_GE;
+			c_iter_lo->op = SCMP_CMP_GE;
+			tf_flag = false;
+			break;
+		case SCMP_CMP_LE:
+			c_iter_hi->op = SCMP_CMP_GE;
+			c_iter_lo->op = SCMP_CMP_GT;
+			tf_flag = false;
+			break;
+		default:
+			c_iter_hi->op = chain[iter].op;
+			c_iter_lo->op = chain[iter].op;
+			tf_flag = true;
 		}
 		c_iter_hi->mask = D64_HI(chain[iter].mask);
 		c_iter_lo->mask = D64_LO(chain[iter].mask);
@@ -996,20 +1000,20 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 
 		/* rewrite the op to reduce the op/datum combos */
 		switch (c_iter->op) {
-			case SCMP_CMP_NE:
-				c_iter->op = SCMP_CMP_EQ;
-				tf_flag = false;
-				break;
-			case SCMP_CMP_LT:
-				c_iter->op = SCMP_CMP_GE;
-				tf_flag = false;
-				break;
-			case SCMP_CMP_LE:
-				c_iter->op = SCMP_CMP_GT;
-				tf_flag = false;
-				break;
-			default:
-				tf_flag = true;
+		case SCMP_CMP_NE:
+			c_iter->op = SCMP_CMP_EQ;
+			tf_flag = false;
+			break;
+		case SCMP_CMP_LT:
+			c_iter->op = SCMP_CMP_GE;
+			tf_flag = false;
+			break;
+		case SCMP_CMP_LE:
+			c_iter->op = SCMP_CMP_GT;
+			tf_flag = false;
+			break;
+		default:
+			tf_flag = true;
 		}
 
 		/* fixup the mask/datum */
@@ -1173,8 +1177,8 @@ add_reset:
 				if (ec_iter->act_t_flg == ec_iter->act_f_flg &&
 				    ec_iter->act_t == ec_iter->act_f) {
 					n_cnt = _db_tree_remove(
-							     &(s_iter->chains),
-							     ec_iter);
+							&(s_iter->chains),
+							ec_iter);
 					s_iter->node_cnt -= n_cnt;
 					goto add_free_ok;
 				}
@@ -1217,7 +1221,8 @@ add_reset:
 					/* add a new branch */
 					c_prev = c_iter;
 					ec_iter->nxt_t = c_iter->nxt_t;
-					s_iter->node_cnt += (s_new->node_cnt-1);
+					s_iter->node_cnt +=
+						(s_new->node_cnt - 1);
 					goto add_free_match;
 				}
 			} else if (c_iter->nxt_f != NULL) {
@@ -1236,7 +1241,8 @@ add_reset:
 					/* add a new branch */
 					c_prev = c_iter;
 					ec_iter->nxt_f = c_iter->nxt_f;
-					s_iter->node_cnt += (s_new->node_cnt-1);
+					s_iter->node_cnt +=
+						(s_new->node_cnt - 1);
 					goto add_free_match;
 				}
 			} else
