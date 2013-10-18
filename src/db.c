@@ -492,6 +492,7 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 		      (col_dst->filter_cnt + col_src->filter_cnt));
 	if (dbs == NULL)
 		return -ENOMEM;
+	col_dst->filters = dbs;
 
 	/* transfer the architecture filters */
 	for (iter_a = col_dst->filter_cnt, iter_b = 0;
