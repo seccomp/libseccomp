@@ -546,6 +546,12 @@ function run_test_bpf_valgrind() {
 	local rc
 	local testcmd
 
+	# we only support the native/c test mode here
+	if [[ $mode != "c" ]]; then
+		stats_skipped=$(($stats_skipped+1))
+		return
+	fi
+
 	# print out the input test data to the log file
 	print_data "$1" "$2"
 
