@@ -41,7 +41,8 @@ CONFIGS = configure.mk configure.h version_info.mk libseccomp.pc
 SUBDIRS_BUILD = include src tests tools
 SUBDIRS_INSTALL = include src tools doc
 
-.PHONY: tarball install check ctags cstags clean dist-clean $(SUBDIRS_BUILD)
+.PHONY: tarball install check check-syntax ctags cstags clean dist-clean \
+	$(SUBDIRS_BUILD)
 
 all: $(SUBDIRS_BUILD)
 
@@ -101,6 +102,9 @@ install: $(SUBDIRS_BUILD)
 check: tools tests
 	@$(ECHO_INFO) "checking in directory tests/ ..."
 	@$(MAKE) -C tests check
+
+check-syntax:
+	@./tools/check-syntax
 
 ctags:
 	@$(ECHO_INFO) "generating ctags for the project ..."
