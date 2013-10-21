@@ -25,7 +25,7 @@ CHK_C_LIST="include/seccomp.h.in \
 	    src/*.c src/*.h \
 	    tests/*.c tests/*.h \
 	    tools/*.c tools/*.h"
-CHK_C_EXCLUDE="src/hash.c"
+CHK_C_EXCLUDE=""
 
 ####
 # functions
