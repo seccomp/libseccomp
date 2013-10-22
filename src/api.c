@@ -501,7 +501,6 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 				 0, action, syscall, arg_cnt, arg_array);
 }
 
-
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_rule_add(scmp_filter_ctx ctx,
 			 uint32_t action, int syscall,
@@ -524,7 +523,6 @@ API int seccomp_rule_add(scmp_filter_ctx ctx,
 	return rc;
 }
 
-
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 				     uint32_t action, int syscall,
@@ -537,7 +535,6 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 	return _seccomp_rule_add((struct db_filter_col *)ctx,
 				 1, action, syscall, arg_cnt, arg_array);
 }
-
 
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_rule_add_exact(scmp_filter_ctx ctx,
