@@ -165,14 +165,8 @@ cdef class Arg:
         """
         self._arg.arg = arg
         self._arg.op = op
-        if isinstance(datum_a, file):
-            self._arg.datum_a = datum_a.fileno()
-        else:
-            self._arg.datum_a = datum_a
-        if isinstance(datum_b, file):
-            self._arg.datum_b = datum_b.fileno()
-        else:
-            self._arg.datum_b = datum_b
+        self._arg.datum_a = datum_a
+        self._arg.datum_b = datum_b
 
     def to_c(self):
         """ Convert the object into a C structure.

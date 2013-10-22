@@ -32,9 +32,9 @@ def test(args):
     f = SyscallFilter(KILL)
     # the next three seccomp_rule_add_exact() calls for read must go together
     # in this order to catch an infinite loop.
-    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdout))
+    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "read", Arg(1, EQ, 0))
-    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
+    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     return f
 
 args = util.get_opt()
