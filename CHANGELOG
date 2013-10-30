@@ -2,7 +2,7 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
-* Version X.X.X - XXX
+* Version 2.1.1 - October 31, 2013
 - Build system improvements
 - Automated test improvments, including a "check" target for use by
   packagers to verify the build
