@@ -2,6 +2,16 @@ libseccomp: Releases
 ===============================================================================
 http://libseccomp.sf.net
 
+* Version X.X.X - XXX
+- Build system improvements
+- Automated test improvments, including a "check" target for use by
+  packagers to verify the build
+- Numerous bug fixes related to the filter's internal rule database which
+  affect those creating rules with syscall arguments
+- Introduced tools to verify the style/formatting of the code, including a
+  "check-syntax" target for use by developers
+- Non-public symbols are now hidden in the library
+
 * Version 2.1.0 - June 11, 2013
 - Add support for the x32 and ARM architectures
 - Improvements to the regression tests, including support for live tests

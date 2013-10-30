@@ -2,11 +2,14 @@ libseccomp: Contributors
 ===============================================================================
 http://libseccomp.sf.net
 
+Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
 Jake Edge <jake@lwn.net>
+Joe MacDonald <joe@deserted.net>
 Kees Cook <keescook@chromium.org>
 Paul Moore <pmoore@redhat.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
+Vitaly Vi Shukela <vi0oss@gmail.com>
