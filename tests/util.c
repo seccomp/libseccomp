@@ -194,7 +194,7 @@ int util_file_write(const char *path)
 	const char buf[] = "testing";
 	ssize_t buf_len = strlen(buf);
 
-	fd = open(path, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+	fd = open(path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd < 0)
 		return errno;
 	if (write(fd, buf, buf_len) < buf_len) {

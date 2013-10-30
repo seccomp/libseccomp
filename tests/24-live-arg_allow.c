@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	fd = open("/dev/null", O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+	fd = open("/dev/null", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
 		rc = errno;
 		goto out;

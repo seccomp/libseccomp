@@ -41,7 +41,8 @@ CONFIGS = configure.mk configure.h version_info.mk libseccomp.pc
 SUBDIRS_BUILD = include src tests tools
 SUBDIRS_INSTALL = include src tools doc
 
-.PHONY: tarball install ctags cstags clean dist-clean $(SUBDIRS_BUILD)
+.PHONY: tarball install check check-syntax ctags cstags clean dist-clean \
+	$(SUBDIRS_BUILD)
 
 all: $(SUBDIRS_BUILD)
 
@@ -49,7 +50,7 @@ $(CONFIGS): version_info
 	@$(ECHO_INFO) "automatically generating configuration ..."
 	@./configure
 
-tarball: clean
+tarball: dist-clean
 	@ver=$(VERSION_RELEASE); \
 	tarball=libseccomp-$$ver.tar.gz; \
 	$(ECHO_INFO) "creating the tarball ../$$tarball"; \
@@ -78,15 +79,15 @@ include: $(VERSION_HDR) $(CONFIGS)
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-src: $(VERSION_HDR) $(CONFIGS)
+src: $(VERSION_HDR) $(CONFIGS) include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-tests: src
+tests: src include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
-tools: src
+tools: src include
 	@$(ECHO_INFO) "building in directory $@/ ..."
 	@$(MAKE) -C $@
 
@@ -97,6 +98,13 @@ install: $(SUBDIRS_BUILD)
 		$(ECHO_INFO) "installing from $$dir/"; \
 		$(MAKE) -C $$dir install; \
 	done
+
+check: tools tests
+	@$(ECHO_INFO) "checking in directory tests/ ..."
+	@$(MAKE) -C tests check
+
+check-syntax:
+	@./tools/check-syntax
 
 ctags:
 	@$(ECHO_INFO) "generating ctags for the project ..."

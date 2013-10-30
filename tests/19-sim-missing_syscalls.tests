@@ -14,3 +14,8 @@ test type: bpf-sim-fuzz
 
 # Testname		StressCount
 19-sim-missing_syscalls	50
+
+test type: bpf-valgrind
+
+# Testname
+19-sim-missing_syscalls

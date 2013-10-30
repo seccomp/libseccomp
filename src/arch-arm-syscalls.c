@@ -37,8 +37,7 @@
 #endif
 
 /* NOTE: based on Linux 3.8.0-rc5 */
-const struct arch_syscall_def arm_syscall_table[] = \
-{
+const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "accept", (__NR_SYSCALL_BASE + 285) },
 	{ "accept4", (__NR_SYSCALL_BASE + 366) },

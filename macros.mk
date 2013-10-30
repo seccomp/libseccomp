@@ -45,8 +45,9 @@ V ?= 0
 CPPFLAGS += -I$(TOPDIR) -I$(TOPDIR)/include
 LIBFLAGS =
 
-CFLAGS ?= -Wl,-z,relro -Wall -O0 -g
+CFLAGS ?= -Wl,-z,relro -Wall -O0 -g -fvisibility=hidden
 CFLAGS += -fPIC
+PYCFLAGS ?= -fvisibility=default
 LDFLAGS ?= -z relro -g
 
 #
@@ -107,7 +108,7 @@ VERSION_HDR = version.h
 
 PY_DISTUTILS = \
 	VERSION_RELEASE="$(VERSION_RELEASE)" \
-	CFLAGS="$(CFLAGS) $(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	CFLAGS="$(CFLAGS) $(CPPFLAGS) $(PYCFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	$(PYTHON) ./setup.py
 
 ifeq ($(V),0)
@@ -181,7 +182,7 @@ INSTALL_BIN_MACRO += \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$(INSTALL_BIN_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
-			"$^" "$(INSTALL_BIN_DIR)";
+			$^ "$(INSTALL_BIN_DIR)";
 
 ifeq ($(V),0)
 	INSTALL_PC_MACRO = \

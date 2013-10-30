@@ -38,9 +38,9 @@ def test(args):
         f.add_arch(Arch.X32)
     if not f.exist_arch(Arch.ARM):
         f.add_arch(Arch.ARM)
-    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
-    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout))
-    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr))
+    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
+    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
+    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
     f.add_rule(ALLOW, "close")
     f.add_rule(ALLOW, "socket")
     f.add_rule(ALLOW, "connect")

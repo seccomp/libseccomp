@@ -37,9 +37,9 @@ def test(args):
     if not f64.exist_arch(Arch.X86_64):
         f64.add_arch(Arch.X86_64)
         f64.remove_arch(Arch.NATIVE)
-    f32.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
-    f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout))
-    f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr))
+    f32.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
+    f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
+    f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
     f32.add_rule(ALLOW, "close")
     f64.add_rule(ALLOW, "socket")
     f64.add_rule(ALLOW, "connect")

@@ -85,8 +85,8 @@ install: $(LIB_SHARED)
 	done
 
 clean:
-	$(RM) $(DEPS) $(OBJS) $(LIB_STATIC) $(LIB_SHARED)
-	@for dir in $(BINDINGS); do \
+	$(RM) $(DEPS) $(OBJS) $(LIB_STATIC) libseccomp.so.*
+	@for dir in python; do \
 		$(MAKE) -C $$dir clean; \
 	done
 

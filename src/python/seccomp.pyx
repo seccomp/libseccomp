@@ -37,15 +37,15 @@ Filter action values:
                tracing process via PTRACE_EVENT_SECCOMP and the
                PTRACE_GETEVENTMSG option
 
-Argument comparison values:
+Argument comparison values (see the Arg class):
 
-    NE - argument not equal the value
-    LT - argument less than the value
-    LE - argument less than, or equal to, the value
-    EQ - argument equal the value
-    GT - argument greater than the value
-    GE - argument greater than, or equal to, the value
-    MASKED_EQ - masked argument is equal to the value
+    NE - arg != datum_a
+    LT - arg < datum_a
+    LE - arg <= datum_a
+    EQ - arg == datum_a
+    GT - arg > datum_a
+    GE - arg >= datum_a
+    MASKED_EQ - (arg & datum_b) == datum_a
 
 
 Example:
@@ -165,14 +165,8 @@ cdef class Arg:
         """
         self._arg.arg = arg
         self._arg.op = op
-        if isinstance(datum_a, file):
-            self._arg.datum_a = datum_a.fileno()
-        else:
-            self._arg.datum_a = datum_a
-        if isinstance(datum_b, file):
-            self._arg.datum_b = datum_b.fileno()
-        else:
-            self._arg.datum_b = datum_b
+        self._arg.datum_a = datum_a
+        self._arg.datum_b = datum_b
 
     def to_c(self):
         """ Convert the object into a C structure.
@@ -191,6 +185,12 @@ cdef class SyscallFilter:
     cdef libseccomp.scmp_filter_ctx _ctx
 
     def __cinit__(self, int defaction):
+        self._ctx = libseccomp.seccomp_init(defaction)
+        if self._ctx == NULL:
+            raise RuntimeError("Library error")
+        _defaction = defaction
+
+    def __init__(self, defaction):
         """ Initialize the filter state
 
         Arguments:
@@ -199,10 +199,6 @@ cdef class SyscallFilter:
         Description:
         Initializes the seccomp filter state to the defaults.
         """
-        self._ctx = libseccomp.seccomp_init(defaction)
-        if self._ctx == NULL:
-            raise RuntimeError("Library error")
-        _defaction = defaction
 
     def __dealloc__(self):
         """ Destroys the filter state and releases any resources.

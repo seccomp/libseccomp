@@ -30,3 +30,8 @@ test type: bpf-sim-fuzz
 
 # Testname		StressCount
 05-sim-long_jumps	50
+
+test type: bpf-valgrind
+
+# Testname
+05-sim-long_jumps

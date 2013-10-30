@@ -46,7 +46,7 @@ extern "C" {
 /**
  * Filter context/handle
  */
-typedef void * scmp_filter_ctx;
+typedef void *scmp_filter_ctx;
 
 /**
  * Filter attributes

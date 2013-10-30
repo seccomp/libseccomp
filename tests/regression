@@ -31,6 +31,18 @@ GLBL_SYS_SIM="../tools/scmp_bpf_sim"
 # functions
 
 #
+# Dependency check
+#
+# Arguments:
+#     1    Dependency to check for
+#
+function check_deps() {
+	[[ -z "$1" ]] && return
+	which "$1" >& /dev/null
+	return $?
+}
+
+#
 # Dependency verification
 #
 # Arguments:
@@ -38,7 +50,7 @@ GLBL_SYS_SIM="../tools/scmp_bpf_sim"
 #
 function verify_deps() {
 	[[ -z "$1" ]] && return
-	if ! which "$1" >& /dev/null; then
+	if ! check_deps "$1"; then
 		echo "error: install \"$1\" and include it in your \$PATH"
 		exit 1
 	fi
@@ -49,8 +61,8 @@ function verify_deps() {
 #
 function usage() {
 cat << EOF
-usage: regression [-h] [-m MODE] [-a] [-b BATCH_NAME] [-g] [-l <LOG>]
-                  [-s SINGLE_TEST] [-t <TEMP_DIR>] [-T <TEST_TYPE>] [-v]
+usage: regression [-h] [-v] [-m MODE] [-a] [-b BATCH_NAME] [-l <LOG>]
+                  [-s SINGLE_TEST] [-t <TEMP_DIR>] [-T <TEST_TYPE>]
 
 libseccomp regression test automation script
 optional arguments:
@@ -58,7 +70,6 @@ optional arguments:
   -m MODE        specified the test mode [c (default), python]
   -a             specifies all tests are to be run
   -b BATCH_NAME  specifies batch of tests to be run
-  -g             specifies that tests are to be run with valgrind
   -l [LOG]       specifies log file to write test results to
   -s SINGLE_TEST specifies individual test number to be run
   -t [TEMP_DIR]  specifies directory to create temporary files in
@@ -97,7 +108,7 @@ function generate_test_num() {
 #     2    string containing line of test data
 #
 function print_data() {
-	if $verbose; then
+	if [[ -n $verbose ]]; then
 		printf "Test %s data:     %s\n" "$1" "$2" >&$logfd
 	fi
 }
@@ -111,7 +122,7 @@ function print_data() {
 #     3    string containing addition details
 #
 function print_result() {
-	if [[ $2 == "INFO" ]] && ! $verbose; then
+	if [[ $2 == "INFO" && -z $verbose ]]; then
 		return
 	fi
 	if [[ $3 == "" ]]; then
@@ -128,8 +139,8 @@ function print_result() {
 #     1    string containing generated test number
 #
 function print_valgrind() {
-	if $verbose; then
-		printf "Test %s valgrind results:\n" "$1" >&$logfd
+	if [[ -n $verbose ]]; then
+		printf "Test %s valgrind output\n" "$1" >&$logfd
 	fi
 }
 
@@ -164,26 +175,12 @@ function get_range() {
 function run_test_command() {
 	local cmd
 
-	if $use_valgrind && $verbose; then
-		print_valgrind $1
-		if [[ $logfd -eq 3 ]]; then
-			cmd="/usr/bin/valgrind --log-fd=$logfd ./$2 $3"
-		else
-			cmd="/usr/bin/valgrind ./$2 $3"
-		fi
-	elif $use_valgrind; then
-		# with -q, valgrind will only print error messages
-		if [[ $logfd -eq 3 ]]; then
-			cmd="/usr/bin/valgrind -q --log-fd=$logfd ./$2 $3"
-		else
-			cmd="/usr/bin/valgrind -q ./$2 $3"
-		fi
-	elif [[ $mode == "python" ]]; then
+	if [[ $mode == "python" ]]; then
 		cmd="PYTHONPATH=$PYTHONPATH"
 		cmd="$cmd:$(cd $(pwd)/../src/python/build/lib.*; pwd)"
-		cmd="$cmd /usr/bin/env python ./$2.py $3"
+		cmd="$cmd /usr/bin/env python $2.py $3"
 	else
-		cmd="./$2 $3"
+		cmd="$2 $3"
 	fi
 
 	# setup the stdout/stderr redirects
@@ -278,7 +275,7 @@ function run_test_bpf_sim_fuzz() {
 
 		# run the test command and put the BPF filter in a temp file
 		exec 4>$tmpfile
-		run_test_command "$testnumstr" "$testname" "-b" 4 "" ""
+		run_test_command "$testnumstr" "./$testname" "-b" 4 ""
 		rc=$?
 		exec 4>&-
 		if [[ $rc -ne 0 ]]; then
@@ -464,7 +461,7 @@ function run_test_bpf_sim() {
 
 			# run the test command and put the BPF in a temp file
 			exec 4>$tmpfile
-			run_test_command "$testnumstr" "$testname" "-b" 4 ""
+			run_test_command "$testnumstr" "./$testname" "-b" 4 ""
 			rc=$?
 			exec 4>&-
 			if [[ $rc -ne 0 ]]; then
@@ -523,8 +520,62 @@ function run_test_basic() {
 	print_data "$1" "$2"
 
 	# run the command
-	run_test_command "$1" "$2" "" "" ""
+	run_test_command "$1" "./$2" "" "" ""
 	rc=$?
+	if [[ $rc -ne 0 ]]; then
+		print_result $1 "FAILURE" "$2 rc=$rc"
+		stats_failure=$(($stats_failure+1))
+	else
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	fi
+	stats_all=$(($stats_all+1))
+}
+
+#
+# Run the specified "bpf-valgrind" test
+#
+# Tests that belong to the "bpf-valgrind" test type generate a BPF filter
+# while running under valgrind to detect any memory errors.
+#
+# Arguments:
+#     1    value of test number from batch file
+#     2    string containing line of test data from batch file
+#
+function run_test_bpf_valgrind() {
+	local rc
+	local testcmd
+
+	# we only support the native/c test mode here
+	if [[ $mode != "c" ]]; then
+		stats_skipped=$(($stats_skipped+1))
+		return
+	fi
+
+	# print out the input test data to the log file
+	print_data "$1" "$2"
+
+	# build the command
+	testcmd="$2"
+	testvalgrind="valgrind \
+		       --tool=memcheck \
+		       --error-exitcode=1 \
+		       --leak-check=full \
+		       --read-var-info=yes \
+		       --track-origins=yes"
+	if [[ -n $logfile ]]; then
+		testvalgrind+=" --log-fd=$logfd"
+	fi
+	if [[ -z $verbose ]]; then
+		testvalgrind+=" --quiet --log-fd=4"
+	fi
+
+	# run the command
+	exec 4>/dev/null
+	print_valgrind "$1"
+	run_test_command "$1" "$testvalgrind --" "./$testcmd -b" 4 2
+	rc=$?
+	exec 4>&-
 	if [[ $rc -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$rc"
 		stats_failure=$(($stats_failure+1))
@@ -560,7 +611,7 @@ function run_test_live() {
 
 	# run the command
 	exec 4>/dev/null
-	run_test_command "$1" "$line_cmd" "$line_act" "" 4
+	run_test_command "$1" "./$line_cmd" "$line_act" "" 4
 	rc=$?
 	exec 4>&-
 
@@ -603,7 +654,7 @@ function run_test_live() {
 #
 function run_test() {
 	# generate the test number string for the line of batch test data
-	local testnumstr=$(generate_test_num "$1" $2 0)
+	local testnumstr=$(generate_test_num "$1" $2 1)
 
 	# ensure we only run tests which match the specified type
 	[[ -n $type && "$4" != "$type" ]] && return
@@ -615,6 +666,13 @@ function run_test() {
 		run_test_bpf_sim "$1" $2 "$3"
 	elif [[ "$4" == "bpf-sim-fuzz" ]]; then
 		run_test_bpf_sim_fuzz "$1" $2 "$3"
+	elif [[ "$4" == "bpf-valgrind" ]]; then
+		# only run this test if valgrind is installed
+		if check_deps valgrind; then
+			run_test_bpf_valgrind "$testnumstr" "$3"
+		else
+			stats_skipped=$(($stats_skipped+1))
+		fi
 	elif [[ "$4" == "live" ]]; then
 		# only run this test if explicitly requested
 		if [[ -n $type ]]; then
@@ -712,13 +770,12 @@ batch_count=0
 logfile=
 logfd=
 mode_list=""
-runall=false
+runall=
 singlecount=0
 tmpfile=""
 tmpdir=""
 type=
-use_valgrind=false
-verbose=false
+verbose=
 stats_all=0
 stats_skipped=0
 stats_success=0
@@ -728,15 +785,11 @@ stats_error=0
 while getopts "ab:gl:m:s:t:T:vh" opt; do
 	case $opt in
 	a)
-		runall=true
+		runall=1
 		;;
 	b)
 		batch_list[batch_count]="$OPTARG"
 		batch_count=$(($batch_count+1))
-		;;
-	g)
-		verify_deps valgrind
-		use_valgrind=true
 		;;
 	l)
 		logfile="$OPTARG"
@@ -766,7 +819,7 @@ while getopts "ab:gl:m:s:t:T:vh" opt; do
 		type="$OPTARG"
 		;;
 	v)
-		verbose=true
+		verbose=1
 		;;
 	h|*)
 		usage
@@ -782,11 +835,11 @@ fi
 
 # default to all tests if batch or single tests not requested
 if [[ -z $batch_list ]] && [[ -z $single_list ]]; then
-	runall=true
+	runall=1
 fi
 
 # drop any requested batch and single tests if all tests were requested
-if $runall; then
+if [[ -n $runall ]]; then
 	batch_list=()
 	single_list=()
 fi
@@ -825,4 +878,8 @@ echo "============================================================" >&$logfd
 
 # cleanup and exit
 rm -f $tmpfile
-exit 0
+rc=0
+[[ $stats_failure -gt 0 ]] && rc=$(($rc + 2))
+[[ $stats_error -gt 0 ]] && rc=$(($rc + 4))
+
+exit $rc
