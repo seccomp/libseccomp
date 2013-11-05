@@ -163,7 +163,7 @@ cdef class Arg:
         """ Initialize the argument comparison.
 
         Arguments:
-        arg - the arguement number, starting at 0
+        arg - the argument number, starting at 0
         op - the argument comparison operator, e.g. {NE,LT,LE,...}
         datum_a - argument value
         datum_b - argument value, only valid when op == MASKED_EQ
