@@ -79,8 +79,16 @@ KILL = libseccomp.SCMP_ACT_KILL
 TRAP = libseccomp.SCMP_ACT_TRAP
 ALLOW = libseccomp.SCMP_ACT_ALLOW
 def ERRNO(int errno):
+    """The action ERRNO(x) means that the syscall will return (x).
+    To conform to Linux syscall calling conventions, the syscall return
+    value should almost always be a negative number.
+    """
     return libseccomp.SCMP_ACT_ERRNO(errno)
 def TRACE(int value):
+    """The action TRACE(x) means that, if the process is being traced, (x)
+    will be returned to the tracing process via PTRACE_EVENT_SECCOMP
+    and the PTRACE_GETEVENTMSG option.
+    """
     return libseccomp.SCMP_ACT_TRACE(value)
 
 NE = libseccomp.SCMP_CMP_NE
