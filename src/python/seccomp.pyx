@@ -118,10 +118,16 @@ def resolve_syscall(arch, syscall):
     Resolve an architecture's syscall name to the correct number or the
     syscall number to the correct name.
     """
+    cdef char *ret_str
+
     if (isinstance(syscall, basestring)):
         return libseccomp.seccomp_syscall_resolve_name_arch(arch, syscall)
     elif (isinstance(syscall, int)):
-        return libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
+        ret_str = libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
+        if ret_str is NULL:
+            raise ValueError('Unknown syscall %d on arch %d' % (syscall, arch))
+        else:
+            return ret_str
     else:
         raise TypeError("Syscall must either be an int or str type")
 
