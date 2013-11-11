@@ -68,6 +68,7 @@ PYTHON ?= /usr/bin/env python
 
 # we require gcc specific functionality
 GCC ?= gcc
+OBJDUMP ?= objdump
 
 INSTALL ?= install
 
@@ -165,7 +166,7 @@ ifeq ($(V),0)
 endif
 INSTALL_LIB_MACRO += \
 		basename=$$(echo $^ | sed -e 's/.so.*$$/.so/'); \
-		soname=$$(objdump -p $^ | grep "SONAME" | awk '{print $$2}'); \
+		soname=$$($(OBJDUMP) -p $^ | grep "SONAME" | awk '{print $$2}'); \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) \
 			-d "$(INSTALL_LIB_DIR)"; \
 		$(INSTALL) -o $(INSTALL_OWNER) -g $(INSTALL_GROUP) -m 0755 \
