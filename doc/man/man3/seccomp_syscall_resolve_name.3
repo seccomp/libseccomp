@@ -1,4 +1,4 @@
-.TH "seccomp_syscall_resolve_name" 3 "7 January 2013" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_syscall_resolve_name" 3 "11 November 2013" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -44,8 +44,10 @@ the associated syscall number is returned, with the negative pseudo syscall
 number being returned in cases where the given syscall does not exist for the
 architeture.  The value
 .BR __NR_SCMP_ERROR
-is returned in case of error.  In all cases, the return value is suitable for
-use in any libseccomp API function which requires the syscall number, examples include
+is returned if the syscall does not exist with other negative values returned
+on other error conditions.  In all cases, the return value is suitable for
+use in any libseccomp API function which requires the syscall number, examples
+include
 .BR seccomp_rule_add ()
 and
 .BR seccomp_rule_add_exact ().
