@@ -286,15 +286,15 @@ API int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
 	const struct arch_def *arch;
 
 	if (name == NULL)
-		return -EINVAL;
+		return __NR_SCMP_ERROR;
 
 	if (arch_token == 0)
 		arch_token = arch_def_native->token;
 	if (arch_valid(arch_token))
-		return -EINVAL;
+		return __NR_SCMP_ERROR;
 	arch = arch_def_lookup(arch_token);
 	if (arch == NULL)
-		return -EFAULT;
+		return __NR_SCMP_ERROR;
 
 	return arch_syscall_resolve_name(arch, name);
 }
