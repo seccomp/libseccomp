@@ -353,8 +353,7 @@ char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num);
  *
  * Resolve the given syscall name to the syscall number for the given
  * architecture.  Returns the syscall number on success, including negative
- * pseudo syscall numbers (e.g. __PNR_*); returns __NR_SCMP_ERROR if the
- * syscall does not exist, negative values on other error conditions.
+ * pseudo syscall numbers (e.g. __PNR_*); returns __NR_SCMP_ERROR on failure.
  *
  */
 int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name);
@@ -365,8 +364,7 @@ int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name);
  *
  * Resolve the given syscall name to the syscall number.  Returns the syscall
  * number on success, including negative pseudo syscall numbers (e.g. __PNR_*);
- * returns __NR_SCMP_ERROR if the syscall does not exist, negative values on
- * other error conditions.
+ * returns __NR_SCMP_ERROR on failure.
  *
  */
 int seccomp_syscall_resolve_name(const char *name);
