@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	if (isdigit(argv[optind][0]) || argv[optind][0] == '-') {
 		sys_num = atoi(argv[optind]);
 		sys_name = arch_syscall_resolve_num(arch, sys_num);
-		printf("%s\n", sys_name);
+		printf("%s\n", (sys_name ? sys_name : "UNKNOWN"));
 	} else {
 		sys_num = arch_syscall_resolve_name(arch, argv[optind]);
 		if (translate != 0)
