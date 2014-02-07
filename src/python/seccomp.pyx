@@ -182,7 +182,7 @@ cdef class Arg:
         self._arg.datum_a = datum_a
         self._arg.datum_b = datum_b
 
-    def to_c(self):
+    cdef libseccomp.scmp_arg_cmp to_c(self):
         """ Convert the object into a C structure.
 
         Description:
@@ -425,6 +425,7 @@ cdef class SyscallFilter:
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add() function and the inability of Cython
         to handle this automatically """
+        cdef Arg arg
         for i, arg in enumerate(args):
             c_arg[i] = arg.to_c()
         if len(args) == 0:
@@ -504,6 +505,7 @@ cdef class SyscallFilter:
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add_exact() function and the inability of
         Cython to handle this automatically """
+        cdef Arg arg
         for i, arg in enumerate(args):
             c_arg[i] = arg.to_c()
         if len(args) == 0:
