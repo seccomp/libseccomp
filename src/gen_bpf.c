@@ -1149,8 +1149,8 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		}
 	}
 
-	if ((db->arch->token == SCMP_ARCH_X86_64 ||
-	     db->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL))
+	if ((state->arch->token == SCMP_ARCH_X86_64 ||
+	     state->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL))
 		acc_reset = false;
 	else
 		acc_reset = true;
@@ -1186,14 +1186,14 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 	}
 
 	/* additional ABI filtering */
-	if ((db->arch->token == SCMP_ARCH_X86_64 ||
-	     db->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL)) {
+	if ((state->arch->token == SCMP_ARCH_X86_64 ||
+	     state->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL)) {
 		_BPF_INSTR(instr, BPF_LD + BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
 			   _BPF_SYSCALL);
 		b_new = _blk_append(state, NULL, &instr);
 		if (b_new == NULL)
 			goto arch_failure;
-		if (db->arch->token == SCMP_ARCH_X86_64) {
+		if (state->arch->token == SCMP_ARCH_X86_64) {
 			/* filter out x32 */
 			_BPF_INSTR(instr, BPF_JMP + BPF_JGE,
 				   _BPF_JMP_NXT(blk_cnt++), _BPF_JMP_NO,
@@ -1202,7 +1202,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 				instr.jf = _BPF_JMP_HSH(b_head->hash);
 			else
 				instr.jf = _BPF_JMP_HSH(state->def_hsh);
-		} else if (db->arch->token == SCMP_ARCH_X32) {
+		} else if (state->arch->token == SCMP_ARCH_X32) {
 			/* filter out x86_64 */
 			_BPF_INSTR(instr, BPF_JMP + BPF_JGE,
 				   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt++),
@@ -1229,7 +1229,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 	/* do the ABI/architecture check */
 	_BPF_INSTR(instr, BPF_JMP + BPF_JEQ,
 		   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt++),
-		   _BPF_K(db->arch->token_bpf));
+		   _BPF_K(state->arch->token_bpf));
 	if (b_head != NULL)
 		instr.jt = _BPF_JMP_HSH(b_head->hash);
 	else
