@@ -31,6 +31,8 @@
 
 extern const struct arch_def arch_def_arm;
 
+#define arm_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
+
 int arm_syscall_resolve_name(const char *name);
 const char *arm_syscall_resolve_num(int num);
 

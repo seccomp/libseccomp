@@ -158,6 +158,32 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 }
 
 /**
+ * Determine the argument offset
+ * @param arch the architecture definition
+ * @param arg the argument number
+ *
+ * Determine the correct offset for the given argument based on the
+ * architecture definition.  Returns the offset on success, negative values on
+ * failure.
+ *
+ */
+int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
+{
+	switch (arch->token) {
+	case SCMP_ARCH_X86:
+		return x86_arg_offset(arg);
+	case SCMP_ARCH_X86_64:
+		return x86_64_arg_offset(arg);
+	case SCMP_ARCH_X32:
+		return x32_arg_offset(arg);
+	case SCMP_ARCH_ARM:
+		return arm_arg_offset(arg);
+	default:
+		return -EDOM;
+	}
+}
+
+/**
  * Resolve a syscall name to a number
  * @param arch the architecture definition
  * @param name the syscall name

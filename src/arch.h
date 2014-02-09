@@ -81,17 +81,9 @@ const struct arch_def *arch_def_lookup(uint32_t token);
 
 int arch_arg_count_max(const struct arch_def *arch);
 
-/**
- * Determine the argument offset
- * @param _arg the argument number
- *
- * Return the correct offset of the given argument.
- *
- */
-#define arch_arg_offset(_arg)	(offsetof(struct seccomp_data, args[_arg]))
-
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg);
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg);
+int arch_arg_offset(const struct arch_def *arch, unsigned int arg);
 
 int arch_syscall_resolve_name(const struct arch_def *arch, const char *name);
 const char *arch_syscall_resolve_num(const struct arch_def *arch, int num);

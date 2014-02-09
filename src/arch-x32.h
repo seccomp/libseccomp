@@ -33,6 +33,8 @@
 
 extern const struct arch_def arch_def_x32;
 
+#define x32_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
+
 int x32_syscall_resolve_name(const char *name);
 const char *x32_syscall_resolve_num(int num);
 

@@ -31,6 +31,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+#include <endian.h>
+
 #include "bpf.h"
 
 #define BPF_PRG_MAX_LEN		4096
@@ -49,6 +54,54 @@ struct bpf_program {
 };
 
 static unsigned int opt_verbose = 0;
+
+/**
+ * Convert a 16-bit target integer into the host's endianess
+ * @param arch the architecture token
+ * @param val the 16-bit integer
+ *
+ * Convert the endianess of the supplied value and return it to the caller.
+ *
+ */
+uint16_t _ttoh16(uint32_t arch, uint16_t val)
+{
+	if (arch & __AUDIT_ARCH_LE)
+		return le16toh(val);
+	else
+		return be16toh(val);
+}
+
+/**
+ * Convert a 32-bit target integer into the host's endianess
+ * @param arch the architecture token
+ * @param val the 32-bit integer
+ *
+ * Convert the endianess of the supplied value and return it to the caller.
+ *
+ */
+uint32_t _ttoh32(uint32_t arch, uint32_t val)
+{
+	if (arch & __AUDIT_ARCH_LE)
+		return le32toh(val);
+	else
+		return be32toh(val);
+}
+
+/**
+ * Convert a 32-bit host integer into the target's endianess
+ * @param arch the architecture token
+ * @param val the 32-bit integer
+ *
+ * Convert the endianess of the supplied value and return it to the caller.
+ *
+ */
+uint32_t _htot32(uint32_t arch, uint32_t val)
+{
+	if (arch & __AUDIT_ARCH_LE)
+		return htole32(val);
+	else
+		return htobe32(val);
+}
 
 /**
  * Print the usage information to stderr and exit
@@ -152,6 +205,10 @@ static void bpf_execute(const struct bpf_program *prg,
 	struct sim_state state;
 	bpf_instr_raw *bpf;
 	unsigned char *sys_data_b = (unsigned char *)sys_data;
+	uint16_t code;
+	uint8_t jt;
+	uint8_t jf;
+	uint32_t k;
 
 	/* initialize the machine state */
 	ip_c = 0;
@@ -163,42 +220,48 @@ static void bpf_execute(const struct bpf_program *prg,
 		ip_c = ip;
 		bpf = &prg->i[ip++];
 
-		switch (bpf->code) {
+		code = _ttoh16(sys_data->arch, bpf->code);
+		jt = bpf->jt;
+		jf = bpf->jf;
+		k = _ttoh32(sys_data->arch, bpf->k);
+
+		switch (code) {
 		case BPF_LD+BPF_W+BPF_ABS:
-			if (bpf->k < BPF_SYSCALL_MAX)
-				state.acc = *((uint32_t *)&sys_data_b[bpf->k]);
-			else
+			if (bpf->k < BPF_SYSCALL_MAX) {
+				uint32_t val = *((uint32_t *)&sys_data_b[k]);
+				state.acc = _htot32(sys_data->arch, val);
+			} else
 				exit_error(ERANGE, ip_c);
 			break;
 		case BPF_ALU+BPF_OR+BPF_K:
-			state.acc |= bpf->k;
+			state.acc |= k;
 			break;
 		case BPF_ALU+BPF_AND+BPF_K:
-			state.acc &= bpf->k;
+			state.acc &= k;
 			break;
 		case BPF_JMP+BPF_JA:
-			ip += bpf->k;
+			ip += k;
 			break;
 		case BPF_JMP+BPF_JEQ+BPF_K:
-			if (state.acc == bpf->k)
-				ip += bpf->jt;
+			if (state.acc == k)
+				ip += jt;
 			else
-				ip += bpf->jf;
+				ip += jf;
 			break;
 		case BPF_JMP+BPF_JGT+BPF_K:
-			if (state.acc > bpf->k)
-				ip += bpf->jt;
+			if (state.acc > k)
+				ip += jt;
 			else
-				ip += bpf->jf;
+				ip += jf;
 			break;
 		case BPF_JMP+BPF_JGE+BPF_K:
-			if (state.acc >= bpf->k)
-				ip += bpf->jt;
+			if (state.acc >= k)
+				ip += jt;
 			else
-				ip += bpf->jf;
+				ip += jf;
 			break;
 		case BPF_RET+BPF_K:
-			end_action(bpf->k, ip_c);
+			end_action(k, ip_c);
 			break;
 		default:
 			/* since we don't support the full bpf language just

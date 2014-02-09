@@ -31,8 +31,9 @@
 
 extern const struct arch_def arch_def_x86_64;
 
-#define x86_64_arg_offset_lo(x)		(arch_arg_offset(x))
-#define x86_64_arg_offset_hi(x)		(arch_arg_offset(x) + 4)
+#define x86_64_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
+#define x86_64_arg_offset_lo(x)		(x86_64_arg_offset(x))
+#define x86_64_arg_offset_hi(x)		(x86_64_arg_offset(x) + 4)
 
 int x86_64_syscall_resolve_name(const char *name);
 const char *x86_64_syscall_resolve_num(int num);

@@ -26,6 +26,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+#include <endian.h>
+
 #include <seccomp.h>
 
 #include "arch.h"
@@ -65,6 +70,8 @@ struct bpf_jump {
 	} tgt;
 	enum bpf_jump_type type;
 };
+#define _BPF_OP(a,x) \
+	(_htot16(a,x))
 #define _BPF_JMP_NO \
 	((struct bpf_jump) { .type = TGT_NONE })
 #define _BPF_JMP_NXT(x) \
@@ -77,8 +84,8 @@ struct bpf_jump {
 	((struct bpf_jump) { .type = TGT_PTR_BLK, .tgt = { .blk = (x) } })
 #define _BPF_JMP_HSH(x) \
 	((struct bpf_jump) { .type = TGT_PTR_HSH, .tgt = { .hash = (x) } })
-#define _BPF_K(x) \
-	((struct bpf_jump) { .type = TGT_K, .tgt = { .imm_k = (x) } })
+#define _BPF_K(a,x) \
+	((struct bpf_jump) { .type = TGT_K, .tgt = { .imm_k = _htot32(a,x) } })
 #define _BPF_JMP_MAX			255
 #define _BPF_JMP_MAX_RET		255
 
@@ -89,7 +96,7 @@ struct bpf_instr {
 	struct bpf_jump k;
 };
 #define _BPF_OFFSET_SYSCALL		(offsetof(struct seccomp_data, nr))
-#define _BPF_SYSCALL			_BPF_K(_BPF_OFFSET_SYSCALL)
+#define _BPF_SYSCALL(a)			_BPF_K(a,_BPF_OFFSET_SYSCALL)
 
 struct bpf_blk {
 	struct bpf_instr *blks;
@@ -170,6 +177,38 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 
 static struct bpf_blk *_hsh_remove(struct bpf_state *state, uint64_t h_val);
 static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
+
+/**
+ * Convert a 16-bit host integer into the target's endianess
+ * @param arch the architecture definition
+ * @param val the 16-bit integer
+ *
+ * Convert the endianess of the supplied value and return it to the caller.
+ *
+ */
+uint16_t _htot16(const struct arch_def *arch, uint16_t val)
+{
+	if (arch->endian == ARCH_ENDIAN_LITTLE)
+		return htole16(val);
+	else
+		return htobe16(val);
+}
+
+/**
+ * Convert a 32-bit host integer into the target's endianess
+ * @param arch the architecture definition
+ * @param val the 32-bit integer
+ *
+ * Convert the endianess of the supplied value and return it to the caller.
+ *
+ */
+uint32_t _htot32(const struct arch_def *arch, uint32_t val)
+{
+	if (arch->endian == ARCH_ENDIAN_LITTLE)
+		return htole32(val);
+	else
+		return htobe32(val);
+}
 
 /**
  * Free the BPF instruction block
@@ -627,7 +666,8 @@ static struct bpf_blk *_gen_bpf_action(struct bpf_state *state,
 {
 	struct bpf_instr instr;
 
-	_BPF_INSTR(instr, BPF_RET, _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(action));
+	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_RET),
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(state->arch, action));
 	return _blk_append(state, blk, &instr);
 }
 
@@ -701,8 +741,9 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		/* reload the accumulator */
 		a_state->offset = acc_offset;
 		a_state->mask = ARG_MASK_MAX;
-		_BPF_INSTR(instr, BPF_LD + BPF_ABS,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_offset));
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, acc_offset));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto node_failure;
@@ -710,8 +751,9 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	if (acc_mask != a_state->mask) {
 		/* apply the bitmask */
 		a_state->mask = acc_mask;
-		_BPF_INSTR(instr, BPF_ALU + BPF_AND,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(acc_mask));
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_ALU + BPF_AND),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, acc_mask));
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto node_failure;
@@ -721,16 +763,19 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	switch (node->op) {
 	case SCMP_CMP_MASKED_EQ:
 	case SCMP_CMP_EQ:
-		_BPF_INSTR(instr, BPF_JMP + BPF_JEQ,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum));
 		break;
 	case SCMP_CMP_GT:
-		_BPF_INSTR(instr, BPF_JMP + BPF_JGT,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGT),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum));
 		break;
 	case SCMP_CMP_GE:
-		_BPF_INSTR(instr, BPF_JMP + BPF_JGE,
-			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_K(node->datum));
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum));
 		break;
 	case SCMP_CMP_NE:
 	case SCMP_CMP_LT:
@@ -1021,8 +1066,9 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 
 	/* setup the accumulator state */
 	if (acc_reset) {
-		_BPF_INSTR(instr, BPF_LD + BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
-			   _BPF_SYSCALL);
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_SYSCALL(state->arch));
 		blk_s = _blk_append(state, NULL, &instr);
 		if (blk_s == NULL)
 			return NULL;
@@ -1040,9 +1086,9 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 		return NULL;
 
 	/* syscall check */
-	_BPF_INSTR(instr, BPF_JMP + BPF_JEQ,
+	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
 		   _BPF_JMP_HSH(blk_c->hash), _BPF_JMP_HSH(nxt_hash),
-		   _BPF_K(sys->num));
+		   _BPF_K(state->arch, sys->num));
 	blk_s = _blk_append(state, blk_s, &instr);
 	if (blk_s == NULL)
 		return NULL;
@@ -1188,25 +1234,27 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 	/* additional ABI filtering */
 	if ((state->arch->token == SCMP_ARCH_X86_64 ||
 	     state->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL)) {
-		_BPF_INSTR(instr, BPF_LD + BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
-			   _BPF_SYSCALL);
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
+			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL(state->arch));
 		b_new = _blk_append(state, NULL, &instr);
 		if (b_new == NULL)
 			goto arch_failure;
 		if (state->arch->token == SCMP_ARCH_X86_64) {
 			/* filter out x32 */
-			_BPF_INSTR(instr, BPF_JMP + BPF_JGE,
+			_BPF_INSTR(instr,
+				   _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
 				   _BPF_JMP_NXT(blk_cnt++), _BPF_JMP_NO,
-				   _BPF_K(X32_SYSCALL_BIT));
+				   _BPF_K(state->arch, X32_SYSCALL_BIT));
 			if (b_head != NULL)
 				instr.jf = _BPF_JMP_HSH(b_head->hash);
 			else
 				instr.jf = _BPF_JMP_HSH(state->def_hsh);
 		} else if (state->arch->token == SCMP_ARCH_X32) {
 			/* filter out x86_64 */
-			_BPF_INSTR(instr, BPF_JMP + BPF_JGE,
+			_BPF_INSTR(instr,
+				   _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
 				   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt++),
-				   _BPF_K(X32_SYSCALL_BIT));
+				   _BPF_K(state->arch, X32_SYSCALL_BIT));
 			if (b_head != NULL)
 				instr.jt = _BPF_JMP_HSH(b_head->hash);
 			else
@@ -1227,9 +1275,9 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 	}
 
 	/* do the ABI/architecture check */
-	_BPF_INSTR(instr, BPF_JMP + BPF_JEQ,
+	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
 		   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt++),
-		   _BPF_K(state->arch->token_bpf));
+		   _BPF_K(state->arch, state->arch->token_bpf));
 	if (b_head != NULL)
 		instr.jt = _BPF_JMP_HSH(b_head->hash);
 	else
@@ -1382,7 +1430,8 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 	if (b_tgt == blk)
 		return -EFAULT;
 
-	if (b_tgt->blk_cnt == 1 && b_tgt->blks[0].op == BPF_RET) {
+	if (b_tgt->blk_cnt == 1 &&
+	    b_tgt->blks[0].op == _BPF_OP(state->arch, BPF_RET)) {
 		rc = _gen_bpf_build_jmp_ret(state, blk, offset, b_tgt);
 		if (rc == 1)
 			return 1;
@@ -1416,7 +1465,7 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		return -EFAULT;
 
 	/* we need to insert a long jump - create one */
-	_BPF_INSTR(instr, BPF_JMP + BPF_JA,
+	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JA),
 		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_JMP_HSH(tgt_hash));
 	b_new = _blk_append(state, NULL, &instr);
 	if (b_new == NULL)
@@ -1461,9 +1510,15 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	struct bpf_blk *b_badarch, *b_default;
 	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new, *b_jmp;
 	struct db_filter *db_secondary = NULL;
+	struct arch_def pseudo_arch;
 
 	if (col->filter_cnt == 0)
 		return -EINVAL;
+
+	/* create a fake architecture definition for use in the early stages */
+	memset(&pseudo_arch, 0, sizeof(pseudo_arch));
+	pseudo_arch.endian = col->endian;
+	state->arch = &pseudo_arch;
 
 	/* generate the badarch action */
 	b_badarch = _gen_bpf_action(state, NULL, state->attr->act_badarch);
@@ -1483,8 +1538,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	state->def_hsh = b_default->hash;
 
 	/* load the architecture token/number */
-	_BPF_INSTR(instr, BPF_LD + BPF_ABS, _BPF_JMP_NO, _BPF_JMP_NO,
-		   _BPF_K(offsetof(struct seccomp_data, arch)));
+	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
+		   _BPF_JMP_NO, _BPF_JMP_NO,
+		   _BPF_K(state->arch, offsetof(struct seccomp_data, arch)));
 	b_head = _blk_append(state, NULL, &instr);
 	if (b_head == NULL)
 		return -ENOMEM;
@@ -1531,6 +1587,9 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	b_badarch->next = NULL;
 	b_tail->next = b_badarch;
 	b_tail = b_badarch;
+
+	/* reset the state to the pseudo_arch for the final resolution */
+	state->arch = &pseudo_arch;
 
 	/* resolve any TGT_NXT jumps at the top level */
 	b_iter = b_head;
@@ -1684,7 +1743,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				}
 				if (b_jmp == NULL)
 					goto build_bpf_free_blks;
-				i_iter->k = _BPF_K(jmp_len);
+				i_iter->k = _BPF_K(state->arch, jmp_len);
 			}
 		}
 
