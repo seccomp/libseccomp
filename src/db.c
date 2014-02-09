@@ -392,6 +392,9 @@ void db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	free(col->filters);
 	col->filters = NULL;
 
+	/* set the endianess to undefined */
+	col->endian = 0;
+
 	/* set the default attribute values */
 	col->attr.act_default = def_action;
 	col->attr.act_badarch = SCMP_ACT_KILL;
@@ -476,6 +479,10 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 {
 	unsigned int iter_a, iter_b;
 	struct db_filter **dbs;
+
+	/* verify that the endianess is a match */
+	if (col_dst->endian != col_src->endian)
+		return -EEXIST;
 
 	/* make sure we don't have any arch/filter collisions */
 	for (iter_a = 0; iter_a < col_dst->filter_cnt; iter_a++) {
@@ -613,6 +620,9 @@ int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
 {
 	struct db_filter **dbs;
 
+	if (col->endian != 0 && col->endian != db->arch->endian)
+		return -EEXIST;
+
 	if (db_col_arch_exist(col, db->arch->token))
 		return -EEXIST;
 
@@ -623,6 +633,8 @@ int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
 	col->filters = dbs;
 	col->filter_cnt++;
 	col->filters[col->filter_cnt - 1] = db;
+	if (col->endian == 0)
+		col->endian = db->arch->endian;
 
 	return 0;
 }

@@ -145,6 +145,7 @@ struct db_filter_col {
 	struct db_filter_attr attr;
 
 	/* individual filters */
+	int endian;
 	struct db_filter **filters;
 	unsigned int filter_cnt;
 };
