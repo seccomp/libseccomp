@@ -42,7 +42,7 @@ and
 .BR seccomp_syscall_resolve_name_arch()
 the associated syscall number is returned, with the negative pseudo syscall
 number being returned in cases where the given syscall does not exist for the
-architeture.  The value
+architecture.  The value
 .BR __NR_SCMP_ERROR
 is returned in case of error.  In all cases, the return value is suitable for
 use in any libseccomp API function which requires the syscall number, examples include
