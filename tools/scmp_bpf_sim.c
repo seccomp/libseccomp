@@ -38,6 +38,20 @@
 
 #include "bpf.h"
 
+#if __i386__
+#define ARCH_NATIVE		AUDIT_ARCH_X86
+#elif __x86_64__
+#ifdef __ILP32__
+#define ARCH_NATIVE		AUDIT_ARCH_X86_64
+#else
+#define ARCH_NATIVE		AUDIT_ARCH_X86_64
+#endif /* __ILP32__ */
+#elif __arm__
+#define ARCH_NATIVE		AUDIT_ARCH_ARM
+#else
+#error the simulator code needs to know about your machine type
+#endif /* machine type guess */
+
 #define BPF_PRG_MAX_LEN		4096
 
 /**
@@ -287,8 +301,9 @@ int main(int argc, char *argv[])
 	struct seccomp_data sys_data;
 	struct bpf_program bpf_prg;
 
-	/* clear the syscall record */
+	/* initialize the syscall record */
 	memset(&sys_data, 0, sizeof(sys_data));
+	sys_data.arch = ARCH_NATIVE;
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:f:h:s:v0:1:2:3:4:5:")) > 0) {
