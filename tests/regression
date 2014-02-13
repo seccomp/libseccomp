@@ -614,33 +614,44 @@ function run_test_live() {
 	run_test_command "$1" "./$line_cmd" "$line_act" "" 4
 	rc=$?
 	exec 4>&-
+	stats_all=$(($stats_all+1))
 
-	# return value codes for this test type:
-	#  159: KILL
-	#  160: ALLOW
-	#  161: TRAP
-	#  162: TRACE (currently unsupported)
-	#  163: ERRNO
-	if [[ $line_act == "KILL" && $rc -eq 159 ]]; then
+	# setup the arch specific return values
+	case "$arch" in
+	x86|x86_64|x32|arm)
+		rc_kill=159
+		rc_allow=160
+		rc_trap=161
+		rc_trace=162
+		rc_errno=163
+		;;
+	*)
+		print_result $testnumstr "ERROR" "arch $arch not supported"
+		stats_error=$(($stats_error+1))
+		return
+		;;
+	esac
+
+	# verify the results
+	if [[ $line_act == "KILL" && $rc -eq $rc_kill ]]; then
 		print_result $1 "SUCCESS" ""
 		stats_success=$(($stats_success+1))
-	elif [[ $line_act == "ALLOW" && $rc -eq 160 ]]; then
+	elif [[ $line_act == "ALLOW" && $rc -eq $rc_allow ]]; then
 		print_result $1 "SUCCESS" ""
 		stats_success=$(($stats_success+1))
-	elif [[ $line_act == "TRAP" && $rc -eq 161 ]]; then
+	elif [[ $line_act == "TRAP" && $rc -eq $rc_trap ]]; then
 		print_result $1 "SUCCESS" ""
 		stats_success=$(($stats_success+1))
 	elif [[ $line_act == "TRACE" ]]; then
 		print_result $1 "ERROR" "unsupported action \"$line_act\""
 		stats_error=$(($stats_error+1))
-	elif [[ $line_act == "ERRNO" && $rc -eq 163 ]]; then
+	elif [[ $line_act == "ERRNO" && $rc -eq $rc_errno ]]; then
 		print_result $1 "SUCCESS" ""
 		stats_success=$(($stats_success+1))
 	else
 		print_result $1 "FAILURE" "$line_test rc=$rc"
 		stats_failure=$(($stats_failure+1))
 	fi
-	stats_all=$(($stats_all+1))
 }
 
 #
