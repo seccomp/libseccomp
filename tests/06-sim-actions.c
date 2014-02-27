@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	struct util_options opts;
-	scmp_filter_ctx ctx;
+	scmp_filter_ctx ctx = NULL;
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)

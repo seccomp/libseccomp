@@ -28,7 +28,7 @@
 int main(int argc, char *argv[])
 {
 	int rc;
-	scmp_filter_ctx ctx;
+	scmp_filter_ctx ctx = NULL;
 
 	rc = util_action_parse(argv[1]);
 	if (rc != SCMP_ACT_ALLOW) {

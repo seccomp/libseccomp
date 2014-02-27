@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	int fd;
-	scmp_filter_ctx ctx;
+	scmp_filter_ctx ctx = NULL;
 	const char buf[] = "testing";
 	ssize_t buf_len = strlen(buf);
 

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	struct util_options opts;
-	scmp_filter_ctx ctx;
+	scmp_filter_ctx ctx = NULL;
 	struct scmp_arg_cmp arg_cmp;
 
 	rc = util_getopt(argc, argv, &opts);
