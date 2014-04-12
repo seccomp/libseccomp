@@ -32,7 +32,7 @@ include ../macros.mk
 include $(TOPDIR)/configure.mk
 include $(TOPDIR)/install.mk
 
-LDFLAGS := ../src/libseccomp.a
+LIBFLAGS := ../src/libseccomp.a
 
 TOOLS = scmp_bpf_disasm \
 	scmp_bpf_sim \

@@ -34,7 +34,7 @@ include $(TOPDIR)/configure.mk
 
 OBJS = util.o
 
-LDFLAGS := ../src/libseccomp.a $(OBJS)
+LIBFLAGS := ../src/libseccomp.a $(OBJS)
 
 TEST_PRIVATE = 00-test
 

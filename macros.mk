@@ -138,7 +138,7 @@ COMPILE += $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<;
 ifeq ($(V),0)
 	COMPILE_EXEC = @echo " CC $@";
 endif
-COMPILE_EXEC += $(GCC) $(CFLAGS) $(CPPFLAGS) -o $@ $< $(LDFLAGS);
+COMPILE_EXEC += $(GCC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $< $(LIBFLAGS);
 
 ifeq ($(V),0)
 	ARCHIVE = @echo " AR $@";
