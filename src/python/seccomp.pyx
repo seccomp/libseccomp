@@ -140,6 +140,8 @@ cdef class Arch:
     X86_64 - 64-bit x86
     X32 - 64-bit x86 using the x32 ABI
     ARM - ARM
+    MIPS - MIPS
+    MIPSEL - MIPS little endian
     """
 
     NATIVE = libseccomp.SCMP_ARCH_NATIVE
@@ -147,6 +149,8 @@ cdef class Arch:
     X86_64 = libseccomp.SCMP_ARCH_X86_64
     X32 = libseccomp.SCMP_ARCH_X32
     ARM = libseccomp.SCMP_ARCH_ARM
+    MIPS = libseccomp.SCMP_ARCH_MIPS
+    MIPSEL = libseccomp.SCMP_ARCH_MIPSEL
 
 cdef class Attr:
     """ Python object representing the SyscallFilter attributes.

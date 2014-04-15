@@ -38,6 +38,8 @@ def test(args):
         f.add_arch(Arch.X32)
     if not f.exist_arch(Arch.ARM):
         f.add_arch(Arch.ARM)
+    if not f.exist_arch(Arch.MIPSEL):
+        f.add_arch(Arch.MIPSEL)
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
