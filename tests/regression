@@ -21,7 +21,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-GLBL_ARCH_SUPPORT="x86 x86_64 x32 arm mipsel"
+GLBL_ARCH_LE_SUPPORT="x86 x86_64 x32 arm mipsel"
+GLBL_ARCH_BE_SUPPORT="mips"
 
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
@@ -344,8 +345,10 @@ function run_test_bpf_sim() {
 	if [[ "${testarch:0:1}" == "+" ]]; then
 		# run the tests on the specified architecture(s)
 		simarch_list="${testarch:1}"
-		if [[ "$simarch_list" == "all" ]]; then
-			simarch_list="$GLBL_ARCH_SUPPORT"
+		if [[ "$simarch_list" == "all_le" ]]; then
+			simarch_list="$GLBL_ARCH_LE_SUPPORT"
+		elif [[ "$simarch_list" == "all_be" ]]; then
+			simarch_list="$GLBL_ARCH_BE_SUPPORT"
 		fi
 	elif [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
 		# only run tests that match the current architecture

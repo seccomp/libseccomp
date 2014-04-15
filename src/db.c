@@ -668,7 +668,7 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
 	}
 	col->filters[--col->filter_cnt] = NULL;
 
-	if (col->filters > 0) {
+	if (col->filter_cnt > 0) {
 		/* NOTE: if we can't do the realloc it isn't fatal, we just
 		 *       have some extra space allocated */
 		dbs = realloc(col->filters,
