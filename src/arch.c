@@ -49,6 +49,8 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 const struct arch_def *arch_def_native = &arch_def_arm;
 #elif __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips;
+#elif __MIPSEL__
+const struct arch_def *arch_def_native = &arch_def_mipsel;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -68,6 +70,7 @@ int arch_valid(uint32_t arch)
 	case SCMP_ARCH_X32:
 	case SCMP_ARCH_ARM:
 	case SCMP_ARCH_MIPS:
+	case SCMP_ARCH_MIPSEL:
 		return 0;
 	}
 
@@ -94,6 +97,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_arm;
 	case SCMP_ARCH_MIPS:
 		return &arch_def_mips;
+	case SCMP_ARCH_MIPSEL:
+		return &arch_def_mipsel;
 	}
 
 	return NULL;
@@ -119,6 +124,7 @@ int arch_arg_count_max(const struct arch_def *arch)
 	case SCMP_ARCH_ARM:
 		return arm_arg_count_max;
 	case SCMP_ARCH_MIPS:
+	case SCMP_ARCH_MIPSEL:
 		return mips_arg_count_max;
 	}
 
@@ -188,6 +194,8 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 		return arm_arg_offset(arg);
 	case SCMP_ARCH_MIPS:
 		return mips_arg_offset(arg);
+	case SCMP_ARCH_MIPSEL:
+		return mipsel_arg_offset(arg);
 	default:
 		return -EDOM;
 	}
@@ -215,6 +223,7 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_name(name);
 	case SCMP_ARCH_MIPS:
+	case SCMP_ARCH_MIPSEL:
 		return mips_syscall_resolve_name(name);
 	}
 
@@ -243,6 +252,7 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_num(num);
 	case SCMP_ARCH_MIPS:
+	case SCMP_ARCH_MIPSEL:
 		return mips_syscall_resolve_num(num);
 	}
 

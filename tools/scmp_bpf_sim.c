@@ -50,6 +50,8 @@
 #define ARCH_NATIVE		AUDIT_ARCH_ARM
 #elif __MIPSEB__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPS
+#elif __MIPSEL__
+#define ARCH_NATIVE		AUDIT_ARCH_MIPSEL
 #else
 #error the simulator code needs to know about your machine type
 #endif /* machine type guess */
@@ -321,6 +323,8 @@ int main(int argc, char *argv[])
 				sys_data.arch = AUDIT_ARCH_ARM;
 			else if (strcmp(optarg, "mips") == 0)
 				sys_data.arch = AUDIT_ARCH_MIPS;
+			else if (strcmp(optarg, "mipsel") == 0)
+				sys_data.arch = AUDIT_ARCH_MIPSEL;
 			else
 				exit_fault(EINVAL);
 			break;

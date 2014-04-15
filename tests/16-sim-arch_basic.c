@@ -61,6 +61,12 @@ int main(int argc, char *argv[])
 			goto out;
 	}
 
+	if (seccomp_arch_exist(ctx, SCMP_ARCH_MIPSEL)) {
+		rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPSEL);
+		if (rc != 0)
+			goto out;
+	}
+
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
 	if (rc != 0)

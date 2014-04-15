@@ -125,6 +125,7 @@ struct scmp_arg_cmp {
  * The MIPS architecture token
  */
 #define SCMP_ARCH_MIPS		AUDIT_ARCH_MIPS
+#define SCMP_ARCH_MIPSEL	AUDIT_ARCH_MIPSEL
 
 /**
  * Convert a syscall name into the associated syscall number

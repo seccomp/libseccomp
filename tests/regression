@@ -21,7 +21,7 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-GLBL_ARCH_SUPPORT="x86 x86_64 x32 arm"
+GLBL_ARCH_SUPPORT="x86 x86_64 x32 arm mipsel"
 
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
@@ -621,6 +621,13 @@ function run_test_live() {
 	case "$arch" in
 	x86|x86_64|x32|arm)
 		rc_kill=159
+		rc_allow=160
+		rc_trap=161
+		rc_trace=162
+		rc_errno=163
+		;;
+	mipsel)
+		rc_kill=140
 		rc_allow=160
 		rc_trap=161
 		rc_trace=162

@@ -73,6 +73,8 @@ int main(int argc, char *argv[])
 				arch = &arch_def_arm;
 			else if (strcmp(optarg, "mips") == 0)
 				arch = &arch_def_mips;
+			else if (strcmp(optarg, "mipsel") == 0)
+				arch = &arch_def_mipsel;
 			else
 				exit_usage(argv[0]);
 			break;

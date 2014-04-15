@@ -33,3 +33,10 @@ const struct arch_def arch_def_mips = {
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_BIG,
 };
+
+const struct arch_def arch_def_mipsel = {
+	.token = SCMP_ARCH_MIPSEL,
+	.token_bpf = AUDIT_ARCH_MIPSEL,
+	.size = ARCH_SIZE_32,
+	.endian = ARCH_ENDIAN_LITTLE,
+};
