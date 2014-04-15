@@ -3,9 +3,9 @@
 #
 
 # information:
-# to createe entries run with the "--gen-suppressions=all" option, e.g.
+# to create entries run with the "--gen-suppressions=all" option, e.g.
 #  valgrind --gen-suppressions=all ...
-# to use the supressions run with the "--suppressions" options, e.g.
+# to use the suppressions run with the "--suppressions" options, e.g.
 #  valgrind --suppressions=<file> ...
 
 # Gentoo x86-64 system with valgrind-3.9.0 and glibc-2.19
