@@ -562,7 +562,8 @@ function run_test_bpf_valgrind() {
 		       --error-exitcode=1 \
 		       --leak-check=full \
 		       --read-var-info=yes \
-		       --track-origins=yes"
+		       --track-origins=yes \
+		       --suppressions=valgrind_test.supp"
 	if [[ -n $logfile ]]; then
 		testvalgrind+=" --log-fd=$logfd"
 	fi

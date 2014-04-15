@@ -132,6 +132,7 @@ function run_tests() {
 					--leak-check=full \
 					--read-var-info=yes \
 					--track-origins=yes \
+					--suppressions=valgrind_test.supp \
 					-- ./$batch_name -b > /dev/null
 				rc=$?
 				stats_all=$(($stats_all + 1))
