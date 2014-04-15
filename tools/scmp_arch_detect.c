@@ -78,6 +78,9 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_ARM:
 			printf("arm\n");
 			break;
+		case SCMP_ARCH_MIPS:
+			printf("mips\n");
+			break;
 		default:
 			printf("unknown\n");
 		}

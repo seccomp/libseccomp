@@ -31,6 +31,7 @@
 #include "../src/arch-x86_64.h"
 #include "../src/arch-x32.h"
 #include "../src/arch-arm.h"
+#include "../src/arch-mips.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
 				arch = &arch_def_x32;
 			else if (strcmp(optarg, "arm") == 0)
 				arch = &arch_def_arm;
+			else if (strcmp(optarg, "mips") == 0)
+				arch = &arch_def_mips;
 			else
 				exit_usage(argv[0]);
 			break;

@@ -34,6 +34,7 @@
 #include "arch-x86_64.h"
 #include "arch-x32.h"
 #include "arch-arm.h"
+#include "arch-mips.h"
 #include "system.h"
 
 #if __i386__
@@ -46,6 +47,8 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 #endif /* __ILP32__ */
 #elif __arm__
 const struct arch_def *arch_def_native = &arch_def_arm;
+#elif __MIPSEB__
+const struct arch_def *arch_def_native = &arch_def_mips;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -64,6 +67,7 @@ int arch_valid(uint32_t arch)
 	case SCMP_ARCH_X86_64:
 	case SCMP_ARCH_X32:
 	case SCMP_ARCH_ARM:
+	case SCMP_ARCH_MIPS:
 		return 0;
 	}
 
@@ -88,6 +92,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_x32;
 	case SCMP_ARCH_ARM:
 		return &arch_def_arm;
+	case SCMP_ARCH_MIPS:
+		return &arch_def_mips;
 	}
 
 	return NULL;
@@ -112,6 +118,8 @@ int arch_arg_count_max(const struct arch_def *arch)
 		return x32_arg_count_max;
 	case SCMP_ARCH_ARM:
 		return arm_arg_count_max;
+	case SCMP_ARCH_MIPS:
+		return mips_arg_count_max;
 	}
 
 	return -EDOM;
@@ -178,6 +186,8 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 		return x32_arg_offset(arg);
 	case SCMP_ARCH_ARM:
 		return arm_arg_offset(arg);
+	case SCMP_ARCH_MIPS:
+		return mips_arg_offset(arg);
 	default:
 		return -EDOM;
 	}
@@ -204,6 +214,8 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 		return x32_syscall_resolve_name(name);
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_name(name);
+	case SCMP_ARCH_MIPS:
+		return mips_syscall_resolve_name(name);
 	}
 
 	return __NR_SCMP_ERROR;
@@ -230,6 +242,8 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 		return x32_syscall_resolve_num(num);
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_num(num);
+	case SCMP_ARCH_MIPS:
+		return mips_syscall_resolve_num(num);
 	}
 
 	return NULL;

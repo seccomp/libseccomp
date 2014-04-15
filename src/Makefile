@@ -42,6 +42,7 @@ OBJS = \
 	arch-x86_64.o arch-x86_64-syscalls.o \
 	arch-x32.o arch-x32-syscalls.o \
 	arch-arm.o arch-arm-syscalls.o \
+	arch-mips.o arch-mips-syscalls.o \
 	hash.o \
 	gen_pfc.o gen_bpf.o
 
