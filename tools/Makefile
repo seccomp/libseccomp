@@ -32,7 +32,9 @@ include ../macros.mk
 include $(TOPDIR)/configure.mk
 include $(TOPDIR)/install.mk
 
-LIBFLAGS := ../src/libseccomp.a
+OBJS = util.o
+
+LIBFLAGS := ../src/libseccomp.a $(OBJS)
 
 TOOLS = scmp_bpf_disasm \
 	scmp_bpf_sim \
@@ -41,7 +43,8 @@ TOOLS = scmp_bpf_disasm \
 
 TOOLS_INSTALL = scmp_sys_resolver
 
-DEPS = $(TOOLS:%=%.d)
+DEPS_OBJS = $(OBJS:%.o=%.d)
+DEPS_TOOLS = $(TOOLS:%=%.d)
 
 #
 # targets
@@ -49,12 +52,13 @@ DEPS = $(TOOLS:%=%.d)
 
 .PHONY: install clean
 
-all: $(TOOLS)
+all: $(TOOLS) $(OBJS)
 
--include $(DEPS)
+-include $(DEPS_TOOLS) $(DEPS_OBJS)
 
-$(DEPS):
+$(DEPS_TOOLS):
 	$(MAKEDEP_EXEC)
+	$(ADDDEP) $@ $(OBJS)
 
 $(TOOLS):
 	$(COMPILE_EXEC)
@@ -63,4 +67,4 @@ install: $(TOOLS_INSTALL)
 	$(INSTALL_BIN_MACRO)
 
 clean:
-	$(RM) $(DEPS) $(TOOLS)
+	$(RM) $(DEPS_TOOLS) $(DEPS_OBJS) $(TOOLS)

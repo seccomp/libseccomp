@@ -31,30 +31,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE
-#endif
-#include <endian.h>
-
 #include "bpf.h"
-
-#if __i386__
-#define ARCH_NATIVE		AUDIT_ARCH_X86
-#elif __x86_64__
-#ifdef __ILP32__
-#define ARCH_NATIVE		AUDIT_ARCH_X86_64
-#else
-#define ARCH_NATIVE		AUDIT_ARCH_X86_64
-#endif /* __ILP32__ */
-#elif __arm__
-#define ARCH_NATIVE		AUDIT_ARCH_ARM
-#elif __MIPSEB__
-#define ARCH_NATIVE		AUDIT_ARCH_MIPS
-#elif __MIPSEL__
-#define ARCH_NATIVE		AUDIT_ARCH_MIPSEL
-#else
-#error the simulator code needs to know about your machine type
-#endif /* machine type guess */
+#include "util.h"
 
 #define BPF_PRG_MAX_LEN		4096
 
@@ -72,70 +50,6 @@ struct bpf_program {
 };
 
 static unsigned int opt_verbose = 0;
-
-/**
- * Convert a 16-bit target integer into the host's endianess
- * @param arch the architecture token
- * @param val the 16-bit integer
- *
- * Convert the endianess of the supplied value and return it to the caller.
- *
- */
-uint16_t _ttoh16(uint32_t arch, uint16_t val)
-{
-	if (arch & __AUDIT_ARCH_LE)
-		return le16toh(val);
-	else
-		return be16toh(val);
-}
-
-/**
- * Convert a 32-bit target integer into the host's endianess
- * @param arch the architecture token
- * @param val the 32-bit integer
- *
- * Convert the endianess of the supplied value and return it to the caller.
- *
- */
-uint32_t _ttoh32(uint32_t arch, uint32_t val)
-{
-	if (arch & __AUDIT_ARCH_LE)
-		return le32toh(val);
-	else
-		return be32toh(val);
-}
-
-/**
- * Convert a 32-bit host integer into the target's endianess
- * @param arch the architecture token
- * @param val the 32-bit integer
- *
- * Convert the endianess of the supplied value and return it to the caller.
- *
- */
-uint32_t _htot32(uint32_t arch, uint32_t val)
-{
-	if (arch & __AUDIT_ARCH_LE)
-		return htole32(val);
-	else
-		return htobe32(val);
-}
-
-/**
- * Print the usage information to stderr and exit
- * @param program the name of the current program being invoked
- *
- * Print the usage information and exit with EINVAL.
- *
- */
-static void exit_usage(const char *program)
-{
-	fprintf(stderr,
-		"usage: %s -f <bpf_file> [-v]"
-		" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
-		program);
-	exit(EINVAL);
-}
 
 /**
  * Handle a simulator fault
@@ -238,16 +152,16 @@ static void bpf_execute(const struct bpf_program *prg,
 		ip_c = ip;
 		bpf = &prg->i[ip++];
 
-		code = _ttoh16(sys_data->arch, bpf->code);
+		code = ttoh16(arch, bpf->code);
 		jt = bpf->jt;
 		jf = bpf->jf;
-		k = _ttoh32(sys_data->arch, bpf->k);
+		k = ttoh32(arch, bpf->k);
 
 		switch (code) {
 		case BPF_LD+BPF_W+BPF_ABS:
-			if (bpf->k < BPF_SYSCALL_MAX) {
+			if (k < BPF_SYSCALL_MAX) {
 				uint32_t val = *((uint32_t *)&sys_data_b[k]);
-				state.acc = _htot32(sys_data->arch, val);
+				state.acc = ttoh32(arch, val);
 			} else
 				exit_error(ERANGE, ip_c);
 			break;
@@ -299,6 +213,7 @@ static void bpf_execute(const struct bpf_program *prg,
 int main(int argc, char *argv[])
 {
 	int opt;
+	int iter;
 	char *opt_file = NULL;
 	FILE *file;
 	size_t file_read_len;
@@ -307,24 +222,23 @@ int main(int argc, char *argv[])
 
 	/* initialize the syscall record */
 	memset(&sys_data, 0, sizeof(sys_data));
-	sys_data.arch = ARCH_NATIVE;
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:f:h:s:v0:1:2:3:4:5:")) > 0) {
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)
-				sys_data.arch = AUDIT_ARCH_I386;
+				arch = AUDIT_ARCH_I386;
 			else if (strcmp(optarg, "x86_64") == 0)
-				sys_data.arch = AUDIT_ARCH_X86_64;
+				arch = AUDIT_ARCH_X86_64;
 			else if (strcmp(optarg, "x32") == 0)
-				sys_data.arch = AUDIT_ARCH_X86_64;
+				arch = AUDIT_ARCH_X86_64;
 			else if (strcmp(optarg, "arm") == 0)
-				sys_data.arch = AUDIT_ARCH_ARM;
+				arch = AUDIT_ARCH_ARM;
 			else if (strcmp(optarg, "mips") == 0)
-				sys_data.arch = AUDIT_ARCH_MIPS;
+				arch = AUDIT_ARCH_MIPS;
 			else if (strcmp(optarg, "mipsel") == 0)
-				sys_data.arch = AUDIT_ARCH_MIPSEL;
+				arch = AUDIT_ARCH_MIPSEL;
 			else
 				exit_fault(EINVAL);
 			break;
@@ -363,6 +277,14 @@ int main(int argc, char *argv[])
 			exit_usage(argv[0]);
 		}
 	}
+
+	/* adjust the endianess of sys_data to match the target */
+	sys_data.nr = htot32(arch, sys_data.nr);
+	sys_data.arch = htot32(arch, arch);
+	sys_data.instruction_pointer = htot64(arch,
+					      sys_data.instruction_pointer);
+	for (iter = 0; iter < BPF_SYS_ARG_MAX; iter++)
+		sys_data.args[iter] = htot64(arch, sys_data.args[iter]);
 
 	/* allocate space for the bpf program */
 	/* XXX - we should make this dynamic */

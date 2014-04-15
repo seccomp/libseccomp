@@ -27,10 +27,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <linux/audit.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include "bpf.h"
+#include "util.h"
 
 #define _OP_FMT			"%-3s"
 
@@ -274,9 +276,15 @@ static int bpf_decode(FILE *file)
 	printf("=================================\n");
 
 	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
+		/* convert the bpf statement */
+		bpf.code = ttoh16(arch, bpf.code);
+		bpf.k = ttoh32(arch, bpf.k);
+
+		/* display a hex dump */
 		printf(" %.4u: 0x%.2x 0x%.2x 0x%.2x 0x%.8x",
 		       line, bpf.code, bpf.jt, bpf.jf, bpf.k);
 
+		/* display the assembler statements */
 		printf("   ");
 		bpf_decode_op(&bpf);
 		printf(" ");
@@ -297,18 +305,40 @@ static int bpf_decode(FILE *file)
 int main(int argc, char *argv[])
 {
 	int rc;
+	int opt;
 	FILE *file;
 
-	if (argc > 2) {
-		fprintf(stderr, "usage: %s [<bpf_file>]\n", argv[0]);
-		return EINVAL;
+	/* parse the command line */
+	while ((opt = getopt(argc, argv, "a:h")) > 0) {
+		switch (opt) {
+		case 'a':
+			if (strcmp(optarg, "x86") == 0)
+				arch = AUDIT_ARCH_I386;
+			else if (strcmp(optarg, "x86_64") == 0)
+				arch = AUDIT_ARCH_X86_64;
+			else if (strcmp(optarg, "x32") == 0)
+				arch = AUDIT_ARCH_X86_64;
+			else if (strcmp(optarg, "arm") == 0)
+				arch = AUDIT_ARCH_ARM;
+			else if (strcmp(optarg, "mips") == 0)
+				arch = AUDIT_ARCH_MIPS;
+			else if (strcmp(optarg, "mipsel") == 0)
+				arch = AUDIT_ARCH_MIPSEL;
+			else
+				exit_usage(argv[0]);
+			break;
+		default:
+			/* usage information */
+			exit_usage(argv[0]);
+		}
 	}
 
-	if (argc == 2) {
-		file = fopen(argv[1], "r");
+	if ((optind > 1) && (optind < argc)) {
+		int opt_file = optind - 1 ;
+		file = fopen(argv[opt_file], "r");
 		if (file == NULL) {
 			fprintf(stderr, "error: unable to open \"%s\" (%s)\n",
-				argv[1], strerror(errno));
+				argv[opt_file], strerror(errno));
 			return errno;
 		}
 	} else
@@ -319,4 +349,3 @@ int main(int argc, char *argv[])
 
 	return rc;
 }
-
