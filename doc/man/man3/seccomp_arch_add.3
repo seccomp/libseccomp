@@ -1,4 +1,4 @@
-.TH "seccomp_arch_add" 3 "26 November 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_arch_add" 3 "16 April 2014" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -50,11 +50,11 @@ constants.
 .P
 When a seccomp filter is initialized with the call to
 .BR seccomp_init (3)
-the native architecture is automatically added to the filter.  If you want to
-remove the native architecture from the filter, you first need to add another
-architecture to the filter as a seccomp filter must contain at least one
-architecture at all times.  After you have added a second architecture to the
-seccomp filter, you can remove the native architecture.
+the native architecture is automatically added to the filter.
+.P
+While it is possible to remove all architectures from a filter, most of the
+libseccomp APIs will fail if the filter does not contain at least one
+architecture.
 .P
 When adding a new architecture to an existing filter, the existing rules will
 not be added to the new architecture.  However, rules added after adding the

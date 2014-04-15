@@ -102,7 +102,7 @@ API int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 	struct db_filter *db;
 
-	if (db_col_valid(col) || db_action_valid(def_action) < 0)
+	if (ctx == NULL || db_action_valid(def_action) < 0)
 		return -EINVAL;
 
 	db_col_reset(col, def_action);
@@ -120,9 +120,6 @@ API int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 /* NOTE - function header comment in include/seccomp.h */
 API void seccomp_release(scmp_filter_ctx ctx)
 {
-	if (_ctx_valid(ctx))
-		return;
-
 	db_col_release((struct db_filter_col *)ctx);
 }
 

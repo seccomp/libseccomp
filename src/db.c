@@ -389,7 +389,8 @@ void db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	for (iter = 0; iter < col->filter_cnt; iter++)
 		db_release(col->filters[iter]);
 	col->filter_cnt = 0;
-	free(col->filters);
+	if (col->filters)
+		free(col->filters);
 	col->filters = NULL;
 
 	/* set the endianess to undefined */
@@ -460,7 +461,7 @@ void db_col_release(struct db_filter_col *col)
  */
 int db_col_valid(struct db_filter_col *col)
 {
-	if (col != NULL && col->state == _DB_STA_VALID)
+	if (col != NULL && col->state == _DB_STA_VALID && col->filter_cnt > 0)
 		return 0;
 	return -EINVAL;
 }
@@ -654,7 +655,7 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
 	unsigned int found;
 	struct db_filter **dbs;
 
-	if ((col->filter_cnt <= 1) || (db_col_arch_exist(col, arch_token) == 0))
+	if ((col->filter_cnt <= 0) || (db_col_arch_exist(col, arch_token) == 0))
 		return -EINVAL;
 
 	for (found = 0, iter = 0; iter < col->filter_cnt; iter++) {
@@ -667,12 +668,20 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
 	}
 	col->filters[--col->filter_cnt] = NULL;
 
-	/* NOTE: if we can't do the realloc it isn't fatal, we just have some
-	 *       extra space that will get cleaned up later */
-	dbs = realloc(col->filters,
-		      sizeof(struct db_filter *) * col->filter_cnt);
-	if (dbs != NULL)
-		col->filters = dbs;
+	if (col->filters > 0) {
+		/* NOTE: if we can't do the realloc it isn't fatal, we just
+		 *       have some extra space allocated */
+		dbs = realloc(col->filters,
+			      sizeof(struct db_filter *) * col->filter_cnt);
+		if (dbs != NULL)
+			col->filters = dbs;
+	} else {
+		/* this was the last filter so free all the associated memory
+		 * and reset the endian token */
+		free(col->filters);
+		col->filters = NULL;
+		col->endian = 0;
+	}
 
 	return 0;
 }
