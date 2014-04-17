@@ -67,4 +67,4 @@ install: $(TOOLS_INSTALL)
 	$(INSTALL_BIN_MACRO)
 
 clean:
-	$(RM) $(DEPS_TOOLS) $(DEPS_OBJS) $(TOOLS)
+	$(RM) $(DEPS_TOOLS) $(DEPS_OBJS) $(TOOLS) $(OBJS)

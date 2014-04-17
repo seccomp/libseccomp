@@ -33,7 +33,7 @@
 
 /* determine the native architecture */
 #if __i386__
-#define ARCH_NATIVE		AUDIT_ARCH_X86
+#define ARCH_NATIVE		AUDIT_ARCH_I386
 #elif __x86_64__
 #ifdef __ILP32__
 #define ARCH_NATIVE		AUDIT_ARCH_X86_64

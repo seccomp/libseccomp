@@ -43,7 +43,7 @@ TOPDIR := $(shell \
 V ?= 0
 
 CPPFLAGS += -I$(TOPDIR) -I$(TOPDIR)/include
-LIBFLAGS =
+LIBFLAGS +=
 
 CFLAGS ?= -Wl,-z,relro -Wall -O0 -g -fvisibility=hidden
 CFLAGS += -fPIC
