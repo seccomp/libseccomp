@@ -17,11 +17,6 @@ test type: bpf-sim
 23-sim-arch_all_basic	+all_le	rt_sigreturn	N		N		N	N	N	N	ALLOW
 23-sim-arch_all_basic	+all_le	open		0x856B008	4		N	N	N	N	KILL
 
-test type: bpf-sim-fuzz
-
-# Testname		StressCount
-23-sim-arch_all_basic	50
-
 test type: bpf-valgrind
 
 # Testname

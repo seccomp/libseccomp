@@ -21,11 +21,6 @@ test type: bpf-sim
 16-sim-arch_basic	+x86_64	connect		0		1		2	N	N	N	ALLOW
 16-sim-arch_basic	+x86_64	shutdown	0		1		2	N	N	N	ALLOW
 
-test type: bpf-sim-fuzz
-
-# Testname		StressCount
-16-sim-arch_basic	50
-
 test type: bpf-valgrind
 
 # Testname
