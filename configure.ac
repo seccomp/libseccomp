@@ -1,4 +1,9 @@
-AC_INIT([libseccomp], [2.1.0])
+
+dnl ####
+dnl libseccomp defines
+dnl ####
+AC_INIT([libseccomp], [0.0.0])
+
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([configure.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -19,11 +24,12 @@ AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
-VERSION_MAJOR="${VERSION%%.*}"
-VERSION_MINOR="${VERSION#*.}"
-VERSION_MICRO="${VERSION_MINOR#*.}"
-VERSION_MINOR="${VERSION_MINOR%%.*}"
-VERSION_MICRO="${VERSION_MICRO%%.*}"
+dnl ####
+dnl version information
+dnl ####
+VERSION_MAJOR=$(echo ${VERSION} | cut -d'.' -f 1)
+VERSION_MINOR=$(echo ${VERSION} | cut -d'.' -f 2)
+VERSION_MICRO=$(echo ${VERSION} | cut -d'.' -f 3)
 AC_SUBST([VERSION_MAJOR])
 AC_SUBST([VERSION_MINOR])
 AC_SUBST([VERSION_MICRO])
@@ -58,6 +64,26 @@ AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
 	[$(test "$enable_python" == yes && echo 1 || echo 0)],
 	[Python bindings build flag.])
 
-AC_CONFIG_FILES([Makefile src/Makefile src/python/Makefile tools/Makefile
-	tests/Makefile include/seccomp.h libseccomp.pc])
+dnl ####
+dnl version dependent files
+dnl ####
+AC_CONFIG_FILES([
+	libseccomp.pc
+	include/seccomp.h
+])
+
+dnl ####
+dnl makefiles
+dnl ####
+AC_CONFIG_FILES([
+	Makefile
+	src/Makefile
+	src/python/Makefile
+	tools/Makefile
+	tests/Makefile
+])
+
+dnl ####
+dnl done
+dnl ####
 AC_OUTPUT

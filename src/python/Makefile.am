@@ -3,7 +3,7 @@
 PYTHON = /usr/bin/env python
 
 PY_DISTUTILS = \
-	VERSION_RELEASE="${VERSION_RELEASE}" \
+	VERSION_RELEASE="@PACKAGE_VERSION@" \
 	CFLAGS="-I\${top_srcdir}/include ${CFLAGS} ${CPPFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
 	${PYTHON} ./setup.py

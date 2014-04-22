@@ -14,4 +14,5 @@ libseccomp_la_SOURCES = api.c arch.c arch-x86.c arch-x86-syscalls.c \
 	\
 	arch-mips.h arch-arm.h arch-x32.h arch-x86.h arch-x86_64.h arch.h \
 	db.h gen_bpf.h gen_pfc.h hash.h system.h
-libseccomp_la_LDFLAGS = -version-number 2:1:0
+libseccomp_la_LDFLAGS = \
+	-version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
