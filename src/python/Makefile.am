@@ -1,24 +1,28 @@
 # -*- Makefile -*-
 
 PYTHON = /usr/bin/env python
-pyverbose_0 = -q
-pyverbose_ = ${pyverbose_0}
 
 PY_DISTUTILS = \
 	VERSION_RELEASE="${VERSION_RELEASE}" \
 	CFLAGS="-I\${top_srcdir}/include ${CFLAGS} ${CPPFLAGS}" \
 	LDFLAGS="${LDFLAGS}" \
 	${PYTHON} ./setup.py
-PY_BUILD = ${PY_DISTUTILS} build ${pyverbose_${V}}
-PY_INSTALL = ${PY_DISTUTILS} install ${pyverbose_${V}}
 
-all-local: python-build
+# support silent builds
+PY_BUILD_0 = @echo "  PYTHON  " $@; ${PY_DISTUTILS} -q build
+PY_BUILD_1 = ${PY_DISTUTILS} build
+PY_BUILD_ = ${PY_BUILD_0}
+PY_BUILD = ${PY_BUILD_@AM_V@}
 
-python-build: ../libseccomp.la libseccomp.pxd seccomp.pyx
-	${AM_V_GEN}${PY_DISTUTILS} build && touch $@
+PY_INSTALL = ${PY_DISTUTILS} install
 
-install-exec-local:
-	${PY_DISTUTILS} install --prefix=${DESTDIR}/${prefix}
+all-local: build
+
+build: ../libseccomp.la libseccomp.pxd seccomp.pyx
+	${PY_BUILD} && touch build
+
+install-exec-local: build
+	${PY_INSTALL} --prefix=${DESTDIR}/${prefix}
 
 clean-local:
-	rm -Rf python-build seccomp.c
+	${RM} -rf seccomp.c build/

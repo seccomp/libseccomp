@@ -28,21 +28,35 @@ AC_SUBST([VERSION_MAJOR])
 AC_SUBST([VERSION_MINOR])
 AC_SUBST([VERSION_MICRO])
 
-dnl AC_ARG_ENABLE([python],
-dnl	[AS_HELP_STRING([--enable-python], [build the python bindings, requires cython])])
-enable_python=no
-AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = yes])
-cython_ver=$(which cython >/dev/null 2>/dev/null && cython -V 2>&1 | cut -d' ' -f3)
-cython_maj=$(echo "$cython_ver" | cut -d'.' -f1)
-cython_min=$(echo "$cython_ver" | cut -d'.' -f2)
+dnl ####
+dnl cython checks
+dnl ####
+AC_CHECK_PROG(have_cython, cython, "yes", "no")
+AS_IF([test "$have_cython" = yes], [
+	AS_ECHO("checking cython version... $(cython -V 2>&1 | cut -d' ' -f 3)")
+	CYTHON_VER_MAJ=$(cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 1);
+	CYTHON_VER_MIN=$(cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 2);
+],[
+	CYTHON_VER_MAJ=0
+	CYTHON_VER_MIN=0
+])
+
+dnl ####
+dnl python binding checks
+dnl ####
+AC_ARG_ENABLE([python],
+	[AS_HELP_STRING([--enable-python],
+	[build the python bindings, requires cython])])
 AS_IF([test "$enable_python" = yes], [
-	recent=""
-	AS_IF([test -n "$cython_maj" -a -n "$cython_min" &&
-	  ! test "$cython_maj" -eq 0 -a "$cython_min" -lt 16], [recent=yes])
-	AS_IF([test -z "$recent"], [
+	# cython version check
+	AS_IF([test "$CYTHON_VER_MAJ" -eq 0 -a "$CYTHON_VER_MIN" -lt 16], [
 		AC_MSG_ERROR([python bindings require cython 0.16 or higher])
 	])
 ])
+AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = yes])
+AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
+	[$(test "$enable_python" == yes && echo 1 || echo 0)],
+	[Python bindings build flag.])
 
 AC_CONFIG_FILES([Makefile src/Makefile src/python/Makefile tools/Makefile
 	tests/Makefile include/seccomp.h libseccomp.pc])
