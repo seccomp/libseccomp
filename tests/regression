@@ -781,6 +781,7 @@ function run_tests() {
 # verify general script dependencies
 verify_deps head
 verify_deps sed
+verify_deps awk
 verify_deps seq
 verify_deps tr
 
@@ -850,9 +851,18 @@ while getopts "ab:gl:m:s:t:T:vh" opt; do
 	esac
 done
 
-# default to running the C tests
+# determine the mode test automatically
 if [[ -z $mode_list ]]; then
+	# always perform the native c tests
 	mode_list="c"
+
+	# query the build configuration
+	if [[ -r "../configure.h" ]]; then
+		# python tests
+		[[ "$(grep "ENABLE_PYTHON" ../configure.h | \
+		   awk '{ print $3 }')" = "1" ]] && \
+			mode_list="$mode_list python"
+	fi
 fi
 
 # default to all tests if batch or single tests not requested
