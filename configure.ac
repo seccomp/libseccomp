@@ -1,3 +1,20 @@
+dnl ####
+dnl # Seccomp Library
+dnl #
+
+dnl #
+dnl # This library is free software; you can redistribute it and/or modify it
+dnl # under the terms of version 2.1 of the GNU Lesser General Public License
+dnl # as published by the Free Software Foundation.
+dnl #
+dnl # This library is distributed in the hope that it will be useful, but
+dnl # WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+dnl # General Public License for more details.
+dnl #
+dnl # You should have received a copy of the GNU Lesser General Public License
+dnl # along with this library; if not, see <http://www.gnu.org/licenses>.
+dnl #
 
 dnl ####
 dnl libseccomp defines
