@@ -21,3 +21,9 @@ SUBDIRS = include src tools tests doc
 
 pkgconfdir = ${libdir}/pkgconfig
 pkgconf_DATA = libseccomp.pc
+
+# support silent builds
+AM_MAKEFLAGS_0 = --quiet --no-print-directory
+AM_MAKEFLAGS_1 =
+AM_MAKEFLAGS_ = ${AM_MAKEFLAGS_0}
+AM_MAKEFLAGS = ${AM_MAKEFLAGS_@AM_V@}
