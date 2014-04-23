@@ -4,16 +4,34 @@ dnl libseccomp defines
 dnl ####
 AC_INIT([libseccomp], [0.0.0])
 
+dnl ####
+dnl autoconf configuration
+dnl ####
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([configure.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wall foreign subdir-objects tar-pax no-dist-gzip dist-xz serial-tests])
+
+dnl ####
+dnl automake configuration
+dnl ####
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects tar-pax serial-tests])
+
+dnl ####
+dnl build tools
+dnl ####
 AC_PROG_CC
 AM_PROG_CC_C_O
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-AC_DISABLE_STATIC
-LT_INIT
+
+dnl ####
+dnl libtool configuration
+dnl ####
+LT_INIT([shared disable-static pic-only])
+
+dnl ####
+dnl enable silent builds by default
+dnl ####
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl ####
 dnl build flags
