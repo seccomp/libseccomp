@@ -60,7 +60,7 @@ TESTS = 01-sim-allow \
 	20-live-basic_die \
 	21-live-basic_allow \
 	22-sim-basic_chains_array \
-	23-sim-arch_all_basic \
+	23-sim-arch_all_le_basic \
 	24-live-arg_allow \
 	25-sim-multilevel_chains_adv
 
