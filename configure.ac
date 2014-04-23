@@ -15,7 +15,6 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_DISABLE_STATIC
 LT_INIT
 
-AC_CHECK_HEADER([linux/seccomp.h])
 
 AM_CPPFLAGS="-I\${top_srcdir}/include"
 AM_CFLAGS="-Wall"
@@ -23,6 +22,11 @@ AM_LDFLAGS="-Wl,-z -Wl,relro"
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_LDFLAGS])
+
+dnl ####
+dnl check build system seccomp awareness
+dnl ####
+AC_CHECK_HEADERS_ONCE([linux/seccomp.h])
 
 dnl ####
 dnl version information
@@ -77,10 +81,12 @@ dnl makefiles
 dnl ####
 AC_CONFIG_FILES([
 	Makefile
+	include/Makefile
 	src/Makefile
 	src/python/Makefile
 	tools/Makefile
 	tests/Makefile
+	doc/Makefile
 ])
 
 dnl ####
