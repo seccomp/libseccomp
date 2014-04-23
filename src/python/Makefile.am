@@ -4,8 +4,9 @@ PYTHON = /usr/bin/env python
 
 PY_DISTUTILS = \
 	VERSION_RELEASE="@PACKAGE_VERSION@" \
-	CFLAGS="-I\${top_srcdir}/include ${CFLAGS} ${CPPFLAGS}" \
-	LDFLAGS="${LDFLAGS}" \
+	CPPFLAGS="-I\${top_srcdir}/include ${AM_CPPFLAGS} ${CPPFLAGS}" \
+	CFLAGS="${AM_CFLAGS} ${CFLAGS}" \
+	LDFLAGS="${AM_LDFLAGS} ${LDFLAGS}" \
 	${PYTHON} ./setup.py
 
 # support silent builds
@@ -18,7 +19,7 @@ PY_INSTALL = ${PY_DISTUTILS} install
 
 all-local: build
 
-build: ../libseccomp.la libseccomp.pxd seccomp.pyx
+build: ../libseccomp-internal.la libseccomp.pxd seccomp.pyx
 	${PY_BUILD} && touch build
 
 install-exec-local: build

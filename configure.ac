@@ -15,7 +15,9 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_DISABLE_STATIC
 LT_INIT
 
-
+dnl ####
+dnl build flags
+dnl ####
 AM_CPPFLAGS="-I\${top_srcdir}/include"
 AM_CFLAGS="-Wall"
 AM_LDFLAGS="-Wl,-z -Wl,relro"
