@@ -7,7 +7,7 @@ AC_INIT([libseccomp], [0.0.0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([configure.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wall foreign subdir-objects tar-pax no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects tar-pax no-dist-gzip dist-xz serial-tests])
 AC_PROG_CC
 AM_PROG_CC_C_O
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])

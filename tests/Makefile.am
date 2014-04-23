@@ -9,11 +9,7 @@ util_la_LDFLAGS = -module
 
 TESTS = regression
 
-EXTRA_DIST = regression *.tests
-BUILT_SOURCES = 00-test.c
-
 check_PROGRAMS = \
-	00-test \
 	01-sim-allow \
 	02-sim-basic \
 	03-sim-basic_chains \
@@ -41,5 +37,7 @@ check_PROGRAMS = \
 	25-sim-multilevel_chains_adv \
 	26-sim-arch_all_be_basic
 
-00-test.c:
-	if ! test -e $@; then echo "int main(void) { return 0; }" >$@; fi
+EXTRA_PROGRAMS = 00-test
+
+clean-local:
+	${RM} -f 00-test
