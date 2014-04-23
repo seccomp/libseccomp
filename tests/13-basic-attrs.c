@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
-		goto out;
+		return ENOMEM;
 
 	rc = seccomp_attr_get(ctx, SCMP_FLTATR_ACT_DEFAULT, &val);
 	if (rc != 0)

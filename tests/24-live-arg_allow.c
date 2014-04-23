@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
 
 	ctx = seccomp_init(SCMP_ACT_TRAP);
 	if (ctx == NULL)
-		goto out;
+		return ENOMEM;
+
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
 				    SCMP_A0(SCMP_CMP_EQ, fd));
 	if (rc != 0)
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
 				    SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 	if (rc != 0)
 		goto out;
+
 	rc = seccomp_load(ctx);
 	if (rc != 0)
 		goto out;

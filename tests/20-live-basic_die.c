@@ -19,6 +19,7 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <errno.h>
 #include <unistd.h>
 
 #include <seccomp.h>
@@ -44,7 +45,8 @@ int main(int argc, char *argv[])
 
 	ctx = seccomp_init(action);
 	if (ctx == NULL)
-		goto out;
+		return ENOMEM;
+
 	rc = seccomp_rule_add_exact(ctx,
 				    SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
 	if (rc != 0)
@@ -53,6 +55,7 @@ int main(int argc, char *argv[])
 				    SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 	if (rc != 0)
 		goto out;
+
 	rc = seccomp_load(ctx);
 	if (rc != 0)
 		goto out;

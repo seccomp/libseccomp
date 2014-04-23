@@ -19,6 +19,7 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#include <errno.h>
 #include <unistd.h>
 
 #include <seccomp.h>
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
 
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
-		goto out;
+		return ENOMEM;
 
 	rc = util_filter_output(&opts, ctx);
 	if (rc)

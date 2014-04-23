@@ -19,8 +19,8 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-#include <unistd.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <seccomp.h>
 
@@ -37,11 +37,15 @@ int main(int argc, char *argv[])
 		goto out_all;
 
 	ctx_32 = seccomp_init(SCMP_ACT_KILL);
-	if (ctx_32 == NULL)
+	if (ctx_32 == NULL) {
+		rc = -ENOMEM;
 		goto out_all;
+	}
 	ctx_64 = seccomp_init(SCMP_ACT_KILL);
-	if (ctx_64 == NULL)
+	if (ctx_64 == NULL) {
+		rc = -ENOMEM;
 		goto out_all;
+	}
 
 	rc = seccomp_arch_remove(ctx_32, SCMP_ARCH_NATIVE);
 	if (rc != 0)
