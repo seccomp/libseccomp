@@ -31,12 +31,10 @@ from seccomp import *
 def test(args):
     f32 = SyscallFilter(KILL)
     f64 = SyscallFilter(KILL)
-    if not f32.exist_arch(Arch.X86):
-        f32.add_arch(Arch.X86)
-        f32.remove_arch(Arch.NATIVE)
-    if not f64.exist_arch(Arch.X86_64):
-        f64.add_arch(Arch.X86_64)
-        f64.remove_arch(Arch.NATIVE)
+    f32.remove_arch(Arch.NATIVE)
+    f64.remove_arch(Arch.NATIVE)
+    f32.add_arch(Arch.X86)
+    f64.add_arch(Arch.X86_64)
     f32.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f32.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))

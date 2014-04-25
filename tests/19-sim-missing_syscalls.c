@@ -40,14 +40,13 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		goto out;
 
-	if (seccomp_arch_native() != SCMP_ARCH_X86) {
-		rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
-		if (rc != 0)
-			goto out;
-		rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
-		if (rc != 0)
-			goto out;
-	}
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
+	if (rc != 0)
+		goto out;
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(tuxcall), 0);
 	if (rc != 0)

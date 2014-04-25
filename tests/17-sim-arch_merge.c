@@ -43,22 +43,19 @@ int main(int argc, char *argv[])
 	if (ctx_64 == NULL)
 		goto out_all;
 
-	if (seccomp_arch_exist(ctx_32, SCMP_ARCH_X86) == -EEXIST) {
-		rc = seccomp_arch_add(ctx_32, SCMP_ARCH_X86);
-		if (rc != 0)
-			goto out_all;
-		rc = seccomp_arch_remove(ctx_32, SCMP_ARCH_NATIVE);
-		if (rc != 0)
-			goto out_all;
-	}
-	if (seccomp_arch_exist(ctx_64, SCMP_ARCH_X86_64) == -EEXIST) {
-		rc = seccomp_arch_add(ctx_64, SCMP_ARCH_X86_64);
-		if (rc != 0)
-			goto out_all;
-		rc = seccomp_arch_remove(ctx_64, SCMP_ARCH_NATIVE);
-		if (rc != 0)
-			goto out_all;
-	}
+	rc = seccomp_arch_remove(ctx_32, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx_64, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+
+	rc = seccomp_arch_add(ctx_32, SCMP_ARCH_X86);
+	if (rc != 0)
+		goto out_all;
+	rc = seccomp_arch_add(ctx_64, SCMP_ARCH_X86_64);
+	if (rc != 0)
+		goto out_all;
 
 	rc = seccomp_rule_add(ctx_32, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));

@@ -29,11 +29,8 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    # Remove the native arch token. We will add the arch tokens
-    # ourselves.
     f.remove_arch(Arch.NATIVE)
-    if not f.exist_arch(Arch.MIPS):
-        f.add_arch(Arch.MIPS)
+    f.add_arch(Arch.MIPS)
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))

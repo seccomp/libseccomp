@@ -38,17 +38,13 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		goto out;
 
-	/*
-	 * Remove the native arch token. We will add the arch tokens
-	 * ourselves.
-	 */
-	seccomp_arch_remove(ctx, seccomp_arch_native());
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
 
-	if (seccomp_arch_exist(ctx, SCMP_ARCH_MIPS)) {
-		rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPS);
-		if (rc != 0)
-			goto out;
-	}
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPS);
+	if (rc != 0)
+		goto out;
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
