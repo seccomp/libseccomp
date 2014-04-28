@@ -10,11 +10,6 @@ test type: bpf-sim
 # Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
 19-sim-missing_syscalls	+x86	0-350		N	N	N	N	N	N	KILL
 
-test type: bpf-sim-fuzz
-
-# Testname		StressCount
-19-sim-missing_syscalls	50
-
 test type: bpf-valgrind
 
 # Testname
