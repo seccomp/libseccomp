@@ -74,9 +74,8 @@ def test():
         pass
 
     f = SyscallFilter(ALLOW)
-    if not f.exist_arch(Arch.X86):
-        f.add_arch(Arch.X86)
-        f.remove_arch(Arch.NATIVE)
+    f.remove_arch(Arch.NATIVE)
+    f.add_arch(Arch.X86)
     try:
         f.add_rule_exactly(KILL, "socket", Arg(0, EQ, 2))
     except RuntimeError:

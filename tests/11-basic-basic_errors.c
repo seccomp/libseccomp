@@ -117,14 +117,12 @@ int main(int argc, char *argv[])
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
 		return -1;
-	if (seccomp_arch_native() != SCMP_ARCH_X86) {
-		rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
-		if (rc != 0)
-			return -1;
-		rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
-		if (rc != 0)
-			return -1;
-	}
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
+	if (rc != 0)
+		return -1;
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(socket), 1,
 				    SCMP_A0(SCMP_CMP_EQ, 2));
 	if (rc != -EINVAL)
