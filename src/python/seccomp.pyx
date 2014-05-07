@@ -120,9 +120,9 @@ def resolve_syscall(arch, syscall):
     """
     cdef char *ret_str
 
-    if (isinstance(syscall, basestring)):
+    if isinstance(syscall, basestring):
         return libseccomp.seccomp_syscall_resolve_name_arch(arch, syscall)
-    elif (isinstance(syscall, int)):
+    elif isinstance(syscall, int):
         ret_str = libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
         if ret_str is NULL:
             raise ValueError('Unknown syscall %d on arch %d' % (syscall, arch))
@@ -144,6 +144,8 @@ cdef class Arch:
     MIPSEL - MIPS little endian
     """
 
+    cdef int _token
+
     NATIVE = libseccomp.SCMP_ARCH_NATIVE
     X86 = libseccomp.SCMP_ARCH_X86
     X86_64 = libseccomp.SCMP_ARCH_X86_64
@@ -151,6 +153,48 @@ cdef class Arch:
     ARM = libseccomp.SCMP_ARCH_ARM
     MIPS = libseccomp.SCMP_ARCH_MIPS
     MIPSEL = libseccomp.SCMP_ARCH_MIPSEL
+
+    def __cinit__(self, arch=libseccomp.SCMP_ARCH_NATIVE):
+        """ Initialize the architecture object.
+
+        Arguments:
+        arch - the architecture name or token value
+
+        Description:
+        Create an architecture object using the given name or token value.
+        """
+        if isinstance(arch, int):
+            if arch == libseccomp.SCMP_ARCH_NATIVE:
+                self._token = libseccomp.seccomp_arch_native()
+            elif arch == libseccomp.SCMP_ARCH_X86:
+                self._token = libseccomp.SCMP_ARCH_X86
+            elif arch == libseccomp.SCMP_ARCH_X86_64:
+                self._token = libseccomp.SCMP_ARCH_X86_64
+            elif arch == libseccomp.SCMP_ARCH_X32:
+                self._token = libseccomp.SCMP_ARCH_X32
+            elif arch == libseccomp.SCMP_ARCH_ARM:
+                self._token = libseccomp.SCMP_ARCH_ARM
+            elif arch == libseccomp.SCMP_ARCH_MIPS:
+                self._token = libseccomp.SCMP_ARCH_MIPS
+            elif arch == libseccomp.SCMP_ARCH_MIPSEL:
+                self._token = libseccomp.SCMP_ARCH_MIPSEL
+            else:
+                self._token = 0;
+        elif isinstance(arch, basestring):
+            self._token = libseccomp.seccomp_arch_resolve_name(arch)
+        else:
+            raise TypeError("Architecture must be an int or str type")
+        if self._token == 0:
+            raise ValueError("Invalid architecture")
+
+    def __int__(self):
+        """ Convert the architecture object to a token value.
+
+        Description:
+        Convert the architecture object to an integer representing the
+        architecture's token value.
+        """
+        return self._token
 
 cdef class Attr:
     """ Python object representing the SyscallFilter attributes.

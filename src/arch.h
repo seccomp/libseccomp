@@ -78,6 +78,7 @@ struct arch_syscall_def {
 int arch_valid(uint32_t arch);
 
 const struct arch_def *arch_def_lookup(uint32_t token);
+const struct arch_def *arch_def_lookup_name(const char *arch_name);
 
 int arch_arg_count_max(const struct arch_def *arch);
 

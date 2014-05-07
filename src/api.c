@@ -142,6 +142,21 @@ API int seccomp_merge(scmp_filter_ctx ctx_dst,
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+API uint32_t seccomp_arch_resolve_name(const char *arch_name)
+{
+	const struct arch_def *arch;
+
+	if (arch_name == NULL)
+		return 0;
+
+	arch = arch_def_lookup_name(arch_name);
+	if (arch == NULL)
+		return 0;
+
+	return arch->token;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 API uint32_t seccomp_arch_native(void)
 {
 	return arch_def_native->token;

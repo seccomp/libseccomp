@@ -1,4 +1,4 @@
-.TH "seccomp_arch_add" 3 "16 April 2014" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_arch_add" 3 "7 May 2014" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@ seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist, seccomp_arch_native \
 .B #define SCMP_ARCH_X86
 .B #define SCMP_ARCH_X86_64
 .sp
+.BI "uint32_t seccomp_arch_resolve_name(const char *" arch_name ");"
 .BI "uint32_t seccomp_arch_native();"
 .BI "int seccomp_arch_exist(const scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
 .BI "int seccomp_arch_add(scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
@@ -46,7 +47,12 @@ constant always referring to the native compiled architecture.  The
 .BR seccomp_arch_native ()
 function returns the system's architecture such that it will match one of the
 .BR SCMP_ARCH_*
-constants.
+constants.  While the
+.BR seccomp_arch_resolve_name ()
+function also returns a
+.BR SCMP_ARCH_*
+constant, the returned token matches the name of the architecture
+passed as an argument to the function.
 .P
 When a seccomp filter is initialized with the call to
 .BR seccomp_init (3)

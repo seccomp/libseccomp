@@ -105,6 +105,31 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 }
 
 /**
+ * Lookup the architecture definition by name
+ * @param arch the architecure name
+ *
+ * Return the matching architecture definition, returns NULL on failure.
+ *
+ */
+const struct arch_def *arch_def_lookup_name(const char *arch_name)
+{
+	if (strcmp(arch_name, "x86") == 0)
+		return &arch_def_x86;
+	else if (strcmp(arch_name, "x86_64") == 0)
+		return &arch_def_x86_64;
+	else if (strcmp(arch_name, "x32") == 0)
+		return &arch_def_x32;
+	else if (strcmp(arch_name, "arm") == 0)
+		return &arch_def_arm;
+	else if (strcmp(arch_name, "mips") == 0)
+		return &arch_def_mips;
+	else if (strcmp(arch_name, "mipsel") == 0)
+		return &arch_def_mipsel;
+
+	return NULL;
+}
+
+/**
  * Determine the maximum number of syscall arguments
  * @param arch the architecture definition
  *

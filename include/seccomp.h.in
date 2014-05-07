@@ -254,6 +254,16 @@ void seccomp_release(scmp_filter_ctx ctx);
 int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src);
 
 /**
+ * Resolve the architecture name to a architecture token
+ * @param arch_name the architecture name
+ *
+ * This function resolves the given architecture name to a token suitable for
+ * use with libseccomp, returns zero on failure.
+ *
+ */
+uint32_t seccomp_arch_resolve_name(const char *arch_name);
+
+/**
  * Return the native architecture token
  *
  * This function returns the native architecture token value, e.g. SCMP_ARCH_*.

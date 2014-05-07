@@ -69,6 +69,7 @@ cdef extern from "seccomp.h":
 
     int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
 
+    uint32_t seccomp_arch_resolve_name(char *arch_name)
     uint32_t seccomp_arch_native()
     int seccomp_arch_exist(scmp_filter_ctx ctx, int arch_token)
     int seccomp_arch_add(scmp_filter_ctx ctx, int arch_token)
