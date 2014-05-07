@@ -40,6 +40,9 @@ setup(
 	cmdclass = {'build_ext': build_ext},
 	ext_modules = [
 		Extension("seccomp", ["seccomp.pyx"],
-			extra_objects=["../.libs/libseccomp-internal.a"])
+			# unable to handle libtool libraries directly
+			extra_objects=["../.libs/libseccomp-internal.a"],
+			# fix build warnings, see PEP 3123
+			extra_compile_args=["-fno-strict-aliasing"])
 	]
 )
