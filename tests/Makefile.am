@@ -55,5 +55,8 @@ check_PROGRAMS = \
 
 EXTRA_PROGRAMS = 00-test
 
+check-build:
+	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}
+
 clean-local:
 	${RM} -f 00-test *.pyc

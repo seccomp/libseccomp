@@ -28,5 +28,8 @@ AM_MAKEFLAGS_1 =
 AM_MAKEFLAGS_ = ${AM_MAKEFLAGS_0}
 AM_MAKEFLAGS = ${AM_MAKEFLAGS_@AM_V@}
 
+check-build: all
+	${MAKE} ${AM_MAKEFLAGS} -C tests check-build
+
 check-syntax:
 	@./tools/check-syntax
