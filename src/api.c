@@ -312,6 +312,33 @@ API int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+API int seccomp_syscall_resolve_name_rewrite_arch(uint32_t arch_token,
+						  const char *name)
+{
+	int syscall;
+	const struct arch_def *arch;
+
+	if (name == NULL)
+		return __NR_SCMP_ERROR;
+
+	if (arch_token == 0)
+		arch_token = arch_def_native->token;
+	if (arch_valid(arch_token))
+		return __NR_SCMP_ERROR;
+	arch = arch_def_lookup(arch_token);
+	if (arch == NULL)
+		return __NR_SCMP_ERROR;
+
+	syscall = arch_syscall_resolve_name(arch, name);
+	if (syscall == __NR_SCMP_ERROR)
+		return __NR_SCMP_ERROR;
+	if (arch_syscall_rewrite(arch, 0, &syscall) < 0)
+		return __NR_SCMP_ERROR;
+
+	return syscall;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 API int seccomp_syscall_resolve_name(const char *name)
 {
 	return seccomp_syscall_resolve_name_arch(SCMP_ARCH_NATIVE, name);

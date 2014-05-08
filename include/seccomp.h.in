@@ -375,6 +375,20 @@ char *seccomp_syscall_resolve_num_arch(uint32_t arch_token, int num);
 int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name);
 
 /**
+ * Resolve a syscall name to a number and perform any rewriting necessary
+ * @param arch_token the architecture token, e.g. SCMP_ARCH_*
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number for the given
+ * architecture and do any necessary syscall rewriting needed by the
+ * architecture.  Returns the syscall number on success, including negative
+ * pseudo syscall numbers (e.g. __PNR_*); returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int seccomp_syscall_resolve_name_rewrite_arch(uint32_t arch_token,
+					      const char *name);
+
+/**
  * Resolve a syscall name to a number
  * @param name the syscall name
  *
