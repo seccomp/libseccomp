@@ -44,19 +44,19 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("x86"));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86_64);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("x86_64"));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_X32);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("x32"));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_ARM);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("arm"));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPSEL);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("mipsel"));
 	if (rc != 0)
 		goto out;
 

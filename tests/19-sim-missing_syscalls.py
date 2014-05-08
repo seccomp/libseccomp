@@ -30,8 +30,8 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    f.remove_arch(Arch.NATIVE)
-    f.add_arch(Arch.X86)
+    f.remove_arch(Arch())
+    f.add_arch(Arch("x86"))
     f.add_rule(ALLOW, "tuxcall")
     try:
         f.add_rule_exactly(ALLOW, "tuxcall")

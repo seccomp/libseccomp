@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPS);
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("mips"));
 	if (rc != 0)
 		goto out;
 
