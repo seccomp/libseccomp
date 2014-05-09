@@ -26,12 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../src/arch.h"
-#include "../src/arch-x86.h"
-#include "../src/arch-x86_64.h"
-#include "../src/arch-x32.h"
-#include "../src/arch-arm.h"
-#include "../src/arch-mips.h"
+#include <seccomp.h>
 
 /**
  * Print the usage information to stderr and exit
@@ -55,27 +50,18 @@ int main(int argc, char *argv[])
 {
 	int opt;
 	int translate = 0;
-	const struct arch_def *arch = arch_def_native;
+	uint32_t arch;
 	int sys_num;
 	const char *sys_name;
+
+	arch = seccomp_arch_native();
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:ht")) > 0) {
 		switch (opt) {
 		case 'a':
-			if (strcmp(optarg, "x86") == 0)
-				arch = &arch_def_x86;
-			else if (strcmp(optarg, "x86_64") == 0)
-				arch = &arch_def_x86_64;
-			else if (strcmp(optarg, "x32") == 0)
-				arch = &arch_def_x32;
-			else if (strcmp(optarg, "arm") == 0)
-				arch = &arch_def_arm;
-			else if (strcmp(optarg, "mips") == 0)
-				arch = &arch_def_mips;
-			else if (strcmp(optarg, "mipsel") == 0)
-				arch = &arch_def_mipsel;
-			else
+			arch = seccomp_arch_resolve_name(optarg);
+			if (arch == 0)
 				exit_usage(argv[0]);
 			break;
 		case 't':
@@ -95,13 +81,14 @@ int main(int argc, char *argv[])
 	/* perform the syscall lookup */
 	if (isdigit(argv[optind][0]) || argv[optind][0] == '-') {
 		sys_num = atoi(argv[optind]);
-		sys_name = arch_syscall_resolve_num(arch, sys_num);
+		sys_name = seccomp_syscall_resolve_num_arch(arch, sys_num);
 		printf("%s\n", (sys_name ? sys_name : "UNKNOWN"));
+	} else if (translate) {
+		sys_num = seccomp_syscall_resolve_name_rewrite(arch,
+							       argv[optind]);
+		printf("%d\n", sys_num);
 	} else {
-		sys_num = arch_syscall_resolve_name(arch, argv[optind]);
-		if (translate != 0)
-			/* ignore errors and just output the resolved number */
-			arch_syscall_rewrite(arch, 0, &sys_num);
+		sys_num = seccomp_syscall_resolve_name_arch(arch, argv[optind]);
 		printf("%d\n", sys_num);
 	}
 
