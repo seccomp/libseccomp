@@ -84,7 +84,7 @@ cdef extern from "seccomp.h":
 
     char *seccomp_syscall_resolve_num_arch(int arch_token, int num)
     int seccomp_syscall_resolve_name_arch(int arch_token, char *name)
-    int seccomp_syscall_resolve_name_rewrite_arch(int arch_token, char *name)
+    int seccomp_syscall_resolve_name_rewrite(int arch_token, char *name)
     int seccomp_syscall_resolve_name(char *name)
     int seccomp_syscall_priority(scmp_filter_ctx ctx,
                                  int syscall, uint8_t priority)

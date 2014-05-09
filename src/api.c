@@ -312,8 +312,8 @@ API int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-API int seccomp_syscall_resolve_name_rewrite_arch(uint32_t arch_token,
-						  const char *name)
+API int seccomp_syscall_resolve_name_rewrite(uint32_t arch_token,
+					     const char *name)
 {
 	int syscall;
 	const struct arch_def *arch;

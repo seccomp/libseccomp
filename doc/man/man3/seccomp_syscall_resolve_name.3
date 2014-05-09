@@ -12,8 +12,8 @@ seccomp_syscall_resolve_name \- Resolve a syscall name
 .BI "int seccomp_syscall_resolve_name(const char *" name ");"
 .BI "int seccomp_syscall_resolve_name_arch(uint32_t " arch_token ","
 .BI "                                      const char *" name ");"
-.BI "int seccomp_syscall_resolve_name_rewrite_arch(uint32_t " arch_token ","
-.BI "                                              const char *" name ");"
+.BI "int seccomp_syscall_resolve_name_rewrite(uint32_t " arch_token ","
+.BI "                                         const char *" name ");"
 .BI "char *seccomp_syscall_resolve_num_arch(uint32_t " arch_token ", int " num ");"
 .sp
 Link with \fI\-lseccomp\fP.
@@ -26,10 +26,10 @@ The
 .BR seccomp_syscall_resolve_name() ,
 .BR seccomp_syscall_resolve_name_arch() ,
 and
-.BR seccomp_syscall_resolve_name_rewrite_arch()
+.BR seccomp_syscall_resolve_name_rewrite()
 functions resolve the commonly used syscall name to the syscall number used by
 the kernel and the rest of the libseccomp API, with
-.BR seccomp_syscall_resolve_name_rewrite_arch()
+.BR seccomp_syscall_resolve_name_rewrite()
 rewriting the syscall number for architectures that modify the syscall.  The
 .BR seccomp_syscall_resolve_num_arch()
 function resolves the syscall number used by the kernel to the commonly used
@@ -45,7 +45,7 @@ In the case of
 .BR seccomp_syscall_resolve_name() ,
 .BR seccomp_syscall_resolve_name_arch() ,
 and
-.BR seccomp_syscall_resolve_name_rewrite_arch()
+.BR seccomp_syscall_resolve_name_rewrite()
 the associated syscall number is returned, with the negative pseudo syscall
 number being returned in cases where the given syscall does not exist for the
 architecture.  The value

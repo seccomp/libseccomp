@@ -121,8 +121,7 @@ def resolve_syscall(arch, syscall):
     cdef char *ret_str
 
     if isinstance(syscall, basestring):
-        return libseccomp.seccomp_syscall_resolve_name_rewrite_arch(arch,
-                                                                    syscall)
+        return libseccomp.seccomp_syscall_resolve_name_rewrite(arch, syscall)
     elif isinstance(syscall, int):
         ret_str = libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
         if ret_str is NULL:

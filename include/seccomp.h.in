@@ -385,8 +385,7 @@ int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name);
  * pseudo syscall numbers (e.g. __PNR_*); returns __NR_SCMP_ERROR on failure.
  *
  */
-int seccomp_syscall_resolve_name_rewrite_arch(uint32_t arch_token,
-					      const char *name);
+int seccomp_syscall_resolve_name_rewrite(uint32_t arch_token, const char *name);
 
 /**
  * Resolve a syscall name to a number

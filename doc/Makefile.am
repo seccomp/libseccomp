@@ -41,5 +41,5 @@ man3_MANS = \
 	man/man3/seccomp_syscall_priority.3 \
 	man/man3/seccomp_syscall_resolve_name.3 \
 	man/man3/seccomp_syscall_resolve_name_arch.3 \
-	man/man3/seccomp_syscall_resolve_name_rewrite_arch.3 \
+	man/man3/seccomp_syscall_resolve_name_rewrite.3 \
 	man/man3/seccomp_syscall_resolve_num_arch.3
