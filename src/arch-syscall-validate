@@ -199,6 +199,39 @@ function dump_lib_mips() {
 }
 
 #
+# Dump the mips64 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_mips64() {
+	# _MIPS_SIM values:
+	#   _MIPS_SIM_ABI32 == 1
+	#   _MIPS_SIM_NABI32 == 2
+	#   _MIPS_SIM_ABI64 == 3
+	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=3 $1/arch/mips/include/uapi/asm/unistd.h | \
+		grep "^#define __NR_" | sort | \
+		grep -v "^#define __NR_O32_" | \
+		grep -v "^#define __NR_N32_" | \
+		grep -v "^#define __NR_64_" | \
+		grep -v "^#define __NR_Linux" | \
+		grep -v "^#define __NR_unused" | \
+		grep -v "^#define __NR_reserved" | \
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/'
+}
+
+#
+# Dump the mips64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_mips64() {
+	$LIB_SYS_DUMP -a mips64 -o 5000 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+}
+
+#
 # Dump the system syscall table
 #
 # Arguments:
@@ -223,6 +256,9 @@ function dump_sys() {
 		;;
 	mips)
 		dump_sys_mips "$2"
+		;;
+	mips64)
+		dump_sys_mips64 "$2"
 		;;
 	*)
 		echo ""
@@ -254,6 +290,9 @@ function dump_lib() {
 		;;
 	mips)
 		dump_lib_mips "$2"
+		;;
+	mips64)
+		dump_lib_mips64 "$2"
 		;;
 	*)
 		echo ""
@@ -290,7 +329,7 @@ done
 shift $(($OPTIND - 1))
 
 # defaults
-[[ $arches == "" ]] && arches="x86 x86_64 x32 arm mips"
+[[ $arches == "" ]] && arches="x86 x86_64 x32 arm mips mips64"
 
 # sanity checks
 kernel_dir="$1"

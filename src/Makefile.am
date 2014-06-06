@@ -27,7 +27,8 @@ SOURCES_ARCH = \
 	arch-x86_64.h arch-x86_64.c arch-x86_64-syscalls.c \
 	arch-x32.h arch-x32.c arch-x32-syscalls.c \
 	arch-arm.h arch-arm.c arch-arm-syscalls.c \
-	arch-mips.h arch-mips.c arch-mips-syscalls.c
+	arch-mips.h arch-mips.c arch-mips-syscalls.c \
+	arch-mips64.h arch-mips64.c arch-mips64-syscalls.c
 
 SOURCES_GEN = \
 	api.c system.h \

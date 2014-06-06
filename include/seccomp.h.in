@@ -122,10 +122,12 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_ARM		AUDIT_ARCH_ARM
 
 /**
- * The MIPS architecture token
+ * The MIPS architecture tokens
  */
 #define SCMP_ARCH_MIPS		AUDIT_ARCH_MIPS
+#define SCMP_ARCH_MIPS64	AUDIT_ARCH_MIPS64
 #define SCMP_ARCH_MIPSEL	AUDIT_ARCH_MIPSEL
+#define SCMP_ARCH_MIPSEL64	AUDIT_ARCH_MIPSEL64
 
 /**
  * Convert a syscall name into the associated syscall number
@@ -1220,6 +1222,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_timerfd
 #define __NR_timerfd		__PNR_timerfd
 #endif /* __NR_timerfd */
+
+#define __PNR_time		-10108
+#ifndef __NR_time
+#define __NR_time		__PNR_time
+#endif /* __NR_time */
 
 #ifdef __cplusplus
 }
