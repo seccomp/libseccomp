@@ -92,7 +92,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "fcntl64", 221 },
 	{ "fdatasync", 148 },
 	{ "fgetxattr", 231 },
-	{ "finit_module", __PNR_finit_module },
+	{ "finit_module", 350 },
 	{ "flistxattr", 234 },
 	{ "flock", 143 },
 	{ "fork", 2 },
