@@ -30,6 +30,16 @@
 #include "arch-arm.h"
 #include "arch-mips.h"
 
+/**
+ * compare the syscall values
+ * @param str_miss the other bad architectures
+ * @param syscall the syscall string to compare against
+ * @param arch_name the name of the arch being tested
+ * @param arch_sys the syscall name to compare
+ *
+ * Compare the syscall names and update @str_miss if necessary.
+ *
+ */
 void syscall_check(char *str_miss, const char *syscall,
 		   const char *arch_name, const char *arch_sys)
 {
@@ -40,6 +50,9 @@ void syscall_check(char *str_miss, const char *syscall,
 	}
 }
 
+/**
+ * main
+ */
 int main(int argc, char *argv[])
 {
 	int i_x86 = 0;
