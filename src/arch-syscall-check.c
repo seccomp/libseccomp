@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	}
 	if (i_arm >= 0) {
 		printf("%s: ERROR, arm has additional syscalls\n",
-			arm_syscall_iterate_name(i_arm));
+		       arm_syscall_iterate_name(i_arm));
 		return 1;
 	}
 	if (i_mips >= 0) {
