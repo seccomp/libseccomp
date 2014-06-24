@@ -78,7 +78,7 @@ function tool_c_style() {
 		--align-reference=name \
 		--max-code-length=80 \
 		--break-after-logical < "$1" \
-		| diff -pu --label="$1" "$1" --label="$1 [CORRECTED]" -
+		| diff -pu --label="$1.orig" "$1" --label="$1" -
 }
 
 #
