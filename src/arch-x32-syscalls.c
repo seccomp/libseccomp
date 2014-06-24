@@ -65,3 +65,16 @@ const char *x32_syscall_resolve_num(int num)
 
 	return x86_64_syscall_resolve_num(syscall);
 }
+
+/**
+ * Iterate through the syscall table and return the syscall name
+ * @param spot the offset into the syscall table
+ *
+ * Return the syscall name at position @spot or NULL on failure.  This function
+ * should only ever be used internally by libseccomp.
+ *
+ */
+const char *x32_syscall_iterate_name(unsigned int spot)
+{
+	return x86_64_syscall_iterate_name(spot);
+}

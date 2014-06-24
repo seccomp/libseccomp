@@ -37,10 +37,15 @@ SOURCES_GEN = \
 
 TESTS = arch-syscall-check
 
+noinst_PROGRAMS = arch-syscall-dump
+
 check_PROGRAMS = arch-syscall-check
 
 noinst_LTLIBRARIES = libseccomp-internal.la
 lib_LTLIBRARIES = libseccomp.la
+
+arch_syscall_dump_SOURCES = arch-syscall-dump.c
+arch_syscall_dump_LDADD = libseccomp-internal.la
 
 arch_syscall_check_SOURCES = arch-syscall-check.c
 arch_syscall_check_LDADD = libseccomp-internal.la
