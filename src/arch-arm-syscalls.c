@@ -36,9 +36,12 @@
 #define __NR_SYSCALL_BASE	__NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 3.8.0-rc5 */
+/* NOTE: based on Linux 3.16-rc1 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
+	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
+	{ "_newselect", (__NR_SYSCALL_BASE + 142) },
+	{ "_sysctl", (__NR_SYSCALL_BASE + 149) },
 	{ "accept", (__NR_SYSCALL_BASE + 285) },
 	{ "accept4", (__NR_SYSCALL_BASE + 366) },
 	{ "access", (__NR_SYSCALL_BASE + 33) },
@@ -176,7 +179,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "ioprio_get", (__NR_SYSCALL_BASE + 315) },
 	{ "ioprio_set", (__NR_SYSCALL_BASE + 314) },
 	{ "ipc", (__NR_SYSCALL_BASE + 117) },
-	{ "kcmp", __PNR_kcmp },
+	{ "kcmp", (__NR_SYSCALL_BASE + 378) },
 	{ "kexec_load", (__NR_SYSCALL_BASE + 347) },
 	{ "keyctl", (__NR_SYSCALL_BASE + 311) },
 	{ "kill", (__NR_SYSCALL_BASE + 37) },
@@ -188,7 +191,6 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "listen", (__NR_SYSCALL_BASE + 284) },
 	{ "listxattr", (__NR_SYSCALL_BASE + 232) },
 	{ "llistxattr", (__NR_SYSCALL_BASE + 233) },
-	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
 	{ "lock", __PNR_lock },
 	{ "lookup_dcookie", (__NR_SYSCALL_BASE + 249) },
 	{ "lremovexattr", (__NR_SYSCALL_BASE + 236) },
@@ -230,7 +232,6 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "munmap", (__NR_SYSCALL_BASE + 91) },
 	{ "name_to_handle_at", (__NR_SYSCALL_BASE + 370) },
 	{ "nanosleep", (__NR_SYSCALL_BASE + 162) },
-	{ "_newselect", (__NR_SYSCALL_BASE + 142) },
 	{ "newfstatat", __PNR_newfstatat },
 	{ "nfsservctl", (__NR_SYSCALL_BASE + 169) },
 	{ "nice", (__NR_SYSCALL_BASE + 34) },
@@ -283,6 +284,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "removexattr", (__NR_SYSCALL_BASE + 235) },
 	{ "rename", (__NR_SYSCALL_BASE + 38) },
 	{ "renameat", (__NR_SYSCALL_BASE + 329) },
+	{ "renameat2", (__NR_SYSCALL_BASE + 382) },
 	{ "request_key", (__NR_SYSCALL_BASE + 310) },
 	{ "restart_syscall", (__NR_SYSCALL_BASE +  0) },
 	{ "rmdir", (__NR_SYSCALL_BASE + 40) },
@@ -297,10 +299,12 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "sched_get_priority_max", (__NR_SYSCALL_BASE + 159) },
 	{ "sched_get_priority_min", (__NR_SYSCALL_BASE + 160) },
 	{ "sched_getaffinity", (__NR_SYSCALL_BASE + 242) },
+	{ "sched_getattr", (__NR_SYSCALL_BASE + 381) },
 	{ "sched_getparam", (__NR_SYSCALL_BASE + 155) },
 	{ "sched_getscheduler", (__NR_SYSCALL_BASE + 157) },
 	{ "sched_rr_get_interval", (__NR_SYSCALL_BASE + 161) },
 	{ "sched_setaffinity", (__NR_SYSCALL_BASE + 241) },
+	{ "sched_setattr", (__NR_SYSCALL_BASE + 380) },
 	{ "sched_setparam", (__NR_SYSCALL_BASE + 154) },
 	{ "sched_setscheduler", (__NR_SYSCALL_BASE + 156) },
 	{ "sched_yield", (__NR_SYSCALL_BASE + 158) },
@@ -384,7 +388,6 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "sync_file_range2", (__NR_SYSCALL_BASE + 341) },
 	{ "syncfs", (__NR_SYSCALL_BASE + 373) },
 	{ "syscall", (__NR_SYSCALL_BASE + 113) },
-	{ "_sysctl", (__NR_SYSCALL_BASE + 149) },
 	{ "sysfs", (__NR_SYSCALL_BASE + 135) },
 	{ "sysinfo", (__NR_SYSCALL_BASE + 116) },
 	{ "syslog", (__NR_SYSCALL_BASE + 103) },
