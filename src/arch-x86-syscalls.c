@@ -26,8 +26,11 @@
 #include "arch.h"
 #include "arch-x86.h"
 
-/* NOTE: based on Linux 3.4.7 */
+/* NOTE: based on Linux 3.16-rc1 */
 const struct arch_syscall_def x86_syscall_table[] = { \
+	{ "_llseek", 140 },
+	{ "_newselect", 142 },
+	{ "_sysctl", 149 },
 	{ "accept", __PNR_accept },
 	{ "accept4", __PNR_accept4 },
 	{ "access", 33 },
@@ -177,7 +180,6 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "listen", __PNR_listen },
 	{ "listxattr", 232 },
 	{ "llistxattr", 233 },
-	{ "_llseek", 140 },
 	{ "lock", 53 },
 	{ "lookup_dcookie", 253 },
 	{ "lremovexattr", 236 },
@@ -219,7 +221,6 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "munmap", 91 },
 	{ "name_to_handle_at", 341 },
 	{ "nanosleep", 162 },
-	{ "_newselect", 142 },
 	{ "newfstatat", __PNR_newfstatat },
 	{ "nfsservctl", 169 },
 	{ "nice", 34 },
@@ -286,10 +287,12 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "sched_get_priority_max", 159 },
 	{ "sched_get_priority_min", 160 },
 	{ "sched_getaffinity", 242 },
+	{ "sched_getattr", 352 },
 	{ "sched_getparam", 155 },
 	{ "sched_getscheduler", 157 },
 	{ "sched_rr_get_interval", 161 },
 	{ "sched_setaffinity", 241 },
+	{ "sched_setattr", 351 },
 	{ "sched_setparam", 154 },
 	{ "sched_setscheduler", 156 },
 	{ "sched_yield", 158 },
@@ -373,7 +376,6 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "sync_file_range2", __PNR_sync_file_range2 },
 	{ "syncfs", 344 },
 	{ "syscall", __PNR_syscall },
-	{ "_sysctl", 149 },
 	{ "sysfs", 135 },
 	{ "sysinfo", 116 },
 	{ "syslog", 103 },
