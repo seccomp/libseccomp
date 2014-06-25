@@ -26,8 +26,9 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux 3.4.7 */
+/* NOTE: based on Linux 3.16-rc1 */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
+	{ "_sysctl", 156 },
 	{ "accept", 43 },
 	{ "accept4", 288 },
 	{ "access", 21 },
@@ -286,10 +287,12 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "sched_get_priority_max", 146 },
 	{ "sched_get_priority_min", 147 },
 	{ "sched_getaffinity", 204 },
+	{ "sched_getattr", 315 },
 	{ "sched_getparam", 143 },
 	{ "sched_getscheduler", 145 },
 	{ "sched_rr_get_interval", 148 },
 	{ "sched_setaffinity", 203 },
+	{ "sched_setattr", 314 },
 	{ "sched_setparam", 142 },
 	{ "sched_setscheduler", 144 },
 	{ "sched_yield", 24 },
@@ -373,7 +376,6 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "sync_file_range2", __PNR_sync_file_range2 },
 	{ "syncfs", 306 },
 	{ "syscall", __PNR_syscall },
-	{ "_sysctl", 156 },
 	{ "sysfs", 139 },
 	{ "sysinfo", 99 },
 	{ "syslog", 103 },
