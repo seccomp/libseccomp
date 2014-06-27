@@ -1219,7 +1219,7 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __PNR_timerfd		-10107
 #ifndef __NR_timerfd
 #define __NR_timerfd		__PNR_timerfd
-#endif /* __NR_sysmips */
+#endif /* __NR_timerfd */
 
 #ifdef __cplusplus
 }
