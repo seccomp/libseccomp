@@ -37,9 +37,7 @@ SOURCES_GEN = \
 
 TESTS = arch-syscall-check
 
-noinst_PROGRAMS = arch-syscall-dump
-
-check_PROGRAMS = arch-syscall-check
+check_PROGRAMS = arch-syscall-check arch-syscall-dump
 
 noinst_LTLIBRARIES = libseccomp-internal.la
 lib_LTLIBRARIES = libseccomp.la
