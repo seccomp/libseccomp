@@ -15,10 +15,14 @@ The "doc/" directory contains all of the documentation aside from the README
 file (this file) and the LICENSE file which can be found in the top level
 directory.
 
+Those who are interested in contributing to the the project are encouraged to
+read the SUBMITTING_PATCHES in the top level directory.
+
 * Building and Installing the Library
 
 In order to build the library you should follow the familiar three step
-process used by most applications:
+process used by most applications which leverage autotools for the build
+process:
 
 	# ./configure
 	# make [V=0|1]
@@ -29,17 +33,15 @@ configuration options.
 
 * Testing the Library
 
-There are a number of tests located in the "tests/" directory and a script
-which can be used to help automate their execution, "regression".  If you want
-to run all of the tests you can simply run the script:
+There are a number of tests located in the "tests/" directory and a make target
+which can be used to help automate their execution.  If you want to run the
+standard regression tests you can execute the following after building the
+library:
 
-	# ./configure
-	# make
-	# cd tests
-	# ./regression
+	# make check
 
-However, the script takes a number of options to customize its execution; the
-options can be displayed by running "./regression -h".
+Be warned that the test run can take a while to run and produces a lot of
+output.
 
 * Other Useful Tools
 
