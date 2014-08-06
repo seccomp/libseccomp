@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL - 1, SCMP_SYS(read), 0);
 		if (rc != -EINVAL)
 			return -1;
-		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 6);
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 7);
 		if (rc != -EINVAL)
 			return -1;
 		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 7,
