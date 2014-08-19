@@ -30,6 +30,7 @@
 #include "arch-arm.h"
 #include "arch-mips.h"
 #include "arch-mips64.h"
+#include "arch-mips64n32.h"
 
 /**
  * compare the syscall values
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
 	int i_arm = 0;
 	int i_mips = 0;
 	int i_mips64 = 0;
+	int i_mips64n32 = 0;
 	const char *sys_name, *tmp;
 	char str_miss[256];
 
@@ -71,14 +73,16 @@ int main(int argc, char *argv[])
 			sys_name = tmp;
 
 		/* check each arch using x86 as the reference */
-		syscall_check(str_miss, sys_name,
-			      "x86_64", x86_64_syscall_iterate_name(i_x86_64));
-		syscall_check(str_miss, sys_name,
-			      "arm", arm_syscall_iterate_name(i_arm));
-		syscall_check(str_miss, sys_name,
-			      "mips", mips_syscall_iterate_name(i_mips));
-		syscall_check(str_miss, sys_name,
-			      "mips64", mips64_syscall_iterate_name(i_mips64));
+		syscall_check(str_miss, sys_name, "x86_64",
+			      x86_64_syscall_iterate_name(i_x86_64));
+		syscall_check(str_miss, sys_name, "arm",
+			      arm_syscall_iterate_name(i_arm));
+		syscall_check(str_miss, sys_name, "mips",
+			      mips_syscall_iterate_name(i_mips));
+		syscall_check(str_miss, sys_name, "mips64",
+			      mips64_syscall_iterate_name(i_mips64));
+		syscall_check(str_miss, sys_name, "mips64n32",
+			      mips64n32_syscall_iterate_name(i_mips64n32));
 
 		/* output the results */
 		printf("%s: ", sys_name);
@@ -99,7 +103,10 @@ int main(int argc, char *argv[])
 			i_mips = -1;
 		if (!mips64_syscall_iterate_name(++i_mips64))
 			i_mips64 = -1;
-	} while (i_x86_64 >= 0 && i_arm >= 0 && i_mips >= 0 && i_mips64 >= 0);
+		if (!mips64n32_syscall_iterate_name(++i_mips64n32))
+			i_mips64n32 = -1;
+	} while (i_x86_64 >= 0 && i_arm >= 0 &&
+		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0);
 
 	/* check for any leftovers */
 	tmp = x86_syscall_iterate_name(i_x86 + 1);
@@ -125,6 +132,11 @@ int main(int argc, char *argv[])
 	if (i_mips64 >= 0) {
 		printf("%s: ERROR, mips64 has additional syscalls\n",
 		       mips64_syscall_iterate_name(i_mips));
+		return 1;
+	}
+	if (i_mips64n32 >= 0) {
+		printf("%s: ERROR, mips64n32 has additional syscalls\n",
+		       mips64n32_syscall_iterate_name(i_mips));
 		return 1;
 	}
 

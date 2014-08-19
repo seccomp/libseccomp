@@ -65,6 +65,10 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "mips64";
 	case SCMP_ARCH_MIPSEL64:
 		return "mipsel64";
+	case SCMP_ARCH_MIPS64N32:
+		return "mips64n32";
+	case SCMP_ARCH_MIPSEL64N32:
+		return "mipsel64n32";
 	default:
 		return "UNKNOWN";
 	}

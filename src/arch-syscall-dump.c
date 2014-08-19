@@ -36,6 +36,7 @@
 #include "arch-arm.h"
 #include "arch-mips.h"
 #include "arch-mips64.h"
+#include "arch-mips64n32.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -105,6 +106,10 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_MIPS64:
 		case SCMP_ARCH_MIPSEL64:
 			sys_name = mips64_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_MIPS64N32:
+		case SCMP_ARCH_MIPSEL64N32:
+			sys_name = mips64n32_syscall_iterate_name(iter);
 			break;
 		default:
 			/* invalid arch */
