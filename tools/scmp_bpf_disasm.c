@@ -324,6 +324,10 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_MIPS;
 			else if (strcmp(optarg, "mipsel") == 0)
 				arch = AUDIT_ARCH_MIPSEL;
+			else if (strcmp(optarg, "mips64") == 0)
+				arch = AUDIT_ARCH_MIPS64;
+			else if (strcmp(optarg, "mipsel64") == 0)
+				arch = AUDIT_ARCH_MIPSEL64;
 			else
 				exit_usage(argv[0]);
 			break;

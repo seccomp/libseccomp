@@ -31,6 +31,7 @@ def test(args):
     f = SyscallFilter(KILL)
     f.remove_arch(Arch())
     f.add_arch(Arch("mips"))
+    f.add_arch(Arch("mips64"))
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))

@@ -36,6 +36,7 @@ def test(args):
     f.add_arch(Arch("x32"))
     f.add_arch(Arch("arm"))
     f.add_arch(Arch("mipsel"))
+    f.add_arch(Arch("mipsel64"))
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))

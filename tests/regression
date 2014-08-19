@@ -21,8 +21,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-GLBL_ARCH_LE_SUPPORT="x86 x86_64 x32 arm mipsel"
-GLBL_ARCH_BE_SUPPORT="mips"
+GLBL_ARCH_LE_SUPPORT="x86 x86_64 x32 arm mipsel mipsel64"
+GLBL_ARCH_BE_SUPPORT="mips mips64"
 
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
@@ -629,7 +629,7 @@ function run_test_live() {
 		rc_trace=162
 		rc_errno=163
 		;;
-	mips|mipsel)
+	mips|mipsel|mips64|mipsel64)
 		rc_kill=140
 		rc_allow=160
 		rc_trap=161

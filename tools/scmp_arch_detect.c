@@ -84,6 +84,12 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_MIPSEL:
 			printf("mipsel\n");
 			break;
+		case SCMP_ARCH_MIPS64:
+			printf("mips64\n");
+			break;
+		case SCMP_ARCH_MIPSEL64:
+			printf("mipsel64\n");
+			break;
 		default:
 			printf("unknown\n");
 		}
