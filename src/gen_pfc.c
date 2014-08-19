@@ -57,6 +57,10 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "x32";
 	case SCMP_ARCH_ARM:
 		return "arm";
+	case SCMP_ARCH_MIPS:
+		return "mips";
+	case SCMP_ARCH_MIPSEL:
+		return "mipsel";
 	default:
 		return "UNKNOWN";
 	}
