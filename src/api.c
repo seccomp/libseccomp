@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <sys/prctl.h>
 
 #include <seccomp.h>
 
@@ -225,30 +224,13 @@ API int seccomp_arch_remove(scmp_filter_ctx ctx, uint32_t arch_token)
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_load(const scmp_filter_ctx ctx)
 {
-	int rc;
 	struct db_filter_col *col;
-	struct bpf_program *program;
 
 	if (_ctx_valid(ctx))
 		return -EINVAL;
 	col = (struct db_filter_col *)ctx;
 
-	program = gen_bpf_generate((struct db_filter_col *)ctx);
-	if (program == NULL)
-		return -ENOMEM;
-	/* attempt to set NO_NEW_PRIVS */
-	if (col->attr.nnp_enable) {
-		rc = prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-		if (rc < 0)
-			return -errno;
-	}
-	/* load the filter into the kernel */
-	rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, program);
-	gen_bpf_release(program);
-	if (rc < 0)
-		return -errno;
-
-	return 0;
+	return sys_filter_load(col);
 }
 
 /* NOTE - function header comment in include/seccomp.h */

@@ -1,5 +1,5 @@
 /**
- * Seccomp System Information
+ * Seccomp System Interfaces
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
@@ -26,6 +26,8 @@
 #include <linux/prctl.h>
 
 #include "configure.h"
+
+struct db_filter_col;
 
 #ifdef HAVE_LINUX_SECCOMP_H
 
@@ -76,17 +78,33 @@ struct seccomp_data {
 	__u64 args[6];
 };
 
-#endif /* CONF_SYSINC_SECCOMP */
+#endif /* HAVE_LINUX_SECCOMP_H */
 
 /* rename some of the socket filter types to make more sense */
 typedef struct sock_filter bpf_instr_raw;
 
+/* no new privs defintions */
 #ifndef PR_SET_NO_NEW_PRIVS
-#define PR_SET_NO_NEW_PRIVS	38
-#endif /* PR_SET_NO_NEW_PRIVS */
+#define PR_SET_NO_NEW_PRIVS		38
+#endif
 
 #ifndef PR_GET_NO_NEW_PRIVS
-#define PR_GET_NO_NEW_PRIVS	39
-#endif /* PR_GET_NO_NEW_PRIVS */
+#define PR_GET_NO_NEW_PRIVS		39
+#endif
+
+/* operations for the seccomp() syscall */
+#ifndef SECCOMP_MODE_STRICT
+#define SECCOMP_SET_MODE_STRICT		0
+#endif
+#ifndef SECCOMP_SET_MODE_FILTER
+#define SECCOMP_SET_MODE_FILTER		1
+#endif
+
+/* flags for the seccomp() syscall */
+#ifndef SECCOMP_FILTER_FLAG_TSYNC
+#define SECCOMP_FILTER_FLAG_TSYNC	1
+#endif
+
+int sys_filter_load(const struct db_filter_col *col);
 
 #endif

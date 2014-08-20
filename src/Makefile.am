@@ -32,7 +32,7 @@ SOURCES_ARCH = \
 	arch-mips64n32.h arch-mips64n32.c arch-mips64n32-syscalls.c
 
 SOURCES_GEN = \
-	api.c system.h \
+	api.c system.h system.c \
 	db.h db.c \
 	hash.h hash.c \
 	gen_pfc.h gen_pfc.c gen_bpf.h gen_bpf.c
