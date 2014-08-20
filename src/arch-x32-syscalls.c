@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux 3.16-rc1 */
+/* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_sysctl", __PNR__sysctl },
 	{ "accept", (X32_SYSCALL_BIT + 43) },
@@ -136,6 +136,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "getpmsg", (X32_SYSCALL_BIT + 181) },
 	{ "getppid", (X32_SYSCALL_BIT + 110) },
 	{ "getpriority", (X32_SYSCALL_BIT + 140) },
+	{ "getrandom", (X32_SYSCALL_BIT + 318) },
 	{ "getresgid", (X32_SYSCALL_BIT + 120) },
 	{ "getresgid32", __PNR_getresgid32 },
 	{ "getresuid", (X32_SYSCALL_BIT + 118) },
@@ -160,8 +161,8 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "io_cancel", (X32_SYSCALL_BIT + 210) },
 	{ "io_destroy", (X32_SYSCALL_BIT + 207) },
 	{ "io_getevents", (X32_SYSCALL_BIT + 208) },
-	{ "io_setup", (X32_SYSCALL_BIT + 206) },
-	{ "io_submit", (X32_SYSCALL_BIT + 209) },
+	{ "io_setup", (X32_SYSCALL_BIT + 543) },
+	{ "io_submit", (X32_SYSCALL_BIT + 544) },
 	{ "ioctl", (X32_SYSCALL_BIT + 514) },
 	{ "ioperm", (X32_SYSCALL_BIT + 173) },
 	{ "iopl", (X32_SYSCALL_BIT + 172) },
@@ -169,6 +170,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "ioprio_set", (X32_SYSCALL_BIT + 251) },
 	{ "ipc", __PNR_ipc },
 	{ "kcmp", (X32_SYSCALL_BIT + 312) },
+	{ "kexec_file_load", (X32_SYSCALL_BIT + 320) },
 	{ "kexec_load", (X32_SYSCALL_BIT + 528) },
 	{ "keyctl", (X32_SYSCALL_BIT + 250) },
 	{ "kill", (X32_SYSCALL_BIT + 62) },
@@ -189,6 +191,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "lstat64", __PNR_lstat64 },
 	{ "madvise", (X32_SYSCALL_BIT + 28) },
 	{ "mbind", (X32_SYSCALL_BIT + 237) },
+	{ "memfd_create", (X32_SYSCALL_BIT + 319) },
 	{ "migrate_pages", (X32_SYSCALL_BIT + 256) },
 	{ "mincore", (X32_SYSCALL_BIT + 27) },
 	{ "mkdir", (X32_SYSCALL_BIT + 83) },
@@ -273,7 +276,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "removexattr", (X32_SYSCALL_BIT + 197) },
 	{ "rename", (X32_SYSCALL_BIT + 82) },
 	{ "renameat", (X32_SYSCALL_BIT + 264) },
-	{ "renameat2", __PNR_renameat2 },
+	{ "renameat2", (X32_SYSCALL_BIT + 316) },
 	{ "request_key", (X32_SYSCALL_BIT + 249) },
 	{ "restart_syscall", (X32_SYSCALL_BIT + 219) },
 	{ "rmdir", (X32_SYSCALL_BIT + 84) },
@@ -297,6 +300,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "sched_setparam", (X32_SYSCALL_BIT + 142) },
 	{ "sched_setscheduler", (X32_SYSCALL_BIT + 144) },
 	{ "sched_yield", (X32_SYSCALL_BIT + 24) },
+	{ "seccomp", (X32_SYSCALL_BIT + 317) },
 	{ "security", (X32_SYSCALL_BIT + 185) },
 	{ "select", (X32_SYSCALL_BIT + 23) },
 	{ "semctl", (X32_SYSCALL_BIT + 66) },

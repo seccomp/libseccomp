@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux 3.16-rc1 */
+/* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -138,6 +138,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "getpmsg", 181 },
 	{ "getppid", 110 },
 	{ "getpriority", 140 },
+	{ "getrandom", 318 },
 	{ "getresgid", 120 },
 	{ "getresgid32", __PNR_getresgid32 },
 	{ "getresuid", 118 },
@@ -171,6 +172,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "ioprio_set", 251 },
 	{ "ipc", __PNR_ipc },
 	{ "kcmp", 312 },
+	{ "kexec_file_load", 320 },
 	{ "kexec_load", 246 },
 	{ "keyctl", 250 },
 	{ "kill", 62 },
@@ -191,6 +193,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "lstat64", __PNR_lstat64 },
 	{ "madvise", 28 },
 	{ "mbind", 237 },
+	{ "memfd_create", 319 },
 	{ "migrate_pages", 256 },
 	{ "mincore", 27 },
 	{ "mkdir", 83 },
@@ -275,7 +278,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "removexattr", 197 },
 	{ "rename", 82 },
 	{ "renameat", 264 },
-	{ "renameat2", __PNR_renameat2 },
+	{ "renameat2", 316 },
 	{ "request_key", 249 },
 	{ "restart_syscall", 219 },
 	{ "rmdir", 84 },
@@ -299,6 +302,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "sched_setparam", 142 },
 	{ "sched_setscheduler", 144 },
 	{ "sched_yield", 24 },
+	{ "seccomp", 317 },
 	{ "security", 185 },
 	{ "select", 23 },
 	{ "semctl", 66 },

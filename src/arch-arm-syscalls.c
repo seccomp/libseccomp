@@ -36,7 +36,7 @@
 #define __NR_SYSCALL_BASE	__NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 3.16-rc1 */
+/* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
@@ -149,6 +149,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "getpmsg", __PNR_getpmsg },
 	{ "getppid", (__NR_SYSCALL_BASE + 64) },
 	{ "getpriority", (__NR_SYSCALL_BASE + 96) },
+	{ "getrandom", (__NR_SYSCALL_BASE + 384) },
 	{ "getresgid", (__NR_SYSCALL_BASE + 171) },
 	{ "getresgid32", (__NR_SYSCALL_BASE + 211) },
 	{ "getresuid", (__NR_SYSCALL_BASE + 165) },
@@ -182,6 +183,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "ioprio_set", (__NR_SYSCALL_BASE + 314) },
 	{ "ipc", (__NR_SYSCALL_BASE + 117) },
 	{ "kcmp", (__NR_SYSCALL_BASE + 378) },
+	{ "kexec_file_load", __PNR_kexec_file_load },
 	{ "kexec_load", (__NR_SYSCALL_BASE + 347) },
 	{ "keyctl", (__NR_SYSCALL_BASE + 311) },
 	{ "kill", (__NR_SYSCALL_BASE + 37) },
@@ -202,6 +204,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "lstat64", (__NR_SYSCALL_BASE + 196) },
 	{ "madvise", (__NR_SYSCALL_BASE + 220) },
 	{ "mbind", (__NR_SYSCALL_BASE + 319) },
+	{ "memfd_create", (__NR_SYSCALL_BASE + 385) },
 	{ "migrate_pages", __PNR_migrate_pages },
 	{ "mincore", (__NR_SYSCALL_BASE + 219) },
 	{ "mkdir", (__NR_SYSCALL_BASE + 39) },
@@ -310,6 +313,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "sched_setparam", (__NR_SYSCALL_BASE + 154) },
 	{ "sched_setscheduler", (__NR_SYSCALL_BASE + 156) },
 	{ "sched_yield", (__NR_SYSCALL_BASE + 158) },
+	{ "seccomp", (__NR_SYSCALL_BASE + 383) },
 	{ "security", __PNR_security },
 	{ "select", (__NR_SYSCALL_BASE + 82) },
 	{ "semctl", (__NR_SYSCALL_BASE + 300) },

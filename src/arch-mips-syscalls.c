@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __NR_SYSCALL_BASE	4000
 
-/* NOTE: based on Linux 3.16-rc1 */
+/* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
 	{ "_newselect", (__NR_SYSCALL_BASE + 142) },
@@ -142,6 +142,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "getpmsg", (__NR_SYSCALL_BASE + 208) },
 	{ "getppid", (__NR_SYSCALL_BASE + 64) },
 	{ "getpriority", (__NR_SYSCALL_BASE + 96) },
+	{ "getrandom", __PNR_getrandom },
 	{ "getresgid", (__NR_SYSCALL_BASE + 191) },
 	{ "getresgid32", __PNR_getresgid32 },
 	{ "getresuid", (__NR_SYSCALL_BASE + 186) },
@@ -175,6 +176,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "ioprio_set", (__NR_SYSCALL_BASE + 314) },
 	{ "ipc", (__NR_SYSCALL_BASE + 117) },
 	{ "kcmp", (__NR_SYSCALL_BASE + 347)  },
+	{ "kexec_file_load", __PNR_kexec_file_load },
 	{ "kexec_load", (__NR_SYSCALL_BASE + 311) },
 	{ "keyctl", (__NR_SYSCALL_BASE + 282) },
 	{ "kill", (__NR_SYSCALL_BASE + 37) },
@@ -195,6 +197,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "lstat64", (__NR_SYSCALL_BASE + 214) },
 	{ "madvise", (__NR_SYSCALL_BASE + 218) },
 	{ "mbind", (__NR_SYSCALL_BASE + 268) },
+	{ "memfd_create", __PNR_memfd_create },
 	{ "migrate_pages", (__NR_SYSCALL_BASE + 287) },
 	{ "mincore", (__NR_SYSCALL_BASE + 217) },
 	{ "mkdir", (__NR_SYSCALL_BASE + 39) },
@@ -303,6 +306,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "sched_setparam", (__NR_SYSCALL_BASE + 158) },
 	{ "sched_setscheduler", (__NR_SYSCALL_BASE + 160) },
 	{ "sched_yield", (__NR_SYSCALL_BASE + 162) },
+	{ "seccomp", (__NR_SYSCALL_BASE + 352) },
 	{ "security", __PNR_security },
 	{ "select", __PNR_select },
 	{ "semctl", __PNR_semctl },

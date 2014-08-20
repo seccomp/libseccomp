@@ -30,7 +30,7 @@
 /* 64 ABI */
 #define __NR_SYSCALL_BASE	5000
 
-/* NOTE: based on Linux 3.16-rc1 */
+/* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", (__NR_SYSCALL_BASE + 22) },
@@ -142,6 +142,7 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "getpmsg", (__NR_SYSCALL_BASE + 174) },
 	{ "getppid", (__NR_SYSCALL_BASE + 108) },
 	{ "getpriority", (__NR_SYSCALL_BASE + 137) },
+	{ "getrandom", __PNR_getrandom },
 	{ "getresgid", (__NR_SYSCALL_BASE + 118) },
 	{ "getresgid32", __PNR_getresgid32 },
 	{ "getresuid", (__NR_SYSCALL_BASE + 116) },
@@ -175,6 +176,7 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "ioprio_set", (__NR_SYSCALL_BASE + 273) },
 	{ "ipc", __PNR_ipc },
 	{ "kcmp", (__NR_SYSCALL_BASE + 306) },
+	{ "kexec_file_load", __PNR_kexec_file_load },
 	{ "kexec_load", (__NR_SYSCALL_BASE + 270) },
 	{ "keyctl", (__NR_SYSCALL_BASE + 241) },
 	{ "kill", (__NR_SYSCALL_BASE + 60) },
@@ -195,6 +197,7 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "lstat64", __PNR_lstat64 },
 	{ "madvise", (__NR_SYSCALL_BASE + 27) },
 	{ "mbind", (__NR_SYSCALL_BASE + 227) },
+	{ "memfd_create", __PNR_memfd_create },
 	{ "migrate_pages", (__NR_SYSCALL_BASE + 246) },
 	{ "mincore", (__NR_SYSCALL_BASE + 26) },
 	{ "mkdir", (__NR_SYSCALL_BASE + 81) },
@@ -228,7 +231,7 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "name_to_handle_at", (__NR_SYSCALL_BASE + 298) },
 	{ "nanosleep", (__NR_SYSCALL_BASE + 34) },
 	{ "newfstatat", (__NR_SYSCALL_BASE + 252) },
-	{ "nfsservctl", __PNR_nfsservctl },
+	{ "nfsservctl", (__NR_SYSCALL_BASE + 173) },
 	{ "nice", __PNR_nice },
 	{ "oldfstat", __PNR_oldfstat },
 	{ "oldlstat", __PNR_oldlstat },
@@ -303,6 +306,7 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "sched_setparam", (__NR_SYSCALL_BASE + 139) },
 	{ "sched_setscheduler", (__NR_SYSCALL_BASE + 141) },
 	{ "sched_yield", (__NR_SYSCALL_BASE + 23) },
+	{ "seccomp", (__NR_SYSCALL_BASE + 312) },
 	{ "security", __PNR_security },
 	{ "select", __PNR_select },
 	{ "semctl", (__NR_SYSCALL_BASE + 64) },
