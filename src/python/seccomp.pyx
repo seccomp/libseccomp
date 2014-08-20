@@ -473,6 +473,8 @@ cdef class SyscallFilter:
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add() function and the inability of Cython
         to handle this automatically """
+        if len(args) > 6:
+            raise RuntimeError("Maximum number of arguments exceeded")
         cdef Arg arg
         for i, arg in enumerate(args):
             c_arg[i] = arg.to_c()
@@ -553,6 +555,8 @@ cdef class SyscallFilter:
         """ NOTE: the code below exists solely to deal with the varadic
         nature of seccomp_rule_add_exact() function and the inability of
         Cython to handle this automatically """
+        if len(args) > 6:
+            raise RuntimeError("Maximum number of arguments exceeded")
         cdef Arg arg
         for i, arg in enumerate(args):
             c_arg[i] = arg.to_c()
