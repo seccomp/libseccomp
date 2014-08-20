@@ -127,6 +127,8 @@ struct db_filter_attr {
 	uint32_t act_badarch;
 	/* NO_NEW_PRIVS related attributes */
 	uint32_t nnp_enable;
+	/* SECCOMP_FILTER_FLAG_TSYNC related attributes */
+	uint32_t tsync_enable;
 };
 
 struct db_filter {

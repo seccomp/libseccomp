@@ -400,6 +400,7 @@ void db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.act_default = def_action;
 	col->attr.act_badarch = SCMP_ACT_KILL;
 	col->attr.nnp_enable = 1;
+	col->attr.tsync_enable = 0;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -562,6 +563,8 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_NNP:
 		*value = col->attr.nnp_enable;
 		break;
+	case SCMP_FLTATR_CTL_TSYNC:
+		*value = col->attr.tsync_enable;
 	default:
 		rc = -EEXIST;
 		break;
@@ -598,6 +601,12 @@ int db_col_attr_set(struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_CTL_NNP:
 		col->attr.nnp_enable = (value ? 1 : 0);
+		break;
+	case SCMP_FLTATR_CTL_TSYNC:
+		rc = sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC);
+		if (rc)
+			return rc;
+		col->attr.tsync_enable = (value ? 1 : 0);
 		break;
 	default:
 		rc = -EEXIST;

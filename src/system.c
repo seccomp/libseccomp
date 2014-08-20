@@ -30,6 +30,28 @@
 #include "system.h"
 
 /**
+ * Check to see if a seccomp() flag is supported
+ * @param flag the seccomp() flag
+ *
+ * This function checks to see if a seccomp() flag is supported by the system.
+ * If the flag is supported zero is returned, negative values otherwise.
+ *
+ */
+int sys_chk_seccomp_flag(int flag)
+{
+#ifdef HAVE_SECCOMP
+	switch (flags) {
+	case SECCOMP_FILTER_FLAG_TSYNC:
+		return 0;
+	default:
+		return -EOPNOTSUPP;
+	}
+#else
+	return -EOPNOTSUPP;
+#endif /* HAVE_SECCOMP */
+}
+
+/**
  * Loads the filter into the kernel
  * @param col the filter collection
  *
@@ -57,7 +79,15 @@ int sys_filter_load(const struct db_filter_col *col)
 
 	/* load the filter into the kernel */
 #ifdef HAVE_SECCOMP
-	rc = seccomp(SECCOMP_SET_MODE_FILTER, flags, program);
+	{
+		int flags = 0;
+		if (col->attr.tsync_enable)
+			flags = SECCOMP_FILTER_FLAG_TSYNC;
+		rc = seccomp(SECCOMP_SET_MODE_FILTER, flags, program);
+		if (rc > 0 && col->attr.tsync_enable)
+			/* always return -ESRCH if we fail to sync threads */
+			errno = -ESRCH;
+	}
 #else
 	rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, program);
 #endif /* HAVE_SECCOMP */

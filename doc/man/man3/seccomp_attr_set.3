@@ -1,4 +1,4 @@
-.TH "seccomp_attr_set" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_attr_set" 3 "21 August 2014" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,17 @@ loading the seccomp filter into the kernel.  If set to off (
 is not set.  Defaults to on (
 .I value
 == 1).
+.TP
+.B SCMP_FLTATR_CTL_TSYNC
+A flag to specify if the kernel should attempt to synchronize the filters
+across all threads on
+.BR seccomp_load (3).
+If the kernel is unable to synchronize all of the thread then the load
+operation will fail.  This flag is only available on Linux Kernel 3.17 or
+greater; attempting to enable this flag on earlier kernels will result in an
+error being returned.  Defaults to off (
+.I value
+== 0).
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////

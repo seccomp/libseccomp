@@ -105,6 +105,8 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_FILTER_FLAG_TSYNC	1
 #endif
 
+int sys_chk_seccomp_flag(int flag);
+
 int sys_filter_load(const struct db_filter_col *col);
 
 #endif
