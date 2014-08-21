@@ -42,10 +42,24 @@
 #endif /* __ILP32__ */
 #elif __arm__
 #define ARCH_NATIVE		AUDIT_ARCH_ARM
-#elif __MIPSEB__
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI32
+#if __MIPSEB__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPS
 #elif __MIPSEL__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPSEL
+#endif /* _MIPS_SIM_ABI32 */
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI64
+#if __MIPSEB__
+#define ARCH_NATIVE		AUDIT_ARCH_MIPS64
+#elif __MIPSEL__
+#define ARCH_NATIVE		AUDIT_ARCH_MIPSEL64
+#endif /* _MIPS_SIM_ABI64 */
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_NABI32
+#if __MIPSEB__
+#define ARCH_NATIVE		AUDIT_ARCH_MIPS64N32
+#elif __MIPSEL__
+#define ARCH_NATIVE		AUDIT_ARCH_MIPSEL64N32
+#endif /* _MIPS_SIM_NABI32 */
 #else
 #error the simulator code needs to know about your machine type
 #endif
