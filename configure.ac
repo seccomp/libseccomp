@@ -112,6 +112,12 @@ AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
 	[Python bindings build flag.])
 
 dnl ####
+dnl coverity checks
+dnl ####
+AC_CHECK_PROG(have_coverity, cov-build, "yes", "no")
+AM_CONDITIONAL(COVERITY, test "$have_coverity" = yes)
+
+dnl ####
 dnl version dependent files
 dnl ####
 AC_CONFIG_FILES([

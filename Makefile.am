@@ -34,3 +34,20 @@ check-build: all
 
 check-syntax:
 	@./tools/check-syntax
+
+if COVERITY
+coverity-build: clean
+	cov-build --dir cov-int ${MAKE} ${AM_MAKEFLAGS} check-build
+endif
+
+if COVERITY
+coverity-tarball: coverity-build
+	@git rev-parse HEAD &> /dev/null && \
+		rev=$$(git rev-parse HEAD | cut -c1-8) || \
+		rev=$$(date --iso-8601=date); \
+	tar czf libseccomp-coverity_$$rev.tar.gz cov-int; \
+	ls -l libseccomp-coverity_$$rev.tar.gz
+endif
+
+clean-local:
+	${RM} -rf cov-int libseccomp-coverity_*.tar.gz
