@@ -234,6 +234,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "oldolduname", __PNR_oldolduname },
 	{ "oldstat", __PNR_oldstat },
 	{ "olduname", __PNR_olduname },
+	{ "oldwait4", __PNR_oldwait4 },
 	{ "open", 2 },
 	{ "open_by_handle_at", 304 },
 	{ "openat", 257 },

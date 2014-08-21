@@ -45,21 +45,22 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 0);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx,
-				    SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx,
-				    SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 	if (rc != 0)
 		goto out;
 

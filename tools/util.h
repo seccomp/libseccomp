@@ -23,6 +23,7 @@
 #define _UTIL_H
 
 #include <inttypes.h>
+#include <linux/audit.h>
 
 #ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32
 #define __AUDIT_ARCH_CONVENTION_MIPS64_N32	0x20000000
@@ -38,6 +39,11 @@
 /* MIPSEL64N32 support was merged in 3.15 */
 #define AUDIT_ARCH_MIPSEL64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE|\
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
+#endif
+
+#ifndef AUDIT_ARCH_AARCH64
+/* AArch64 support for audit was merged in 3.17-rc1 */
+#define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
 #endif
 
 extern uint32_t arch;

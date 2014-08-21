@@ -41,40 +41,39 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
-				    SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, 0x0),
-				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 3,
+			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO),
+			      SCMP_A1(SCMP_CMP_NE, 0x0),
+			      SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
-				    SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, 0x0),
-				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
+			      SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO),
+			      SCMP_A1(SCMP_CMP_NE, 0x0),
+			      SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
-				    SCMP_A0(SCMP_CMP_EQ, STDERR_FILENO),
-				    SCMP_A1(SCMP_CMP_NE, 0x0),
-				    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 3,
+			      SCMP_A0(SCMP_CMP_EQ, STDERR_FILENO),
+			      SCMP_A1(SCMP_CMP_NE, 0x0),
+			      SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx,
-				    SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	if (rc != 0)
+		goto out;
+
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
 	if (rc != 0)
 		goto out;
 

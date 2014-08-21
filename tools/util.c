@@ -42,6 +42,8 @@
 #endif /* __ILP32__ */
 #elif __arm__
 #define ARCH_NATIVE		AUDIT_ARCH_ARM
+#elif __aarch64__
+#define ARCH_NATIVE		AUDIT_ARCH_AARCH64
 #elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI32
 #if __MIPSEB__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPS

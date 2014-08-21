@@ -245,6 +245,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "oldolduname", __PNR_oldolduname },
 	{ "oldstat", __PNR_oldstat },
 	{ "olduname", __PNR_olduname },
+	{ "oldwait4", __PNR_oldwait4 },
 	{ "open", (__NR_SYSCALL_BASE +  5) },
 	{ "open_by_handle_at", (__NR_SYSCALL_BASE + 371) },
 	{ "openat", (__NR_SYSCALL_BASE + 322) },

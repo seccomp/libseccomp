@@ -33,8 +33,8 @@ def test():
     if action == TRAP:
         util.install_trap()
     f = SyscallFilter(action)
-    f.add_rule_exactly(ALLOW, "rt_sigreturn")
-    f.add_rule_exactly(ALLOW, "exit_group")
+    f.add_rule(ALLOW, "rt_sigreturn")
+    f.add_rule(ALLOW, "exit_group")
     f.load()
     try:
         util.write_file("/dev/null")

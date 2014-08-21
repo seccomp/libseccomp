@@ -166,6 +166,44 @@ function dump_lib_arm() {
 }
 
 #
+# Dump the aarch64 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_aarch64() {
+	gcc -E -dM -I$1/include/uapi -D__BITS_PER_LONG=64 $1/include/uapi/asm-generic/unistd.h | \
+		grep "^#define __NR_" | sort | \
+		sed -e '/__NR_syscalls/d' | \
+		sed -e '/__NR_arch_specific_syscall/d' | \
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+\(.*\)/\1\t\2/' | \
+		sed -e 's/__NR3264_statfs/43/' | \
+		sed -e 's/__NR3264_ftruncate/46/' | \
+		sed -e 's/__NR3264_truncate/45/' | \
+		sed -e 's/__NR3264_lseek/62/' | \
+		sed -e 's/__NR3264_sendfile/71/' | \
+		sed -e 's/__NR3264_fstatat/79/' | \
+		sed -e 's/__NR3264_fstatfs/44/' | \
+		sed -e 's/__NR3264_fcntl/25/' | \
+		sed -e 's/__NR3264_fadvise64/223/' | \
+		sed -e 's/__NR3264_mmap/222/' | \
+		sed -e 's/__NR3264_fstat/80/' | \
+		sed -e 's/__NR3264_lstat/1039/' | \
+		sed -e 's/__NR3264_stat/1038/'
+}
+
+#
+# Dump the aarch64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_aarch64() {
+	$LIB_SYS_DUMP -a aarch64 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+}
+
+#
 # Dump the mips system syscall table
 #
 # Arguments:
@@ -287,6 +325,9 @@ function dump_sys() {
 	arm)
 		dump_sys_arm "$2"
 		;;
+	aarch64)
+		dump_sys_aarch64 "$2"
+		;;
 	mips)
 		dump_sys_mips "$2"
 		;;
@@ -323,6 +364,9 @@ function dump_lib() {
 		;;
 	arm)
 		dump_lib_arm "$2"
+		;;
+	aarch64)
+		dump_lib_aarch64 "$2"
 		;;
 	mips)
 		dump_lib_mips "$2"
@@ -368,7 +412,9 @@ done
 shift $(($OPTIND - 1))
 
 # defaults
-[[ $arches == "" ]] && arches="x86 x86_64 x32 arm mips mips64 mips64n32"
+if [[ $arches == "" ]]; then
+	arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32"
+fi
 
 # sanity checks
 kernel_dir="$1"

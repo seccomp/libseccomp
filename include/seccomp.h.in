@@ -118,9 +118,14 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_X32		(EM_X86_64|__AUDIT_ARCH_LE)
 
 /**
- * The ARM architecture token
+ * The ARM architecture tokens
  */
 #define SCMP_ARCH_ARM		AUDIT_ARCH_ARM
+#ifndef AUDIT_ARCH_AARCH64
+/* AArch64 support for audit was merged in 3.17-rc1 */
+#define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif
+#define SCMP_ARCH_AARCH64	AUDIT_ARCH_AARCH64
 
 /**
  * The MIPS architecture tokens
@@ -1232,7 +1237,7 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __PNR_getrandom		-10109
 #ifndef __NR_getrandom
 #define __NR_getrandom		__PNR_getrandom
-#endif /* __NR_time */
+#endif /* __NR_getrandom */
 
 #define __PNR_memfd_create	-10110
 #ifndef __NR_memfd_create
@@ -1243,6 +1248,181 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_kexec_file_load
 #define __NR_kexec_file_load	__PNR_kexec_file_load
 #endif /* __NR_kexec_file_load */
+
+#define __PNR_sysfs		-10145
+#ifndef __NR_sysfs
+#define __NR_sysfs		__PNR_sysfs
+#endif /* __NR_sysfs */
+
+#define __PNR_oldwait4		-10146
+#ifndef __NR_oldwait4
+#define __NR_oldwait4		__PNR_oldwait4
+#endif /* __NR_sysfs */
+
+#define __PNR_access		-10147
+#ifndef __NR_access
+#define __NR_access		__PNR_access
+#endif /* __NR_access */
+
+#define __PNR_alarm		-10148
+#ifndef __NR_alarm
+#define __NR_alarm		__PNR_alarm
+#endif /* __NR_alarm */
+
+#define __PNR_chmod		-10149
+#ifndef __NR_chmod
+#define __NR_chmod		__PNR_chmod
+#endif /* __NR_chmod */
+
+#define __PNR_chown		-10150
+#ifndef __NR_chown
+#define __NR_chown		__PNR_chown
+#endif /* __NR_chown */
+
+#define __PNR_creat		-10151
+#ifndef __NR_creat
+#define __NR_creat		__PNR_creat
+#endif /* __NR_creat */
+
+#define __PNR_dup2		-10152
+#ifndef __NR_dup2
+#define __NR_dup2		__PNR_dup2
+#endif /* __NR_dup2 */
+
+#define __PNR_epoll_create	-10153
+#ifndef __NR_epoll_create
+#define __NR_epoll_create	__PNR_epoll_create
+#endif /* __NR_epoll_create */
+
+#define __PNR_epoll_wait	-10154
+#ifndef __NR_epoll_wait
+#define __NR_epoll_wait		__PNR_epoll_wait
+#endif /* __NR_epoll_wait */
+
+#define __PNR_eventfd		-10155
+#ifndef __NR_eventfd
+#define __NR_eventfd		__PNR_eventfd
+#endif /* __NR_eventfd */
+
+#define __PNR_fork		-10156
+#ifndef __NR_fork
+#define __NR_fork		__PNR_fork
+#endif /* __NR_fork */
+
+#define __PNR_futimesat		-10157
+#ifndef __NR_futimesat
+#define __NR_futimesat		__PNR_futimesat
+#endif /* __NR_futimesat */
+
+#define __PNR_getdents		-10158
+#ifndef __NR_getdents
+#define __NR_getdents		__PNR_getdents
+#endif /* __NR_getdents */
+
+#define __PNR_getpgrp		-10159
+#ifndef __NR_getpgrp
+#define __NR_getpgrp		__PNR_getpgrp
+#endif /* __NR_getpgrp */
+
+#define __PNR_inotify_init	-10160
+#ifndef __NR_inotify_init
+#define __NR_inotify_init	__PNR_inotify_init
+#endif /* __NR_inotify_init */
+
+#define __PNR_lchown		-10161
+#ifndef __NR_lchown
+#define __NR_lchown		__PNR_lchown
+#endif /* __NR_lchown */
+
+#define __PNR_link		-10162
+#ifndef __NR_link
+#define __NR_link		__PNR_link
+#endif /* __NR_link */
+
+#define __PNR_lstat		-10163
+#ifndef __NR_lstat
+#define __NR_lstat		__PNR_lstat
+#endif /* __NR_lstat */
+
+#define __PNR_mkdir		-10164
+#ifndef __NR_mkdir
+#define __NR_mkdir		__PNR_mkdir
+#endif /* __NR_mkdir */
+
+#define __PNR_mknod		-10165
+#ifndef __NR_mknod
+#define __NR_mknod		__PNR_mknod
+#endif /* __NR_mknod */
+
+#define __PNR_open		-10166
+#ifndef __NR_open
+#define __NR_open		__PNR_open
+#endif /* __NR_open */
+
+#define __PNR_pause		-10167
+#ifndef __NR_pause
+#define __NR_pause		__PNR_pause
+#endif /* __NR_pause */
+
+#define __PNR_pipe		-10168
+#ifndef __NR_pipe
+#define __NR_pipe		__PNR_pipe
+#endif /* __NR_pipe */
+
+#define __PNR_poll		-10169
+#ifndef __NR_poll
+#define __NR_poll		__PNR_poll
+#endif /* __NR_poll */
+
+#define __PNR_readlink		-10170
+#ifndef __NR_readlink
+#define __NR_readlink		__PNR_readlink
+#endif /* __NR_readlink */
+
+#define __PNR_rename		-10171
+#ifndef __NR_rename
+#define __NR_rename		__PNR_rename
+#endif /* __NR_rename */
+
+#define __PNR_rmdir		-10172
+#ifndef __NR_rmdir
+#define __NR_rmdir		__PNR_rmdir
+#endif /* __NR_rmdir */
+
+#define __PNR_signalfd		-10173
+#ifndef __NR_signalfd
+#define __NR_signalfd		__PNR_signalfd
+#endif /* __NR_signalfd */
+
+#define __PNR_stat		-10174
+#ifndef __NR_stat
+#define __NR_stat		__PNR_stat
+#endif /* __NR_stat */
+
+#define __PNR_symlink		-10175
+#ifndef __NR_symlink
+#define __NR_symlink		__PNR_symlink
+#endif /* __NR_symlink */
+
+#define __PNR_unlink		-10176
+#ifndef __NR_unlink
+#define __NR_unlink		__PNR_unlink
+#endif /* __NR_unlink */
+
+#define __PNR_ustat		-10177
+#ifndef __NR_ustat
+#define __NR_ustat		__PNR_ustat
+#endif /* __NR_ustat */
+
+#define __PNR_utime		-10178
+#ifndef __NR_utime
+#define __NR_utime		__PNR_utime
+#endif /* __NR_utime */
+
+#define __PNR_utimes		-10179
+#ifndef __NR_utimes
+#define __NR_utimes		__PNR_utimes
+#endif /* __NR_utimes */
 
 #ifdef __cplusplus
 }

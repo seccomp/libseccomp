@@ -39,11 +39,11 @@ def test():
 
     f = SyscallFilter(TRAP)
     # NOTE: additional syscalls required for python
-    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, fd))
-    f.add_rule_exactly(ALLOW, "close")
-    f.add_rule_exactly(ALLOW, "rt_sigaction")
-    f.add_rule_exactly(ALLOW, "rt_sigreturn")
-    f.add_rule_exactly(ALLOW, "exit_group")
+    f.add_rule(ALLOW, "write", Arg(0, EQ, fd))
+    f.add_rule(ALLOW, "close")
+    f.add_rule(ALLOW, "rt_sigaction")
+    f.add_rule(ALLOW, "rt_sigreturn")
+    f.add_rule(ALLOW, "exit_group")
     f.load()
 
     try:

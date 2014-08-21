@@ -34,6 +34,7 @@
 #include "arch-x86_64.h"
 #include "arch-x32.h"
 #include "arch-arm.h"
+#include "arch-aarch64.h"
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
@@ -49,6 +50,8 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 #endif /* __ILP32__ */
 #elif __arm__
 const struct arch_def *arch_def_native = &arch_def_arm;
+#elif __aarch64__
+const struct arch_def *arch_def_native = &arch_def_aarch64;
 #elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI32
 #if __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips;
@@ -91,6 +94,7 @@ int arch_valid(uint32_t arch)
 	case SCMP_ARCH_MIPSEL64:
 	case SCMP_ARCH_MIPS64N32:
 	case SCMP_ARCH_MIPSEL64N32:
+	case SCMP_ARCH_AARCH64:
 		return 0;
 	}
 
@@ -115,6 +119,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_x32;
 	case SCMP_ARCH_ARM:
 		return &arch_def_arm;
+	case SCMP_ARCH_AARCH64:
+		return &arch_def_aarch64;
 	case SCMP_ARCH_MIPS:
 		return &arch_def_mips;
 	case SCMP_ARCH_MIPSEL:
@@ -149,6 +155,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_x32;
 	else if (strcmp(arch_name, "arm") == 0)
 		return &arch_def_arm;
+	else if (strcmp(arch_name, "aarch64") == 0)
+		return &arch_def_aarch64;
 	else if (strcmp(arch_name, "mips") == 0)
 		return &arch_def_mips;
 	else if (strcmp(arch_name, "mipsel") == 0)
@@ -184,6 +192,8 @@ int arch_arg_count_max(const struct arch_def *arch)
 		return x32_arg_count_max;
 	case SCMP_ARCH_ARM:
 		return arm_arg_count_max;
+	case SCMP_ARCH_AARCH64:
+		return aarch64_arg_count_max;
 	case SCMP_ARCH_MIPS:
 	case SCMP_ARCH_MIPSEL:
 		return mips_arg_count_max;
@@ -213,6 +223,8 @@ int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 	switch (arch->token) {
 	case SCMP_ARCH_X86_64:
 		return x86_64_arg_offset_lo(arg);
+	case SCMP_ARCH_AARCH64:
+		return aarch64_arg_offset_lo(arg);
 	case SCMP_ARCH_MIPS64:
 		return mips64_arg_offset_lo(arg);
 	case SCMP_ARCH_MIPSEL64:
@@ -237,6 +249,8 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 	switch (arch->token) {
 	case SCMP_ARCH_X86_64:
 		return x86_64_arg_offset_hi(arg);
+	case SCMP_ARCH_AARCH64:
+		return aarch64_arg_offset_hi(arg);
 	case SCMP_ARCH_MIPS64:
 		return mips64_arg_offset_hi(arg);
 	case SCMP_ARCH_MIPSEL64:
@@ -267,6 +281,8 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 		return x32_arg_offset(arg);
 	case SCMP_ARCH_ARM:
 		return arm_arg_offset(arg);
+	case SCMP_ARCH_AARCH64:
+		return aarch64_arg_offset(arg);
 	case SCMP_ARCH_MIPS:
 		return mips_arg_offset(arg);
 	case SCMP_ARCH_MIPSEL:
@@ -305,6 +321,8 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 		return x32_syscall_resolve_name(name);
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_name(name);
+	case SCMP_ARCH_AARCH64:
+		return aarch64_syscall_resolve_name(name);
 	case SCMP_ARCH_MIPS:
 	case SCMP_ARCH_MIPSEL:
 		return mips_syscall_resolve_name(name);
@@ -340,6 +358,8 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 		return x32_syscall_resolve_num(num);
 	case SCMP_ARCH_ARM:
 		return arm_syscall_resolve_num(num);
+	case SCMP_ARCH_AARCH64:
+		return aarch64_syscall_resolve_num(num);
 	case SCMP_ARCH_MIPS:
 	case SCMP_ARCH_MIPSEL:
 		return mips_syscall_resolve_num(num);

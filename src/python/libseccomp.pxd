@@ -31,6 +31,7 @@ cdef extern from "seccomp.h":
         SCMP_ARCH_X86_64
         SCMP_ARCH_X32
         SCMP_ARCH_ARM
+        SCMP_ARCH_AARCH64
         SCMP_ARCH_MIPS
         SCMP_ARCH_MIPS64
         SCMP_ARCH_MIPS64N32
