@@ -629,7 +629,7 @@ function run_test_live() {
 		rc_trace=162
 		rc_errno=163
 		;;
-	mips|mipsel|mips64|mipsel64)
+	mips|mipsel|mips64|mips64n32|mipsel64|mipsel64n32)
 		rc_kill=140
 		rc_allow=160
 		rc_trap=161
