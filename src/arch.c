@@ -49,19 +49,19 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 #endif /* __ILP32__ */
 #elif __arm__
 const struct arch_def *arch_def_native = &arch_def_arm;
-#elif _MIPS_SIM == _MIPS_SIM_ABI32
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI32
 #if __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips;
 #elif __MIPSEL__
 const struct arch_def *arch_def_native = &arch_def_mipsel;
 #endif /* _MIPS_SIM_ABI32 */
-#elif _MIPS_SIM == _MIPS_SIM_ABI64
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI64
 #if __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips64;
 #elif __MIPSEL__
 const struct arch_def *arch_def_native = &arch_def_mipsel64;
 #endif /* _MIPS_SIM_ABI64 */
-#elif _MIPS_SIM == _MIPS_SIM_NABI32
+#elif __mips__ && _MIPS_SIM == _MIPS_SIM_NABI32
 #if __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips64n32;
 #elif __MIPSEL__
