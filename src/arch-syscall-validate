@@ -368,7 +368,7 @@ done
 shift $(($OPTIND - 1))
 
 # defaults
-[[ $arches == "" ]] && arches="x86 x86_64 x32 arm mips mips64"
+[[ $arches == "" ]] && arches="x86 x86_64 x32 arm mips mips64 mips64n32"
 
 # sanity checks
 kernel_dir="$1"
