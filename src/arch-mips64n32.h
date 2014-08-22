@@ -28,13 +28,8 @@
 #include "arch.h"
 #include "system.h"
 
-#define mips64n32_arg_count_max		6
-
 extern const struct arch_def arch_def_mips64n32;
 extern const struct arch_def arch_def_mipsel64n32;
-
-#define mips64n32_arg_offset(x)	(offsetof(struct seccomp_data, args[x]) + 4)
-#define mipsel64n32_arg_offset(x)	(offsetof(struct seccomp_data, args[x]))
 
 int mips64n32_syscall_resolve_name(const char *name);
 const char *mips64n32_syscall_resolve_num(int num);

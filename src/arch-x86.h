@@ -28,11 +28,7 @@
 #include "db.h"
 #include "system.h"
 
-#define x86_arg_count_max		6
-
 extern const struct arch_def arch_def_x86;
-
-#define x86_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
 
 int x86_syscall_resolve_name(const char *name);
 const char *x86_syscall_resolve_num(int num);
