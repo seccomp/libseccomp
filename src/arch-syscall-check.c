@@ -27,6 +27,7 @@
 #include "arch.h"
 #include "arch-x86.h"
 #include "arch-x86_64.h"
+#include "arch-x32.h"
 #include "arch-arm.h"
 #include "arch-aarch64.h"
 #include "arch-mips.h"
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
 {
 	int i_x86 = 0;
 	int i_x86_64 = 0;
+	int i_x32 = 0;
 	int i_arm = 0;
 	int i_aarch64 = 0;
 	int i_mips = 0;
@@ -77,6 +79,8 @@ int main(int argc, char *argv[])
 		/* check each arch using x86 as the reference */
 		syscall_check(str_miss, sys_name, "x86_64",
 			      x86_64_syscall_iterate_name(i_x86_64));
+		syscall_check(str_miss, sys_name, "x32",
+			      x32_syscall_iterate_name(i_x32));
 		syscall_check(str_miss, sys_name, "arm",
 			      arm_syscall_iterate_name(i_arm));
 		syscall_check(str_miss, sys_name, "aarch64",
@@ -101,6 +105,8 @@ int main(int argc, char *argv[])
 			i_x86++;
 		if (!x86_64_syscall_iterate_name(++i_x86_64))
 			i_x86_64 = -1;
+		if (!x32_syscall_iterate_name(++i_x32))
+			i_x32 = -1;
 		if (!arm_syscall_iterate_name(++i_arm))
 			i_arm = -1;
 		if (!mips_syscall_iterate_name(++i_mips))
@@ -111,7 +117,7 @@ int main(int argc, char *argv[])
 			i_mips64n32 = -1;
 		if (!aarch64_syscall_iterate_name(++i_aarch64))
 			i_aarch64 = -1;
-	} while (i_x86_64 >= 0 &&
+	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0);
 
@@ -124,6 +130,11 @@ int main(int argc, char *argv[])
 	if (i_x86_64 >= 0) {
 		printf("%s: ERROR, x86_64 has additional syscalls\n",
 		       x86_64_syscall_iterate_name(i_x86_64));
+		return 1;
+	}
+	if (i_x32 >= 0) {
+		printf("%s: ERROR, x32 has additional syscalls\n",
+		       x32_syscall_iterate_name(i_x32));
 		return 1;
 	}
 	if (i_arm >= 0) {

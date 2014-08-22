@@ -28,6 +28,8 @@
 
 /* NOTE: based on Linux 3.17-rc1+ */
 const struct arch_syscall_def x32_syscall_table[] = { \
+	{ "_llseek", __PNR__llseek },
+	{ "_newselect", __PNR__newselect },
 	{ "_sysctl", __PNR__sysctl },
 	{ "accept", (X32_SYSCALL_BIT + 43) },
 	{ "accept4", (X32_SYSCALL_BIT + 288) },
