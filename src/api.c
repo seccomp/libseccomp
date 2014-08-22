@@ -516,7 +516,8 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 			       unsigned int arg_cnt,
 			       const struct scmp_arg_cmp *arg_array)
 {
-	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+	/* arg_cnt is unsigned, so no need to check the lower bound */
+	if (arg_cnt > ARG_COUNT_MAX)
 		return -EINVAL;
 
 	return _seccomp_rule_add((struct db_filter_col *)ctx,
@@ -533,7 +534,8 @@ API int seccomp_rule_add(scmp_filter_ctx ctx,
 	struct scmp_arg_cmp arg_array[ARG_COUNT_MAX];
 	va_list arg_list;
 
-	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+	/* arg_cnt is unsigned, so no need to check the lower bound */
+	if (arg_cnt > ARG_COUNT_MAX)
 		return -EINVAL;
 
 	va_start(arg_list, arg_cnt);
@@ -551,7 +553,8 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 				     unsigned int arg_cnt,
 				     const struct scmp_arg_cmp *arg_array)
 {
-	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+	/* arg_cnt is unsigned, so no need to check the lower bound */
+	if (arg_cnt > ARG_COUNT_MAX)
 		return -EINVAL;
 
 	return _seccomp_rule_add((struct db_filter_col *)ctx,
@@ -568,7 +571,8 @@ API int seccomp_rule_add_exact(scmp_filter_ctx ctx,
 	struct scmp_arg_cmp arg_array[ARG_COUNT_MAX];
 	va_list arg_list;
 
-	if (arg_cnt < 0 || arg_cnt > ARG_COUNT_MAX)
+	/* arg_cnt is unsigned, so no need to check the lower bound */
+	if (arg_cnt > ARG_COUNT_MAX)
 		return -EINVAL;
 
 	va_start(arg_list, arg_cnt);

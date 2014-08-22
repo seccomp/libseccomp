@@ -565,6 +565,7 @@ int db_col_attr_get(const struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_CTL_TSYNC:
 		*value = col->attr.tsync_enable;
+		break;
 	default:
 		rc = -EEXIST;
 		break;
@@ -873,6 +874,8 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	chain_len_max = arch_arg_count_max(arch);
+	if (chain_len_max < 0)
+		goto gen_64_failure;
 	for (iter = 0; iter < chain_len_max; iter++) {
 		if (chain[iter].valid == 0)
 			continue;
@@ -1003,6 +1006,8 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	chain_len_max = arch_arg_count_max(arch);
+	if (chain_len_max < 0)
+		goto gen_32_failure;
 	for (iter = 0; iter < chain_len_max; iter++) {
 		if (chain[iter].valid == 0)
 			continue;

@@ -490,6 +490,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	h_new->found = (found ? 1 : 0);
 
 	/* insert the block into the hash table */
+hsh_add_restart:
 	h_iter = state->htbl[h_val & _BPF_HASH_MASK];
 	if (h_iter != NULL) {
 		do {
@@ -530,13 +531,14 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 					/* overflow */
 					blk->flag_hash = false;
 					blk->hash = 0;
+					free(h_new);
 					return -EFAULT;
 				}
 				h_val += ((uint64_t)1 << 32);
 				h_new->blk->hash = h_val;
 
 				/* restart at the beginning of the bucket */
-				h_iter = state->htbl[h_val & _BPF_HASH_MASK];
+				goto hsh_add_restart;
 			} else {
 				/* no match, move along */
 				h_prev = h_iter;
@@ -1082,8 +1084,10 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 
 	/* generate the argument chains */
 	blk_c = _gen_bpf_chain(state, sys, sys->chains, &def_jump, &a_state);
-	if (blk_c == NULL)
+	if (blk_c == NULL) {
+		_blk_free(state, blk_s);
 		return NULL;
+	}
 
 	/* syscall check */
 	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
@@ -1359,10 +1363,10 @@ static int _gen_bpf_build_jmp_ret(struct bpf_state *state,
 		j_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (j_len <= _BPF_JMP_MAX_RET && b_jmp == blk_ret)
-		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
+	if (j_len <= _BPF_JMP_MAX_RET && b_jmp == blk_ret)
+		return 0;
 
 	/* we need a closer return instruction, see if one already exists */
 	j_len = blk->blk_cnt - (offset + 1);
@@ -1372,10 +1376,10 @@ static int _gen_bpf_build_jmp_ret(struct bpf_state *state,
 		j_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (j_len <= _BPF_JMP_MAX_RET && b_jmp->hash == tgt_hash)
-		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
+	if (j_len <= _BPF_JMP_MAX_RET && b_jmp->hash == tgt_hash)
+		return 0;
 
 	/* we need to insert a new return instruction - create one */
 	b_new = _gen_bpf_action(state, NULL, blk_ret->blks[0].k.tgt.imm_k);
@@ -1446,10 +1450,10 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		jmp_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (jmp_len <= _BPF_JMP_MAX && b_jmp == b_tgt)
-		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
+	if (jmp_len <= _BPF_JMP_MAX && b_jmp == b_tgt)
+		return 0;
 
 	/* we need a long jump, see if one already exists */
 	jmp_len = blk->blk_cnt - (offset + 1);
@@ -1459,10 +1463,10 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 		jmp_len += b_jmp->blk_cnt;
 		b_jmp = b_jmp->next;
 	}
-	if (jmp_len <= _BPF_JMP_MAX && b_jmp->hash == tgt_hash)
-		return 0;
 	if (b_jmp == NULL)
 		return -EFAULT;
+	if (jmp_len <= _BPF_JMP_MAX && b_jmp->hash == tgt_hash)
+		return 0;
 
 	/* we need to insert a long jump - create one */
 	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JA),

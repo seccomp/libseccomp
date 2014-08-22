@@ -67,14 +67,16 @@ int main(int argc, char *argv[])
 	int i_mips = 0;
 	int i_mips64 = 0;
 	int i_mips64n32 = 0;
-	const char *sys_name, *tmp;
+	const char *sys_name;
 	char str_miss[256];
 
 	do {
 		str_miss[0] = '\0';
-		tmp = x86_syscall_iterate_name(i_x86);
-		if (tmp)
-			sys_name = tmp;
+		sys_name = x86_syscall_iterate_name(i_x86);
+		if (sys_name == NULL) {
+			printf("FAULT\n");
+			return 1;
+		}
 
 		/* check each arch using x86 as the reference */
 		syscall_check(str_miss, sys_name, "x86_64",
@@ -122,9 +124,9 @@ int main(int argc, char *argv[])
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0);
 
 	/* check for any leftovers */
-	tmp = x86_syscall_iterate_name(i_x86 + 1);
-	if (tmp) {
-		printf("%s: ERROR, x86 has additional syscalls\n", tmp);
+	sys_name = x86_syscall_iterate_name(i_x86 + 1);
+	if (sys_name) {
+		printf("%s: ERROR, x86 has additional syscalls\n", sys_name);
 		return 1;
 	}
 	if (i_x86_64 >= 0) {
@@ -154,12 +156,12 @@ int main(int argc, char *argv[])
 	}
 	if (i_mips64 >= 0) {
 		printf("%s: ERROR, mips64 has additional syscalls\n",
-		       mips64_syscall_iterate_name(i_mips));
+		       mips64_syscall_iterate_name(i_mips64));
 		return 1;
 	}
 	if (i_mips64n32 >= 0) {
 		printf("%s: ERROR, mips64n32 has additional syscalls\n",
-		       mips64n32_syscall_iterate_name(i_mips));
+		       mips64n32_syscall_iterate_name(i_mips64n32));
 		return 1;
 	}
 

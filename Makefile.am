@@ -42,10 +42,15 @@ endif
 
 if COVERITY
 coverity-tarball: coverity-build
-	@git rev-parse HEAD &> /dev/null && \
-		rev=$$(git rev-parse HEAD | cut -c1-8) || \
-		rev=$$(date --iso-8601=date); \
+	@if git rev-parse HEAD &> /dev/null; then \
+		rev_full=$$(git rev-parse HEAD); \
+		rev=$$(echo $$rev_full | cut -c1-8); \
+	else \
+		rev_full=$$(date --iso-8601=date); \
+		rev=$$rev_full; \
+	fi; \
 	tar czf libseccomp-coverity_$$rev.tar.gz cov-int; \
+	echo " HEAD revision: $$rev_full"; \
 	ls -l libseccomp-coverity_$$rev.tar.gz
 endif
 
