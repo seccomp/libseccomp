@@ -27,13 +27,7 @@
 #include "arch.h"
 #include "system.h"
 
-#define aarch64_arg_count_max		6
-
 extern const struct arch_def arch_def_aarch64;
-
-#define aarch64_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
-#define aarch64_arg_offset_lo(x)	(aarch64_arg_offset(x))
-#define aarch64_arg_offset_hi(x)	(aarch64_arg_offset(x) + 4)
 
 int aarch64_syscall_resolve_name(const char *name);
 const char *aarch64_syscall_resolve_num(int num);

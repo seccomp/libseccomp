@@ -82,9 +82,14 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		       int *syscall, struct db_api_arg *chain)
 {
 	unsigned int iter;
+	int arg_max;
+
+	arg_max = arch_arg_count_max(arch);
+	if (arg_max < 0)
+		return arg_max;
 
 	if ((*syscall) <= -100 && (*syscall) >= -117) {
-		for (iter = 0; iter < x86_arg_count_max; iter++) {
+		for (iter = 0; iter < arg_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -95,7 +100,7 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		chain[0].valid = 1;
 		*syscall = __x86_NR_socketcall;
 	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
-		for (iter = 0; iter < x86_arg_count_max; iter++) {
+		for (iter = 0; iter < arg_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}

@@ -40,6 +40,10 @@
 #include "arch-mips64n32.h"
 #include "system.h"
 
+#define default_arg_count_max		6
+
+#define default_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
+
 #if __i386__
 const struct arch_def *arch_def_native = &arch_def_x86;
 #elif __x86_64__
@@ -83,22 +87,7 @@ const struct arch_def *arch_def_native = &arch_def_mipsel64n32;
  */
 int arch_valid(uint32_t arch)
 {
-	switch (arch) {
-	case SCMP_ARCH_X86:
-	case SCMP_ARCH_X86_64:
-	case SCMP_ARCH_X32:
-	case SCMP_ARCH_ARM:
-	case SCMP_ARCH_MIPS:
-	case SCMP_ARCH_MIPSEL:
-	case SCMP_ARCH_MIPS64:
-	case SCMP_ARCH_MIPSEL64:
-	case SCMP_ARCH_MIPS64N32:
-	case SCMP_ARCH_MIPSEL64N32:
-	case SCMP_ARCH_AARCH64:
-		return 0;
-	}
-
-	return -EINVAL;
+	return (arch_def_lookup(arch) ? 0 : -EINVAL);
 }
 
 /**
@@ -183,29 +172,7 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
  */
 int arch_arg_count_max(const struct arch_def *arch)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86:
-		return x86_arg_count_max;
-	case SCMP_ARCH_X86_64:
-		return x86_64_arg_count_max;
-	case SCMP_ARCH_X32:
-		return x32_arg_count_max;
-	case SCMP_ARCH_ARM:
-		return arm_arg_count_max;
-	case SCMP_ARCH_AARCH64:
-		return aarch64_arg_count_max;
-	case SCMP_ARCH_MIPS:
-	case SCMP_ARCH_MIPSEL:
-		return mips_arg_count_max;
-	case SCMP_ARCH_MIPS64:
-	case SCMP_ARCH_MIPSEL64:
-		return mips64_arg_count_max;
-	case SCMP_ARCH_MIPS64N32:
-	case SCMP_ARCH_MIPSEL64N32:
-		return mips64n32_arg_count_max;
-	}
-
-	return -EDOM;
+	return (arch_valid(arch->token) == 0 ? default_arg_count_max : -EDOM);
 }
 
 /**
@@ -220,15 +187,16 @@ int arch_arg_count_max(const struct arch_def *arch)
  */
 int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86_64:
-		return x86_64_arg_offset_lo(arg);
-	case SCMP_ARCH_AARCH64:
-		return aarch64_arg_offset_lo(arg);
-	case SCMP_ARCH_MIPS64:
-		return mips64_arg_offset_lo(arg);
-	case SCMP_ARCH_MIPSEL64:
-		return mipsel64_arg_offset_lo(arg);
+	if (arch_valid(arch->token) < 0)
+		return -EDOM;
+
+	switch (arch->endian) {
+	case ARCH_ENDIAN_LITTLE:
+		return default_arg_offset(arg);
+		break;
+	case ARCH_ENDIAN_BIG:
+		return default_arg_offset(arg) + 4;
+		break;
 	default:
 		return -EDOM;
 	}
@@ -246,15 +214,16 @@ int arch_arg_offset_lo(const struct arch_def *arch, unsigned int arg)
  */
 int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86_64:
-		return x86_64_arg_offset_hi(arg);
-	case SCMP_ARCH_AARCH64:
-		return aarch64_arg_offset_hi(arg);
-	case SCMP_ARCH_MIPS64:
-		return mips64_arg_offset_hi(arg);
-	case SCMP_ARCH_MIPSEL64:
-		return mipsel64_arg_offset_hi(arg);
+	if (arch_valid(arch->token) < 0 || arch->size != ARCH_SIZE_64)
+		return -EDOM;
+
+	switch (arch->endian) {
+	case ARCH_ENDIAN_LITTLE:
+		return default_arg_offset(arg) + 4;
+		break;
+	case ARCH_ENDIAN_BIG:
+		return default_arg_offset(arg);
+		break;
 	default:
 		return -EDOM;
 	}
@@ -272,32 +241,7 @@ int arch_arg_offset_hi(const struct arch_def *arch, unsigned int arg)
  */
 int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86:
-		return x86_arg_offset(arg);
-	case SCMP_ARCH_X86_64:
-		return x86_64_arg_offset(arg);
-	case SCMP_ARCH_X32:
-		return x32_arg_offset(arg);
-	case SCMP_ARCH_ARM:
-		return arm_arg_offset(arg);
-	case SCMP_ARCH_AARCH64:
-		return aarch64_arg_offset(arg);
-	case SCMP_ARCH_MIPS:
-		return mips_arg_offset(arg);
-	case SCMP_ARCH_MIPSEL:
-		return mipsel_arg_offset(arg);
-	case SCMP_ARCH_MIPS64:
-		return mips64_arg_offset(arg);
-	case SCMP_ARCH_MIPSEL64:
-		return mipsel64_arg_offset(arg);
-	case SCMP_ARCH_MIPS64N32:
-		return mips64n32_arg_offset(arg);
-	case SCMP_ARCH_MIPSEL64N32:
-		return mipsel64n32_arg_offset(arg);
-	default:
-		return -EDOM;
-	}
+	return arch_arg_offset_lo(arch, arg);
 }
 
 /**

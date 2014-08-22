@@ -28,13 +28,8 @@
 #include "arch.h"
 #include "system.h"
 
-#define mips_arg_count_max		6
-
 extern const struct arch_def arch_def_mips;
 extern const struct arch_def arch_def_mipsel;
-
-#define mips_arg_offset(x)	(offsetof(struct seccomp_data, args[x]) + 4)
-#define mipsel_arg_offset(x)	(offsetof(struct seccomp_data, args[x]))
 
 int mips_syscall_resolve_name(const char *name);
 const char *mips_syscall_resolve_num(int num);
