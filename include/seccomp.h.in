@@ -1111,11 +1111,6 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_arm_sync_file_range	__PNR_arm_sync_file_range
 #endif /* __NR_arm_sync_file_range */
 
-#define __PNR_finit_module	-10085
-#ifndef __NR_finit_module
-#define __NR_finit_module	__PNR_finit_module
-#endif /* __NR_finit_module */
-
 #define __PNR_pciconfig_iobase	-10086
 #ifndef __NR_pciconfig_iobase
 #define __NR_pciconfig_iobase	__PNR_pciconfig_iobase
@@ -1166,11 +1161,6 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_iopl		__PNR_iopl
 #endif /* __NR_iopl */
 
-#define __PNR_kcmp		-10096
-#ifndef __NR_kcmp
-#define __NR_kcmp		__PNR_kcmp
-#endif /* __NR_kcmp */
-
 #define __PNR_migrate_pages	-10097
 #ifndef __NR_migrate_pages
 #define __NR_migrate_pages	__PNR_migrate_pages
@@ -1210,11 +1200,6 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_cacheflush
 #define __NR_cacheflush		__PNR_cacheflush
 #endif /* __NR_cacheflush */
-
-#define __PNR_renameat2		-10105
-#ifndef __NR_renameat2
-#define __NR_renameat2		__PNR_renameat2
-#endif /* __NR_renameat2 */
 
 #define __PNR_sysmips		-10106
 #ifndef __NR_sysmips
