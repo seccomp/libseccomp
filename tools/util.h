@@ -24,6 +24,18 @@
 
 #include <inttypes.h>
 
+#ifndef AUDIT_ARCH_MIPS64N32
+/* MIPS64N32 support was merged in 3.15 */
+#define AUDIT_ARCH_MIPS64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|\
+				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
+#endif
+
+#ifndef AUDIT_ARCH_MIPSEL64N32
+/* MIPSEL64N32 support was merged in 3.15 */
+#define AUDIT_ARCH_MIPSEL64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE|\
+				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
+#endif
+
 extern uint32_t arch;
 
 void exit_usage(const char *program);
