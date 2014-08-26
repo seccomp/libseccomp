@@ -342,23 +342,70 @@ function run_test_bpf_sim() {
 	local -a high_arg  #line[3-8]
 	local result=${line[9]}
 
-	if [[ "${testarch:0:1}" == "+" ]]; then
-		# run the tests on the specified architecture(s)
-		simarch_list="${testarch:1}"
-		if [[ "$simarch_list" == "all_le" ]]; then
-			simarch_list="$GLBL_ARCH_LE_SUPPORT"
-		elif [[ "$simarch_list" == "all_be" ]]; then
-			simarch_list="$GLBL_ARCH_BE_SUPPORT"
+	# expand the architecture list
+	local simarch_tmp
+	local simarch_avoid
+	simarch_tmp=""
+	simarch_avoid=""
+	for arch_i in $(echo $testarch | sed -e 's/,/ /g'); do
+		case $arch_i in
+		all)
+			# add the native arch
+			simarch_tmp+=" $arch"
+			;;
+		all_le)
+			# add the native arch only if it is little endian
+			if echo "$GLBL_ARCH_LE_SUPPORT" | grep -qw "$arch"; then
+				simarch_tmp+=" $arch"
+			fi
+			;;
+		+all_le)
+			# add all of the little endian architectures
+			simarch_tmp+=" $GLBL_ARCH_LE_SUPPORT"
+			;;
+		all_be)
+			# add the native arch only if it is big endian
+			if echo "$GLBL_ARCH_BE_SUPPORT" | grep -qw "$arch"; then
+				simarch_tmp+=" $arch"
+			fi
+			;;
+		+all_be)
+			# add all of the big endian architectures
+			simarch_tmp+=" $GLBL_ARCH_BE_SUPPORT"
+			;;
+		+*)
+			# add the architecture specified
+			simarch_tmp+=" ${arch_i:1}"
+			;;
+		-*)
+			# remove the architecture specified
+			simarch_avoid+=" ${arch_i:1}"
+			;;
+		*)
+			# add the architecture specified if it is native
+			if [[ "$arch_i" == "$arch" ]]; then
+				simarch_tmp+=" $arch_i"
+			fi
+			;;
+		esac
+	done
+
+	# make sure we remove any undesired architectures
+	local simarch_list
+	simarch_list=""
+	for arch_i in $simarch_tmp; do
+		if echo "$simarch_avoid" | grep -q -v -w "$arch_i"; then
+			simarch_list+=" $arch_i"
 		fi
-	elif [[ "$testarch" != "all" ]] && [[ "$testarch" != "$arch" ]]; then
-		# only run tests that match the current architecture
+	done
+	simarch_list=$(echo $simarch_list | sed -e 's/  / /g;s/^ //;')
+
+	# do we have any architectures remaining in the list?
+	if [[ $simarch_list == "" ]]; then
 		print_result $(generate_test_num "$1" $2 1) "INFO" \
-		       "Test skipped due to test/system architecture difference"
+			"Test skipped due to architecture difference"
 		stats_skipped=$(($stats_skipped+1))
 		return
-	else
-		# run the tests on the native architecture
-		simarch_list="$arch"
 	fi
 
 	# get low and high range arg values
