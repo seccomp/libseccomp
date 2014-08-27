@@ -125,6 +125,9 @@ struct scmp_arg_cmp {
 /**
  * The MIPS architecture tokens
  */
+#ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32
+#define __AUDIT_ARCH_CONVENTION_MIPS64_N32	0x20000000
+#endif
 #define SCMP_ARCH_MIPS		AUDIT_ARCH_MIPS
 #define SCMP_ARCH_MIPS64	AUDIT_ARCH_MIPS64
 #ifndef AUDIT_ARCH_MIPS64N32

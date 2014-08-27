@@ -24,6 +24,10 @@
 
 #include <inttypes.h>
 
+#ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32
+#define __AUDIT_ARCH_CONVENTION_MIPS64_N32	0x20000000
+#endif
+
 #ifndef AUDIT_ARCH_MIPS64N32
 /* MIPS64N32 support was merged in 3.15 */
 #define AUDIT_ARCH_MIPS64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|\
