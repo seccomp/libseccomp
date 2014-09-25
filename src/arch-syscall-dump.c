@@ -38,6 +38,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
+#include "arch-ppc64.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -97,6 +98,9 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_ARM:
 			sys_name = arm_syscall_iterate_name(iter);
 			break;
+		case SCMP_ARCH_AARCH64:
+			sys_name = aarch64_syscall_iterate_name(iter);
+			break;
 		case SCMP_ARCH_MIPS:
 		case SCMP_ARCH_MIPSEL:
 			sys_name = mips_syscall_iterate_name(iter);
@@ -109,9 +113,10 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_MIPSEL64N32:
 			sys_name = mips64n32_syscall_iterate_name(iter);
 			break;
-		case SCMP_ARCH_AARCH64:
-			sys_name = aarch64_syscall_iterate_name(iter);
+		case SCMP_ARCH_PPC64:
+			sys_name = ppc64_syscall_iterate_name(iter);
 			break;
+
 		default:
 			/* invalid arch */
 			exit_usage(argv[0]);

@@ -303,6 +303,29 @@ function dump_lib_mips64n32() {
 }
 
 #
+# Dump the ppc64 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_ppc64() {
+	gcc -E -dM $1/arch/powerpc/include/uapi/asm/unistd.h | \
+		grep "^#define __NR_" | sort | \
+		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/'
+}
+
+#
+# Dump the ppc64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_ppc64() {
+	$LIB_SYS_DUMP -a ppc64 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+}
+
+#
 # Dump the system syscall table
 #
 # Arguments:
@@ -336,6 +359,9 @@ function dump_sys() {
 		;;
 	mips64n32)
 		dump_sys_mips64n32 "$2"
+		;;
+	ppc64)
+		dump_sys_ppc64 "$2"
 		;;
 	*)
 		echo ""
@@ -377,6 +403,9 @@ function dump_lib() {
 	mips64n32)
 		dump_lib_mips64n32 "$2"
 		;;
+	ppc64)
+		dump_lib_ppc64 "$2"
+		;;
 	*)
 		echo ""
 		;;
@@ -413,7 +442,7 @@ shift $(($OPTIND - 1))
 
 # defaults
 if [[ $arches == "" ]]; then
-	arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32"
+	arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32 ppc64"
 fi
 
 # sanity checks
