@@ -62,6 +62,12 @@
 #elif __MIPSEL__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPSEL64N32
 #endif /* _MIPS_SIM_NABI32 */
+#elif __PPC64__
+#ifdef __BIG_ENDIAN__
+#define ARCH_NATIVE		AUDIT_ARCH_PPC64
+#else
+#define ARCH_NATIVE		AUDIT_ARCH_PPC64LE
+#endif
 #else
 #error the simulator code needs to know about your machine type
 #endif
