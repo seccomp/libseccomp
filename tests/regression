@@ -594,7 +594,6 @@ function run_test_basic() {
 #
 function run_test_bpf_valgrind() {
 	local rc
-	local testcmd
 
 	# we only support the native/c test mode here
 	if [[ $mode != "c" ]]; then
@@ -606,14 +605,13 @@ function run_test_bpf_valgrind() {
 	print_data "$1" "$2"
 
 	# build the command
-	testcmd="$2"
 	testvalgrind="valgrind \
 		       --tool=memcheck \
 		       --error-exitcode=1 \
 		       --leak-check=full \
 		       --read-var-info=yes \
 		       --track-origins=yes \
-		       --suppressions=valgrind_test.supp"
+		       --suppressions=$basedir/valgrind_test.supp"
 	if [[ -n $logfile ]]; then
 		testvalgrind+=" --log-fd=$logfd"
 	fi
@@ -624,7 +622,7 @@ function run_test_bpf_valgrind() {
 	# run the command
 	exec 4>/dev/null
 	print_valgrind "$1"
-	run_test_command "$1" "$testvalgrind --" "./$testcmd -b" 4 2
+	run_test_command "$1" "$testvalgrind --" "./$2 -b" 4 2
 	rc=$?
 	exec 4>&-
 	if [[ $rc -ne 0 ]]; then
@@ -760,7 +758,7 @@ function run_test() {
 #
 function run_tests() {
 	# loop through all test files
-	for file in *.tests; do
+	for file in $basedir/*.tests; do
 		local testnum=1
 		local batch_requested=false
 		local batch_name=""
@@ -852,6 +850,10 @@ stats_success=0
 stats_failure=0
 stats_error=0
 
+# set the test root directory
+basedir=$(dirname $0)
+
+# parse the command line
 while getopts "ab:gl:m:s:t:T:vh" opt; do
 	case $opt in
 	a)
