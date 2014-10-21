@@ -38,6 +38,8 @@ SOURCES_GEN = \
 	hash.h hash.c \
 	gen_pfc.h gen_pfc.c gen_bpf.h gen_bpf.c
 
+EXTRA_DIST = arch-syscall-validate
+
 TESTS = arch-syscall-check
 
 check_PROGRAMS = arch-syscall-check arch-syscall-dump

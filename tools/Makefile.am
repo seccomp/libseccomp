@@ -27,6 +27,8 @@ noinst_PROGRAMS = \
 	scmp_bpf_disasm \
 	scmp_bpf_sim
 
+EXTRA_DIST = check-syntax scmp_app_inspector
+
 scmp_bpf_disasm_SOURCES = scmp_bpf_disasm.c bpf.h util.h
 scmp_bpf_sim_SOURCES = scmp_bpf_sim.c bpf.h util.h
 

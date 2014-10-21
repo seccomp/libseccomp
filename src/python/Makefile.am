@@ -33,6 +33,8 @@ PY_BUILD = ${PY_BUILD_@AM_V@}
 
 PY_INSTALL = ${PY_DISTUTILS} install
 
+EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py
+
 all-local: build
 
 build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py

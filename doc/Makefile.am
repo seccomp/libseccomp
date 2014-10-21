@@ -16,10 +16,10 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-man1_MANS = \
+dist_man1_MANS = \
 	man/man1/scmp_sys_resolver.1
 
-man3_MANS = \
+dist_man3_MANS = \
 	man/man3/seccomp_arch_add.3 \
 	man/man3/seccomp_arch_exist.3 \
 	man/man3/seccomp_arch_native.3 \
