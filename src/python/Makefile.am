@@ -35,7 +35,7 @@ PY_INSTALL = ${PY_DISTUTILS} install
 
 all-local: build
 
-build: ../libseccomp-internal.la libseccomp.pxd seccomp.pyx setup.py
+build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
 	${PY_BUILD} && touch build
 
 install-exec-local: build

@@ -17,7 +17,7 @@
 #
 
 AM_LDFLAGS = -static
-LDADD = util.la ../src/libseccomp-internal.la
+LDADD = util.la ../src/libseccomp.la
 
 check_LTLIBRARIES = util.la
 util_la_SOURCES = util.c util.h

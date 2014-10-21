@@ -42,20 +42,15 @@ TESTS = arch-syscall-check
 
 check_PROGRAMS = arch-syscall-check arch-syscall-dump
 
-noinst_LTLIBRARIES = libseccomp-internal.la
 lib_LTLIBRARIES = libseccomp.la
 
-arch_syscall_dump_SOURCES = arch-syscall-dump.c
-arch_syscall_dump_LDADD = libseccomp-internal.la
+arch_syscall_dump_SOURCES = arch-syscall-dump.c ${SOURCES_ARCH}
 
-arch_syscall_check_SOURCES = arch-syscall-check.c
-arch_syscall_check_LDADD = libseccomp-internal.la
+arch_syscall_check_SOURCES = arch-syscall-check.c ${SOURCES_ARCH}
 
-libseccomp_internal_la_SOURCES = ${SOURCES_GEN} ${SOURCES_ARCH}
-
-libseccomp_la_SOURCES = libseccomp-internal.la
-libseccomp_la_CFLAGS = -fvisibility=hidden
-libseccomp_la_LDFLAGS = \
+libseccomp_la_SOURCES = ${SOURCES_GEN} ${SOURCES_ARCH}
+libseccomp_la_CFLAGS = ${AM_CFLAGS} ${CFLAGS} -fPIC -DPIC -fvisibility=hidden
+libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${LDFLAGS} \
 	-version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
 
 check-build:

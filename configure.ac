@@ -56,7 +56,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 dnl ####
 dnl libtool configuration
 dnl ####
-LT_INIT([shared disable-static pic-only])
+LT_INIT([shared pic-only])
 
 dnl ####
 dnl enable silent builds by default

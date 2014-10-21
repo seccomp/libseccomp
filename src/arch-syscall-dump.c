@@ -58,20 +58,17 @@ static void exit_usage(const char *program)
 int main(int argc, char *argv[])
 {
 	int opt;
-	uint32_t arch;
-	int offset;
+	const struct arch_def *arch = arch_def_native;
+	int offset = 0;
 	int iter;
 	int sys_num;
 	const char *sys_name;
-
-	arch = seccomp_arch_native();
-	offset = 0;
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:o:h")) > 0) {
 		switch (opt) {
 		case 'a':
-			arch = seccomp_arch_resolve_name(optarg);
+			arch = arch_def_lookup_name(optarg);
 			if (arch == 0)
 				exit_usage(argv[0]);
 			break;
@@ -87,7 +84,7 @@ int main(int argc, char *argv[])
 
 	iter = 0;
 	do {
-		switch (arch) {
+		switch (arch->token) {
 		case SCMP_ARCH_X86:
 			sys_name = x86_syscall_iterate_name(iter);
 			break;
@@ -120,8 +117,7 @@ int main(int argc, char *argv[])
 			exit_usage(argv[0]);
 		}
 		if (sys_name != NULL) {
-			sys_num = seccomp_syscall_resolve_name_arch(arch,
-								    sys_name);
+			sys_num = arch_syscall_resolve_name(arch, sys_name);
 			if (offset > 0 && sys_num > 0)
 				sys_num -= offset;
 
