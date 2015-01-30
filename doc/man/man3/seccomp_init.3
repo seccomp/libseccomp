@@ -48,21 +48,21 @@ Valid
 values are as follows:
 .TP
 .B SCMP_ACT_KILL
-The process will be killed by the kernel when it calls a syscall that does not
+The thread will be killed by the kernel when it calls a syscall that does not
 match any of the configured seccomp filter rules.
 .TP
 .B SCMP_ACT_TRAP
-The process will throw a SIGSYS signal when it calls a syscall that does not
+The thread will throw a SIGSYS signal when it calls a syscall that does not
 match any of the configured seccomp filter rules.
 .TP
 .B SCMP_ACT_ERRNO(uint16_t errno)
-The process will receive a return value of
+The thread will receive a return value of
 .I errno
 when it calls a syscall that does not match any of the configured seccomp filter
 rules.
 .TP
 .B SCMP_ACT_TRACE(uint16_t msg_num)
-If the process is being traced and the tracing process specified the
+If the thread is being traced and the tracing process specified the
 .B PTRACE_O_TRACESECCOMP
 option in the call to
 .BR ptrace (2),
@@ -75,7 +75,7 @@ can be retrieved using the
 option.
 .TP
 .B SCMP_ACT_ALLOW
-The seccomp filter will have no effect on the process calling the syscall if it
+The seccomp filter will have no effect on the thread calling the syscall if it
 does not match any of the configured seccomp filter rules.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
