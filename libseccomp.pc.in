@@ -26,7 +26,7 @@ includedir=@includedir@
 
 Name: libseccomp
 Description: The enhanced seccomp library
-URL: http://libseccomp.sf.net
+URL: https://github.com/seccomp/libseccomp
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lseccomp

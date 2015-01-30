@@ -1,6 +1,6 @@
 How to Submit Patches to the libseccomp Project
 ===============================================================================
-http://libseccomp.sf.net
+https://github.com/seccomp/libseccomp
 
 This document is intended to act as a guide to help you contribute to the
 libseccomp project.  It is not perfect, and there will always be exceptions
