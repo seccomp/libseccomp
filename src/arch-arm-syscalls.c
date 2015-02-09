@@ -36,7 +36,7 @@
 #define __NR_SYSCALL_BASE	__NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 3.17-rc1+ */
+/* NOTE: based on Linux 3.19 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
@@ -55,6 +55,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "arch_prctl", __PNR_arch_prctl },
 	{ "bdflush", (__NR_SYSCALL_BASE + 134) },
 	{ "bind", (__NR_SYSCALL_BASE + 282) },
+	{ "bpf", (__NR_SYSCALL_BASE + 386) },
 	{ "break", __PNR_break },
 	{ "brk", (__NR_SYSCALL_BASE + 45) },
 	{ "cachectl", __PNR_cachectl },
@@ -90,6 +91,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "eventfd", (__NR_SYSCALL_BASE + 351) },
 	{ "eventfd2", (__NR_SYSCALL_BASE + 356) },
 	{ "execve", (__NR_SYSCALL_BASE + 11) },
+	{ "execveat", (__NR_SYSCALL_BASE + 387) },
 	{ "exit", (__NR_SYSCALL_BASE +  1) },
 	{ "exit_group", (__NR_SYSCALL_BASE + 248) },
 	{ "faccessat", (__NR_SYSCALL_BASE + 334) },

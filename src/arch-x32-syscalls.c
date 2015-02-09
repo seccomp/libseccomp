@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux 3.17-rc1+ */
+/* NOTE: based on Linux 3.19 */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -44,6 +44,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "arch_prctl", (X32_SYSCALL_BIT + 158) },
 	{ "bdflush", __PNR_bdflush },
 	{ "bind", (X32_SYSCALL_BIT + 49) },
+	{ "bpf", (X32_SYSCALL_BIT + 321) },
 	{ "break", __PNR_break },
 	{ "brk", (X32_SYSCALL_BIT + 12) },
 	{ "cachectl", __PNR_cachectl },
@@ -79,6 +80,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "eventfd", (X32_SYSCALL_BIT + 284) },
 	{ "eventfd2", (X32_SYSCALL_BIT + 290) },
 	{ "execve", (X32_SYSCALL_BIT + 520) },
+	{ "execveat", (X32_SYSCALL_BIT + 545) },
 	{ "exit", (X32_SYSCALL_BIT + 60) },
 	{ "exit_group", (X32_SYSCALL_BIT + 231) },
 	{ "faccessat", (X32_SYSCALL_BIT + 269) },
