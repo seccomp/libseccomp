@@ -311,7 +311,7 @@ function dump_lib_mips64n32() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_ppc64() {
-	gcc -E -dM $1/arch/powerpc/include/uapi/asm/unistd.h | \
+	gcc -E -dM -D__powerpc64__ $1/arch/powerpc/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | sort | \
 		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/'
 }
