@@ -253,6 +253,8 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_PPC64;
 			else if (strcmp(optarg, "ppc64le") == 0)
 				arch = AUDIT_ARCH_PPC64LE;
+			else if (strcmp(optarg, "ppc") == 0)
+				arch = AUDIT_ARCH_PPC;
 			else
 				exit_fault(EINVAL);
 			break;

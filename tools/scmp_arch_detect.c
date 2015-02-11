@@ -105,6 +105,9 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_PPC64LE:
 			printf("ppc64le\n");
 			break;
+		case SCMP_ARCH_PPC:
+			printf("ppc\n");
+			break;
 		default:
 			printf("unknown\n");
 		}

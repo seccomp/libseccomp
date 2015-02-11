@@ -68,6 +68,8 @@
 #else
 #define ARCH_NATIVE		AUDIT_ARCH_PPC64LE
 #endif
+#elif __PPC__
+#define ARCH_NATIVE		AUDIT_ARCH_PPC
 #else
 #error the simulator code needs to know about your machine type
 #endif
