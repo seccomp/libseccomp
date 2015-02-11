@@ -148,6 +148,7 @@ cdef class Arch:
     MIPSEL64 - MIPS little endian 64-bit ABI
     MIPSEL64N32 - MIPS little endian N32 ABI
     PPC64 - 64-bit PowerPC
+    PPC - 32-bit PowerPC
     """
 
     cdef int _token
@@ -165,7 +166,8 @@ cdef class Arch:
     MIPSEL64 = libseccomp.SCMP_ARCH_MIPSEL64
     MIPSEL64N32 = libseccomp.SCMP_ARCH_MIPSEL64N32
     PPC64 = libseccomp.SCMP_ARCH_PPC64
-    PPC64 = libseccomp.SCMP_ARCH_PPC64LE
+    PPC64LE = libseccomp.SCMP_ARCH_PPC64LE
+    PPC = libseccomp.SCMP_ARCH_PPC
 
     def __cinit__(self, arch=libseccomp.SCMP_ARCH_NATIVE):
         """ Initialize the architecture object.
@@ -205,6 +207,8 @@ cdef class Arch:
                 self._token = libseccomp.SCMP_ARCH_PPC64
             elif arch == libseccomp.SCMP_ARCH_PPC64LE:
                 self._token = libseccomp.SCMP_ARCH_PPC64LE
+            elif arch == libseccomp.SCMP_ARCH_PPC:
+                self._token = libseccomp.SCMP_ARCH_PPC
             else:
                 self._token = 0;
         elif isinstance(arch, basestring):

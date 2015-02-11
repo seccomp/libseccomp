@@ -39,6 +39,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-ppc64.h"
+#include "arch-ppc.h"
 #include "system.h"
 
 #define default_arg_count_max		6
@@ -81,6 +82,8 @@ const struct arch_def *arch_def_native = &arch_def_ppc64;
 #else
 const struct arch_def *arch_def_native = &arch_def_ppc64le;
 #endif
+#elif __PPC__
+const struct arch_def *arch_def_native = &arch_def_ppc;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -133,6 +136,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_ppc64;
 	case SCMP_ARCH_PPC64LE:
 		return &arch_def_ppc64le;
+	case SCMP_ARCH_PPC:
+		return &arch_def_ppc;
 	}
 
 	return NULL;
@@ -173,6 +178,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_ppc64;
 	else if (strcmp(arch_name, "ppc64le") == 0)
 		return &arch_def_ppc64le;
+	else if (strcmp(arch_name, "ppc") == 0)
+		return &arch_def_ppc;
 
 	return NULL;
 }
@@ -294,6 +301,8 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	case SCMP_ARCH_PPC64:
 	case SCMP_ARCH_PPC64LE:
 		return ppc64_syscall_resolve_name(name);
+	case SCMP_ARCH_PPC:
+		return ppc_syscall_resolve_name(name);
 	}
 
 	return __NR_SCMP_ERROR;
@@ -334,6 +343,8 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	case SCMP_ARCH_PPC64:
 	case SCMP_ARCH_PPC64LE:
 		return ppc64_syscall_resolve_num(num);
+	case SCMP_ARCH_PPC:
+		return ppc_syscall_resolve_num(num);
 	}
 
 	return NULL;
