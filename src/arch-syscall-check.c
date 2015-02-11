@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 		syscall_check(str_miss, sys_name, "mips64n32",
 			      mips64n32_syscall_iterate_name(i_mips64n32));
 		syscall_check(str_miss, sys_name, "ppc64",
-			      ppc64_syscall_iterate_name(i_mips64n32));
+			      ppc64_syscall_iterate_name(i_ppc64));
 
 		/* output the results */
 		printf("%s: ", sys_name);
