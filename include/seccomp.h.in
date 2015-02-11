@@ -153,6 +153,7 @@ struct scmp_arg_cmp {
 /**
  * The PowerPC architecture tokens
  */
+#define SCMP_ARCH_PPC		AUDIT_ARCH_PPC
 #define SCMP_ARCH_PPC64		AUDIT_ARCH_PPC64
 #ifndef AUDIT_ARCH_PPC64LE
 #define AUDIT_ARCH_PPC64LE	(EM_PPC64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)

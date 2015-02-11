@@ -39,6 +39,7 @@
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
 #include "arch-ppc64.h"
+#include "arch-ppc.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -115,6 +116,9 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_PPC64:
 			sys_name = ppc64_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_PPC:
+			sys_name = ppc_syscall_iterate_name(iter);
 			break;
 
 		default:

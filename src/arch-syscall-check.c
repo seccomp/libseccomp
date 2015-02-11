@@ -34,6 +34,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-ppc64.h"
+#include "arch-ppc.h"
 
 /**
  * compare the syscall values
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
 	int i_mips64 = 0;
 	int i_mips64n32 = 0;
 	int i_ppc64 = 0;
+	int i_ppc = 0;
 	const char *sys_name;
 	char str_miss[256];
 
@@ -97,6 +99,8 @@ int main(int argc, char *argv[])
 			      mips64n32_syscall_iterate_name(i_mips64n32));
 		syscall_check(str_miss, sys_name, "ppc64",
 			      ppc64_syscall_iterate_name(i_ppc64));
+		syscall_check(str_miss, sys_name, "ppc",
+			      ppc_syscall_iterate_name(i_ppc));
 
 		/* output the results */
 		printf("%s: ", sys_name);
@@ -125,10 +129,12 @@ int main(int argc, char *argv[])
 			i_mips64n32 = -1;
 		if (!ppc64_syscall_iterate_name(++i_ppc64))
 			i_ppc64 = -1;
+		if (!ppc_syscall_iterate_name(++i_ppc))
+			i_ppc = -1;
 	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0 &&
-		 i_ppc64 >= 0);
+		 i_ppc64 >= 0 && i_ppc >= 0);
 
 	/* check for any leftovers */
 	sys_name = x86_syscall_iterate_name(i_x86 + 1);
@@ -174,6 +180,11 @@ int main(int argc, char *argv[])
 	if (i_ppc64 >= 0) {
 		printf("%s: ERROR, ppc64 has additional syscalls\n",
 		       ppc64_syscall_iterate_name(i_ppc64));
+		return 1;
+	}
+	if (i_ppc >= 0) {
+		printf("%s: ERROR, ppc has additional syscalls\n",
+		       ppc_syscall_iterate_name(i_ppc));
 		return 1;
 	}
 
