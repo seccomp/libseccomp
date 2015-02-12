@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-aarch64.h"
 
-/* NOTE: based on Linux 3.17-rc1+ */
+/* NOTE: based on Linux 3.19 */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -44,6 +44,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "arch_prctl", __PNR_arch_prctl },
 	{ "bdflush", __PNR_bdflush },
 	{ "bind", 200 },
+	{ "bpf", 280 },
 	{ "break", __PNR_break },
 	{ "brk", 214 },
 	{ "cachectl", __PNR_cachectl },
@@ -79,6 +80,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "eventfd", __PNR_eventfd },
 	{ "eventfd2", 19 },
 	{ "execve", 221 },
+	{ "execveat", 281 },
 	{ "exit", 93 },
 	{ "exit_group", 94 },
 	{ "faccessat", 48 },
@@ -193,7 +195,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "lstat64", __PNR_lstat64 },
 	{ "madvise", 233 },
 	{ "mbind", 235 },
-	{ "memfd_create", __PNR_memfd_create },
+	{ "memfd_create", 279 },
 	{ "migrate_pages", 238 },
 	{ "mincore", 232 },
 	{ "mkdir", __PNR_mkdir },

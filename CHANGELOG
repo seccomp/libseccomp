@@ -2,6 +2,19 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.2.0 - February 12, 2015
+- Migrated the build system to autotools
+- Added support for the aarch64 architecture
+- Added support for the mips, mips64, and mips64n32 architectures for both big
+  and little endian systems
+- Added support for using the new seccomp() syscall and the thread sync
+  functionality
+- Added Python bindings
+- Updated the internal syscall tables to Linux v3.19
+- Added documentation to help contributors wishing to submit patches
+- Migrated to Github for git hosting and Google Groups for the mailing list
+- Numerous minor bug fixes
+
 * Version 2.1.1 - October 31, 2013
 - Build system improvements
 - Automated test improvments, including a "check" target for use by

@@ -1246,12 +1246,12 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __PNR_getrandom		-10109
 #ifndef __NR_getrandom
 #define __NR_getrandom		__PNR_getrandom
-#endif /* __NR_getrandom */
+#endif /* __NR_getrandom - NO LONGER NEEDED */
 
 #define __PNR_memfd_create	-10110
 #ifndef __NR_memfd_create
 #define __NR_memfd_create	__PNR_memfd_create
-#endif /* __NR_memfd_create */
+#endif /* __NR_memfd_create - NO LONGER NEEDED */
 
 #define __PNR_kexec_file_load	-10111
 #ifndef __NR_kexec_file_load

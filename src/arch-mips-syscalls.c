@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __NR_SYSCALL_BASE	4000
 
-/* NOTE: based on Linux 3.17-rc1+ */
+/* NOTE: based on Linux 3.19 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
 	{ "_newselect", (__NR_SYSCALL_BASE + 142) },
@@ -48,6 +48,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "arch_prctl", __PNR_arch_prctl },
 	{ "bdflush", (__NR_SYSCALL_BASE + 134) },
 	{ "bind", (__NR_SYSCALL_BASE + 169) },
+	{ "bpf", (__NR_SYSCALL_BASE + 355) },
 	{ "break", __NR_SYSCALL_BASE + 17 },
 	{ "brk", (__NR_SYSCALL_BASE + 45) },
 	{ "cachectl", (__NR_SYSCALL_BASE + 148) },
@@ -83,6 +84,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "eventfd", (__NR_SYSCALL_BASE + 319) },
 	{ "eventfd2", (__NR_SYSCALL_BASE + 325) },
 	{ "execve", (__NR_SYSCALL_BASE + 11) },
+	{ "execveat", (__NR_SYSCALL_BASE + 356) },
 	{ "exit", (__NR_SYSCALL_BASE + 1) },
 	{ "exit_group", (__NR_SYSCALL_BASE + 246) },
 	{ "faccessat", (__NR_SYSCALL_BASE + 300) },
@@ -142,7 +144,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "getpmsg", (__NR_SYSCALL_BASE + 208) },
 	{ "getppid", (__NR_SYSCALL_BASE + 64) },
 	{ "getpriority", (__NR_SYSCALL_BASE + 96) },
-	{ "getrandom", __PNR_getrandom },
+	{ "getrandom", (__NR_SYSCALL_BASE + 353) },
 	{ "getresgid", (__NR_SYSCALL_BASE + 191) },
 	{ "getresgid32", __PNR_getresgid32 },
 	{ "getresuid", (__NR_SYSCALL_BASE + 186) },
@@ -197,7 +199,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "lstat64", (__NR_SYSCALL_BASE + 214) },
 	{ "madvise", (__NR_SYSCALL_BASE + 218) },
 	{ "mbind", (__NR_SYSCALL_BASE + 268) },
-	{ "memfd_create", __PNR_memfd_create },
+	{ "memfd_create", (__NR_SYSCALL_BASE + 354) },
 	{ "migrate_pages", (__NR_SYSCALL_BASE + 287) },
 	{ "mincore", (__NR_SYSCALL_BASE + 217) },
 	{ "mkdir", (__NR_SYSCALL_BASE + 39) },
