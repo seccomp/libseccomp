@@ -1,0 +1,19 @@
+# -*- mode: yaml; -*-
+# vim ft=yaml
+language: c
+compiler: gcc
+matrix:
+    env:
+        - CFLAGS="-g -O2 -Werror"
+        - CFLAGS="-g -O2 -fsanitize=address -fno-omit-frame-pointer"
+          ASAN_OPTIONS=verbosity=2:malloc_context_size=20:quarantine_size_mb=512:print_stats=1:atexit=1
+          LDFLAGS="-fsanitize=address"
+        - CFLAGS="-g -O2 -fsanitize=undefined -fno-omit-frame-pointer"
+          LDFLAGS="-fsanitize=undefined"
+before_install:
+    - sudo apt-get install -qq libtool cython astyle
+script: 
+    -  ./autogen.sh 
+        && ./configure --enable-python 
+        && make check-syntax 
+        && make check
