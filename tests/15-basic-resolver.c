@@ -47,14 +47,23 @@ int main(int argc, char *argv[])
 
 	name = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE, __NR_open);
 	if (name == NULL || strcmp(name, "open") != 0)
-		return 1;
+		goto fail;
+	free(name);
+
 	name = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE, __NR_socket);
 	if (name == NULL || strcmp(name, "socket") != 0)
-		return 1;
+		goto fail;
+	free(name);
+
 	name = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE,
 						__NR_SCMP_ERROR);
 	if (name != NULL)
-		return 1;
+		goto fail;
+	free(name);
 
 	return 0;
+
+fail:
+	free(name);
+	return 1;
 }
