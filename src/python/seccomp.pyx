@@ -409,7 +409,7 @@ cdef class SyscallFilter:
         Lookup the given attribute in the filter and return the
         attribute's value to the caller.
         """
-        value = 0
+        cdef uint32_t value = 0
         rc = libseccomp.seccomp_attr_get(self._ctx,
                                          attr, <uint32_t *>&value)
         if rc == -errno.EINVAL:
