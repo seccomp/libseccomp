@@ -42,6 +42,22 @@
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
 #endif
 
+#ifndef EM_ARM
+#define EM_ARM 40
+#endif
+
+#ifndef AUDIT_ARCH_ARM
+#define AUDIT_ARCH_ARM          (EM_ARM|__AUDIT_ARCH_LE)
+#endif
+
+#ifndef AUDIT_ARCH_ARMEB
+#define AUDIT_ARCH_ARMEB        (EM_ARM)
+#endif
+
+#ifndef EM_AARCH64
+#define EM_AARCH64 183
+#endif
+
 #ifndef AUDIT_ARCH_AARCH64
 /* AArch64 support for audit was merged in 3.17-rc1 */
 #define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
