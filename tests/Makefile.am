@@ -51,7 +51,8 @@ check_PROGRAMS = \
 	23-sim-arch_all_le_basic \
 	24-live-arg_allow \
 	25-sim-multilevel_chains_adv \
-	26-sim-arch_all_be_basic
+	26-sim-arch_all_be_basic \
+	27-sim-bpf_blk_state
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
