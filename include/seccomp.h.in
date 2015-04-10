@@ -1424,6 +1424,16 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_utimes		__PNR_utimes
 #endif /* __NR_utimes */
 
+#define __PNR_getrlimit		-10180
+#ifndef __NR_getrlimit
+#define __NR_getrlimit		__PNR_getrlimit
+#endif /* __NR_utimes */
+
+#define __PNR_mmap		-10181
+#ifndef __NR_mmap
+#define __NR_mmap		__PNR_mmap
+#endif /* __NR_utimes */
+
 #ifdef __cplusplus
 }
 #endif

@@ -146,7 +146,7 @@ function dump_lib_x32() {
 #
 function dump_sys_arm() {
 	# NOTE: arm_sync_file_range() and sync_file_range2() share values
-	cat $1/arch/arm/include/uapi/asm/unistd.h | \
+	gcc -E -dM -D __ARM_EABI__ $1/arch/arm/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | sort | \
 		grep -v "^#define __NR_OABI_SYSCALL_BASE" | \
 		grep -v "^#define __NR_SYSCALL_BASE" | \
