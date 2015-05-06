@@ -30,22 +30,22 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    f.add_rule(ALLOW, "open");
-    f.add_rule(ALLOW, "close");
+    f.add_rule(ALLOW, "open")
+    f.add_rule(ALLOW, "close")
     f.add_rule(ALLOW, "read",
                Arg(0, EQ, sys.stdin.fileno()),
                Arg(1, NE, 0),
-               Arg(2, LT, sys.maxsize));
+               Arg(2, LT, sys.maxsize))
     f.add_rule(ALLOW, "write",
                Arg(0, EQ, sys.stdout.fileno()),
                Arg(1, NE, 0),
-               Arg(2, LT, sys.maxsize));
+               Arg(2, LT, sys.maxsize))
     f.add_rule(ALLOW, "write",
                Arg(0, EQ, sys.stderr.fileno()),
                Arg(1, NE, 0),
-               Arg(2, LT, sys.maxsize));
-    f.add_rule(ALLOW, "close");
-    f.add_rule(ALLOW, "rt_sigreturn");
+               Arg(2, LT, sys.maxsize))
+    f.add_rule(ALLOW, "close")
+    f.add_rule(ALLOW, "rt_sigreturn")
     return f
 
 args = util.get_opt()

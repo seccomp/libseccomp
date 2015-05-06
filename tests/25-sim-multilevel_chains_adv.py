@@ -32,11 +32,11 @@ def test(args):
     f = SyscallFilter(KILL)
     f.add_rule_exactly(ALLOW, 10,
                        Arg(0, EQ, 11),
-                       Arg(1, NE, 12));
+                       Arg(1, NE, 12))
     f.add_rule_exactly(ALLOW, 20,
                        Arg(0, EQ, 21),
                        Arg(1, NE, 22),
-                       Arg(2, EQ, 23));
+                       Arg(2, EQ, 23))
     return f
 
 args = util.get_opt()

@@ -30,11 +30,11 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    f.add_rule_exactly(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()));
-    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()));
-    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()));
-    f.add_rule_exactly(ALLOW, "close");
-    f.add_rule_exactly(ALLOW, "rt_sigreturn");
+    f.add_rule_exactly(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
+    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
+    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
+    f.add_rule_exactly(ALLOW, "close")
+    f.add_rule_exactly(ALLOW, "rt_sigreturn")
     return f
 
 args = util.get_opt()
