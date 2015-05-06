@@ -48,6 +48,14 @@ struct acc_state {
 	int32_t offset;
 	uint32_t mask;
 };
+#define _ACC_STATE(x,y) \
+	(struct acc_state){ .offset = (x), .mask = (y) }
+#define _ACC_STATE_OFFSET(x) \
+	_ACC_STATE(x,ARG_MASK_MAX)
+#define _ACC_STATE_UNDEF \
+	_ACC_STATE_OFFSET(-1)
+#define _ACC_CMP_EQ(x,y) \
+	((x).offset == (y).offset && (x).mask == (y).mask)
 
 enum bpf_jump_type {
 	TGT_NONE = 0,
@@ -97,11 +105,18 @@ struct bpf_instr {
 };
 #define _BPF_OFFSET_SYSCALL		(offsetof(struct seccomp_data, nr))
 #define _BPF_SYSCALL(a)			_BPF_K(a,_BPF_OFFSET_SYSCALL)
+#define _BPF_OFFSET_ARCH		(offsetof(struct seccomp_data, arch))
+#define _BPF_ARCH(a)			_BPF_K(a,_BPF_OFFSET_ARCH)
 
 struct bpf_blk {
+	/* bpf instructions */
 	struct bpf_instr *blks;
 	unsigned int blk_cnt;
 	unsigned int blk_alloc;
+
+	/* accumulator state */
+	struct acc_state acc_start;
+	struct acc_state acc_end;
 
 	/* priority - higher is better */
 	unsigned int priority;
@@ -119,7 +134,6 @@ struct bpf_blk {
 	struct bpf_blk *hash_nxt;
 	struct bpf_blk *prev, *next;
 	struct bpf_blk *lvl_prv, *lvl_nxt;
-	struct acc_state acc_state;
 };
 #define _BLK_MSZE(x) \
 	((x)->blk_cnt * sizeof(*((x)->blks)))
@@ -288,12 +302,70 @@ static void _blk_free(struct bpf_state *state, struct bpf_blk *blk)
 }
 
 /**
+ * Allocate and initialize a new instruction block
+ *
+ * Allocate a new BPF instruction block and perform some very basic
+ * initialization.  Returns a pointer to the block on success, NULL on failure.
+ *
+ */
+static struct bpf_blk *_blk_alloc(void)
+{
+	struct bpf_blk *blk;
+
+	blk = malloc(sizeof(*blk));
+	if (blk == NULL)
+		return NULL;
+
+	memset(blk, 0, sizeof(*blk));
+	blk->flag_unique = true;
+	blk->acc_start = _ACC_STATE_UNDEF;
+	blk->acc_end = _ACC_STATE_UNDEF;
+
+	return blk;
+}
+
+/**
+ * Resize an instruction block
+ * @param state the BPF state
+ * @param blk the existing instruction block, or NULL
+ * @param size_add the minimum amount of instructions to add
+ *
+ * Resize the given instruction block such that it is at least as large as the
+ * current size plus @size_add.  Returns a pointer to the block on success,
+ * NULL on failure.
+ *
+ */
+static struct bpf_blk *_blk_resize(struct bpf_state *state,
+				   struct bpf_blk *blk,
+				   unsigned int size_add)
+{
+	unsigned int size_adj = (AINC_BLK > size_add ? AINC_BLK : size_add);
+	struct bpf_instr *new;
+
+	if (blk == NULL)
+		return NULL;
+
+	if ((blk->blk_cnt + size_adj) <= blk->blk_alloc)
+		return blk;
+
+	blk->blk_alloc += size_adj;
+	new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
+	if (new == NULL) {
+		_blk_free(state, blk);
+		return NULL;
+	}
+	blk->blks = new;
+
+	return blk;
+}
+
+/**
  * Append a new BPF instruction to an instruction block
  * @param state the BPF state
  * @param blk the existing instruction block, or NULL
  * @param instr the new instruction
  *
- * Add the new BPF instruction to the end of the give instruction block.  If
+ * Add the new BPF instruction to the end of the given instruction block.  If
  * the given instruction block is NULL, a new block will be allocated.  Returns
  * a pointer to the block on success, NULL on failure, and in the case of
  * failure the instruction block is free'd.
@@ -303,25 +375,43 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 				   struct bpf_blk *blk,
 				   const struct bpf_instr *instr)
 {
-	struct bpf_instr *new;
-
 	if (blk == NULL) {
-		blk = malloc(sizeof(*blk));
+		blk = _blk_alloc();
 		if (blk == NULL)
 			return NULL;
-		memset(blk, 0, sizeof(*blk));
-		blk->flag_unique = true;
 	}
-	if ((blk->blk_cnt + 1) > blk->blk_alloc) {
-		blk->blk_alloc += AINC_BLK;
-		new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
-		if (new == NULL) {
-			_blk_free(state, blk);
-			return NULL;
-		}
-		blk->blks = new;
-	}
+
+	if (_blk_resize(state, blk, 1) == NULL)
+	    return NULL;
 	memcpy(&blk->blks[blk->blk_cnt++], instr, sizeof(*instr));
+
+	return blk;
+}
+
+/**
+ * Prepend a new BPF instruction to an instruction block
+ * @param state the BPF state
+ * @param blk the existing instruction block, or NULL
+ * @param instr the new instruction
+ *
+ * Add the new BPF instruction to the start of the given instruction block.
+ * If the given instruction block is NULL, a new block will be allocated.
+ * Returns a pointer to the block on success, NULL on failure, and in the case
+ * of failure the instruction block is free'd.
+ *
+ */
+static struct bpf_blk *_blk_prepend(struct bpf_state *state,
+				    struct bpf_blk *blk,
+				    const struct bpf_instr *instr)
+{
+	/* empty - we can treat this like a normal append operation */
+	if (blk == NULL || blk->blk_cnt == 0)
+		return _blk_append(state, blk, instr);
+
+	if (_blk_resize(state, blk, 1) == NULL)
+	    return NULL;
+	memmove(&blk->blks[1], &blk->blks[0], blk->blk_cnt++ * sizeof(*instr));
+	memcpy(&blk->blks[0], instr, sizeof(*instr));
 
 	return blk;
 }
@@ -715,9 +805,13 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	int32_t acc_offset;
 	uint32_t acc_mask;
 	uint64_t act_t_hash = 0, act_f_hash = 0;
-	struct bpf_blk *blk = NULL, *b_act;
+	struct bpf_blk *blk, *b_act;
 	struct bpf_instr instr;
-	struct acc_state a_state_orig = *a_state;
+
+	blk = _blk_alloc();
+	if (blk == NULL)
+		return NULL;
+	blk->acc_start = *a_state;
 
 	/* generate the action blocks */
 	if (node->act_t_flg) {
@@ -749,6 +843,8 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		blk = _blk_append(state, blk, &instr);
 		if (blk == NULL)
 			goto node_failure;
+		/* we're not dependent on the accumulator anymore */
+		blk->acc_start = _ACC_STATE_UNDEF;
 	}
 	if (acc_mask != a_state->mask) {
 		/* apply the bitmask */
@@ -806,7 +902,7 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		goto node_failure;
 
 	blk->node = node;
-	blk->acc_state = a_state_orig;
+	blk->acc_end = *a_state;
 	return blk;
 
 node_failure:
@@ -861,7 +957,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		case TGT_PTR_DB:
 			node = (struct db_arg_chain_tree *)i_iter->jt.tgt.db;
 			b_new = _gen_bpf_chain(state, sys, node,
-					       nxt_jump, &blk->acc_state);
+					       nxt_jump, &blk->acc_start);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
@@ -887,7 +983,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		case TGT_PTR_DB:
 			node = (struct db_arg_chain_tree *)i_iter->jf.tgt.db;
 			b_new = _gen_bpf_chain(state, sys, node,
-					       nxt_jump, &blk->acc_state);
+					       nxt_jump, &blk->acc_start);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
@@ -940,6 +1036,7 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 	const struct db_arg_chain_tree *c_iter;
 	unsigned int iter;
 	struct bpf_jump nxt_jump_tmp;
+	struct acc_state acc = *a_state;
 
 	if (chain == NULL) {
 		b_head = _gen_bpf_action(state, NULL, sys->action);
@@ -954,7 +1051,7 @@ static struct bpf_blk *_gen_bpf_chain(struct bpf_state *state,
 
 		/* build all of the blocks for this level */
 		do {
-			b_iter = _gen_bpf_node(state, c_iter, a_state);
+			b_iter = _gen_bpf_node(state, c_iter, &acc);
 			if (b_iter == NULL)
 				goto chain_failure;
 			if (b_head != NULL) {
@@ -1058,7 +1155,7 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 {
 	int rc;
 	struct bpf_instr instr;
-	struct bpf_blk *blk_c, *blk_s = NULL;
+	struct bpf_blk *blk_c, *blk_s;
 	struct bpf_jump def_jump;
 	struct acc_state a_state;
 
@@ -1066,20 +1163,27 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 	memset(&def_jump, 0, sizeof(def_jump));
 	def_jump = _BPF_JMP_HSH(state->def_hsh);
 
+	blk_s = _blk_alloc();
+	if (blk_s == NULL)
+		return NULL;
+
 	/* setup the accumulator state */
 	if (acc_reset) {
 		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
 			   _BPF_JMP_NO, _BPF_JMP_NO,
 			   _BPF_SYSCALL(state->arch));
-		blk_s = _blk_append(state, NULL, &instr);
+		blk_s = _blk_append(state, blk_s, &instr);
 		if (blk_s == NULL)
 			return NULL;
-		a_state.offset = _BPF_OFFSET_SYSCALL;
-		a_state.mask = ARG_MASK_MAX;
+		/* we've loaded the syscall ourselves */
+		a_state = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
+		blk_s->acc_start = _ACC_STATE_UNDEF;
+		blk_s->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
 	} else {
-		/* set the accumulator state to an unknown value */
-		a_state.offset = -1;
-		a_state.mask = ARG_MASK_MAX;
+		/* we rely on someone else to load the syscall */
+		a_state = _ACC_STATE_UNDEF;
+		blk_s->acc_start = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
+		blk_s->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
 	}
 
 	/* generate the argument chains */
@@ -1243,6 +1347,7 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		b_new = _blk_append(state, NULL, &instr);
 		if (b_new == NULL)
 			goto arch_failure;
+		b_new->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
 		if (state->arch->token == SCMP_ARCH_X86_64) {
 			/* filter out x32 */
 			_BPF_INSTR(instr,
@@ -1543,11 +1648,11 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* load the architecture token/number */
 	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
-		   _BPF_JMP_NO, _BPF_JMP_NO,
-		   _BPF_K(state->arch, offsetof(struct seccomp_data, arch)));
+		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARCH(state->arch));
 	b_head = _blk_append(state, NULL, &instr);
 	if (b_head == NULL)
 		return -ENOMEM;
+	b_head->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_ARCH);
 	rc = _hsh_add(state, &b_head, 1);
 	if (rc < 0)
 		return rc;
@@ -1638,6 +1743,37 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				b_jmp = _hsh_find_once(state,
 						       i_iter->k.tgt.hash);
 			if (b_jmp != NULL) {
+				/* do we need to reload the accumulator? */
+				if ((b_jmp->acc_start.offset != -1) &&
+				    !_ACC_CMP_EQ(b_iter->acc_end,
+						 b_jmp->acc_start)) {
+					if (b_jmp->acc_start.mask != ARG_MASK_MAX) {
+						_BPF_INSTR(instr,
+							   _BPF_OP(state->arch,
+								   BPF_ALU + BPF_AND),
+							   _BPF_JMP_NO,
+							   _BPF_JMP_NO,
+							   _BPF_K(state->arch,
+								  b_jmp->acc_start.mask));
+						b_jmp = _blk_prepend(state,
+								     b_jmp,
+								     &instr);
+						if (b_jmp == NULL)
+							return -EFAULT;
+					}
+					_BPF_INSTR(instr,
+						   _BPF_OP(state->arch,
+							   BPF_LD + BPF_ABS),
+						   _BPF_JMP_NO, _BPF_JMP_NO,
+						   _BPF_K(state->arch,
+							  b_jmp->acc_start.offset));
+					b_jmp = _blk_prepend(state,
+							     b_jmp, &instr);
+					if (b_jmp == NULL)
+						return -EFAULT;
+					/* not reliant on the accumulator */
+					b_jmp->acc_start = _ACC_STATE_UNDEF;
+				}
 				/* insert the new block after this block */
 				b_jmp->prev = b_iter;
 				b_jmp->next = b_iter->next;
@@ -1653,6 +1789,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		} else
 			b_iter = b_iter->prev;
 	} while (b_iter != NULL);
+
 
 	/* NOTE - from here to the end of the function we need to fail via the
 	 *	  the build_bpf_free_blks label, not just return an error; see
