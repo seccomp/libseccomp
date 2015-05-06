@@ -22,6 +22,7 @@
 #ifndef _UTIL_H
 #define _UTIL_H
 
+#include <elf.h>
 #include <inttypes.h>
 #include <linux/audit.h>
 
