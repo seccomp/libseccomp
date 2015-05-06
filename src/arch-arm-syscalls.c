@@ -27,6 +27,7 @@
 #include "arch-arm.h"
 
 #define __NR_OABI_SYSCALL_BASE	0x900000
+#define __ARM_NR_BASE		0x0f0000
 
 /* NOTE: we currently only support the ARM EABI, more info at the URL below:
  *       -> http://wiki.embeddedarm.com/wiki/EABI_vs_OABI */
@@ -57,9 +58,10 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "bind", (__NR_SYSCALL_BASE + 282) },
 	{ "bpf", (__NR_SYSCALL_BASE + 386) },
 	{ "break", __PNR_break },
+	{ "breakpoint", (__NR_SYSCALL_BASE + (__ARM_NR_BASE + 1)) },
 	{ "brk", (__NR_SYSCALL_BASE + 45) },
 	{ "cachectl", __PNR_cachectl },
-	{ "cacheflush", __PNR_cacheflush },
+	{ "cacheflush", (__NR_SYSCALL_BASE + (__ARM_NR_BASE + 2)) },
 	{ "capget", (__NR_SYSCALL_BASE + 184) },
 	{ "capset", (__NR_SYSCALL_BASE + 185) },
 	{ "chdir", (__NR_SYSCALL_BASE + 12) },
@@ -333,6 +335,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "set_robust_list", (__NR_SYSCALL_BASE + 338) },
 	{ "set_thread_area", __PNR_set_thread_area },
 	{ "set_tid_address", (__NR_SYSCALL_BASE + 256) },
+	{ "set_tls", (__NR_SYSCALL_BASE + (__ARM_NR_BASE + 5)) },
 	{ "setdomainname", (__NR_SYSCALL_BASE + 121) },
 	{ "setfsgid", (__NR_SYSCALL_BASE + 139) },
 	{ "setfsgid32", (__NR_SYSCALL_BASE + 216) },
@@ -428,6 +431,8 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "unlinkat", (__NR_SYSCALL_BASE + 328) },
 	{ "unshare", (__NR_SYSCALL_BASE + 337) },
 	{ "uselib", (__NR_SYSCALL_BASE + 86) },
+	{ "usr26", (__NR_SYSCALL_BASE + (__ARM_NR_BASE + 3)) },
+	{ "usr32", (__NR_SYSCALL_BASE + (__ARM_NR_BASE + 4)) },
 	{ "ustat", (__NR_SYSCALL_BASE + 62) },
 	{ "utime", __PNR_utime },
 	{ "utimensat", (__NR_SYSCALL_BASE + 348) },
