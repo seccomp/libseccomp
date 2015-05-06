@@ -146,12 +146,22 @@ function dump_lib_x32() {
 #
 function dump_sys_arm() {
 	# NOTE: arm_sync_file_range() and sync_file_range2() share values
-	gcc -E -dM -D __ARM_EABI__ $1/arch/arm/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
+	gcc -E -dM -D__ARM_EABI__ $1/arch/arm/include/uapi/asm/unistd.h | \
+		grep "^#define __\(ARM_\)*NR_" | \
 		grep -v "^#define __NR_OABI_SYSCALL_BASE" | \
 		grep -v "^#define __NR_SYSCALL_BASE" | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_SYSCALL_BASE[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/' | \
-		sed -e '/#define __NR_sync_file_range2[ \t]\+__NR_arm_sync_file_range/d'
+		grep -v "^#define __ARM_NR_BASE" | \
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_SYSCALL_BASE[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/;s/#define[ \t]\+__ARM_NR_\([^ \t]\+\)[ \t]\+(__ARM_NR_BASE[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t983040 + \2/' | \
+		while read line; do \
+			if echo "$line" | grep -q "+"; then \
+				echo "$line" | awk '{ print $1"\t"$2+$4 }'; \
+			else \
+				echo "$line"; \
+			fi; \
+		done | \
+		cat - | \
+		sed -e '/#define __NR_sync_file_range2[ \t]\+__NR_arm_sync_file_range/d' | \
+		sort
 }
 
 #
@@ -175,7 +185,7 @@ function dump_lib_arm() {
 #
 function dump_sys_aarch64() {
 	gcc -E -dM -I$1/include/uapi -D__BITS_PER_LONG=64 $1/include/uapi/asm-generic/unistd.h | \
-		grep "^#define __NR_" | sort | \
+		grep "^#define __NR_" | \
 		sed -e '/__NR_syscalls/d' | \
 		sed -e '/__NR_arch_specific_syscall/d' | \
 		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+\(.*\)/\1\t\2/' | \
@@ -191,7 +201,8 @@ function dump_sys_aarch64() {
 		sed -e 's/__NR3264_mmap/222/' | \
 		sed -e 's/__NR3264_fstat/80/' | \
 		sed -e 's/__NR3264_lstat/1039/' | \
-		sed -e 's/__NR3264_stat/1038/'
+		sed -e 's/__NR3264_stat/1038/' | \
+		sort
 }
 
 #
@@ -217,14 +228,15 @@ function dump_sys_mips() {
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
 	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=1 $1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
+		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
 		grep -v "^#define __NR_64_" | \
 		grep -v "^#define __NR_Linux" | \
 		grep -v "^#define __NR_unused" | \
 		grep -v "^#define __NR_reserved" | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/'
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/' | \
+		sort
 }
 
 #
@@ -250,14 +262,15 @@ function dump_sys_mips64() {
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
 	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=3 $1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
+		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
 		grep -v "^#define __NR_64_" | \
 		grep -v "^#define __NR_Linux" | \
 		grep -v "^#define __NR_unused" | \
 		grep -v "^#define __NR_reserved" | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/'
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/' | \
+		sort
 }
 
 #
@@ -283,14 +296,15 @@ function dump_sys_mips64n32() {
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
 	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=2 $1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
+		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
 		grep -v "^#define __NR_64_" | \
 		grep -v "^#define __NR_Linux" | \
 		grep -v "^#define __NR_unused" | \
 		grep -v "^#define __NR_reserved" | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/'
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t\2/' | \
+		sort
 }
 
 #

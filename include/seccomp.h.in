@@ -1434,6 +1434,26 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_mmap		__PNR_mmap
 #endif /* __NR_utimes */
 
+#define __PNR_breakpoint	-10182
+#ifndef __NR_breakpoint
+#define __NR_breakpoint		__PNR_breakpoint
+#endif /* __NR_breakpoint */
+
+#define __PNR_set_tls		-10183
+#ifndef __NR_set_tls
+#define __NR_set_tls		__PNR_set_tls
+#endif /* __NR_set_tls */
+
+#define __PNR_usr26		-10184
+#ifndef __NR_usr26
+#define __NR_usr26		__PNR_usr26
+#endif /* __NR_usr26 */
+
+#define __PNR_usr32		-10185
+#ifndef __NR_usr32
+#define __NR_usr32		__PNR_usr32
+#endif /* __NR_usr32 */
+
 #ifdef __cplusplus
 }
 #endif
