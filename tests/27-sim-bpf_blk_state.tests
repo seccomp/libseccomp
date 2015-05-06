@@ -1,0 +1,24 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2015 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <pmoore@redhat.com
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+27-sim-bpf_blk_state	+x86_64	socket		0-2		N		N	N	N	N	ALLOW
+27-sim-bpf_blk_state	+x86_64	socket		3-9		N		N	N	N	N	KILL
+27-sim-bpf_blk_state	+x86_64	socket		10		N		N	N	N	N	ALLOW
+27-sim-bpf_blk_state	+x86_64	socket		11-32		N		N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+27-sim-bpf_blk_state	50
+
+test type: bpf-valgrind
+
+# Testname
+27-sim-bpf_blk_state
