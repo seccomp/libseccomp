@@ -382,7 +382,7 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 	}
 
 	if (_blk_resize(state, blk, 1) == NULL)
-	    return NULL;
+		return NULL;
 	memcpy(&blk->blks[blk->blk_cnt++], instr, sizeof(*instr));
 
 	return blk;
@@ -409,7 +409,7 @@ static struct bpf_blk *_blk_prepend(struct bpf_state *state,
 		return _blk_append(state, blk, instr);
 
 	if (_blk_resize(state, blk, 1) == NULL)
-	    return NULL;
+		return NULL;
 	memmove(&blk->blks[1], &blk->blks[0], blk->blk_cnt++ * sizeof(*instr));
 	memcpy(&blk->blks[0], instr, sizeof(*instr));
 
