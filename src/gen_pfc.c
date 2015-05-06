@@ -177,6 +177,9 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 		case SCMP_CMP_MASKED_EQ:
 			fprintf(fds, " & 0x%.8x == ", c_iter->mask);
 			break;
+		case SCMP_CMP_NE:
+		case SCMP_CMP_LT:
+		case SCMP_CMP_LE:
 		default:
 			fprintf(fds, " ??? ");
 		}
@@ -247,7 +250,7 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
 static int _gen_pfc_arch(const struct db_filter_col *col,
 			 const struct db_filter *db, FILE *fds)
 {
-	int rc;
+	int rc = 0;
 	struct db_sys_list *s_iter;
 	struct pfc_sys_list *p_iter = NULL, *p_new, *p_head = NULL, *p_prev;
 
