@@ -26,25 +26,41 @@
 #include <inttypes.h>
 #include <linux/audit.h>
 
+/**
+ * The ARM architecture tokens
+ */
+/* AArch64 support for audit was merged in 3.17-rc1 */
+#ifndef AUDIT_ARCH_AARCH64
+#ifndef EM_AARCH64
+#define EM_AARCH64		183
+#endif /* EM_AARCH64 */
+#define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_AARCH64 */
+
+/**
+ * The MIPS architecture tokens
+ */
 #ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32
 #define __AUDIT_ARCH_CONVENTION_MIPS64_N32	0x20000000
 #endif
-
-#ifndef AUDIT_ARCH_MIPS64N32
+#ifndef EM_MIPS
+#define EM_MIPS			8
+#endif
+#ifndef AUDIT_ARCH_MIPS
+#define AUDIT_ARCH_MIPS		(EM_MIPS)
+#endif
+#ifndef AUDIT_ARCH_MIPS64
+#define AUDIT_ARCH_MIPS64	(EM_MIPS|__AUDIT_ARCH_64BIT)
+#endif
 /* MIPS64N32 support was merged in 3.15 */
+#ifndef AUDIT_ARCH_MIPS64N32
 #define AUDIT_ARCH_MIPS64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|\
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
 #endif
-
-#ifndef AUDIT_ARCH_MIPSEL64N32
 /* MIPSEL64N32 support was merged in 3.15 */
+#ifndef AUDIT_ARCH_MIPSEL64N32
 #define AUDIT_ARCH_MIPSEL64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE|\
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
-#endif
-
-#ifndef AUDIT_ARCH_AARCH64
-/* AArch64 support for audit was merged in 3.17-rc1 */
-#define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
 #endif
 
 extern uint32_t arch;
