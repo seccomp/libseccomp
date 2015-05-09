@@ -72,10 +72,9 @@ static unsigned int __db_tree_free(struct db_arg_chain_tree *tree)
 
 /**
  * Free a syscall filter argument chain tree
- * @param list the argument chain list
+ * @param tree the argument chain list
  *
- * This function frees a syscall argument chain list and returns the number of
- * nodes freed.
+ * This function frees a tree and returns the number of nodes freed.
  *
  */
 static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
@@ -576,7 +575,7 @@ int db_col_attr_get(const struct db_filter_col *col,
 
 /**
  * Set a filter attribute
- * @param db the seccomp filter collection
+ * @param col the seccomp filter collection
  * @param attr the filter attribute
  * @param value the filter attribute value
  *
@@ -699,7 +698,6 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
 /**
  * Free and reset the seccomp filter DB
  * @param db the seccomp filter DB
- * @param def_action the default filter action
  *
  * This function frees any existing filters and resets the filter DB to a
  * default state; only the DB architecture is preserved.
