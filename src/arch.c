@@ -129,7 +129,7 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 
 /**
  * Lookup the architecture definition by name
- * @param arch the architecure name
+ * @param arch_name the architecure name
  *
  * Return the matching architecture definition, returns NULL on failure.
  *

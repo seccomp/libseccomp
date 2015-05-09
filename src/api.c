@@ -380,7 +380,7 @@ syscall_priority_failure:
  * @param action the filter action
  * @param syscall the syscall number
  * @param arg_cnt the number of argument filters in the argument filter chain
- * @param arg_list the argument filter chain, (uint, enum scmp_compare, ulong)
+ * @param arg_array the argument filter chain, (uint, enum scmp_compare, ulong)
  *
  * This function adds a new argument/comparison/value to the seccomp filter for
  * a syscall; multiple arguments can be specified and they will be chained

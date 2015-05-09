@@ -189,7 +189,7 @@ static uint32_t jhash_word(const uint32_t *k, size_t length, uint32_t initval)
 
 /**
  * Hash a variable-length key into a 32-bit value
- * @param k the key (the unaligned variable-length array of bytes)
+ * @param key the key (the unaligned variable-length array of bytes)
  * @param length the length of the key, counting by bytes
  * @param initval can be any 4-byte value
  *
@@ -456,7 +456,7 @@ static uint32_t jhash_le(const void *key, size_t length, uint32_t initval)
 
 /**
  * Hash a variable-length key into a 32-bit value
- * @param k the key (the unaligned variable-length array of bytes)
+ * @param key the key (the unaligned variable-length array of bytes)
  * @param length the length of the key, counting by bytes
  * @param initval can be any 4-byte value
  *
@@ -655,7 +655,7 @@ static uint32_t jhash_be( const void *key, size_t length, uint32_t initval)
 
 /**
  * Hash a variable-length key into a 32-bit value
- * @param k the key (the unaligned variable-length array of bytes)
+ * @param key the key (the unaligned variable-length array of bytes)
  * @param length the length of the key, counting by bytes
  * @param initval can be any 4-byte value
  *
