@@ -8,6 +8,18 @@ designed to abstract away the underlying BPF based syscall filter language and
 present a more conventional function-call based filtering interface that should
 be familiar to, and easily adopted by, application developers.
 
+* Online Resources
+
+The library source repository currently lives on GitHub at the following URL:
+
+	-> https://github.com/seccomp/libseccomp
+
+The project mailing list is currently hosted on Google Groups at the URL below,
+please note that a Google account is not required to subscribe to the mailing
+list.
+
+	-> https://groups.google.com/d/forum/libseccomp
+
 * Documentation
 
 The "doc/" directory contains all of the currently available documentation,
@@ -20,14 +32,17 @@ read the SUBMITTING_PATCHES in the top level directory.
 
 * Building and Installing the Library
 
-In order to build the library you should follow the familiar three step
-process used by most autotools based applications:
+If you are building the libseccomp library from an official release tarball,
+you should follow the familiar three step process used by most autotools based
+applications:
 
 	# ./configure
 	# make [V=0|1]
 	# make install
 
-As usual, running "./configure -h" will display a list of build-time
+However, if you are building the library from sources retrieved from the source
+repository you may need to run the autogen.sh script before running configure.
+In both cases, running "./configure -h" will display a list of build-time
 configuration options.
 
 * Testing the Library
