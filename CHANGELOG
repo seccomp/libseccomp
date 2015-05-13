@@ -2,6 +2,12 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.2.1 - May 13, 2015
+- Fix a problem with syscall argument filtering on 64-bit systems
+- Fix some problems with the 32-bit ARM syscall table
+- Fix build problems on very old systems
+- Update the README file with the GitHub and Google Groups information
+
 * Version 2.2.0 - February 12, 2015
 - Migrated the build system to autotools
 - Added support for the aarch64 architecture
