@@ -62,6 +62,8 @@
 #elif __MIPSEL__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPSEL64N32
 #endif /* _MIPS_SIM_NABI32 */
+#elif __s390__
+#define ARCH_NATIVE		AUDIT_ARCH_S390
 #elif __s390x__
 #define ARCH_NATIVE		AUDIT_ARCH_S390X
 #else

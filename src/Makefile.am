@@ -31,7 +31,8 @@ SOURCES_ARCH = \
 	arch-mips.h arch-mips.c arch-mips-syscalls.c \
 	arch-mips64.h arch-mips64.c arch-mips64-syscalls.c \
 	arch-mips64n32.h arch-mips64n32.c arch-mips64n32-syscalls.c \
-	arch-s390x.h arch-s390x.c arch-s390x-syscalls.c
+	arch-s390x.h arch-s390x.c arch-s390x-syscalls.c \
+	arch-s390.h arch-s390.c arch-s390-syscalls.c
 
 SOURCES_GEN = \
 	api.c system.h system.c \

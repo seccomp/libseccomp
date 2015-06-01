@@ -38,6 +38,7 @@
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
+#include "arch-s390.h"
 #include "arch-s390x.h"
 #include "system.h"
 
@@ -75,6 +76,8 @@ const struct arch_def *arch_def_native = &arch_def_mips64n32;
 #elif __MIPSEL__
 const struct arch_def *arch_def_native = &arch_def_mipsel64n32;
 #endif /* _MIPS_SIM_NABI32 */
+#elif __s390__
+const struct arch_def *arch_def_native = &arch_def_s390;
 #elif __s390x__
 const struct arch_def *arch_def_native = &arch_def_s390x;
 #else
@@ -125,6 +128,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_mips64n32;
 	case SCMP_ARCH_MIPSEL64N32:
 		return &arch_def_mipsel64n32;
+	case SCMP_ARCH_S390:
+		return &arch_def_s390;
 	case SCMP_ARCH_S390X:
 		return &arch_def_s390x;
 	}
@@ -163,6 +168,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_mips64n32;
 	else if (strcmp(arch_name, "mipsel64n32") == 0)
 		return &arch_def_mipsel64n32;
+	else if (strcmp(arch_name, "s390") == 0)
+		return &arch_def_s390;
 	else if (strcmp(arch_name, "s390x") == 0)
 		return &arch_def_s390x;
 
@@ -283,6 +290,8 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	case SCMP_ARCH_MIPS64N32:
 	case SCMP_ARCH_MIPSEL64N32:
 		return mips64n32_syscall_resolve_name(name);
+	case SCMP_ARCH_S390:
+		return s390_syscall_resolve_name(name);
 	case SCMP_ARCH_S390X:
 		return s390x_syscall_resolve_name(name);
 	}
@@ -322,6 +331,8 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	case SCMP_ARCH_MIPS64N32:
 	case SCMP_ARCH_MIPSEL64N32:
 		return mips64n32_syscall_resolve_num(num);
+	case SCMP_ARCH_S390:
+		return s390_syscall_resolve_num(num);
 	case SCMP_ARCH_S390X:
 		return s390x_syscall_resolve_num(num);
 	}

@@ -33,6 +33,7 @@
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
+#include "arch-s390.h"
 #include "arch-s390x.h"
 
 /**
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
 	int i_mips64 = 0;
 	int i_mips64n32 = 0;
 	int i_s390x = 0;
+	int i_s390 = 0;
 	const char *sys_name;
 	char str_miss[256];
 
@@ -95,6 +97,8 @@ int main(int argc, char *argv[])
 			      mips64_syscall_iterate_name(i_mips64));
 		syscall_check(str_miss, sys_name, "mips64n32",
 			      mips64n32_syscall_iterate_name(i_mips64n32));
+		syscall_check(str_miss, sys_name, "s390",
+			      s390_syscall_iterate_name(i_s390));
 		syscall_check(str_miss, sys_name, "s390x",
 			      s390x_syscall_iterate_name(i_s390x));
 
@@ -123,12 +127,14 @@ int main(int argc, char *argv[])
 			i_mips64n32 = -1;
 		if (!aarch64_syscall_iterate_name(++i_aarch64))
 			i_aarch64 = -1;
+		if (!s390_syscall_iterate_name(++i_s390))
+			i_s390 = -1;
 		if (!s390x_syscall_iterate_name(++i_s390x))
 			i_s390x = -1;
 	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0 &&
-		 i_s390x >= 0);
+		 i_s390 >= 0 && i_s390x >= 0);
 
 	/* check for any leftovers */
 	sys_name = x86_syscall_iterate_name(i_x86 + 1);
@@ -171,9 +177,14 @@ int main(int argc, char *argv[])
 		       mips64n32_syscall_iterate_name(i_mips64n32));
 		return 1;
 	}
+	if (i_s390 >= 0) {
+		printf("%s: ERROR, s390 has additional syscalls\n",
+		       s390_syscall_iterate_name(i_s390));
+		return 1;
+	}
 	if (i_s390x >= 0) {
 		printf("%s: ERROR, s390x has additional syscalls\n",
-		       mips64n32_syscall_iterate_name(i_s390x));
+		       s390x_syscall_iterate_name(i_s390x));
 		return 1;
 	}
 

@@ -163,6 +163,11 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_MIPSEL64N32	AUDIT_ARCH_MIPSEL64N32
 
 /**
+ * The S390 architecture token
+ */
+#define SCMP_ARCH_S390		AUDIT_ARCH_S390
+
+/**
  * The S390X architecture token
  */
 #define SCMP_ARCH_S390X		AUDIT_ARCH_S390X

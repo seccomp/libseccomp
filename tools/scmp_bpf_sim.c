@@ -249,6 +249,8 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_MIPS64N32;
 			else if (strcmp(optarg, "mipsel64n32") == 0)
 				arch = AUDIT_ARCH_MIPSEL64N32;
+			else if (strcmp(optarg, "s390") == 0)
+				arch = AUDIT_ARCH_S390;
 			else if (strcmp(optarg, "s390x") == 0)
 				arch = AUDIT_ARCH_S390X;
 			else

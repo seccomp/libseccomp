@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("mips64n32"));
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("s390"));
+	if (rc != 0)
+		goto out;
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("s390x"));
 	if (rc != 0)
 		goto out;

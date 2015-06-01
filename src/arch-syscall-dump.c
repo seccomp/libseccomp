@@ -38,6 +38,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
+#include "arch-s390.h"
 #include "arch-s390x.h"
 
 /**
@@ -112,6 +113,9 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_AARCH64:
 			sys_name = aarch64_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_S390:
+			sys_name = s390_syscall_iterate_name(iter);
 			break;
 		case SCMP_ARCH_S390X:
 			sys_name = s390x_syscall_iterate_name(iter);
