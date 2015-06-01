@@ -294,6 +294,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "rt_sigsuspend", 130 },
 	{ "rt_sigtimedwait", 128 },
 	{ "rt_tgsigqueueinfo", 297 },
+	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
 	{ "sched_get_priority_max", 146 },
 	{ "sched_get_priority_min", 147 },
 	{ "sched_getaffinity", 204 },

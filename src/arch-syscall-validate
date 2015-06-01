@@ -319,6 +319,28 @@ function dump_lib_mips64n32() {
 }
 
 #
+# Dump the s390x library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_s390x() {
+	$LIB_SYS_DUMP -a s390x | grep -v - | sort
+}
+
+#
+# Dump the s390x system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_s390x() {
+	gcc -dM -E $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
+	    sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
+}
+
+#
 # Dump the system syscall table
 #
 # Arguments:
@@ -352,6 +374,9 @@ function dump_sys() {
 		;;
 	mips64n32)
 		dump_sys_mips64n32 "$2"
+		;;
+	s390x)
+		dump_sys_s390x "$2"
 		;;
 	*)
 		echo ""
@@ -392,6 +417,9 @@ function dump_lib() {
 		;;
 	mips64n32)
 		dump_lib_mips64n32
+		;;
+	s390x)
+		dump_lib_s390x "$2"
 		;;
 	*)
 		echo ""
@@ -439,7 +467,7 @@ shift $(($OPTIND - 1))
 
 # defaults
 if [[ $opt_arches == "" ]]; then
-	opt_arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32"
+	opt_arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32 s390x"
 fi
 
 # sanity checks

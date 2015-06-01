@@ -163,6 +163,11 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_MIPSEL64N32	AUDIT_ARCH_MIPSEL64N32
 
 /**
+ * The S390X architecture token
+ */
+#define SCMP_ARCH_S390X		AUDIT_ARCH_S390X
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
@@ -1475,6 +1480,31 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #else
 #define __NR_usr32		__PNR_usr32
 #endif /* __ARM_NR_usr32 */
+
+#define __PNR_get_mempolicy            -10180
+#ifndef __NR_get_mempolicy
+#define __NR_get_mempolicy             __PNR_get_mempolicy
+#endif /* __NR_get_mempolicy */
+
+#define __PNR_move_pages            -10181
+#ifndef __NR_move_pages
+#define __NR_move_pages             __PNR_move_pages
+#endif /* __NR_move_pages */
+
+#define __PNR_mbind            -10182
+#ifndef __NR_mbind
+#define __NR_mbind             __PNR_mbind
+#endif /* __NR_mbind */
+
+#define __PNR_set_mempolicy            -10183
+#ifndef __NR_set_mempolicy
+#define __NR_set_mempolicy             __PNR_set_mempolicy
+#endif /* __NR_set_mempolicy */
+
+#define __PNR_s390_runtime_instr -10184
+#ifndef __NR_s390_runtime_instr
+#define __NR_s390_runtime_instr  __PNR_s390_runtime_instr
+#endif /* __NR_s390_runtime_instr */
 
 #ifdef __cplusplus
 }
