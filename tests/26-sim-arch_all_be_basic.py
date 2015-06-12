@@ -33,6 +33,8 @@ def test(args):
     f.add_arch(Arch("mips"))
     f.add_arch(Arch("mips64"))
     f.add_arch(Arch("mips64n32"))
+    f.add_arch(Arch("s390"))
+    f.add_arch(Arch("s390x"))
     f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
     f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))

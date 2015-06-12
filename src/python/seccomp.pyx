@@ -163,6 +163,8 @@ cdef class Arch:
     MIPSEL = libseccomp.SCMP_ARCH_MIPSEL
     MIPSEL64 = libseccomp.SCMP_ARCH_MIPSEL64
     MIPSEL64N32 = libseccomp.SCMP_ARCH_MIPSEL64N32
+    S390 = libseccomp.SCMP_ARCH_S390
+    S390X = libseccomp.SCMP_ARCH_S390X
 
     def __cinit__(self, arch=libseccomp.SCMP_ARCH_NATIVE):
         """ Initialize the architecture object.
@@ -198,6 +200,10 @@ cdef class Arch:
                 self._token = libseccomp.SCMP_ARCH_MIPSEL64
             elif arch == libseccomp.SCMP_ARCH_MIPSEL64N32:
                 self._token = libseccomp.SCMP_ARCH_MIPSEL64N32
+            elif arch == libseccomp.SCMP_ARCH_S390:
+                self._token = libseccomp.SCMP_ARCH_S390
+            elif arch == libseccomp.SCMP_ARCH_S390X:
+                self._token = libseccomp.SCMP_ARCH_S390X
             else:
                 self._token = 0;
         elif isinstance(arch, basestring):

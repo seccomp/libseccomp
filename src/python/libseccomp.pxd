@@ -38,6 +38,8 @@ cdef extern from "seccomp.h":
         SCMP_ARCH_MIPSEL
         SCMP_ARCH_MIPSEL64
         SCMP_ARCH_MIPSEL64N32
+        SCMP_ARCH_S390
+        SCMP_ARCH_S390X
 
     cdef enum scmp_filter_attr:
         SCMP_FLTATR_ACT_DEFAULT
