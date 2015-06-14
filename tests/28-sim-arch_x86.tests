@@ -1,0 +1,27 @@
+#
+# libseccomp regression test automation data
+#
+# This test triggers a bug in libseccomp erroneously allowing the close()
+# syscall on x32 instead of 'KILL'ing it, as it should do for unsupported
+# architectures.
+#
+# Author: Mathias Krause <minipli@googlemail.com>
+#
+
+test type: bpf-sim
+
+# Testname	Arch		Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+28-sim-arch_x86	+x86,+x86_64	read	N	N	N	N	N	N	ALLOW
+28-sim-arch_x86	+x86,+x86_64	close	N	N	N	N	N	N	ERRNO(1)
+28-sim-arch_x86	+arm,+x32	read	N	N	N	N	N	N	KILL
+28-sim-arch_x86	+arm,+x32	close	N	N	N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+28-sim-arch_x86	50
+
+test type: bpf-valgrind
+
+# Testname
+28-sim-arch_x86
