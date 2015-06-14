@@ -1,7 +1,7 @@
 #
 # libseccomp regression test automation data
 #
-# This test triggers a bug in libseccomp erroneously allowing the close()
+# This test triggered a bug in libseccomp erroneously allowing the close()
 # syscall on x32 instead of 'KILL'ing it, as it should do for unsupported
 # architectures.
 #
