@@ -33,7 +33,7 @@
 
 struct db_api_arg {
 	unsigned int arg;
-	unsigned int op;
+	enum scmp_compare op;
 	scmp_datum_t mask;
 	scmp_datum_t datum;
 
