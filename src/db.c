@@ -828,17 +828,12 @@ int db_syscall_priority(struct db_filter *db,
  * Fixup the node based on the op/mask
  * @param node the chain node
  *
- * Apply some simplifications based on the comparison op and mask value.
+ * Ensure the datum is masked as well.
  *
  */
 static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
 {
-	if (node->op == SCMP_CMP_MASKED_EQ && node->mask == 0) {
-		node->op = SCMP_CMP_EQ;
-		node->mask = ARG_MASK_MAX;
-		node->datum = 0;
-	} else
-		node->datum &= node->mask;
+	node->datum &= node->mask;
 }
 
 /**
