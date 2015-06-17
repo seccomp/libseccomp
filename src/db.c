@@ -825,6 +825,38 @@ int db_syscall_priority(struct db_filter *db,
 }
 
 /**
+ * Test if the argument filter can be skipped because it's a tautology
+ * @param arg argument filter
+ *
+ * If this argument filter applied to the lower 32 bit can be skipped this
+ * function returns false.
+ *
+ */
+static bool _db_arg_cmp_need_lo(const struct db_api_arg *arg)
+{
+	if (arg->op == SCMP_CMP_MASKED_EQ && D64_LO(arg->mask) == 0)
+		return false;
+
+	return true;
+}
+
+/**
+ * Test if the argument filter can be skipped because it's a tautology
+ * @param arg argument filter
+ *
+ * If this argument filter applied to the upper 32 bit can be skipped this
+ * function returns false.
+ *
+ */
+static bool _db_arg_cmp_need_hi(const struct db_api_arg *arg)
+{
+	if (arg->op == SCMP_CMP_MASKED_EQ && D64_HI(arg->mask) == 0)
+		return false;
+
+	return true;
+}
+
+/**
  * Fixup the node based on the op/mask
  * @param node the chain node
  *
@@ -871,6 +903,13 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		goto gen_64_failure;
 	for (iter = 0; iter < chain_len_max; iter++) {
 		if (chain[iter].valid == 0)
+			continue;
+
+		/* TODO: handle the case were either hi or lo isn't needed */
+
+		/* skip generating instruction which are no-ops */
+		if (!_db_arg_cmp_need_hi(&chain[iter]) &&
+		    !_db_arg_cmp_need_lo(&chain[iter]))
 			continue;
 
 		c_iter_hi = malloc(sizeof(*c_iter_hi));
@@ -1005,6 +1044,10 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		if (chain[iter].valid == 0)
 			continue;
 
+		/* skip generating instructions which are no-ops */
+		if (!_db_arg_cmp_need_lo(&chain[iter]))
+			continue;
+
 		c_iter = malloc(sizeof(*c_iter));
 		if (c_iter == NULL)
 			goto gen_32_failure;
@@ -1013,6 +1056,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		c_iter->arg = chain[iter].arg;
 		c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
 		c_iter->op = chain[iter].op;
+		/* implicitly strips off the upper 32 bit */
 		c_iter->mask = chain[iter].mask;
 		c_iter->datum = chain[iter].datum;
 
