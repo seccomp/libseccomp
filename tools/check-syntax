@@ -3,7 +3,7 @@
 #
 # libseccomp code syntax checking tool
 #
-# Copyright (c) 2013 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2013,2015 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <pmoore@redhat.com>
 #
 
@@ -54,18 +54,17 @@ usage: check-syntax [-h]
 libseccomp code syntax checking tool
 optional arguments:
   -h             show this help message and exit
+  -f             fix the file formatting
 EOF
 }
 
 #
-# Check the formatting on a C source/header file
+# Generate a properly formatted C source/header file
 #
 # Arguments:
-#     1    File to check
+#     1    Source file
 #
 function tool_c_style() {
-	[[ -z "$1" || ! -r "$1" ]] && return
-
 	astyle --options=none --lineend=linux --mode=c \
 		--style=linux \
 		--indent=force-tab=8 \
@@ -77,8 +76,33 @@ function tool_c_style() {
 		--align-pointer=name \
 		--align-reference=name \
 		--max-code-length=80 \
-		--break-after-logical < "$1" \
-		| diff -pu --label="$1.orig" "$1" --label="$1" -
+		--break-after-logical < "$1"
+}
+
+#
+# Check the formatting on a C source/header file
+#
+# Arguments:
+#     1    File to check
+#
+function tool_c_style_check() {
+	[[ -z "$1" || ! -r "$1" ]] && return
+
+	tool_c_style "$1" | diff -pu --label="$1.orig" "$1" --label="$1" -
+}
+
+#
+# Fix the formatting on a C source/header file
+#
+# Arguments:
+#     1    File to fix
+#
+function tool_c_style_fix() {
+	[[ -z "$1" || ! -r "$1" ]] && return
+
+	tmp="$(mktemp --tmpdir=$(dirname "$1"))"
+	tool_c_style "$1" > "$tmp"
+	mv "$tmp" "$1"
 }
 
 #
@@ -88,7 +112,18 @@ function check_c() {
 	for i in $CHK_C_LIST; do
 		echo "$CHK_C_EXCLUDE" | grep -q "$i" && continue
 		echo "Differences for $i"
-		tool_c_style "$i"
+		tool_c_style_check "$i"
+	done
+}
+
+#
+# Perform all known syntax fixess for the configured C sources/headers
+#
+function fix_c() {
+	for i in $CHK_C_LIST; do
+		echo "$CHK_C_EXCLUDE" | grep -q "$i" && continue
+		echo "Fixing $i"
+		tool_c_style_fix "$i"
 	done
 }
 
@@ -97,8 +132,13 @@ function check_c() {
 
 verify_deps astyle
 
-while getopts "h" opt; do
+opt_fix=0
+
+while getopts "fh" opt; do
 	case $opt in
+	f)
+		opt_fix=1
+		;;
 	h|*)
 		usage
 		exit 1
@@ -109,7 +149,11 @@ done
 # display the results
 echo "=============== $(date) ==============="
 echo "Code Syntax Check Results (\"check-syntax $*\")"
-check_c
+if [[ $opt_fix -eq 1 ]]; then
+	fix_c
+else
+	check_c
+fi
 echo "============================================================"
 
 # exit
