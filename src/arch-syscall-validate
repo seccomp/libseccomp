@@ -63,6 +63,8 @@ libseccomp syscall validation script
 optional arguments:
   -h             show this help message and exit
   -a             architecture
+  -l             output the library's syscall definitions
+  -s             output the system's syscall definitions
 EOF
 }
 
@@ -368,28 +370,28 @@ function dump_sys() {
 function dump_lib() {
 	case $1 in
 	x86)
-		dump_lib_x86 "$2"
+		dump_lib_x86
 		;;
 	x86_64)
-		dump_lib_x86_64 "$2"
+		dump_lib_x86_64
 		;;
 	x32)
-		dump_lib_x32 "$2"
+		dump_lib_x32
 		;;
 	arm)
-		dump_lib_arm "$2"
+		dump_lib_arm
 		;;
 	aarch64)
-		dump_lib_aarch64 "$2"
+		dump_lib_aarch64
 		;;
 	mips)
-		dump_lib_mips "$2"
+		dump_lib_mips
 		;;
 	mips64)
-		dump_lib_mips64 "$2"
+		dump_lib_mips64
 		;;
 	mips64n32)
-		dump_lib_mips64n32 "$2"
+		dump_lib_mips64n32
 		;;
 	*)
 		echo ""
@@ -410,12 +412,22 @@ if [[ ! -x $LIB_SYS_DUMP ]]; then
 	exit 1
 fi
 
-arches=""
+opt_arches=""
+opt_sys=""
+opt_lib=""
 
-while getopts "a:h" opt; do
+while getopts "a:slh" opt; do
 	case $opt in
 	a)
-		arches+="$OPTARG "
+		opt_arches+="$OPTARG "
+		;;
+	s)
+		opt_sys=1
+		opt_lib=0
+		;;
+	l)
+		opt_sys=0
+		opt_lib=1
 		;;
 	h|*)
 		usage
@@ -426,8 +438,8 @@ done
 shift $(($OPTIND - 1))
 
 # defaults
-if [[ $arches == "" ]]; then
-	arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32"
+if [[ $opt_arches == "" ]]; then
+	opt_arches="x86 x86_64 x32 arm aarch64 mips mips64 mips64n32"
 fi
 
 # sanity checks
@@ -442,20 +454,27 @@ if [[ ! -d $kernel_dir ]]; then
 fi
 
 # generate some temp files
-tmp_orig=$(mktemp -t syscall_validate_XXXXXX)
-tmp_new=$(mktemp -t syscall_validate_XXXXXX)
+tmp_lib=$(mktemp -t syscall_validate_XXXXXX)
+tmp_sys=$(mktemp -t syscall_validate_XXXXXX)
 
-# loop through the architectures
-for i in $arches; do
+# loop through the architectures and compare
+for i in $opt_arches; do
 	# dump the syscall tables
-	dump_lib $i > $tmp_orig
-	dump_sys $i "$kernel_dir" > $tmp_new
+	dump_lib $i > $tmp_lib
+	dump_sys $i "$kernel_dir" > $tmp_sys
 
-	# do the comparison
-	diff -u --label="$i [library]" $tmp_orig --label "$i [system]" $tmp_new
+	if [[ $opt_lib -eq 1 ]]; then
+		cat $tmp_lib
+	elif [[ $opt_sys -eq 1 ]]; then
+		cat $tmp_sys
+	else
+		#  compare the lib and sys output
+		diff -u --label="$i [library]" $tmp_lib \
+			--label "$i [system]" $tmp_sys
+	fi
 done
 
 # cleanup and exit
-rm -f $tmp_orig $tmp_new
+rm -f $tmp_lib $tmp_sys
 
 exit 0
