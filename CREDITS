@@ -2,8 +2,10 @@ libseccomp: Contributors
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+Andrew Jones <drjones@redhat.com>
 Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
+Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
@@ -14,6 +16,7 @@ Kees Cook <keescook@chromium.org>
 Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
 Marcus Meissner <meissner@suse.de>
 Markos Chandras <markos.chandras@imgtec.com>
+Mathias Krause <minipli@googlemail.com>
 Michael Forney <mforney@mforney.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
 Paul Moore <pmoore@redhat.com>
