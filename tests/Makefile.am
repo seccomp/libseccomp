@@ -82,7 +82,9 @@ EXTRA_DIST_TESTPYTHON = \
 	23-sim-arch_all_le_basic.py \
 	24-live-arg_allow.py \
 	25-sim-multilevel_chains_adv.py \
-	26-sim-arch_all_be_basic.py
+	26-sim-arch_all_be_basic.py \
+	27-sim-bpf_blk_state.py \
+	28-sim-arch_x86.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -110,7 +112,9 @@ EXTRA_DIST_TESTCFGS = \
 	23-sim-arch_all_le_basic.tests \
 	24-live-arg_allow.tests \
 	25-sim-multilevel_chains_adv.tests \
-	26-sim-arch_all_be_basic.tests
+	26-sim-arch_all_be_basic.tests \
+	27-sim-bpf_blk_state.tests \
+	28-sim-arch_x86.tests
 
 EXTRA_DIST_TESTSCRIPTS = regression testdiff testgen
 
