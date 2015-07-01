@@ -1227,9 +1227,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #endif /* __NR_cachectl */
 
 #define __PNR_cacheflush	-10104
-#ifndef __NR_cacheflush
+#ifdef __ARM_NR_cacheflush
+#define __NR_cacheflush		__ARM_NR_cacheflush
+#else
 #define __NR_cacheflush		__PNR_cacheflush
-#endif /* __NR_cacheflush */
+#endif /* __ARM_NR_cacheflush */
 
 #define __PNR_sysmips		-10106
 #ifndef __NR_sysmips
@@ -1447,24 +1449,32 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #endif /* __NR_utimes */
 
 #define __PNR_breakpoint	-10182
-#ifndef __NR_breakpoint
+#ifdef __ARM_NR_breakpoint
+#define __NR_breakpoint		__ARM_NR_breakpoint
+#else
 #define __NR_breakpoint		__PNR_breakpoint
-#endif /* __NR_breakpoint */
+#endif /* __ARM_NR_breakpoint */
 
 #define __PNR_set_tls		-10183
-#ifndef __NR_set_tls
+#ifdef __ARM_NR_set_tls
+#define __NR_set_tls		__ARM_NR_set_tls
+#else
 #define __NR_set_tls		__PNR_set_tls
-#endif /* __NR_set_tls */
+#endif /* __ARM_NR_set_tls */
 
 #define __PNR_usr26		-10184
-#ifndef __NR_usr26
+#ifdef __ARM_NR_usr26
+#define __NR_usr26		__ARM_NR_usr26
+#else
 #define __NR_usr26		__PNR_usr26
-#endif /* __NR_usr26 */
+#endif /* __ARM_NR_usr26 */
 
 #define __PNR_usr32		-10185
-#ifndef __NR_usr32
+#ifdef __ARM_NR_usr32
+#define __NR_usr32		__ARM_NR_usr32
+#else
 #define __NR_usr32		__PNR_usr32
-#endif /* __NR_usr32 */
+#endif /* __ARM_NR_usr32 */
 
 #ifdef __cplusplus
 }
