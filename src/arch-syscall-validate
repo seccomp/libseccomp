@@ -75,7 +75,7 @@ EOF
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x86() {
-	cat $1/arch/x86/syscalls/syscall_32.tbl | \
+	cat $1/arch/x86/entry/syscalls/syscall_32.tbl | \
 		grep -v "^#" | awk '{ print $3"\t"$1 }' | sed '/^[ \t]*$/d' | \
 		sort
 }
@@ -98,7 +98,7 @@ function dump_lib_x86() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x86_64() {
-	cat $1/arch/x86/syscalls/syscall_64.tbl | \
+	cat $1/arch/x86/entry/syscalls/syscall_64.tbl | \
 		grep -v "^#" | awk '{ print $2,$3,$1 }' | sed -e '/^x32/d' | \
 		awk '{ print $2"\t"$3 }' | sed '/^[ \t]*$/d' | sort
 }
@@ -121,7 +121,7 @@ function dump_lib_x86_64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x32() {
-	cat $1/arch/x86/syscalls/syscall_64.tbl | \
+	cat $1/arch/x86/entry/syscalls/syscall_64.tbl | \
 		grep -v "^#" | awk '{ print $2,$3,$1 }' | sed -e '/^64/d' | \
 		awk '{ print $2"\t"$3 }' | sed '/^[ \t]*$/d' | sort
 }
