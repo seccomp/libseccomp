@@ -2,6 +2,12 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.2.2 - July 6, 2015
+- Fix a problem with the masked equality operator
+- Fix a problem on x86_64/x32 involving invalid architectures
+- Fix a problem with the ARM specific syscalls
+- Fix a build problem when the source and build directories differ
+
 * Version 2.2.1 - May 13, 2015
 - Fix a problem with syscall argument filtering on 64-bit systems
 - Fix some problems with the 32-bit ARM syscall table
@@ -18,12 +24,12 @@ https://github.com/seccomp/libseccomp
 - Added Python bindings
 - Updated the internal syscall tables to Linux v3.19
 - Added documentation to help contributors wishing to submit patches
-- Migrated to Github for git hosting and Google Groups for the mailing list
+- Migrated to GitHub for git hosting and Google Groups for the mailing list
 - Numerous minor bug fixes
 
 * Version 2.1.1 - October 31, 2013
 - Build system improvements
-- Automated test improvments, including a "check" target for use by
+- Automated test improvements, including a "check" target for use by
   packagers to verify the build
 - Numerous bug fixes related to the filter's internal rule database which
   affect those creating rules with syscall arguments
@@ -40,8 +46,8 @@ https://github.com/seccomp/libseccomp
 
 * Version 2.0.0 - January 28, 2013
 - Fixes for the x86 multiplexed syscalls
-- Additions to the API to better support non-native architecures
-- Additions to the API to support multiple architecures in one filter
+- Additions to the API to better support non-native architectures
+- Additions to the API to support multiple architectures in one filter
 - Additions to the API to resolve syscall name/number mappings
 - Assorted minor bug fixes
 - Improved build messages regardless of build verbosity
