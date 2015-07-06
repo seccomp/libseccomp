@@ -30,6 +30,12 @@ test type: bpf-sim
 12-sim-basic_masked_ops	all	1000	0	0x400		2	N	N	N	KILL
 12-sim-basic_masked_ops	all	1000	0	0x402-0x4FF	2	N	N	N	KILL
 12-sim-basic_masked_ops	all	1000	0	0x10300-0x103FF	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0x00000000F00003E8	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0x00000000800003E8	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0x00000001800003E8	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0x00000001000003E8	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0x0000000F000003E8	2	N	N	N	ALLOW
+12-sim-basic_masked_ops	all	1000	0	0xFFFFFFFFFFFF03E8	2	N	N	N	ALLOW
 
 test type: bpf-sim-fuzz
 
