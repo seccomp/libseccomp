@@ -2,6 +2,9 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.2.3 - July 8, 2015
+- Fix a problem with 'make check' on 32-bit ARM systems
+
 * Version 2.2.2 - July 6, 2015
 - Fix a problem with the masked equality operator
 - Fix a problem on x86_64/x32 involving invalid architectures
