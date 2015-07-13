@@ -76,10 +76,10 @@ const struct arch_def *arch_def_native = &arch_def_mips64n32;
 #elif __MIPSEL__
 const struct arch_def *arch_def_native = &arch_def_mipsel64n32;
 #endif /* _MIPS_SIM_NABI32 */
+#elif __s390x__ /* s390x must be checked before s390 */
+const struct arch_def *arch_def_native = &arch_def_s390x;
 #elif __s390__
 const struct arch_def *arch_def_native = &arch_def_s390;
-#elif __s390x__
-const struct arch_def *arch_def_native = &arch_def_s390x;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
