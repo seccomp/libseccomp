@@ -164,6 +164,23 @@ function get_range() {
 }
 
 #
+# Get the number sequence for a given range with increments of 1, i.e.
+# implement a specialized seq(1).
+#
+# We use our own implementation based on miniseq in favour to the standard seq
+# tool as, at least, seq of coreutils v8.23 and v8.24 has problems on 32 bit
+# ARM for large numbers (see the mailing thread at
+# https://groups.google.com/forum/#!topic/libseccomp/VtrClkXxLGA).
+#
+# Arguments:
+#     1    starting value
+#     2    last value
+#
+function get_seq() {
+	${basedir}/miniseq "$1" "$2"
+}
+
+#
 # Run the specified test command (with valgrind if requested)
 #
 # Arguments:
@@ -245,7 +262,7 @@ function run_test_bpf_sim_fuzz() {
 	local testname=${line[0]}
 	local stress_count=${line[1]}
 
-	for i in $(seq 1 $stress_count); do
+	for i in $(get_seq 1 $stress_count); do
 		local sys=$(generate_random_data)
 		local -a arg=($(generate_random_data) $(generate_random_data) \
 			      $(generate_random_data) $(generate_random_data) \
@@ -462,13 +479,13 @@ function run_test_bpf_sim() {
 		# and arg ranges and generate/run every combination of requested
 		# tests; if no ranges were specifed, then the single test is
 		# run
-		for sys in $(seq -f "%1.0f" $low_syscall $high_syscall); do
-		for arg0 in $(seq -f "%1.0f" ${low_arg[0]} ${high_arg[0]}); do
-		for arg1 in $(seq -f "%1.0f" ${low_arg[1]} ${high_arg[1]}); do
-		for arg2 in $(seq -f "%1.0f" ${low_arg[2]} ${high_arg[2]}); do
-		for arg3 in $(seq -f "%1.0f" ${low_arg[3]} ${high_arg[3]}); do
-		for arg4 in $(seq -f "%1.0f" ${low_arg[4]} ${high_arg[4]}); do
-		for arg5 in $(seq -f "%1.0f" ${low_arg[5]} ${high_arg[5]}); do
+		for sys in $(get_seq $low_syscall $high_syscall); do
+		for arg0 in $(get_seq ${low_arg[0]} ${high_arg[0]}); do
+		for arg1 in $(get_seq ${low_arg[1]} ${high_arg[1]}); do
+		for arg2 in $(get_seq ${low_arg[2]} ${high_arg[2]}); do
+		for arg3 in $(get_seq ${low_arg[3]} ${high_arg[3]}); do
+		for arg4 in $(get_seq ${low_arg[4]} ${high_arg[4]}); do
+		for arg5 in $(get_seq ${low_arg[5]} ${high_arg[5]}); do
 			local -a arg=($arg0 $arg1 $arg2 $arg3 $arg4 $arg5)
 
 			# Get the generated sub-test num string
@@ -827,7 +844,6 @@ function run_tests() {
 verify_deps head
 verify_deps sed
 verify_deps awk
-verify_deps seq
 verify_deps tr
 
 # global variables

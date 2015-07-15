@@ -26,6 +26,7 @@ util_la_LDFLAGS = -module
 TESTS = regression
 
 check_PROGRAMS = \
+	miniseq \
 	01-sim-allow \
 	02-sim-basic \
 	03-sim-basic_chains \
