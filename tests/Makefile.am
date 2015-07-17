@@ -23,6 +23,8 @@ check_LTLIBRARIES = util.la
 util_la_SOURCES = util.c util.h
 util_la_LDFLAGS = -module
 
+miniseq_LDADD =
+
 TESTS = regression
 
 check_PROGRAMS = \
