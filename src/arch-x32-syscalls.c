@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -387,6 +387,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "swapcontext", __PNR_swapcontext },
 	{ "swapoff", (X32_SYSCALL_BIT + 168) },
 	{ "swapon", (X32_SYSCALL_BIT + 167) },
+	{ "switch_endian", __PNR_switch_endian },
 	{ "symlink", (X32_SYSCALL_BIT + 88) },
 	{ "symlinkat", (X32_SYSCALL_BIT + 266) },
 	{ "sync", (X32_SYSCALL_BIT + 162) },

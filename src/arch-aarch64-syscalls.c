@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-aarch64.h"
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -387,6 +387,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "swapcontext", __PNR_swapcontext },
 	{ "swapoff", 225 },
 	{ "swapon", 224 },
+	{ "switch_endian", __PNR_switch_endian },
 	{ "symlink", __PNR_symlink },
 	{ "symlinkat", 36 },
 	{ "sync", 81 },

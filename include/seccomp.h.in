@@ -1521,6 +1521,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_sys_debug_setcontext	__PNR_sys_debug_setcontext
 #endif /* __NR_sys_debug_setcontext */
 
+#define __PNR_switch_endian	-10191
+#ifndef __NR_switch_endian
+#define __NR_switch_endian	__PNR_switch_endian
+#endif /* __NR_switch_endian */
+
 #ifdef __cplusplus
 }
 #endif

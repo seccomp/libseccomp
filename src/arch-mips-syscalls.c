@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __NR_SYSCALL_BASE	4000
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
 	{ "_newselect", (__NR_SYSCALL_BASE + 142) },
@@ -391,6 +391,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "swapcontext", __PNR_swapcontext },
 	{ "swapoff", (__NR_SYSCALL_BASE + 115) },
 	{ "swapon", (__NR_SYSCALL_BASE + 87) },
+	{ "switch_endian", __PNR_switch_endian },
 	{ "symlink", (__NR_SYSCALL_BASE + 83) },
 	{ "symlinkat", (__NR_SYSCALL_BASE + 297) },
 	{ "sync", (__NR_SYSCALL_BASE + 36) },

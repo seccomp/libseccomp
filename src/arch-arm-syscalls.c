@@ -37,7 +37,7 @@
 #define __NR_SYSCALL_BASE	__NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__NR_SYSCALL_BASE + 140) },
@@ -399,13 +399,14 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "swapcontext", __PNR_swapcontext },
 	{ "swapoff", (__NR_SYSCALL_BASE + 115) },
 	{ "swapon", (__NR_SYSCALL_BASE + 87) },
+	{ "switch_endian", __PNR_switch_endian },
 	{ "symlink", (__NR_SYSCALL_BASE + 83) },
 	{ "symlinkat", (__NR_SYSCALL_BASE + 331) },
 	{ "sync", (__NR_SYSCALL_BASE + 36) },
 	{ "sync_file_range", __PNR_sync_file_range },
 	{ "sync_file_range2", (__NR_SYSCALL_BASE + 341) },
 	{ "syncfs", (__NR_SYSCALL_BASE + 373) },
-	{ "syscall", (__NR_SYSCALL_BASE + 113) },
+	{ "syscall", (__PNR_syscall) },
 	{ "sys_debug_setcontext", __PNR_sys_debug_setcontext },
 	{ "sysfs", (__NR_SYSCALL_BASE + 135) },
 	{ "sysinfo", (__NR_SYSCALL_BASE + 116) },

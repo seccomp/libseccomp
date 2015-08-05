@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86.h"
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -387,6 +387,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "swapcontext", __PNR_swapcontext },
 	{ "swapoff", 115 },
 	{ "swapon", 87 },
+	{ "switch_endian", __PNR_switch_endian },
 	{ "symlink", 83 },
 	{ "symlinkat", 304 },
 	{ "sync", 36 },

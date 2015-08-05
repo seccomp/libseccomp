@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc.h"
 
-/* NOTE: based on Linux 3.19 */
+/* NOTE: based on Linux 4.2-rc5 */
 const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -47,6 +47,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "bind", 327 },
 	{ "bpf", 361 },
 	{ "break", 17 },
+	{ "breakpoint", __PNR_breakpoint },
 	{ "brk", 45 },
 	{ "cachectl", __PNR_cachectl },
 	{ "cacheflush", __PNR_cacheflush },
@@ -325,6 +326,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "set_robust_list", 300 },
 	{ "set_thread_area", __PNR_set_thread_area },
 	{ "set_tid_address", 232 },
+	{ "set_tls", __PNR_set_tls },
 	{ "setdomainname", 121 },
 	{ "setfsgid", 139 },
 	{ "setfsgid32", __PNR_setfsgid32 },
@@ -386,6 +388,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "swapcontext", 249 },
 	{ "swapoff", 115 },
 	{ "swapon", 87 },
+	{ "switch_endian", 363 },
 	{ "symlink", 83 },
 	{ "symlinkat", 295 },
 	{ "sync", 36 },
@@ -425,6 +428,8 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "unlinkat", 292 },
 	{ "unshare", 282 },
 	{ "uselib", 86 },
+	{ "usr26", __PNR_usr26 },
+	{ "usr32", __PNR_usr32 },
 	{ "ustat", 62 },
 	{ "utime", 30 },
 	{ "utimensat", 304 },
