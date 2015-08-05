@@ -163,6 +163,16 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_MIPSEL64N32	AUDIT_ARCH_MIPSEL64N32
 
 /**
+ * The PowerPC architecture tokens
+ */
+#define SCMP_ARCH_PPC		AUDIT_ARCH_PPC
+#define SCMP_ARCH_PPC64		AUDIT_ARCH_PPC64
+#ifndef AUDIT_ARCH_PPC64LE
+#define AUDIT_ARCH_PPC64LE	(EM_PPC64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif
+#define SCMP_ARCH_PPC64LE	AUDIT_ARCH_PPC64LE
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
@@ -1475,6 +1485,41 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #else
 #define __NR_usr32		__PNR_usr32
 #endif /* __ARM_NR_usr32 */
+
+#define __PNR_multiplexer	-10186
+#ifndef __NR_multiplexer
+#define __NR_multiplexer	__PNR_multiplexer
+#endif /* __NR_multiplexer */
+
+#define __PNR_rtas		-10187
+#ifndef __NR_rtas
+#define __NR_rtas		__PNR_rtas
+#endif /* __NR_rtas */
+
+#define __PNR_spu_create	-10188
+#ifndef __NR_spu_create
+#define __NR_spu_create		__PNR_spu_create
+#endif /* __NR_spu_create */
+
+#define __PNR_spu_run		-10189
+#ifndef __NR_spu_run
+#define __NR_spu_run		__PNR_spu_run
+#endif /* __NR_spu_run */
+
+#define __PNR_subpage_prot	-10189
+#ifndef __NR_subpage_prot
+#define __NR_subpage_prot	__PNR_subpage_prot
+#endif /* __NR_subpage_prot */
+
+#define __PNR_swapcontext	-10190
+#ifndef __NR_swapcontext
+#define __NR_swapcontext	__PNR_swapcontext
+#endif /* __NR_swapcontext */
+
+#define __PNR_sys_debug_setcontext	-10191
+#ifndef __NR_sys_debug_setcontext
+#define __NR_sys_debug_setcontext	__PNR_sys_debug_setcontext
+#endif /* __NR_sys_debug_setcontext */
 
 #ifdef __cplusplus
 }

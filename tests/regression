@@ -21,8 +21,14 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-GLBL_ARCH_LE_SUPPORT="x86 x86_64 x32 arm aarch64 mipsel mipsel64 mipsel64n32"
-GLBL_ARCH_BE_SUPPORT="mips mips64 mips64n32"
+GLBL_ARCH_LE_SUPPORT=" \
+	x86 x86_64 x32 \
+	arm aarch64 \
+	mipsel mipsel64 mipsel64n32 \
+	ppc64le"
+GLBL_ARCH_BE_SUPPORT=" \
+	mips mips64 mips64n32 \
+	ppc64 ppc"
 
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
@@ -684,7 +690,7 @@ function run_test_live() {
 
 	# setup the arch specific return values
 	case "$arch" in
-	x86|x86_64|x32|arm|aarch64)
+	x86|x86_64|x32|arm|aarch64|ppc64|ppc64le|ppc)
 		rc_kill=159
 		rc_allow=160
 		rc_trap=161
