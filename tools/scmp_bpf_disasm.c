@@ -199,6 +199,18 @@ static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 		case BPF_MEM:
 			printf("$temp[%u]", bpf->k);
 			break;
+		case BPF_IMM:
+			printf("%u", bpf->k);
+			break;
+		case BPF_IND:
+			printf("$data[X + %u]", bpf->k);
+			break;
+		case BPF_LEN:
+			printf("len($data)");
+			break;
+		case BPF_MSH:
+			printf("4 * $data[%u] & 0x0f", bpf->k);
+			break;
 		}
 		break;
 	case BPF_ST:
@@ -311,6 +323,18 @@ static void bpf_dot_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 			break;
 		case BPF_MEM:
 			printf(" $temp[%u]\",shape=parallelogram]\n", bpf->k);
+			break;
+		case BPF_IMM:
+			printf(" %u\",shape=parallelogram]\n", bpf->k);
+			break;
+		case BPF_IND:
+			printf(" $data[X + %u]\",shape=parallelogram]\n", bpf->k);
+			break;
+		case BPF_LEN:
+			printf(" len($data)\",shape=parallelogram]\n");
+			break;
+		case BPF_MSH:
+			printf(" 4 * $data[%u] & 0x0f\",shape=parallelogram]\n", bpf->k);
 			break;
 		}
 		break;
