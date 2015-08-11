@@ -24,6 +24,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -43,7 +44,7 @@
  * Decode the BPF operand and print it to stdout.
  *
  */
-static void bpf_decode_op(const bpf_instr_raw *bpf)
+static const char *bpf_decode_op(const bpf_instr_raw *bpf)
 {
 	switch (bpf->code) {
 	case BPF_LD+BPF_W+BPF_IMM:
@@ -52,24 +53,21 @@ static void bpf_decode_op(const bpf_instr_raw *bpf)
 	case BPF_LD+BPF_W+BPF_MEM:
 	case BPF_LD+BPF_W+BPF_LEN:
 	case BPF_LD+BPF_W+BPF_MSH:
-		printf(_OP_FMT, "ld");
-		break;
+		return "ld";
 	case BPF_LD+BPF_H+BPF_IMM:
 	case BPF_LD+BPF_H+BPF_ABS:
 	case BPF_LD+BPF_H+BPF_IND:
 	case BPF_LD+BPF_H+BPF_MEM:
 	case BPF_LD+BPF_H+BPF_LEN:
 	case BPF_LD+BPF_H+BPF_MSH:
-		printf(_OP_FMT, "ldh");
-		break;
+		return "ldh";
 	case BPF_LD+BPF_B+BPF_IMM:
 	case BPF_LD+BPF_B+BPF_ABS:
 	case BPF_LD+BPF_B+BPF_IND:
 	case BPF_LD+BPF_B+BPF_MEM:
 	case BPF_LD+BPF_B+BPF_LEN:
 	case BPF_LD+BPF_B+BPF_MSH:
-		printf(_OP_FMT, "ldb");
-		break;
+		return "ldb";
 	case BPF_LDX+BPF_W+BPF_IMM:
 	case BPF_LDX+BPF_W+BPF_ABS:
 	case BPF_LDX+BPF_W+BPF_IND:
@@ -88,83 +86,95 @@ static void bpf_decode_op(const bpf_instr_raw *bpf)
 	case BPF_LDX+BPF_B+BPF_MEM:
 	case BPF_LDX+BPF_B+BPF_LEN:
 	case BPF_LDX+BPF_B+BPF_MSH:
-		printf(_OP_FMT, "ldx");
-		break;
+		return "ldx";
 	case BPF_ST:
-		printf(_OP_FMT, "st");
-		break;
+		return "st";
 	case BPF_STX:
-		printf(_OP_FMT, "stx");
-		break;
+		return "stx";
 	case BPF_ALU+BPF_ADD+BPF_K:
 	case BPF_ALU+BPF_ADD+BPF_X:
-		printf(_OP_FMT, "add");
-		break;
+		return "add";
 	case BPF_ALU+BPF_SUB+BPF_K:
 	case BPF_ALU+BPF_SUB+BPF_X:
-		printf(_OP_FMT, "sub");
-		break;
+		return "sub";
 	case BPF_ALU+BPF_MUL+BPF_K:
 	case BPF_ALU+BPF_MUL+BPF_X:
-		printf(_OP_FMT, "mul");
-		break;
+		return "mul";
 	case BPF_ALU+BPF_DIV+BPF_K:
 	case BPF_ALU+BPF_DIV+BPF_X:
-		printf(_OP_FMT, "div");
-		break;
+		return "div";
 	case BPF_ALU+BPF_OR+BPF_K:
 	case BPF_ALU+BPF_OR+BPF_X:
-		printf(_OP_FMT, "or");
-		break;
+		return "or";
 	case BPF_ALU+BPF_AND+BPF_K:
 	case BPF_ALU+BPF_AND+BPF_X:
-		printf(_OP_FMT, "and");
-		break;
+		return "and";
 	case BPF_ALU+BPF_LSH+BPF_K:
 	case BPF_ALU+BPF_LSH+BPF_X:
-		printf(_OP_FMT, "lsh");
-		break;
+		return "lsh";
 	case BPF_ALU+BPF_RSH+BPF_K:
 	case BPF_ALU+BPF_RSH+BPF_X:
-		printf(_OP_FMT, "rsh");
-		break;
+		return "rsh";
 	case BPF_ALU+BPF_NEG+BPF_K:
 	case BPF_ALU+BPF_NEG+BPF_X:
-		printf(_OP_FMT, "neg");
-		break;
+		return "neg";
 	case BPF_JMP+BPF_JA+BPF_K:
 	case BPF_JMP+BPF_JA+BPF_X:
-		printf(_OP_FMT, "jmp");
-		break;
+		return "jmp";
 	case BPF_JMP+BPF_JEQ+BPF_K:
 	case BPF_JMP+BPF_JEQ+BPF_X:
-		printf(_OP_FMT, "jeq");
-		break;
+		return "jeq";
 	case BPF_JMP+BPF_JGT+BPF_K:
 	case BPF_JMP+BPF_JGT+BPF_X:
-		printf(_OP_FMT, "jgt");
-		break;
+		return "jgt";
 	case BPF_JMP+BPF_JGE+BPF_K:
 	case BPF_JMP+BPF_JGE+BPF_X:
-		printf(_OP_FMT, "jge");
-		break;
+		return "jge";
 	case BPF_JMP+BPF_JSET+BPF_K:
 	case BPF_JMP+BPF_JSET+BPF_X:
-		printf(_OP_FMT, "jset");
-		break;
+		return "jset";
 	case BPF_RET+BPF_K:
 	case BPF_RET+BPF_X:
 	case BPF_RET+BPF_A:
-		printf(_OP_FMT, "ret");
-		break;
+		return "ret";
 	case BPF_MISC+BPF_TAX:
-		printf(_OP_FMT, "tax");
-		break;
+		return "tax";
 	case BPF_MISC+BPF_TXA:
-		printf(_OP_FMT, "txa");
+		return "txa";
+	}
+	return "???";
+}
+
+/**
+ * Decode a RET action
+ * @param k the return action
+ *
+ * Decode the action and print it to stdout.
+ *
+ */
+static void bpf_decode_action(uint32_t k)
+{
+	uint32_t act = k & SECCOMP_RET_ACTION;
+	uint32_t data = k & SECCOMP_RET_DATA;
+
+	switch (act) {
+	case SECCOMP_RET_KILL:
+		printf("KILL");
+		break;
+	case SECCOMP_RET_TRAP:
+		printf("TRAP");
+		break;
+	case SECCOMP_RET_ERRNO:
+		printf("ERRNO(%u)", data);
+		break;
+	case SECCOMP_RET_TRACE:
+		printf("TRACE(%u)", data);
+		break;
+	case SECCOMP_RET_ALLOW:
+		printf("ALLOW");
 		break;
 	default:
-		printf(_OP_FMT, "???");
+		printf("0x%.8x", k);
 	}
 }
 
@@ -223,28 +233,7 @@ static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 			/* XXX - accumulator? */
 			printf("$acc");
 		} else if (BPF_SRC(bpf->code) == BPF_K) {
-			uint32_t act = bpf->k & SECCOMP_RET_ACTION;
-			uint32_t data = bpf->k & SECCOMP_RET_DATA;
-
-			switch (act) {
-			case SECCOMP_RET_KILL:
-				printf("KILL");
-				break;
-			case SECCOMP_RET_TRAP:
-				printf("TRAP");
-				break;
-			case SECCOMP_RET_ERRNO:
-				printf("ERRNO(%u)", data);
-				break;
-			case SECCOMP_RET_TRACE:
-				printf("TRACE(%u)", data);
-				break;
-			case SECCOMP_RET_ALLOW:
-				printf("ALLOW");
-				break;
-			default:
-				printf("0x%.8x", bpf->k);
-			}
+			bpf_decode_action(bpf->k);
 		} else if (BPF_SRC(bpf->code) == BPF_X) {
 			/* XXX - any idea? */
 			printf("???");
@@ -286,7 +275,7 @@ static int bpf_decode(FILE *file)
 
 		/* display the assembler statements */
 		printf("   ");
-		bpf_decode_op(&bpf);
+		printf(_OP_FMT, bpf_decode_op(&bpf));
 		printf(" ");
 		bpf_decode_args(&bpf, line);
 		printf("\n");
@@ -300,16 +289,142 @@ static int bpf_decode(FILE *file)
 }
 
 /**
+ * Decode the BPF arguments (JT, JF, and K)
+ * @param bpf the BPF instruction
+ * @param line the current line number
+ *
+ * Decode the BPF arguments (JT, JF, and K) and print the relevant information
+ * to stdout based on the operand.
+ *
+ */
+static void bpf_dot_decode_args(const bpf_instr_raw *bpf, unsigned int line)
+{
+	const char *op = bpf_decode_op(bpf);
+
+	printf("\tline%d[label=\"%s", line, op);
+	switch (BPF_CLASS(bpf->code)) {
+	case BPF_LD:
+	case BPF_LDX:
+		switch (BPF_MODE(bpf->code)) {
+		case BPF_ABS:
+			printf(" $data[%u]\",shape=parallelogram]\n", bpf->k);
+			break;
+		case BPF_MEM:
+			printf(" $temp[%u]\",shape=parallelogram]\n", bpf->k);
+			break;
+		}
+		break;
+	case BPF_ST:
+	case BPF_STX:
+		printf(" $temp[%u]\",shape=parallelogram]\n",
+		       bpf->k);
+		break;
+	case BPF_ALU:
+		if (BPF_SRC(bpf->code) == BPF_K) {
+			switch (BPF_OP(bpf->code)) {
+			case BPF_OR:
+			case BPF_AND:
+				printf(" 0x%.8x\",shape=rectangle]\n", bpf->k);
+				break;
+			default:
+				printf(" %u\",shape=rectangle]\n", bpf->k);
+			}
+		} else
+			printf(" %u\",shape=rectangle]\n", bpf->k);
+		break;
+	case BPF_JMP:
+		if (BPF_OP(bpf->code) == BPF_JA) {
+			printf("\",shape=hexagon]\n");
+			printf("\tline%d -> line%d\n",
+			       line, (line + 1) + bpf->k);
+		} else {
+			printf(" %-4u", bpf->k);
+			/* Heuristic: if k > 256, also emit hex version */
+			if (bpf->k > 256)
+				printf("\\n(0x%.8x)", bpf->k);
+			printf("\",shape=diamond]\n");
+			printf("\tline%d -> line%d [label=\"true\"]\n",
+			       line, (line + 1) + bpf->jt);
+			printf("\tline%d -> line%d [label=\"false\"]\n",
+			       line, (line + 1) + bpf->jf);
+		}
+		break;
+	case BPF_RET:
+		if (BPF_RVAL(bpf->code) == BPF_A) {
+			/* XXX - accumulator? */
+			printf(" $acc\", shape=\"box\", style=rounded]\n");
+		} else if (BPF_SRC(bpf->code) == BPF_K) {
+			printf(" ");
+			bpf_decode_action(bpf->k);
+			printf("\", shape=\"box\", style=rounded]\n");
+		} else if (BPF_SRC(bpf->code) == BPF_X) {
+			/* XXX - any idea? */
+			printf(" ???\", shape=\"box\", style=rounded]\n");
+		}
+		break;
+	case BPF_MISC:
+		printf("\"]\n");
+		break;
+	default:
+		printf(" ???\"]\n");
+	}
+}
+
+/**
+ * Perform a simple decoding of the BPF program to a dot graph
+ * @param file the BPF program
+ *
+ * Read the BPF program and display the instructions.  Returns zero on success,
+ * negative values on failure.
+ *
+ */
+static int bpf_dot_decode(FILE *file)
+{
+	unsigned int line = 0;
+	size_t len;
+	bpf_instr_raw bpf;
+	int prev_class = 0;
+
+	/* header */
+	printf("digraph {\n");
+	printf("\tstart[shape=\"box\", style=rounded];\n");
+
+	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
+		/* convert the bpf statement */
+		bpf.code = ttoh16(arch, bpf.code);
+		bpf.k = ttoh32(arch, bpf.k);
+
+		/* display the statement */
+		bpf_dot_decode_args(&bpf, line);
+
+		/* if previous line wasn't RET/JMP, link it to this line */
+		if (line == 0)
+			printf("\tstart -> line%d\n", line);
+		else if ((prev_class != BPF_JMP) && (prev_class != BPF_RET))
+			printf("\tline%d -> line%d\n", line - 1, line);
+		prev_class = BPF_CLASS(bpf.code);
+
+		line++;
+	}
+	printf("}\n");
+
+	if (ferror(file))
+		return errno;
+	return 0;
+}
+
+/**
  * main
  */
 int main(int argc, char *argv[])
 {
 	int rc;
 	int opt;
+	bool dot_out = false;
 	FILE *file;
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "a:h")) > 0) {
+	while ((opt = getopt(argc, argv, "a:dh")) > 0) {
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)
@@ -343,6 +458,9 @@ int main(int argc, char *argv[])
 			else
 				exit_usage(argv[0]);
 			break;
+		case 'd':
+			dot_out = true;
+			break;
 		default:
 			/* usage information */
 			exit_usage(argv[0]);
@@ -360,7 +478,10 @@ int main(int argc, char *argv[])
 	} else
 		file = stdin;
 
-	rc = bpf_decode(file);
+	if (dot_out)
+		rc = bpf_dot_decode(file);
+	else
+		rc = bpf_decode(file);
 	fclose(file);
 
 	return rc;
