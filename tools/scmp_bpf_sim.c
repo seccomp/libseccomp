@@ -52,6 +52,22 @@ struct bpf_program {
 static unsigned int opt_verbose = 0;
 
 /**
+ * Print the usage information to stderr and exit
+ * @param program the name of the current program being invoked
+ *
+ * Print the usage information and exit with EINVAL.
+ *
+ */
+static void exit_usage(const char *program)
+{
+	fprintf(stderr,
+		"usage: %s -f <bpf_file> [-v] [-h]"
+		" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
+		program);
+	exit(EINVAL);
+}
+
+/**
  * Handle a simulator fault
  * @param rc the error or return code
  *
@@ -224,7 +240,7 @@ int main(int argc, char *argv[])
 	memset(&sys_data, 0, sizeof(sys_data));
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "a:f:h:s:v0:1:2:3:4:5:")) > 0) {
+	while ((opt = getopt(argc, argv, "a:f:hs:v0:1:2:3:4:5:")) > 0) {
 		switch (opt) {
 		case 'a':
 			if (strcmp(optarg, "x86") == 0)

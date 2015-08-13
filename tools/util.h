@@ -74,8 +74,6 @@
 
 extern uint32_t arch;
 
-void exit_usage(const char *program);
-
 uint16_t ttoh16(uint32_t arch, uint16_t val);
 uint32_t ttoh32(uint32_t arch, uint32_t val);
 

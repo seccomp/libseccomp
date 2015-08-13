@@ -38,6 +38,19 @@
 #define _OP_FMT			"%-3s"
 
 /**
+ * Print the usage information to stderr and exit
+ * @param program the name of the current program being invoked
+ *
+ * Print the usage information and exit with EINVAL.
+ *
+ */
+static void exit_usage(const char *program)
+{
+	fprintf(stderr, "usage: %s -a <arch> [-d] [-h]\n", program);
+	exit(EINVAL);
+}
+
+/**
  * Decode the BPF operand
  * @param bpf the BPF instruction
  *

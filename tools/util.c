@@ -78,22 +78,6 @@
 uint32_t arch = ARCH_NATIVE;
 
 /**
- * Print the usage information to stderr and exit
- * @param program the name of the current program being invoked
- *
- * Print the usage information and exit with EINVAL.
- *
- */
-void exit_usage(const char *program)
-{
-	fprintf(stderr,
-		"usage: %s -f <bpf_file> [-v]"
-		" -a <arch> -s <syscall_num> [-0 <a0>] ... [-5 <a5>]\n",
-		program);
-	exit(EINVAL);
-}
-
-/**
  * Convert a 16-bit target integer into the host's endianess
  * @param arch the architecture token
  * @param val the 16-bit integer
