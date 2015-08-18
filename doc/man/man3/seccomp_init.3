@@ -48,12 +48,17 @@ Valid
 values are as follows:
 .TP
 .B SCMP_ACT_KILL
-The thread will be killed by the kernel when it calls a syscall that does not
-match any of the configured seccomp filter rules.
+The thread will be terminated by the kernel with SIGSYS when it calls a syscall
+that does not match any of the configured seccomp filter rules.  The thread
+will not be able to catch the signal.
 .TP
 .B SCMP_ACT_TRAP
-The thread will throw a SIGSYS signal when it calls a syscall that does not
-match any of the configured seccomp filter rules.
+The thread will be sent a SIGSYS signal when it calls a syscall that does not
+match any of the configured seccomp filter rules.  It may catch this and change
+its behavior accordingly.  When using SA_SIGINFO with
+.BR sigaction (2),
+si_code will be set to SYS_SECCOMP, si_syscall will be set to the syscall that
+failed the rules, and si_arch will be set to the AUDIT_ARCH for the active ABI.
 .TP
 .B SCMP_ACT_ERRNO(uint16_t errno)
 The thread will receive a return value of
@@ -67,8 +72,8 @@ If the thread is being traced and the tracing process specified the
 option in the call to
 .BR ptrace (2),
 the tracing process will be notified, via
-.B PTRACE_EVENT_SECCOMP
-, and the value provided in
+.BR PTRACE_EVENT_SECCOMP ,
+and the value provided in
 .I msg_num
 can be retrieved using the
 .B PTRACE_GETEVENTMSG
