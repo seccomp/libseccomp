@@ -880,7 +880,6 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	case SCMP_CMP_NE:
 	case SCMP_CMP_LT:
 	case SCMP_CMP_LE:
-		/* if we hit here it means the filter db isn't correct */
 	default:
 		/* fatal error, we should never get here */
 		goto node_failure;
