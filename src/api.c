@@ -298,6 +298,7 @@ API int seccomp_syscall_resolve_name_arch(uint32_t arch_token, const char *name)
 API int seccomp_syscall_resolve_name_rewrite(uint32_t arch_token,
 					     const char *name)
 {
+	int rc;
 	int syscall;
 	const struct arch_def *arch;
 
@@ -315,7 +316,11 @@ API int seccomp_syscall_resolve_name_rewrite(uint32_t arch_token,
 	syscall = arch_syscall_resolve_name(arch, name);
 	if (syscall == __NR_SCMP_ERROR)
 		return __NR_SCMP_ERROR;
-	if (arch_syscall_rewrite(arch, 0, &syscall) < 0)
+	rc = arch_syscall_rewrite(arch, &syscall);
+	if (rc == -EDOM)
+		/* if we can't rewrite the syscall, just pass it through */
+		return syscall;
+	else if (rc < 0)
 		return __NR_SCMP_ERROR;
 
 	return syscall;
@@ -356,7 +361,7 @@ API int seccomp_syscall_priority(scmp_filter_ctx ctx,
 			 * since priorities are a "best effort" thing - as we
 			 * want to catch the -EDOM error and bail on this
 			 * architecture */
-			rc_tmp = arch_syscall_rewrite(filter->arch, 1, &sc_tmp);
+			rc_tmp = arch_syscall_rewrite(filter->arch, &sc_tmp);
 			if (rc_tmp == -EDOM)
 				continue;
 			if (rc_tmp < 0)

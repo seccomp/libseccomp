@@ -35,7 +35,7 @@ const char *x86_syscall_resolve_num(int num);
 
 const char *x86_syscall_iterate_name(unsigned int spot);
 
-int x86_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall);
+int x86_syscall_rewrite(const struct arch_def *arch, int *syscall);
 
 int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		       int *syscall, struct db_api_arg *chain);

@@ -33,4 +33,4 @@ util.pyc
 26-sim-arch_all_be_basic
 27-sim-bpf_blk_state
 28-sim-arch_x86
-
+29-sim-pseudo_syscall

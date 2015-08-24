@@ -383,18 +383,15 @@ int arch_syscall_translate(const struct arch_def *arch, int *syscall)
 /**
  * Rewrite a syscall value to match the architecture
  * @param arch the architecture definition
- * @param strict strict flag
  * @param syscall the syscall number
  *
  * Syscalls can vary across different architectures so this function rewrites
- * the syscall into the correct value for the specified architecture.  If
- * @strict is true then the function will fail if the syscall can not be
- * preservered, however, if @strict is false the function will do a "best
- * effort" rewrite and not fail. Returns zero on success, negative values on
- * failure.
+ * the syscall into the correct value for the specified architecture. Returns
+ * zero on success, -EDOM if the syscall is not defined for @arch, and negative
+ * values on failure.
  *
  */
-int arch_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
+int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 {
 	int sys = *syscall;
 
@@ -408,14 +405,12 @@ int arch_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
 		/* rewritable syscalls */
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			return x86_syscall_rewrite(arch, strict, syscall);
+			x86_syscall_rewrite(arch, syscall);
 		}
-		/* NOTE: we fall through to the default handling (strict?) if
-		 *       we don't support any rewriting for the architecture */
 	}
 
 	/* syscalls not defined on this architecture */
-	if (strict)
+	if ((*syscall) < 0)
 		return -EDOM;
 	return 0;
 }
@@ -432,12 +427,14 @@ int arch_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
  * regardless of the rule or architecture.  If @strict is true then the
  * function will fail if the entire filter can not be preservered, however,
  * if @strict is false the function will do a "best effort" rewrite and not
- * fail.  Returns zero on success, negative values on failure.
+ * fail.  Returns zero on success, -EDOM if the syscall is not defined for
+ * @arch, and negative values on failure.
  *
  */
 int arch_filter_rewrite(const struct arch_def *arch,
 			bool strict, int *syscall, struct db_api_arg *chain)
 {
+	int rc;
 	int sys = *syscall;
 
 	if (sys >= 0) {
@@ -450,14 +447,15 @@ int arch_filter_rewrite(const struct arch_def *arch,
 		/* rewritable syscalls */
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			return x86_filter_rewrite(arch, strict, syscall, chain);
+			rc = x86_filter_rewrite(arch, strict, syscall, chain);
+			/* we still want to catch invalid rewrites */
+			if (rc == -EINVAL)
+				return -EINVAL;
 		}
-		/* NOTE: we fall through to the default handling (strict?) if
-		 *       we don't support any rewriting for the architecture */
 	}
 
 	/* syscalls not defined on this architecture */
-	if (strict)
+	if ((*syscall) < 0)
 		return -EDOM;
 	return 0;
 }

@@ -40,24 +40,22 @@ const struct arch_def arch_def_x86 = {
 /**
  * Rewrite a syscall value to match the architecture
  * @param arch the architecture definition
- * @param strict strict flag
  * @param syscall the syscall number
  *
  * Syscalls can vary across different architectures so this function rewrites
- * the syscall into the correct value for the specified architecture.  If
- * @strict is true then the function will fail if the syscall can not be
- * preservered, however, if @strict is false the function will do a "best
- * effort" rewrite and not fail. Returns zero on success, negative values on
- * failure.
+ * the syscall into the correct value for the specified architecture.  Returns
+ * zero on success, negative values on failure.
  *
  */
-int x86_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
+int x86_syscall_rewrite(const struct arch_def *arch, int *syscall)
 {
-	if ((*syscall) <= -100 && (*syscall) >= -117)
+	int sys = *syscall;
+
+	if (sys <= -100 && sys >= -117)
 		*syscall = __x86_NR_socketcall;
-	else if ((*syscall) <= -200 && (*syscall) >= -211)
+	else if (sys <= -200 && sys >= -211)
 		*syscall = __x86_NR_ipc;
-	else if (((*syscall) < 0) && (strict))
+	else if (sys < 0)
 		return -EDOM;
 
 	return 0;
@@ -81,6 +79,7 @@ int x86_syscall_rewrite(const struct arch_def *arch, bool strict, int *syscall)
 int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		       int *syscall, struct db_api_arg *chain)
 {
+	int sys = *syscall;
 	unsigned int iter;
 	int arg_max;
 
@@ -88,7 +87,7 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 	if (arg_max < 0)
 		return arg_max;
 
-	if ((*syscall) <= -100 && (*syscall) >= -117) {
+	if (sys <= -100 && sys >= -117) {
 		for (iter = 0; iter < arg_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
@@ -96,10 +95,10 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
 		chain[0].mask = DATUM_MAX;
-		chain[0].datum = abs(*syscall) % 100;
+		chain[0].datum = abs(sys) % 100;
 		chain[0].valid = 1;
 		*syscall = __x86_NR_socketcall;
-	} else if ((*syscall) <= -200 && (*syscall) >= -211) {
+	} else if (sys <= -200 && sys >= -211) {
 		for (iter = 0; iter < arg_max; iter++) {
 			if ((chain[iter].valid != 0) && (strict))
 				return -EINVAL;
@@ -107,10 +106,10 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 		chain[0].arg = 0;
 		chain[0].op = SCMP_CMP_EQ;
 		chain[0].mask = DATUM_MAX;
-		chain[0].datum = abs(*syscall) % 200;
+		chain[0].datum = abs(sys) % 200;
 		chain[0].valid = 1;
 		*syscall = __x86_NR_ipc;
-	} else if (((*syscall) < 0) && (strict))
+	} else if (sys < 0)
 		return -EDOM;
 
 	return 0;

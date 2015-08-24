@@ -90,8 +90,7 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name);
 const char *arch_syscall_resolve_num(const struct arch_def *arch, int num);
 
 int arch_syscall_translate(const struct arch_def *arch, int *syscall);
-int arch_syscall_rewrite(const struct arch_def *arch, bool strict,
-			 int *syscall);
+int arch_syscall_rewrite(const struct arch_def *arch, int *syscall);
 
 int arch_filter_rewrite(const struct arch_def *arch,
 			bool strict, int *syscall, struct db_api_arg *chain);
