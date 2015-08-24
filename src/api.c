@@ -483,7 +483,7 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 			/* mangle the private chain copy */
 			rc_tmp = arch_filter_rewrite(filter->arch, strict,
 						     &sc_tmp, chain_tmp);
-			if ((rc == -EDOM) && (!strict)) {
+			if ((rc_tmp == -EDOM) && (!strict)) {
 				free(chain_tmp);
 				continue;
 			}
