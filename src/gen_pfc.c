@@ -71,6 +71,12 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "mips64n32";
 	case SCMP_ARCH_MIPSEL64N32:
 		return "mipsel64n32";
+	case SCMP_ARCH_PPC64:
+		return "ppc64";
+	case SCMP_ARCH_PPC64LE:
+		return "ppc64le";
+	case SCMP_ARCH_PPC:
+		return "ppc";
 	case SCMP_ARCH_S390X:
 		return "s390x";
 	case SCMP_ARCH_S390:
