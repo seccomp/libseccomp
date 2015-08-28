@@ -296,6 +296,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "rt_sigtimedwait", (X32_SYSCALL_BIT + 523) },
 	{ "rt_tgsigqueueinfo", (X32_SYSCALL_BIT + 536) },
 	{ "rtas", __PNR_rtas },
+	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
 	{ "sched_get_priority_max", (X32_SYSCALL_BIT + 146) },
 	{ "sched_get_priority_min", (X32_SYSCALL_BIT + 147) },
 	{ "sched_getaffinity", (X32_SYSCALL_BIT + 204) },

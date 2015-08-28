@@ -300,6 +300,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "rt_sigtimedwait", (__NR_SYSCALL_BASE + 197) },
 	{ "rt_tgsigqueueinfo", (__NR_SYSCALL_BASE + 332) },
 	{ "rtas", __PNR_rtas },
+	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
 	{ "sched_get_priority_max", (__NR_SYSCALL_BASE + 163) },
 	{ "sched_get_priority_min", (__NR_SYSCALL_BASE + 164) },
 	{ "sched_getaffinity", (__NR_SYSCALL_BASE + 240) },

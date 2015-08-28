@@ -38,8 +38,10 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
-#include "arch-ppc64.h"
 #include "arch-ppc.h"
+#include "arch-ppc64.h"
+#include "arch-s390.h"
+#include "arch-s390x.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -114,13 +116,19 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_MIPSEL64N32:
 			sys_name = mips64n32_syscall_iterate_name(iter);
 			break;
-		case SCMP_ARCH_PPC64:
-			sys_name = ppc64_syscall_iterate_name(iter);
-			break;
 		case SCMP_ARCH_PPC:
 			sys_name = ppc_syscall_iterate_name(iter);
 			break;
-
+		case SCMP_ARCH_PPC64:
+		case SCMP_ARCH_PPC64LE:
+			sys_name = ppc64_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_S390:
+			sys_name = s390_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_S390X:
+			sys_name = s390x_syscall_iterate_name(iter);
+			break;
 		default:
 			/* invalid arch */
 			exit_usage(argv[0]);

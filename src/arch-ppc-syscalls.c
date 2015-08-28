@@ -297,6 +297,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "rt_sigtimedwait", 176 },
 	{ "rt_tgsigqueueinfo", 322 },
 	{ "rtas", 255 },
+	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
 	{ "sched_get_priority_max", 159 },
 	{ "sched_get_priority_min", 160 },
 	{ "sched_getaffinity", 223 },

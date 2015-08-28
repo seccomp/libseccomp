@@ -38,8 +38,10 @@
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
-#include "arch-ppc64.h"
 #include "arch-ppc.h"
+#include "arch-ppc64.h"
+#include "arch-s390.h"
+#include "arch-s390x.h"
 #include "system.h"
 
 #define default_arg_count_max		6
@@ -84,6 +86,10 @@ const struct arch_def *arch_def_native = &arch_def_ppc64le;
 #endif
 #elif __PPC__
 const struct arch_def *arch_def_native = &arch_def_ppc;
+#elif __s390x__ /* s390x must be checked before s390 */
+const struct arch_def *arch_def_native = &arch_def_s390x;
+#elif __s390__
+const struct arch_def *arch_def_native = &arch_def_s390;
 #else
 #error the arch code needs to know about your machine type
 #endif /* machine type guess */
@@ -132,12 +138,16 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_mips64n32;
 	case SCMP_ARCH_MIPSEL64N32:
 		return &arch_def_mipsel64n32;
+	case SCMP_ARCH_PPC:
+		return &arch_def_ppc;
 	case SCMP_ARCH_PPC64:
 		return &arch_def_ppc64;
 	case SCMP_ARCH_PPC64LE:
 		return &arch_def_ppc64le;
-	case SCMP_ARCH_PPC:
-		return &arch_def_ppc;
+	case SCMP_ARCH_S390:
+		return &arch_def_s390;
+	case SCMP_ARCH_S390X:
+		return &arch_def_s390x;
 	}
 
 	return NULL;
@@ -174,12 +184,16 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_mips64n32;
 	else if (strcmp(arch_name, "mipsel64n32") == 0)
 		return &arch_def_mipsel64n32;
+	else if (strcmp(arch_name, "ppc") == 0)
+		return &arch_def_ppc;
 	else if (strcmp(arch_name, "ppc64") == 0)
 		return &arch_def_ppc64;
 	else if (strcmp(arch_name, "ppc64le") == 0)
 		return &arch_def_ppc64le;
-	else if (strcmp(arch_name, "ppc") == 0)
-		return &arch_def_ppc;
+	else if (strcmp(arch_name, "s390") == 0)
+		return &arch_def_s390;
+	else if (strcmp(arch_name, "s390x") == 0)
+		return &arch_def_s390x;
 
 	return NULL;
 }
@@ -298,11 +312,15 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 	case SCMP_ARCH_MIPS64N32:
 	case SCMP_ARCH_MIPSEL64N32:
 		return mips64n32_syscall_resolve_name(name);
+	case SCMP_ARCH_PPC:
+		return ppc_syscall_resolve_name(name);
 	case SCMP_ARCH_PPC64:
 	case SCMP_ARCH_PPC64LE:
 		return ppc64_syscall_resolve_name(name);
-	case SCMP_ARCH_PPC:
-		return ppc_syscall_resolve_name(name);
+	case SCMP_ARCH_S390:
+		return s390_syscall_resolve_name(name);
+	case SCMP_ARCH_S390X:
+		return s390x_syscall_resolve_name(name);
 	}
 
 	return __NR_SCMP_ERROR;
@@ -340,11 +358,15 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 	case SCMP_ARCH_MIPS64N32:
 	case SCMP_ARCH_MIPSEL64N32:
 		return mips64n32_syscall_resolve_num(num);
+	case SCMP_ARCH_PPC:
+		return ppc_syscall_resolve_num(num);
 	case SCMP_ARCH_PPC64:
 	case SCMP_ARCH_PPC64LE:
 		return ppc64_syscall_resolve_num(num);
-	case SCMP_ARCH_PPC:
-		return ppc_syscall_resolve_num(num);
+	case SCMP_ARCH_S390:
+		return s390_syscall_resolve_num(num);
+	case SCMP_ARCH_S390X:
+		return s390x_syscall_resolve_num(num);
 	}
 
 	return NULL;

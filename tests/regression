@@ -28,7 +28,8 @@ GLBL_ARCH_LE_SUPPORT=" \
 	ppc64le"
 GLBL_ARCH_BE_SUPPORT=" \
 	mips mips64 mips64n32 \
-	ppc64 ppc"
+	ppc ppc64 \
+	s390 s390x"
 
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
@@ -700,7 +701,7 @@ function run_test_live() {
 
 	# setup the arch specific return values
 	case "$arch" in
-	x86|x86_64|x32|arm|aarch64|ppc64|ppc64le|ppc)
+	x86|x86_64|x32|arm|aarch64|ppc|ppc64|ppc64le|ppc|s390|s390x)
 		rc_kill=159
 		rc_allow=160
 		rc_trap=161

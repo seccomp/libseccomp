@@ -70,6 +70,10 @@
 #endif
 #elif __PPC__
 #define ARCH_NATIVE		AUDIT_ARCH_PPC
+#elif __s390x__ /* s390x must be checked before s390 */
+#define ARCH_NATIVE		AUDIT_ARCH_S390X
+#elif __s390__
+#define ARCH_NATIVE		AUDIT_ARCH_S390
 #else
 #error the simulator code needs to know about your machine type
 #endif

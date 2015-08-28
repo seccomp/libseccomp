@@ -296,6 +296,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "rt_sigtimedwait", 137 },
 	{ "rt_tgsigqueueinfo", 240 },
 	{ "rtas", __PNR_rtas },
+	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
 	{ "sched_get_priority_max", 125 },
 	{ "sched_get_priority_min", 126 },
 	{ "sched_getaffinity", 123 },
