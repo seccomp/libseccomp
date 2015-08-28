@@ -183,7 +183,17 @@ function get_range() {
 #     2    last value
 #
 function get_seq() {
-	${basedir}/miniseq "$1" "$2"
+	# NOTE: this whole thing is a bit hacky, but we need to search around
+	#       for miniseq to fix 'make distcheck', someday we should fix this
+	if [[ -x ./miniseq ]]; then
+		./miniseq "$1" "$2"
+	elif [[ -x $basedir/miniseq ]]; then
+		$basedir/miniseq "$1" "$2"
+	else
+		# we're often run from a subshell, so we can't simply exit
+		echo "error: unable to find miniseq" >&2
+		kill $pid
+	fi
 }
 
 #
@@ -874,6 +884,9 @@ stats_error=0
 
 # set the test root directory
 basedir=$(dirname $0)
+
+# set the test harness pid
+pid=$$
 
 # parse the command line
 while getopts "ab:gl:m:s:t:T:vh" opt; do
