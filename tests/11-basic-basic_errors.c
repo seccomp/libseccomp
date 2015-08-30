@@ -130,6 +130,16 @@ int main(int argc, char *argv[])
 	seccomp_release(ctx);
 	ctx = NULL;
 
+	/* errno values beyond MAX_ERRNO */
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(0xffff), 0, 0);
+	if (rc != -EINVAL)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
 	/* seccomp_export_pfc errors */
 	rc = seccomp_export_pfc(ctx, STDOUT_FILENO);
 	if (rc != -EINVAL)

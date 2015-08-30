@@ -81,6 +81,12 @@ def test():
     except RuntimeError:
         pass
 
+    f = SyscallFilter(ALLOW)
+    try:
+        f.add_rule(ERRNO(0xffff), "read")
+    except RuntimeError:
+        pass
+
 test()
 
 # kate: syntax python;

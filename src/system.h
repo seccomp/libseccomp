@@ -27,6 +27,9 @@
 
 #include "configure.h"
 
+/* NOTE: this was taken from the Linux Kernel sources */
+#define MAX_ERRNO		4095
+
 struct db_filter_col;
 
 #ifdef HAVE_LINUX_SECCOMP_H

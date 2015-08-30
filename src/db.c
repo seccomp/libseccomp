@@ -30,6 +30,7 @@
 
 #include "arch.h"
 #include "db.h"
+#include "system.h"
 
 /* state values */
 #define _DB_STA_VALID			0xA1B2C3D4
@@ -358,7 +359,8 @@ int db_action_valid(uint32_t action)
 		return 0;
 	else if (action == SCMP_ACT_TRAP)
 		return 0;
-	else if (action == SCMP_ACT_ERRNO(action & 0x0000ffff))
+	else if ((action == SCMP_ACT_ERRNO(action & 0x0000ffff)) &&
+		((action & 0x0000ffff) < MAX_ERRNO))
 		return 0;
 	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
 		return 0;
