@@ -492,6 +492,10 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_PPC64LE;
 			else if (strcmp(optarg, "ppc") == 0)
 				arch = AUDIT_ARCH_PPC;
+			else if (strcmp(optarg, "s390") == 0)
+				arch = AUDIT_ARCH_S390;
+			else if (strcmp(optarg, "s390x") == 0)
+				arch = AUDIT_ARCH_S390X;
 			else
 				exit_usage(argv[0]);
 			break;
