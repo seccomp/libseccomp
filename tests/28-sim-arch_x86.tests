@@ -16,11 +16,6 @@ test type: bpf-sim
 28-sim-arch_x86	+arm,+x32	read	N	N	N	N	N	N	KILL
 28-sim-arch_x86	+arm,+x32	close	N	N	N	N	N	N	KILL
 
-test type: bpf-sim-fuzz
-
-# Testname	StressCount
-28-sim-arch_x86	50
-
 test type: bpf-valgrind
 
 # Testname

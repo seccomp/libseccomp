@@ -12,11 +12,6 @@ test type: bpf-sim
 29-sim-pseudo_syscall	+x86	4294957190	N	N	N	N	N	N	ALLOW
 29-sim-pseudo_syscall	+x86	4294957295	N	N	N	N	N	N	ALLOW
 
-test type: bpf-sim-fuzz
-
-# Testname		StressCount
-29-sim-pseudo_syscall	50
-
 test type: bpf-valgrind
 
 # Testname
