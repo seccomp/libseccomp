@@ -360,7 +360,7 @@ int db_action_valid(uint32_t action)
 	else if (action == SCMP_ACT_TRAP)
 		return 0;
 	else if ((action == SCMP_ACT_ERRNO(action & 0x0000ffff)) &&
-		((action & 0x0000ffff) < MAX_ERRNO))
+		 ((action & 0x0000ffff) < MAX_ERRNO))
 		return 0;
 	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
 		return 0;
