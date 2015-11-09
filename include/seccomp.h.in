@@ -1557,6 +1557,26 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_s390_runtime_instr		__PNR_s390_runtime_instr
 #endif /* __NR_s390_runtime_instr */
 
+#define __PNR_s390_pci_mmio_read	-10197
+#ifndef __NR_s390_pci_mmio_read
+#define __NR_s390_pci_mmio_read		__PNR_s390_pci_mmio_read
+#endif /* __NR_s390_pci_mmio_read */
+
+#define __PNR_s390_pci_mmio_write	-10198
+#ifndef __NR_s390_pci_mmio_write
+#define __NR_s390_pci_mmio_write	__PNR_s390_pci_mmio_write
+#endif /* __NR_s390_pci_mmio_write */
+
+#define __PNR_membarrier	-10199
+#ifndef __NR_membarrier
+#define __NR_membarrier		__PNR_membarrier
+#endif /* __NR_membarrier */
+
+#define __PNR_userfaultfd	-10200
+#ifndef __NR_userfaultfd
+#define __NR_userfaultfd	__PNR_userfaultfd
+#endif /* __NR_userfaultfd */
+
 #ifdef __cplusplus
 }
 #endif
