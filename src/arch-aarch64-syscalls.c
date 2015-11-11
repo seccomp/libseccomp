@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-aarch64.h"
 
-/* NOTE: based on Linux 4.2-rc5 */
+/* NOTE: based on Linux 4.3 */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -431,9 +431,9 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "unlinkat", 35 },
 	{ "unshare", 97 },
 	{ "uselib", __PNR_uselib },
+	{ "userfaultfd", 282 },
 	{ "usr26", __PNR_usr26 },
 	{ "usr32", __PNR_usr32 },
-	{ "userfaultfd", 282 },
 	{ "ustat", __PNR_ustat },
 	{ "utime", __PNR_utime },
 	{ "utimensat", 88 },

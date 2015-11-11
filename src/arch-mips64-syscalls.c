@@ -30,7 +30,7 @@
 /* 64 ABI */
 #define __SCMP_NR_BASE	5000
 
-/* NOTE: based on Linux 4.2-rc5 */
+/* NOTE: based on Linux 4.3 */
 const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", (__SCMP_NR_BASE + 22) },
@@ -435,9 +435,9 @@ const struct arch_syscall_def mips64_syscall_table[] = { \
 	{ "unlinkat", (__SCMP_NR_BASE + 253) },
 	{ "unshare", (__SCMP_NR_BASE + 262) },
 	{ "uselib", __PNR_uselib },
+	{ "userfaultfd",  (__SCMP_NR_BASE + 317) },
 	{ "usr26", __PNR_usr26 },
 	{ "usr32", __PNR_usr32 },
-	{ "userfaultfd",  (__SCMP_NR_BASE + 317) },
 	{ "ustat", (__SCMP_NR_BASE + 133) },
 	{ "utime", (__SCMP_NR_BASE + 130) },
 	{ "utimensat", (__SCMP_NR_BASE + 275) },

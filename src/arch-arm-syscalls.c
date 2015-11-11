@@ -37,7 +37,7 @@
 #define __SCMP_NR_BASE			__SCMP_NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 4.2-rc5 */
+/* NOTE: based on Linux 4.3 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
@@ -443,9 +443,9 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "unlinkat", (__SCMP_NR_BASE + 328) },
 	{ "unshare", (__SCMP_NR_BASE + 337) },
 	{ "uselib", (__SCMP_NR_BASE + 86) },
+	{ "userfaultfd", (__SCMP_NR_BASE + 388) },
 	{ "usr26", (__SCMP_NR_BASE + (__SCMP_ARM_NR_BASE + 3)) },
 	{ "usr32", (__SCMP_NR_BASE + (__SCMP_ARM_NR_BASE + 4)) },
-	{ "userfaultfd", (__SCMP_NR_BASE + 388) },
 	{ "ustat", (__SCMP_NR_BASE + 62) },
 	{ "utime", __PNR_utime },
 	{ "utimensat", (__SCMP_NR_BASE + 348) },

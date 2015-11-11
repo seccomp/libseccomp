@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
 
-/* NOTE: based on Linux 4.2-rc5 */
+/* NOTE: based on Linux 4.3 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
 	{ "_newselect", (__SCMP_NR_BASE + 142) },
@@ -435,9 +435,9 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "unlinkat", (__SCMP_NR_BASE + 294) },
 	{ "unshare", (__SCMP_NR_BASE + 303) },
 	{ "uselib", (__SCMP_NR_BASE + 86) },
+	{ "userfaultfd",  (__SCMP_NR_BASE + 357) },
 	{ "usr26", __PNR_usr26 },
 	{ "usr32", __PNR_usr32 },
-	{ "userfaultfd",  (__SCMP_NR_BASE + 357) },
 	{ "ustat", (__SCMP_NR_BASE + 62) },
 	{ "utime", (__SCMP_NR_BASE + 30) },
 	{ "utimensat", (__SCMP_NR_BASE + 316) },

@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc64.h"
 
-/* NOTE: based on Linux 4.2-rc5 */
+/* NOTE: based on Linux 4.3 */
 const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -432,9 +432,9 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "unlinkat", 292 },
 	{ "unshare", 282 },
 	{ "uselib", 86 },
+	{ "userfaultfd", 364 },
 	{ "usr26", __PNR_usr26 },
 	{ "usr32", __PNR_usr32 },
-	{ "userfaultfd", 364 },
 	{ "ustat", 62 },
 	{ "utime", 30 },
 	{ "utimensat", 304 },
