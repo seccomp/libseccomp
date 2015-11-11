@@ -69,6 +69,25 @@ EOF
 }
 
 #
+# Dump the library syscall table for a given architecture
+#
+# Arguments:
+#     1    architecture
+#     2    offset (optional)
+#
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_arch() {
+	local offset_str=""
+
+	[[ -z $1 ]] && return
+
+	[[ -n $2 ]] && offset_str="-o $2"
+	$LIB_SYS_DUMP -a $1 $offset_str | sed -e '/[^\t]\+\t-[0-9]\+/d'
+}
+
+#
 # Dump the x86 system syscall table
 #
 # Arguments:
@@ -88,7 +107,7 @@ function dump_sys_x86() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_x86() {
-	$LIB_SYS_DUMP -a x86 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch x86
 }
 
 #
@@ -111,7 +130,7 @@ function dump_sys_x86_64() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_x86_64() {
-	$LIB_SYS_DUMP -a x86_64 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch x86_64
 }
 
 #
@@ -135,7 +154,7 @@ function dump_sys_x32() {
 #
 function dump_lib_x32() {
 	# 1073741824 == 0x40000000
-	$LIB_SYS_DUMP -a x32 -o 1073741824 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch x32 1073741824
 }
 
 #
@@ -161,7 +180,6 @@ function dump_sys_arm() {
 				echo "$line"; \
 			fi; \
 		done | \
-		cat - | \
 		sed -e '/#define __NR_sync_file_range2[ \t]\+__NR_arm_sync_file_range/d' | \
 		sort
 }
@@ -173,8 +191,7 @@ function dump_sys_arm() {
 #
 function dump_lib_arm() {
 	# NOTE: arm_sync_file_range() and sync_file_range2() share values
-	$LIB_SYS_DUMP -a arm | sed -e '/[^\t]\+\t-[0-9]\+/d' | \
-		sed -e '/sync_file_range2[ \t]\+341/d'
+	dump_lib_arch arm | sed -e '/sync_file_range2[ \t]\+341/d'
 }
 
 #
@@ -213,7 +230,7 @@ function dump_sys_aarch64() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_aarch64() {
-	$LIB_SYS_DUMP -a aarch64 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch aarch64
 }
 
 #
@@ -247,7 +264,7 @@ function dump_sys_mips() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips() {
-	$LIB_SYS_DUMP -a mips -o 4000 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch mips 4000
 }
 
 #
@@ -281,7 +298,7 @@ function dump_sys_mips64() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips64() {
-	$LIB_SYS_DUMP -a mips64 -o 5000 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch mips64 5000
 }
 
 #
@@ -315,7 +332,7 @@ function dump_sys_mips64n32() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips64n32() {
-	$LIB_SYS_DUMP -a mips64n32 -o 6000 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch mips64n32 6000
 }
 
 #
@@ -328,8 +345,9 @@ function dump_lib_mips64n32() {
 #
 function dump_sys_ppc() {
 	gcc -E -dM $1/arch/powerpc/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
-		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/'
+		grep "^#define __NR_" | \
+		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/' | \
+		sort
 }
 
 #
@@ -338,7 +356,7 @@ function dump_sys_ppc() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_ppc() {
-	$LIB_SYS_DUMP -a ppc | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch ppc
 }
 
 #
@@ -351,8 +369,9 @@ function dump_lib_ppc() {
 #
 function dump_sys_ppc64() {
 	gcc -E -dM -D__powerpc64__ $1/arch/powerpc/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | sort | \
-		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/'
+		grep "^#define __NR_" | \
+		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/' | \
+		sort
 }
 
 #
@@ -361,7 +380,7 @@ function dump_sys_ppc64() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_ppc64() {
-	$LIB_SYS_DUMP -a ppc64 | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	dump_lib_arch ppc64
 }
 
 #
@@ -373,8 +392,16 @@ function dump_lib_ppc64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390() {
-	gcc -dM -m31 -E $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
-	    sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
+	gcc -E -dM $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_timer_create[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t254 + \2/' | \
+		while read line; do \
+			if echo "$line" | grep -q "+"; then \
+				echo "$line" | awk '{ print $1"\t"$2+$4 }'; \
+			else \
+				echo "$line"; \
+			fi; \
+		done | \
+		sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
 }
 
 #
@@ -383,7 +410,7 @@ function dump_sys_s390() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_s390() {
-	$LIB_SYS_DUMP -a s390 | grep -v - | sort
+	dump_lib_arch s390
 }
 
 #
@@ -395,8 +422,16 @@ function dump_lib_s390() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390x() {
-	gcc -dM -E $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
-	    sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
+	gcc -E -dM -D __s390x__ $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
+		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_timer_create[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t254 + \2/' | \
+		while read line; do \
+			if echo "$line" | grep -q "+"; then \
+				echo "$line" | awk '{ print $1"\t"$2+$4 }'; \
+			else \
+				echo "$line"; \
+			fi; \
+		done | \
+		sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
 }
 
 #
@@ -405,7 +440,7 @@ function dump_sys_s390x() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_s390x() {
-	$LIB_SYS_DUMP -a s390x | grep -v - | sort
+	dump_lib_arch s390x
 }
 
 #
