@@ -1,7 +1,7 @@
 /**
  * Enhanced Seccomp Filter DB
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2012,2016 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
 
@@ -434,6 +434,28 @@ static void _db_release(struct db_filter *db)
 }
 
 /**
+ * Destroy a seccomp filter snapshot
+ * @param snap the seccomp filter snapshot
+ *
+ * This function destroys a seccomp filter snapshot.  After calling this
+ * function, the snapshot should no longer be referenced.
+ *
+ */
+static void _db_snap_release(struct db_filter_snap *snap)
+{
+	unsigned int iter;
+
+	if (snap->filter_cnt > 0) {
+		for (iter = 0; iter < snap->filter_cnt; iter++) {
+			if (snap->filters[iter])
+				_db_release(snap->filters[iter]);
+		}
+		free(snap->filters);
+	}
+	free(snap);
+}
+
+/**
  * Update the user specified portion of the syscall priority
  * @param db the seccomp filter db
  * @param syscall the syscall number
@@ -505,6 +527,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 {
 	unsigned int iter;
 	struct db_filter *db;
+	struct db_filter_snap *snap;
 
 	if (col == NULL)
 		return -EINVAL;
@@ -536,6 +559,16 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	if (db_col_db_add(col, db) < 0) {
 		_db_release(db);
 		return -ENOMEM;
+	}
+
+	/* reset the transactions */
+	while (col->snapshots) {
+		snap = col->snapshots;
+		col->snapshots = snap->next;
+		for (iter = 0; iter < snap->filter_cnt; iter++)
+			_db_release(snap->filters[iter]);
+		free(snap->filters);
+		free(snap);
 	}
 
 	return 0;
@@ -1650,4 +1683,141 @@ add_return:
 	if (chain != NULL)
 		free(chain);
 	return rc;
+}
+
+/**
+ * Start a new seccomp filter transaction
+ * @param col the filter collection
+ *
+ * This function starts a new seccomp filter transaction for the given filter
+ * collection.  Returns zero on success, negative values on failure.
+ *
+ */
+int db_col_transaction_start(struct db_filter_col *col)
+{
+	unsigned int iter;
+	size_t args_size;
+	struct db_filter_snap *snap;
+	struct db_filter *filter_o, *filter_s;
+	struct db_api_rule_list *rule_o, *rule_s;
+
+	/* allocate the snapshot */
+	snap = malloc(sizeof(*snap));
+	if (snap == NULL)
+		return -ENOMEM;
+	snap->filters = malloc(sizeof(struct db_filter *) * col->filter_cnt);
+	if (snap->filters == NULL) {
+		free(snap);
+		return -ENOMEM;
+	}
+	snap->filter_cnt = col->filter_cnt;
+	for (iter = 0; iter < snap->filter_cnt; iter++)
+		snap->filters[iter] = NULL;
+	snap->next = NULL;
+
+	/* create a snapshot of the current filter state */
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		/* allocate a new filter */
+		filter_o = col->filters[iter];
+		filter_s = _db_init(filter_o->arch);
+		if (filter_s == NULL)
+			goto trans_start_failure;
+		snap->filters[iter] = filter_s;
+
+		/* create a filter snapshot from existing rules */
+		rule_o = filter_o->rules;
+		if (rule_o == NULL)
+			continue;
+		do {
+			/* copy the rule */
+			rule_s = malloc(sizeof(*rule_s));
+			if (rule_s == NULL)
+				goto trans_start_failure;
+			args_size = sizeof(*rule_s->args) * rule_o->args_cnt;
+			rule_s->args = malloc(args_size);
+			if (rule_s->args == NULL) {
+				free(rule_s);
+				goto trans_start_failure;
+			}
+			rule_s->action = rule_o->action;
+			rule_s->syscall = rule_o->syscall;
+			rule_s->args_cnt = rule_o->args_cnt;
+			memcpy(rule_s->args, rule_o->args, args_size);
+			if (filter_s->rules != NULL) {
+				rule_s->prev = filter_s->rules->prev;
+				rule_s->next = filter_s->rules;
+				filter_s->rules->prev->next = rule_s;
+				filter_s->rules->prev = rule_s;
+			} else {
+				rule_s->prev = rule_s;
+				rule_s->next = rule_s;
+				filter_s->rules = rule_s;
+			}
+
+			/* insert the rule into the filter */
+			if (_db_rule_add(filter_s, rule_o) != 0)
+				goto trans_start_failure;
+
+			/* next rule */
+			rule_o = rule_o->next;
+		} while (rule_o != filter_o->rules);
+	}
+
+	/* add the snapshot to the list */
+	snap->next = col->snapshots;
+	col->snapshots = snap;
+
+	return 0;
+
+trans_start_failure:
+	_db_snap_release(snap);
+	return -ENOMEM;
+}
+
+/**
+ * Abort the top most seccomp filter transaction
+ * @param col the filter collection
+ *
+ * This function aborts the most recent seccomp filter transaction.
+ *
+ */
+void db_col_transaction_abort(struct db_filter_col *col)
+{
+	int iter;
+	unsigned int filter_cnt;
+	struct db_filter **filters;
+	struct db_filter_snap *snap;
+
+	if (col->snapshots == NULL)
+		return;
+
+	/* replace the current filter with the last snapshot */
+	snap = col->snapshots;
+	col->snapshots = snap->next;
+	filter_cnt = col->filter_cnt;
+	filters = col->filters;
+	col->filter_cnt = snap->filter_cnt;
+	col->filters = snap->filters;
+	free(snap);
+
+	/* free the filter we swapped out */
+	for (iter = 0; iter < filter_cnt; iter++)
+		_db_release(filters[iter]);
+	free(filters);
+}
+
+/**
+ * Commit the top most seccomp filter transaction
+ * @param col the filter collection
+ *
+ * This function commits the most recent seccomp filter transaction.
+ *
+ */
+void db_col_transaction_commit(struct db_filter_col *col)
+{
+	struct db_filter_snap *snap;
+
+	snap = col->snapshots;
+	col->snapshots = snap->next;
+	_db_snap_release(snap);
 }

@@ -1,7 +1,7 @@
 /**
  * Enhanced Seccomp Filter DB
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2012,2016 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <pmoore@redhat.com>
  */
 
@@ -151,6 +151,14 @@ struct db_filter {
 	struct db_api_rule_list *rules;
 };
 
+struct db_filter_snap {
+	/* individual filters */
+	struct db_filter **filters;
+	unsigned int filter_cnt;
+
+	struct db_filter_snap *next;
+};
+
 struct db_filter_col {
 	/* verification / state */
 	int state;
@@ -162,6 +170,9 @@ struct db_filter_col {
 	int endian;
 	struct db_filter **filters;
 	unsigned int filter_cnt;
+
+	/* transaction snapshots */
+	struct db_filter_snap *snapshots;
 };
 
 /**
@@ -203,5 +214,9 @@ int db_col_rule_add(struct db_filter_col *col,
 
 int db_col_syscall_priority(struct db_filter_col *col,
 			    int syscall, uint8_t priority);
+
+int db_col_transaction_start(struct db_filter_col *col);
+void db_col_transaction_abort(struct db_filter_col *col);
+void db_col_transaction_commit(struct db_filter_col *col);
 
 #endif
