@@ -167,7 +167,7 @@ struct db_filter_col {
 int db_action_valid(uint32_t action);
 
 struct db_filter_col *db_col_init(uint32_t def_action);
-void db_col_reset(struct db_filter_col *col, uint32_t def_action);
+int db_col_reset(struct db_filter_col *col, uint32_t def_action);
 void db_col_release(struct db_filter_col *col);
 
 int db_col_valid(struct db_filter_col *col);
@@ -181,16 +181,15 @@ int db_col_attr_get(const struct db_filter_col *col,
 int db_col_attr_set(struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t value);
 
+int db_col_db_new(struct db_filter_col *col, const struct arch_def *arch);
 int db_col_db_add(struct db_filter_col *col, struct db_filter *db);
 int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token);
 
-struct db_filter *db_init(const struct arch_def *arch);
-void db_reset(struct db_filter *db);
-void db_release(struct db_filter *db);
+int db_col_rule_add(struct db_filter_col *col,
+		    bool strict, uint32_t action, int syscall,
+		    unsigned int arg_cnt, const struct scmp_arg_cmp *arg_array);
 
-int db_syscall_priority(struct db_filter *db, int syscall, uint8_t priority);
-
-int db_rule_add(struct db_filter *db, uint32_t action, int syscall,
-		struct db_api_arg *chain);
+int db_col_syscall_priority(struct db_filter_col *col,
+			    int syscall, uint8_t priority);
 
 #endif

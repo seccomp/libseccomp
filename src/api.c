@@ -69,51 +69,21 @@ static int _syscall_valid(int syscall)
 /* NOTE - function header comment in include/seccomp.h */
 API scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
-	struct db_filter_col *col;
-	struct db_filter *db;
-
 	if (db_action_valid(def_action) < 0)
 		return NULL;
 
-	col = db_col_init(def_action);
-	if (col == NULL)
-		return NULL;
-	db = db_init(arch_def_native);
-	if (db == NULL)
-		goto init_failure_col;
-
-	if (db_col_db_add(col, db) < 0)
-		goto init_failure_db;
-
-	return col;
-
-init_failure_db:
-	db_release(db);
-init_failure_col:
-	db_col_release(col);
-	return NULL;
+	return db_col_init(def_action);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
-	int rc;
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
-	struct db_filter *db;
 
 	if (ctx == NULL || db_action_valid(def_action) < 0)
 		return -EINVAL;
 
-	db_col_reset(col, def_action);
-
-	db = db_init(arch_def_native);
-	if (db == NULL)
-		return -ENOMEM;
-	rc = db_col_db_add(col, db);
-	if (rc < 0)
-		db_release(db);
-
-	return rc;
+	return db_col_reset(col, def_action);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -180,9 +150,7 @@ API int seccomp_arch_exist(const scmp_filter_ctx ctx,
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token)
 {
-	int rc;
 	const struct arch_def *arch;
-	struct db_filter *db;
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
 	if (arch_token == 0)
@@ -196,14 +164,7 @@ API int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token)
 	arch = arch_def_lookup(arch_token);
 	if (arch == NULL)
 		return -EFAULT;
-	db = db_init(arch);
-	if (db == NULL)
-		return -ENOMEM;
-	rc = db_col_db_add(col, db);
-	if (rc < 0)
-		db_release(db);
-
-	return rc;
+	return db_col_db_new(col, arch);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -336,81 +297,25 @@ API int seccomp_syscall_resolve_name(const char *name)
 API int seccomp_syscall_priority(scmp_filter_ctx ctx,
 				 int syscall, uint8_t priority)
 {
-	int rc = 0, rc_tmp;
-	unsigned int iter;
-	int sc_tmp;
-	struct db_filter_col *col;
-	struct db_filter *filter;
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
-	if (_ctx_valid(ctx) || _syscall_valid(syscall))
+	if (db_col_valid(col) || _syscall_valid(syscall))
 		return -EINVAL;
-	col = (struct db_filter_col *)ctx;
 
-	for (iter = 0; iter < col->filter_cnt; iter++) {
-		filter = col->filters[iter];
-		sc_tmp = syscall;
-
-		rc_tmp = arch_syscall_translate(filter->arch, &sc_tmp);
-		if (rc_tmp < 0)
-			goto syscall_priority_failure;
-
-		/* if this is a pseudo syscall (syscall < 0) then we need to
-		 * rewrite the syscall for some arch specific reason */
-		if (sc_tmp < 0) {
-			/* we set this as a strict op - we don't really care
-			 * since priorities are a "best effort" thing - as we
-			 * want to catch the -EDOM error and bail on this
-			 * architecture */
-			rc_tmp = arch_syscall_rewrite(filter->arch, &sc_tmp);
-			if (rc_tmp == -EDOM)
-				continue;
-			if (rc_tmp < 0)
-				goto syscall_priority_failure;
-		}
-
-		rc_tmp = db_syscall_priority(filter, sc_tmp, priority);
-
-syscall_priority_failure:
-		if (rc == 0 && rc_tmp < 0)
-			rc = rc_tmp;
-	}
-
-	return rc;
+	return db_col_syscall_priority(col, syscall, priority);
 }
 
-/**
- * Add a new rule to the current filter
- * @param col the filter collection
- * @param strict the strict flag
- * @param action the filter action
- * @param syscall the syscall number
- * @param arg_cnt the number of argument filters in the argument filter chain
- * @param arg_array the argument filter chain, (uint, enum scmp_compare, ulong)
- *
- * This function adds a new argument/comparison/value to the seccomp filter for
- * a syscall; multiple arguments can be specified and they will be chained
- * together (essentially AND'd together) in the filter.  When the strict flag
- * is true the function will fail if the exact rule can not be added to the
- * filter, if the strict flag is false the function will not fail if the
- * function needs to adjust the rule due to architecture specifics.  Returns
- * zero on success, negative values on failure.
- *
- */
-static int _seccomp_rule_add(struct db_filter_col *col,
-			     bool strict, uint32_t action, int syscall,
-			     unsigned int arg_cnt,
-			     const struct scmp_arg_cmp *arg_array)
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_rule_add_array(scmp_filter_ctx ctx,
+			       uint32_t action, int syscall,
+			       unsigned int arg_cnt,
+			       const struct scmp_arg_cmp *arg_array)
 {
-	int rc = 0, rc_tmp;
-	int sc_tmp;
-	unsigned int iter;
-	unsigned int chain_len;
-	unsigned int arg_num;
-	size_t chain_size;
-	struct db_filter *filter;
-	struct db_api_arg *chain = NULL, *chain_tmp;
-	struct scmp_arg_cmp arg_data;
+	int rc;
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
+	if (arg_cnt > ARG_COUNT_MAX)
+		return -EINVAL;
 	if (arg_cnt > 0 && arg_array == NULL)
 		return -EINVAL;
 
@@ -423,110 +328,7 @@ static int _seccomp_rule_add(struct db_filter_col *col,
 	if (action == col->attr.act_default)
 		return -EPERM;
 
-	if (strict && col->filter_cnt > 1)
-		return -EOPNOTSUPP;
-
-	/* collect the arguments for the filter rule */
-	chain_len = ARG_COUNT_MAX;
-	chain_size = sizeof(*chain) * chain_len;
-	chain = malloc(chain_size);
-	if (chain == NULL)
-		return -ENOMEM;
-	memset(chain, 0, chain_size);
-	for (iter = 0; iter < arg_cnt; iter++) {
-		arg_data = arg_array[iter];
-		arg_num = arg_data.arg;
-		if (arg_num < chain_len && chain[arg_num].valid == 0) {
-			chain[arg_num].valid = 1;
-			chain[arg_num].arg = arg_num;
-			chain[arg_num].op = arg_data.op;
-			/* XXX - we should check datum/mask size against the
-			 *	 arch definition, e.g. 64 bit datum on x86 */
-			switch (chain[arg_num].op) {
-			case SCMP_CMP_NE:
-			case SCMP_CMP_LT:
-			case SCMP_CMP_LE:
-			case SCMP_CMP_EQ:
-			case SCMP_CMP_GE:
-			case SCMP_CMP_GT:
-				chain[arg_num].mask = DATUM_MAX;
-				chain[arg_num].datum = arg_data.datum_a;
-				break;
-			case SCMP_CMP_MASKED_EQ:
-				chain[arg_num].mask = arg_data.datum_a;
-				chain[arg_num].datum = arg_data.datum_b;
-				break;
-			default:
-				rc = -EINVAL;
-				goto rule_add_return;
-			}
-		} else {
-			rc = -EINVAL;
-			goto rule_add_return;
-		}
-	}
-
-	for (iter = 0; iter < col->filter_cnt; iter++) {
-		filter = col->filters[iter];
-		sc_tmp = syscall;
-
-		rc_tmp = arch_syscall_translate(filter->arch, &sc_tmp);
-		if (rc_tmp < 0)
-			goto rule_add_failure;
-
-		/* if this is a pseudo syscall (syscall < 0) then we need to
-		 * rewrite the rule for some arch specific reason */
-		if (sc_tmp < 0) {
-			/* make a private copy of the chain */
-			chain_tmp = malloc(chain_size);
-			if (chain_tmp == NULL) {
-				rc = -ENOMEM;
-				goto rule_add_failure;
-			}
-			memcpy(chain_tmp, chain, chain_size);
-
-			/* mangle the private chain copy */
-			rc_tmp = arch_filter_rewrite(filter->arch, strict,
-						     &sc_tmp, chain_tmp);
-			if ((rc_tmp == -EDOM) && (!strict)) {
-				free(chain_tmp);
-				continue;
-			}
-			if (rc_tmp < 0) {
-				free(chain_tmp);
-				goto rule_add_failure;
-			}
-
-			/* add the new rule to the existing filter */
-			rc_tmp = db_rule_add(filter, action, sc_tmp, chain_tmp);
-			free(chain_tmp);
-		} else
-			/* add the new rule to the existing filter */
-			rc_tmp = db_rule_add(filter, action, sc_tmp, chain);
-
-rule_add_failure:
-		if (rc == 0 && rc_tmp < 0)
-			rc = rc_tmp;
-	}
-
-rule_add_return:
-	if (chain != NULL)
-		free(chain);
-	return rc;
-}
-
-/* NOTE - function header comment in include/seccomp.h */
-API int seccomp_rule_add_array(scmp_filter_ctx ctx,
-			       uint32_t action, int syscall,
-			       unsigned int arg_cnt,
-			       const struct scmp_arg_cmp *arg_array)
-{
-	/* arg_cnt is unsigned, so no need to check the lower bound */
-	if (arg_cnt > ARG_COUNT_MAX)
-		return -EINVAL;
-
-	return _seccomp_rule_add((struct db_filter_col *)ctx,
-				 0, action, syscall, arg_cnt, arg_array);
+	return db_col_rule_add(col, 0, action, syscall, arg_cnt, arg_array);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -558,12 +360,27 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 				     unsigned int arg_cnt,
 				     const struct scmp_arg_cmp *arg_array)
 {
-	/* arg_cnt is unsigned, so no need to check the lower bound */
+	int rc;
+	struct db_filter_col *col = (struct db_filter_col *)ctx;
+
 	if (arg_cnt > ARG_COUNT_MAX)
 		return -EINVAL;
+	if (arg_cnt > 0 && arg_array == NULL)
+		return -EINVAL;
 
-	return _seccomp_rule_add((struct db_filter_col *)ctx,
-				 1, action, syscall, arg_cnt, arg_array);
+	if (db_col_valid(col) || _syscall_valid(syscall))
+		return -EINVAL;
+
+	rc = db_action_valid(action);
+	if (rc < 0)
+		return rc;
+	if (action == col->attr.act_default)
+		return -EPERM;
+
+	if (col->filter_cnt > 1)
+		return -EOPNOTSUPP;
+
+	return db_col_rule_add(col, 1, action, syscall, arg_cnt, arg_array);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
