@@ -65,8 +65,7 @@ int x86_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
  * @param strict strict flag
- * @param syscall the syscall number
- * @param chain the argument filter chain
+ * @param rule the filter rule
  *
  * Syscalls can vary across different architectures so this function handles
  * the necessary seccomp rule rewrites to ensure the right thing is done
@@ -77,11 +76,11 @@ int x86_syscall_rewrite(const struct arch_def *arch, int *syscall)
  *
  */
 int x86_filter_rewrite(const struct arch_def *arch, bool strict,
-		       int *syscall, struct db_api_arg *chain)
+		       struct db_api_rule_list *rule)
 {
-	int sys = *syscall;
-	unsigned int iter;
 	int arg_max;
+	unsigned int iter;
+	int sys = rule->syscall;
 
 	arg_max = arch_arg_count_max(arch);
 	if (arg_max < 0)
@@ -89,26 +88,26 @@ int x86_filter_rewrite(const struct arch_def *arch, bool strict,
 
 	if (sys <= -100 && sys >= -117) {
 		for (iter = 0; iter < arg_max; iter++) {
-			if ((chain[iter].valid != 0) && (strict))
+			if ((rule->args[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
-		chain[0].arg = 0;
-		chain[0].op = SCMP_CMP_EQ;
-		chain[0].mask = DATUM_MAX;
-		chain[0].datum = abs(sys) % 100;
-		chain[0].valid = 1;
-		*syscall = __x86_NR_socketcall;
+		rule->args[0].arg = 0;
+		rule->args[0].op = SCMP_CMP_EQ;
+		rule->args[0].mask = DATUM_MAX;
+		rule->args[0].datum = abs(sys) % 100;
+		rule->args[0].valid = 1;
+		rule->syscall = __x86_NR_socketcall;
 	} else if (sys <= -200 && sys >= -211) {
 		for (iter = 0; iter < arg_max; iter++) {
-			if ((chain[iter].valid != 0) && (strict))
+			if ((rule->args[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
-		chain[0].arg = 0;
-		chain[0].op = SCMP_CMP_EQ;
-		chain[0].mask = DATUM_MAX;
-		chain[0].datum = abs(sys) % 200;
-		chain[0].valid = 1;
-		*syscall = __x86_NR_ipc;
+		rule->args[0].arg = 0;
+		rule->args[0].op = SCMP_CMP_EQ;
+		rule->args[0].mask = DATUM_MAX;
+		rule->args[0].datum = abs(sys) % 200;
+		rule->args[0].valid = 1;
+		rule->syscall = __x86_NR_ipc;
 	} else if (sys < 0)
 		return -EDOM;
 

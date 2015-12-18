@@ -441,8 +441,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * Rewrite a filter rule to match the architecture specifics
  * @param arch the architecture definition
  * @param strict strict flag
- * @param syscall the syscall number
- * @param chain the argument filter chain
+ * @param rule the filter rule
  *
  * Syscalls can vary across different architectures so this function handles
  * the necessary seccomp rule rewrites to ensure the right thing is done
@@ -453,11 +452,11 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * @arch, and negative values on failure.
  *
  */
-int arch_filter_rewrite(const struct arch_def *arch,
-			bool strict, int *syscall, struct db_api_arg *chain)
+int arch_filter_rewrite(const struct arch_def *arch, bool strict,
+			struct db_api_rule_list *rule)
 {
 	int rc;
-	int sys = *syscall;
+	int sys = rule->syscall;
 
 	if (sys >= 0) {
 		/* we shouldn't be here - no rewrite needed */
@@ -469,7 +468,7 @@ int arch_filter_rewrite(const struct arch_def *arch,
 		/* rewritable syscalls */
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			rc = x86_filter_rewrite(arch, strict, syscall, chain);
+			rc = x86_filter_rewrite(arch, strict, rule);
 			/* we still want to catch invalid rewrites */
 			if (rc == -EINVAL)
 				return -EINVAL;
@@ -477,7 +476,7 @@ int arch_filter_rewrite(const struct arch_def *arch,
 	}
 
 	/* syscalls not defined on this architecture */
-	if ((*syscall) < 0)
+	if (rule->syscall < 0)
 		return -EDOM;
 	return 0;
 }

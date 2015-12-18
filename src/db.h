@@ -40,6 +40,15 @@ struct db_api_arg {
 	bool valid;
 };
 
+struct db_api_rule_list {
+	uint32_t action;
+	int syscall;
+	struct db_api_arg *args;
+	unsigned int args_cnt;
+
+	struct db_api_rule_list *prev, *next;
+};
+
 struct db_arg_chain_tree {
 	/* argument number (a0 = 0, a1 = 1, etc.) */
 	unsigned int arg;
@@ -137,6 +146,9 @@ struct db_filter {
 
 	/* syscall filters, kept as a sorted single-linked list */
 	struct db_sys_list *syscalls;
+
+	/* list of rules used to build the filters, kept in order */
+	struct db_api_rule_list *rules;
 };
 
 struct db_filter_col {

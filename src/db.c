@@ -357,6 +357,7 @@ next:
 static void _db_reset(struct db_filter *db)
 {
 	struct db_sys_list *s_iter;
+	struct db_api_rule_list *r_iter;
 
 	if (db == NULL)
 		return;
@@ -371,6 +372,20 @@ static void _db_reset(struct db_filter *db)
 			s_iter = db->syscalls;
 		}
 		db->syscalls = NULL;
+	}
+
+	/* free any rules */
+	if (db->rules != NULL) {
+		/* split the loop first then loop and free */
+		db->rules->prev->next = NULL;
+		r_iter = db->rules;
+		while (r_iter != NULL) {
+			db->rules = r_iter->next;
+			free(r_iter->args);
+			free(r_iter);
+			r_iter = db->rules;
+		}
+		db->rules = NULL;
 	}
 }
 
@@ -1172,9 +1187,7 @@ gen_32_failure:
 /**
  * Add a new rule to the seccomp filter DB
  * @param db the seccomp filter db
- * @param action the filter action
- * @param syscall the syscall number
- * @param chain argument filter chain
+ * @param rule the filter rule
  *
  * This function adds a new syscall filter to the seccomp filter DB, adding to
  * the existing filters for the syscall, unless no argument specific filters
@@ -1183,10 +1196,13 @@ gen_32_failure:
  * filter DB. Returns zero on success, negative values on failure.
  *
  */
-int _db_rule_add(struct db_filter *db, uint32_t action, int syscall,
-		 struct db_api_arg *chain)
+static int _db_rule_add(struct db_filter *db,
+			const struct db_api_rule_list *rule)
 {
 	int rc = -ENOMEM;
+	int syscall = rule->syscall;
+	uint32_t action = rule->action;
+	struct db_api_arg *chain = rule->args;
 	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	struct db_arg_chain_tree *ec_iter;
@@ -1515,13 +1531,13 @@ int db_col_rule_add(struct db_filter_col *col,
 		    unsigned int arg_cnt, const struct scmp_arg_cmp *arg_array)
 {
 	int rc = 0, rc_tmp;
-	int sc_tmp;
 	unsigned int iter;
 	unsigned int chain_len;
 	unsigned int arg_num;
 	size_t chain_size;
 	struct db_filter *filter;
-	struct db_api_arg *chain = NULL, *chain_tmp;
+	struct db_api_arg *chain = NULL;
+	struct db_api_rule_list *rule;
 	struct scmp_arg_cmp arg_data;
 
 	/* collect the arguments for the filter rule */
@@ -1566,41 +1582,64 @@ int db_col_rule_add(struct db_filter_col *col,
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
 		filter = col->filters[iter];
-		sc_tmp = syscall;
 
-		rc_tmp = arch_syscall_translate(filter->arch, &sc_tmp);
-		if (rc_tmp < 0)
+		/* copy of the chain for each filter in the collection */
+		rule = malloc(sizeof(*rule));
+		if (rule == NULL) {
+			rc_tmp = -ENOMEM;
 			goto add_failure;
+		}
+		rule->args = malloc(chain_size);
+		if (rule->args == NULL) {
+			free(rule);
+			rc_tmp = -ENOMEM;
+			goto add_failure;
+		}
+		rule->action = action;
+		rule->syscall = syscall;
+		rule->args_cnt = chain_len;
+		memcpy(rule->args, chain, chain_size);
+
+		rc_tmp = arch_syscall_translate(filter->arch, &rule->syscall);
+		if (rc_tmp < 0) {
+			free(rule->args);
+			free(rule);
+			goto add_failure;
+		}
 
 		/* if this is a pseudo syscall (syscall < 0) then we need to
 		 * rewrite the rule for some arch specific reason */
-		if (sc_tmp < 0) {
-			/* make a private copy of the chain */
-			chain_tmp = malloc(chain_size);
-			if (chain_tmp == NULL) {
-				rc = -ENOMEM;
-				goto add_failure;
-			}
-			memcpy(chain_tmp, chain, chain_size);
-
+		if (rule->syscall < 0) {
 			/* mangle the private chain copy */
 			rc_tmp = arch_filter_rewrite(filter->arch, strict,
-						     &sc_tmp, chain_tmp);
-			if ((rc_tmp == -EDOM) && (!strict)) {
-				free(chain_tmp);
-				continue;
-			}
+						     rule);
 			if (rc_tmp < 0) {
-				free(chain_tmp);
+				free(rule->args);
+				free(rule);
+				if ((rc_tmp == -EDOM) && (!strict))
+					continue;
 				goto add_failure;
 			}
+		}
 
-			/* add the new rule to the existing filter */
-			rc_tmp = _db_rule_add(filter, action, sc_tmp, chain_tmp);
-			free(chain_tmp);
-		} else
-			/* add the new rule to the existing filter */
-			rc_tmp = _db_rule_add(filter, action, sc_tmp, chain);
+		/* add the new rule to the existing filter */
+		rc_tmp = _db_rule_add(filter, rule);
+		if (rc_tmp == 0) {
+			/* insert the chain to the end of the filter's rule list */
+			if (filter->rules != NULL) {
+				rule->prev = filter->rules->prev;
+				rule->next = filter->rules;
+				filter->rules->prev->next = rule;
+				filter->rules->prev = rule;
+			} else {
+				rule->prev = rule;
+				rule->next = rule;
+				filter->rules = rule;
+			}
+		} else {
+			free(rule->args);
+			free(rule);
+		}
 
 add_failure:
 		if (rc == 0 && rc_tmp < 0)
