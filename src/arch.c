@@ -292,36 +292,8 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
  */
 int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86:
-		return x86_syscall_resolve_name(name);
-	case SCMP_ARCH_X86_64:
-		return x86_64_syscall_resolve_name(name);
-	case SCMP_ARCH_X32:
-		return x32_syscall_resolve_name(name);
-	case SCMP_ARCH_ARM:
-		return arm_syscall_resolve_name(name);
-	case SCMP_ARCH_AARCH64:
-		return aarch64_syscall_resolve_name(name);
-	case SCMP_ARCH_MIPS:
-	case SCMP_ARCH_MIPSEL:
-		return mips_syscall_resolve_name(name);
-	case SCMP_ARCH_MIPS64:
-	case SCMP_ARCH_MIPSEL64:
-		return mips64_syscall_resolve_name(name);
-	case SCMP_ARCH_MIPS64N32:
-	case SCMP_ARCH_MIPSEL64N32:
-		return mips64n32_syscall_resolve_name(name);
-	case SCMP_ARCH_PPC:
-		return ppc_syscall_resolve_name(name);
-	case SCMP_ARCH_PPC64:
-	case SCMP_ARCH_PPC64LE:
-		return ppc64_syscall_resolve_name(name);
-	case SCMP_ARCH_S390:
-		return s390_syscall_resolve_name(name);
-	case SCMP_ARCH_S390X:
-		return s390x_syscall_resolve_name(name);
-	}
+	if (arch->syscall_resolve_name)
+		return (*arch->syscall_resolve_name)(name);
 
 	return __NR_SCMP_ERROR;
 }
@@ -338,36 +310,8 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
  */
 const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86:
-		return x86_syscall_resolve_num(num);
-	case SCMP_ARCH_X86_64:
-		return x86_64_syscall_resolve_num(num);
-	case SCMP_ARCH_X32:
-		return x32_syscall_resolve_num(num);
-	case SCMP_ARCH_ARM:
-		return arm_syscall_resolve_num(num);
-	case SCMP_ARCH_AARCH64:
-		return aarch64_syscall_resolve_num(num);
-	case SCMP_ARCH_MIPS:
-	case SCMP_ARCH_MIPSEL:
-		return mips_syscall_resolve_num(num);
-	case SCMP_ARCH_MIPS64:
-	case SCMP_ARCH_MIPSEL64:
-		return mips64_syscall_resolve_num(num);
-	case SCMP_ARCH_MIPS64N32:
-	case SCMP_ARCH_MIPSEL64N32:
-		return mips64n32_syscall_resolve_num(num);
-	case SCMP_ARCH_PPC:
-		return ppc_syscall_resolve_num(num);
-	case SCMP_ARCH_PPC64:
-	case SCMP_ARCH_PPC64LE:
-		return ppc64_syscall_resolve_num(num);
-	case SCMP_ARCH_S390:
-		return s390_syscall_resolve_num(num);
-	case SCMP_ARCH_S390X:
-		return s390x_syscall_resolve_num(num);
-	}
+	if (arch->syscall_resolve_num)
+		return (*arch->syscall_resolve_num)(num);
 
 	return NULL;
 }
@@ -425,10 +369,8 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 		return -EINVAL;
 	} else if (sys <= -100 && sys > -10000) {
 		/* rewritable syscalls */
-		switch (arch->token) {
-		case SCMP_ARCH_X86:
-			x86_syscall_rewrite(arch, syscall);
-		}
+		if (arch->syscall_rewrite)
+			(*arch->syscall_rewrite)(syscall);
 	}
 
 	/* syscalls not defined on this architecture */
@@ -466,9 +408,8 @@ int arch_filter_rewrite(const struct arch_def *arch, bool strict,
 		return -EINVAL;
 	} else if (sys <= -100 && sys > -10000) {
 		/* rewritable syscalls */
-		switch (arch->token) {
-		case SCMP_ARCH_X86:
-			rc = x86_filter_rewrite(arch, strict, rule);
+		if (arch->filter_rewrite) {
+			rc = (*arch->filter_rewrite)(strict, rule);
 			/* we still want to catch invalid rewrites */
 			if (rc == -EINVAL)
 				return -EINVAL;

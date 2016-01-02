@@ -15,4 +15,8 @@ const struct arch_def arch_def_s390x = {
 	.token_bpf = AUDIT_ARCH_S390X,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_BIG,
+	.syscall_resolve_name = s390x_syscall_resolve_name,
+	.syscall_resolve_num = s390x_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };

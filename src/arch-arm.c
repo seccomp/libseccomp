@@ -31,4 +31,8 @@ const struct arch_def arch_def_arm = {
 	.token_bpf = AUDIT_ARCH_ARM,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
+	.syscall_resolve_name = arm_syscall_resolve_name,
+	.syscall_resolve_num = arm_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };

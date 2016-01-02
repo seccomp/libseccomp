@@ -30,6 +30,10 @@ const struct arch_def arch_def_mips64 = {
 	.token_bpf = AUDIT_ARCH_MIPS64,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_BIG,
+	.syscall_resolve_name = mips64_syscall_resolve_name,
+	.syscall_resolve_num = mips64_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };
 
 const struct arch_def arch_def_mipsel64 = {
@@ -37,4 +41,8 @@ const struct arch_def arch_def_mipsel64 = {
 	.token_bpf = AUDIT_ARCH_MIPSEL64,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_LITTLE,
+	.syscall_resolve_name = mips64_syscall_resolve_name,
+	.syscall_resolve_num = mips64_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };

@@ -35,9 +35,8 @@ const char *x86_syscall_resolve_num(int num);
 
 const char *x86_syscall_iterate_name(unsigned int spot);
 
-int x86_syscall_rewrite(const struct arch_def *arch, int *syscall);
+int x86_syscall_rewrite(int *syscall);
 
-int x86_filter_rewrite(const struct arch_def *arch, bool strict,
-		       struct db_api_rule_list *rule);
+int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule);
 
 #endif

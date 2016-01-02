@@ -31,4 +31,8 @@ const struct arch_def arch_def_x86_64 = {
 	.token_bpf = AUDIT_ARCH_X86_64,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_LITTLE,
+	.syscall_resolve_name = x86_64_syscall_resolve_name,
+	.syscall_resolve_num = x86_64_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };

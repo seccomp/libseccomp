@@ -33,6 +33,7 @@
 struct db_api_rule_list;
 
 struct arch_def {
+	/* arch definition */
 	uint32_t token;
 	uint32_t token_bpf;
 	enum {
@@ -45,6 +46,12 @@ struct arch_def {
 		ARCH_ENDIAN_LITTLE,
 		ARCH_ENDIAN_BIG,
 	} endian;
+
+	/* arch specific functions */
+	int (*syscall_resolve_name)(const char *name);
+	const char *(*syscall_resolve_num)(int num);
+	int (*syscall_rewrite)(int *syscall);
+	int (*filter_rewrite)(bool strict, struct db_api_rule_list *rule);
 };
 
 /* arch_def for the current architecture */

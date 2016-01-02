@@ -35,11 +35,14 @@ const struct arch_def arch_def_x86 = {
 	.token_bpf = AUDIT_ARCH_I386,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
+	.syscall_resolve_name = x86_syscall_resolve_name,
+	.syscall_resolve_num = x86_syscall_resolve_num,
+	.syscall_rewrite = x86_syscall_rewrite,
+	.filter_rewrite = x86_filter_rewrite,
 };
 
 /**
  * Rewrite a syscall value to match the architecture
- * @param arch the architecture definition
  * @param syscall the syscall number
  *
  * Syscalls can vary across different architectures so this function rewrites
@@ -47,7 +50,7 @@ const struct arch_def arch_def_x86 = {
  * zero on success, negative values on failure.
  *
  */
-int x86_syscall_rewrite(const struct arch_def *arch, int *syscall)
+int x86_syscall_rewrite(int *syscall)
 {
 	int sys = *syscall;
 
@@ -75,14 +78,13 @@ int x86_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * fail.  Returns zero on success, negative values on failure.
  *
  */
-int x86_filter_rewrite(const struct arch_def *arch, bool strict,
-		       struct db_api_rule_list *rule)
+int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule)
 {
 	int arg_max;
 	unsigned int iter;
 	int sys = rule->syscall;
 
-	arg_max = arch_arg_count_max(arch);
+	arg_max = ARG_COUNT_MAX;
 	if (arg_max < 0)
 		return arg_max;
 

@@ -30,4 +30,8 @@ const struct arch_def arch_def_ppc = {
 	.token_bpf = AUDIT_ARCH_PPC,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_BIG,
+	.syscall_resolve_name = ppc_syscall_resolve_name,
+	.syscall_resolve_num = ppc_syscall_resolve_num,
+	.syscall_rewrite = NULL,
+	.filter_rewrite = NULL,
 };
