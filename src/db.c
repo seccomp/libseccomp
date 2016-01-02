@@ -1229,8 +1229,7 @@ gen_32_failure:
  * filter DB. Returns zero on success, negative values on failure.
  *
  */
-static int _db_rule_add(struct db_filter *db,
-			const struct db_api_rule_list *rule)
+int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule)
 {
 	int rc = -ENOMEM;
 	int syscall = rule->syscall;
@@ -1568,9 +1567,7 @@ int db_col_rule_add(struct db_filter_col *col,
 	unsigned int chain_len;
 	unsigned int arg_num;
 	size_t chain_size;
-	struct db_filter *filter;
 	struct db_api_arg *chain = NULL;
-	struct db_api_rule_list *rule;
 	struct scmp_arg_cmp arg_data;
 
 	/* collect the arguments for the filter rule */
@@ -1614,67 +1611,9 @@ int db_col_rule_add(struct db_filter_col *col,
 	}
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
-		filter = col->filters[iter];
-
-		/* copy of the chain for each filter in the collection */
-		rule = malloc(sizeof(*rule));
-		if (rule == NULL) {
-			rc_tmp = -ENOMEM;
-			goto add_failure;
-		}
-		rule->args = malloc(chain_size);
-		if (rule->args == NULL) {
-			free(rule);
-			rc_tmp = -ENOMEM;
-			goto add_failure;
-		}
-		rule->action = action;
-		rule->syscall = syscall;
-		rule->args_cnt = chain_len;
-		memcpy(rule->args, chain, chain_size);
-
-		rc_tmp = arch_syscall_translate(filter->arch, &rule->syscall);
-		if (rc_tmp < 0) {
-			free(rule->args);
-			free(rule);
-			goto add_failure;
-		}
-
-		/* if this is a pseudo syscall (syscall < 0) then we need to
-		 * rewrite the rule for some arch specific reason */
-		if (rule->syscall < 0) {
-			/* mangle the private chain copy */
-			rc_tmp = arch_filter_rewrite(filter->arch, strict,
-						     rule);
-			if (rc_tmp < 0) {
-				free(rule->args);
-				free(rule);
-				if ((rc_tmp == -EDOM) && (!strict))
-					continue;
-				goto add_failure;
-			}
-		}
-
-		/* add the new rule to the existing filter */
-		rc_tmp = _db_rule_add(filter, rule);
-		if (rc_tmp == 0) {
-			/* insert the chain to the end of the filter's rule list */
-			if (filter->rules != NULL) {
-				rule->prev = filter->rules->prev;
-				rule->next = filter->rules;
-				filter->rules->prev->next = rule;
-				filter->rules->prev = rule;
-			} else {
-				rule->prev = rule;
-				rule->next = rule;
-				filter->rules = rule;
-			}
-		} else {
-			free(rule->args);
-			free(rule);
-		}
-
-add_failure:
+		rc_tmp = arch_filter_rule_add(col->filters[iter], strict,
+					      action, syscall,
+					      chain_len, chain);
 		if (rc == 0 && rc_tmp < 0)
 			rc = rc_tmp;
 	}
@@ -1755,7 +1694,7 @@ int db_col_transaction_start(struct db_filter_col *col)
 			}
 
 			/* insert the rule into the filter */
-			if (_db_rule_add(filter_s, rule_o) != 0)
+			if (db_rule_add(filter_s, rule_o) != 0)
 				goto trans_start_failure;
 
 			/* next rule */

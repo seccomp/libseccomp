@@ -36,6 +36,7 @@ const struct arch_def arch_def_mips = {
 	.syscall_resolve_num = mips_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.filter_rewrite = NULL,
+	.rule_add = NULL,
 };
 
 const struct arch_def arch_def_mipsel = {
@@ -47,4 +48,5 @@ const struct arch_def arch_def_mipsel = {
 	.syscall_resolve_num = mips_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.filter_rewrite = NULL,
+	.rule_add = NULL,
 };

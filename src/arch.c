@@ -42,6 +42,7 @@
 #include "arch-ppc64.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "db.h"
 #include "system.h"
 
 #define default_arg_count_max		6
@@ -394,8 +395,8 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * @arch, and negative values on failure.
  *
  */
-int arch_filter_rewrite(const struct arch_def *arch, bool strict,
-			struct db_api_rule_list *rule)
+static int arch_filter_rewrite(const struct arch_def *arch, bool strict,
+			       struct db_api_rule_list *rule)
 {
 	int rc;
 	int sys = rule->syscall;
@@ -420,4 +421,103 @@ int arch_filter_rewrite(const struct arch_def *arch, bool strict,
 	if (rule->syscall < 0)
 		return -EDOM;
 	return 0;
+}
+
+/**
+ * Add a new rule to the specified filter
+ * @param db the seccomp filter db
+ * @param strict the strict flag
+ * @param action the filter action
+ * @param syscall the syscall number
+ * @param chain_len the number of argument filters in the argument filter chain
+ * @param chain the argument filter chain
+ *
+ * This function adds a new argument/comparison/value to the seccomp filter for
+ * a syscall; multiple arguments can be specified and they will be chained
+ * together (essentially AND'd together) in the filter.  When the strict flag
+ * is true the function will fail if the exact rule can not be added to the
+ * filter, if the strict flag is false the function will not fail if the
+ * function needs to adjust the rule due to architecture specifics.  Returns
+ * zero on success, negative values on failure.
+ *
+ */
+int arch_filter_rule_add(struct db_filter *db, bool strict,
+			 uint32_t action, int syscall,
+			 unsigned int chain_len, struct db_api_arg *chain)
+{
+	int rc;
+	size_t chain_size = sizeof(*chain) * chain_len;
+	struct db_api_rule_list *rule, *rule_tail;
+
+	/* ensure we aren't using any reserved syscall values */
+	if (syscall < 0 && syscall > -100)
+		return -EINVAL;
+
+	/* copy of the chain for each filter in the collection */
+	rule = malloc(sizeof(*rule));
+	if (rule == NULL)
+		return -ENOMEM;
+	rule->args = malloc(chain_size);
+	if (rule->args == NULL) {
+		free(rule);
+		return -ENOMEM;
+	}
+	rule->action = action;
+	rule->syscall = syscall;
+	rule->args_cnt = chain_len;
+	memcpy(rule->args, chain, chain_size);
+	rule->prev = NULL;
+	rule->next = NULL;
+
+	/* add the new rule to the existing filter */
+	if (db->arch->rule_add == NULL) {
+		rc = arch_syscall_translate(db->arch, &rule->syscall);
+		if (rc < 0)
+			goto rule_add_failure;
+
+		/* if this is a pseudo syscall (syscall < 0) then we need to
+		 * rewrite the rule for some arch specific reason */
+		if (rule->syscall < 0) {
+			/* mangle the private chain copy */
+			rc = arch_filter_rewrite(db->arch, strict, rule);
+			if ((rc == -EDOM) && (!strict)) {
+				/* don't consider this a failure */
+				rc = 0;
+				goto rule_add_failure;
+			}
+			if (rc < 0)
+				goto rule_add_failure;
+		}
+
+		rc = db_rule_add(db, rule);
+	} else
+		rc = (db->arch->rule_add)(db, rule);
+	if (rc == 0) {
+		/* insert the chain to the end of the filter's rule list */
+		rule_tail = rule;
+		while (rule_tail->next)
+			rule_tail = rule_tail->next;
+		if (db->rules != NULL) {
+			rule->prev = db->rules->prev;
+			rule_tail->next = db->rules;
+			db->rules->prev->next = rule;
+			db->rules->prev = rule_tail;
+		} else {
+			rule->prev = rule_tail;
+			rule_tail->next = rule;
+			db->rules = rule;
+		}
+	} else
+		goto rule_add_failure;
+
+	return 0;
+
+rule_add_failure:
+	do {
+		rule_tail = rule;
+		rule = rule->next;
+		free(rule_tail->args);
+		free(rule_tail);
+	} while (rule);
+	return rc;
 }

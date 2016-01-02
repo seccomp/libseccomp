@@ -35,4 +35,5 @@ const struct arch_def arch_def_aarch64 = {
 	.syscall_resolve_num = aarch64_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.filter_rewrite = NULL,
+	.rule_add = NULL,
 };

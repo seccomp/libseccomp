@@ -219,4 +219,6 @@ int db_col_transaction_start(struct db_filter_col *col);
 void db_col_transaction_abort(struct db_filter_col *col);
 void db_col_transaction_commit(struct db_filter_col *col);
 
+int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule);
+
 #endif

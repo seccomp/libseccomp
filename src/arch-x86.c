@@ -39,6 +39,7 @@ const struct arch_def arch_def_x86 = {
 	.syscall_resolve_num = x86_syscall_resolve_num,
 	.syscall_rewrite = x86_syscall_rewrite,
 	.filter_rewrite = x86_filter_rewrite,
+	.rule_add = NULL,
 };
 
 /**
