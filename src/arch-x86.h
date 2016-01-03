@@ -37,6 +37,7 @@ const char *x86_syscall_iterate_name(unsigned int spot);
 
 int x86_syscall_rewrite(int *syscall);
 
-int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule);
+int x86_rule_add(struct db_filter *db, bool strict,
+		 struct db_api_rule_list *rule);
 
 #endif

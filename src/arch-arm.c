@@ -34,6 +34,5 @@ const struct arch_def arch_def_arm = {
 	.syscall_resolve_name = arm_syscall_resolve_name,
 	.syscall_resolve_num = arm_syscall_resolve_num,
 	.syscall_rewrite = NULL,
-	.filter_rewrite = NULL,
 	.rule_add = NULL,
 };

@@ -381,49 +381,6 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 }
 
 /**
- * Rewrite a filter rule to match the architecture specifics
- * @param arch the architecture definition
- * @param strict strict flag
- * @param rule the filter rule
- *
- * Syscalls can vary across different architectures so this function handles
- * the necessary seccomp rule rewrites to ensure the right thing is done
- * regardless of the rule or architecture.  If @strict is true then the
- * function will fail if the entire filter can not be preservered, however,
- * if @strict is false the function will do a "best effort" rewrite and not
- * fail.  Returns zero on success, -EDOM if the syscall is not defined for
- * @arch, and negative values on failure.
- *
- */
-static int arch_filter_rewrite(const struct arch_def *arch, bool strict,
-			       struct db_api_rule_list *rule)
-{
-	int rc;
-	int sys = rule->syscall;
-
-	if (sys >= 0) {
-		/* we shouldn't be here - no rewrite needed */
-		return 0;
-	} else if (sys < 0 && sys > -100) {
-		/* reserved values */
-		return -EINVAL;
-	} else if (sys <= -100 && sys > -10000) {
-		/* rewritable syscalls */
-		if (arch->filter_rewrite) {
-			rc = (*arch->filter_rewrite)(strict, rule);
-			/* we still want to catch invalid rewrites */
-			if (rc == -EINVAL)
-				return -EINVAL;
-		}
-	}
-
-	/* syscalls not defined on this architecture */
-	if (rule->syscall < 0)
-		return -EDOM;
-	return 0;
-}
-
-/**
  * Add a new rule to the specified filter
  * @param db the seccomp filter db
  * @param strict the strict flag
@@ -453,6 +410,11 @@ int arch_filter_rule_add(struct db_filter *db, bool strict,
 	if (syscall < 0 && syscall > -100)
 		return -EINVAL;
 
+	/* translate the syscall */
+	rc = arch_syscall_translate(db->arch, &syscall);
+	if (rc < 0)
+		return rc;
+
 	/* copy of the chain for each filter in the collection */
 	rule = malloc(sizeof(*rule));
 	if (rule == NULL)
@@ -471,27 +433,14 @@ int arch_filter_rule_add(struct db_filter *db, bool strict,
 
 	/* add the new rule to the existing filter */
 	if (db->arch->rule_add == NULL) {
-		rc = arch_syscall_translate(db->arch, &rule->syscall);
-		if (rc < 0)
+		/* negative syscalls require a db->arch->rule_add() function */
+		if (syscall < 0 && strict) {
+			rc = -EDOM;
 			goto rule_add_failure;
-
-		/* if this is a pseudo syscall (syscall < 0) then we need to
-		 * rewrite the rule for some arch specific reason */
-		if (rule->syscall < 0) {
-			/* mangle the private chain copy */
-			rc = arch_filter_rewrite(db->arch, strict, rule);
-			if ((rc == -EDOM) && (!strict)) {
-				/* don't consider this a failure */
-				rc = 0;
-				goto rule_add_failure;
-			}
-			if (rc < 0)
-				goto rule_add_failure;
 		}
-
 		rc = db_rule_add(db, rule);
 	} else
-		rc = (db->arch->rule_add)(db, rule);
+		rc = (db->arch->rule_add)(db, strict, rule);
 	if (rc == 0) {
 		/* insert the chain to the end of the filter's rule list */
 		rule_tail = rule;

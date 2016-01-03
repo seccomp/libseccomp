@@ -53,8 +53,7 @@ struct arch_def {
 	int (*syscall_resolve_name)(const char *name);
 	const char *(*syscall_resolve_num)(int num);
 	int (*syscall_rewrite)(int *syscall);
-	int (*filter_rewrite)(bool strict, struct db_api_rule_list *rule);
-	int (*rule_add)(struct db_filter *filter,
+	int (*rule_add)(struct db_filter *filter, bool strict,
 			struct db_api_rule_list *rule);
 };
 

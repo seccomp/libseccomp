@@ -38,8 +38,7 @@ const struct arch_def arch_def_x86 = {
 	.syscall_resolve_name = x86_syscall_resolve_name,
 	.syscall_resolve_num = x86_syscall_resolve_num,
 	.syscall_rewrite = x86_syscall_rewrite,
-	.filter_rewrite = x86_filter_rewrite,
-	.rule_add = NULL,
+	.rule_add = x86_rule_add,
 };
 
 /**
@@ -66,31 +65,31 @@ int x86_syscall_rewrite(int *syscall)
 }
 
 /**
- * Rewrite a filter rule to match the architecture specifics
- * @param arch the architecture definition
- * @param strict strict flag
+ * add a new rule to the x86 seccomp filter
+ * @param db the seccomp filter db
+ * @param strict the strict flag
  * @param rule the filter rule
  *
- * Syscalls can vary across different architectures so this function handles
- * the necessary seccomp rule rewrites to ensure the right thing is done
- * regardless of the rule or architecture.  If @strict is true then the
- * function will fail if the entire filter can not be preservered, however,
- * if @strict is false the function will do a "best effort" rewrite and not
- * fail.  Returns zero on success, negative values on failure.
+ * This function adds a new syscall filter to the seccomp filter db, making any
+ * necessary adjustments for the x86 ABI.  Returns zero on success, negative
+ * values on failure.
  *
  */
-int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule)
+int x86_rule_add(struct db_filter *db, bool strict,
+		 struct db_api_rule_list *rule)
 {
-	int arg_max;
+	int rc;
 	unsigned int iter;
 	int sys = rule->syscall;
 
-	arg_max = ARG_COUNT_MAX;
-	if (arg_max < 0)
-		return arg_max;
-
-	if (sys <= -100 && sys >= -117) {
-		for (iter = 0; iter < arg_max; iter++) {
+	if (sys >= 0) {
+		/* normal syscall processing */
+		rc = db_rule_add(db, rule);
+		if (rc < 0)
+			return rc;
+	} else if (sys <= -100 && sys >= -117) {
+		/* multiplexed socket syscalls */
+		for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 			if ((rule->args[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -100,8 +99,13 @@ int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule)
 		rule->args[0].datum = abs(sys) % 100;
 		rule->args[0].valid = 1;
 		rule->syscall = __x86_NR_socketcall;
+
+		rc = db_rule_add(db, rule);
+		if (rc < 0)
+			return rc;
 	} else if (sys <= -200 && sys >= -211) {
-		for (iter = 0; iter < arg_max; iter++) {
+		/* multiplexed ipc syscalls */
+		for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 			if ((rule->args[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -111,7 +115,11 @@ int x86_filter_rewrite(bool strict, struct db_api_rule_list *rule)
 		rule->args[0].datum = abs(sys) % 200;
 		rule->args[0].valid = 1;
 		rule->syscall = __x86_NR_ipc;
-	} else if (sys < 0)
+
+		rc = db_rule_add(db, rule);
+		if (rc < 0)
+			return rc;
+	} else if (strict)
 		return -EDOM;
 
 	return 0;

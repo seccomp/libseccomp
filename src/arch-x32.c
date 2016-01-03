@@ -35,6 +35,5 @@ const struct arch_def arch_def_x32 = {
 	.syscall_resolve_name = x32_syscall_resolve_name,
 	.syscall_resolve_num = x32_syscall_resolve_num,
 	.syscall_rewrite = NULL,
-	.filter_rewrite = NULL,
 	.rule_add = NULL,
 };

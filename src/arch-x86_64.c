@@ -34,6 +34,5 @@ const struct arch_def arch_def_x86_64 = {
 	.syscall_resolve_name = x86_64_syscall_resolve_name,
 	.syscall_resolve_num = x86_64_syscall_resolve_num,
 	.syscall_rewrite = NULL,
-	.filter_rewrite = NULL,
 	.rule_add = NULL,
 };
