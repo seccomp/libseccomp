@@ -19,19 +19,6 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-/* NOTE: Linux 4.3 introduced direct wired socket syscalls, at present we only
- *       use the direct wired numbers if we are building on a x86 system and
- *       the direct wired syscalls are defined (e.g. __NR_socket > 0) */
-#if __i386__
-#if __NR_socket < 0
-#define __SYS_SOCKET_MULTI 0
-#else
-#define __SYS_SOCKET_MULTI 1
-#endif
-#else
-#define __SYS_SOCKET_MULTI 1
-#endif
-
 #include <string.h>
 
 #include <seccomp.h>
@@ -45,11 +32,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "_newselect", 142 },
 	{ "_sysctl", 149 },
 	{ "accept", __PNR_accept },
-#if __SYS_SOCKET_MULTI
 	{ "accept4", 364 },
-#else
-	{ "accept4", __PNR_accept4 },
-#endif
 	{ "access", 33 },
 	{ "acct", 51 },
 	{ "add_key", 286 },
@@ -60,11 +43,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "arm_sync_file_range", __PNR_arm_sync_file_range },
 	{ "arch_prctl", __PNR_arch_prctl },
 	{ "bdflush", 134 },
-#if __SYS_SOCKET_MULTI
 	{ "bind", 361 },
-#else
-	{ "bind", __PNR_bind },
-#endif
 	{ "bpf", 357 },
 	{ "break", 17 },
 	{ "breakpoint", __PNR_breakpoint },
@@ -85,11 +64,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "clock_settime", 264 },
 	{ "clone", 120 },
 	{ "close", 6 },
-#if __SYS_SOCKET_MULTI
 	{ "connect", 362 },
-#else
-	{ "connect", __PNR_connect },
-#endif
 	{ "creat", 8 },
 	{ "create_module", 127 },
 	{ "delete_module", 129 },
@@ -159,11 +134,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "getgroups", 80 },
 	{ "getgroups32", 205 },
 	{ "getitimer", 105 },
-#if __SYS_SOCKET_MULTI
 	{ "getpeername", 368 },
-#else
-	{ "getpeername", __PNR_getpeername },
-#endif
 	{ "getpgid", 132 },
 	{ "getpgrp", 65 },
 	{ "getpid", 20 },
@@ -178,16 +149,8 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "getrlimit", 76 },
 	{ "getrusage", 77 },
 	{ "getsid", 147 },
-#if __SYS_SOCKET_MULTI
 	{ "getsockname", 367 },
-#else
-	{ "getsockname", __PNR_getsockname },
-#endif
-#if __SYS_SOCKET_MULTI
 	{ "getsockopt", 365 },
-#else
-	{ "getsockopt", __PNR_getsockopt },
-#endif
 	{ "gettid", 224 },
 	{ "gettimeofday", 78 },
 	{ "getuid", 24 },
@@ -221,11 +184,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "lgetxattr", 230 },
 	{ "link", 9 },
 	{ "linkat", 303 },
-#if __SYS_SOCKET_MULTI
 	{ "listen", 363 },
-#else
-	{ "listen", __PNR_listen },
-#endif
 	{ "listxattr", 232 },
 	{ "llistxattr", 233 },
 	{ "lock", 53 },
@@ -318,17 +277,9 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "readv", 145 },
 	{ "reboot", 88 },
 	{ "recv", __PNR_recv },
-#if __SYS_SOCKET_MULTI
 	{ "recvfrom", 371 },
-#else
-	{ "recvfrom", __PNR_recvfrom },
-#endif
 	{ "recvmmsg", 337 },
-#if __SYS_SOCKET_MULTI
 	{ "recvmsg", 372 },
-#else
-	{ "recvmsg", __PNR_recvmsg },
-#endif
 	{ "remap_file_pages", 257 },
 	{ "removexattr", 235 },
 	{ "rename", 38 },
@@ -372,16 +323,8 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "sendfile", 187 },
 	{ "sendfile64", 239 },
 	{ "sendmmsg", 345 },
-#if __SYS_SOCKET_MULTI
 	{ "sendmsg", 370 },
-#else
-	{ "sendmsg", __PNR_sendmsg },
-#endif
-#if __SYS_SOCKET_MULTI
 	{ "sendto", 369 },
-#else
-	{ "sendto", __PNR_sendto },
-#endif
 	{ "set_mempolicy", 276 },
 	{ "set_robust_list", 311 },
 	{ "set_thread_area", 243 },
@@ -411,11 +354,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "setreuid32", 203 },
 	{ "setrlimit", 75 },
 	{ "setsid", 66 },
-#if __SYS_SOCKET_MULTI
 	{ "setsockopt", 366 },
-#else
-	{ "setsockopt", __PNR_setsockopt },
-#endif
 	{ "settimeofday", 79 },
 	{ "setuid", 23 },
 	{ "setuid32", 213 },
@@ -425,11 +364,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "shmctl", __PNR_shmctl },
 	{ "shmdt", __PNR_shmdt },
 	{ "shmget", __PNR_shmget },
-#if __SYS_SOCKET_MULTI
 	{ "shutdown", 373 },
-#else
-	{ "shutdown", __PNR_shutdown },
-#endif
 	{ "sigaction", 67 },
 	{ "sigaltstack", 186 },
 	{ "signal", 48 },
@@ -439,17 +374,9 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "sigprocmask", 126 },
 	{ "sigreturn", 119 },
 	{ "sigsuspend", 72 },
-#if __SYS_SOCKET_MULTI
 	{ "socket", 359 },
-#else
-	{ "socket", __PNR_socket },
-#endif
 	{ "socketcall", 102 },
-#if __SYS_SOCKET_MULTI
 	{ "socketpair", 360 },
-#else
-	{ "socketpair", __PNR_socketpair },
-#endif
 	{ "splice", 313 },
 	{ "spu_create", __PNR_spu_create },
 	{ "spu_run", __PNR_spu_run },

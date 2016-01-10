@@ -382,6 +382,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 
 /**
  * Add a new rule to the specified filter
+ * @param col the filter collection
  * @param db the seccomp filter db
  * @param strict the strict flag
  * @param action the filter action
@@ -398,8 +399,8 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * zero on success, negative values on failure.
  *
  */
-int arch_filter_rule_add(struct db_filter *db, bool strict,
-			 uint32_t action, int syscall,
+int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
+			 bool strict, uint32_t action, int syscall,
 			 unsigned int chain_len, struct db_api_arg *chain)
 {
 	int rc;
@@ -440,7 +441,7 @@ int arch_filter_rule_add(struct db_filter *db, bool strict,
 		}
 		rc = db_rule_add(db, rule);
 	} else
-		rc = (db->arch->rule_add)(db, strict, rule);
+		rc = (db->arch->rule_add)(col, db, strict, rule);
 	if (rc == 0) {
 		/* insert the chain to the end of the filter's rule list */
 		rule_tail = rule;

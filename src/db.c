@@ -1611,7 +1611,7 @@ int db_col_rule_add(struct db_filter_col *col,
 	}
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
-		rc_tmp = arch_filter_rule_add(col->filters[iter], strict,
+		rc_tmp = arch_filter_rule_add(col, col->filters[iter], strict,
 					      action, syscall,
 					      chain_len, chain);
 		if (rc == 0 && rc_tmp < 0)
