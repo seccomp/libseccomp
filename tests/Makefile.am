@@ -57,7 +57,8 @@ check_PROGRAMS = \
 	26-sim-arch_all_be_basic \
 	27-sim-bpf_blk_state \
 	28-sim-arch_x86 \
-	29-sim-pseudo_syscall
+	29-sim-pseudo_syscall \
+	30-sim-socket_syscalls
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -89,7 +90,8 @@ EXTRA_DIST_TESTPYTHON = \
 	26-sim-arch_all_be_basic.py \
 	27-sim-bpf_blk_state.py \
 	28-sim-arch_x86.py \
-	29-sim-pseudo_syscall.py
+	29-sim-pseudo_syscall.py \
+	30-sim-socket_syscalls.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -120,7 +122,8 @@ EXTRA_DIST_TESTCFGS = \
 	26-sim-arch_all_be_basic.tests \
 	27-sim-bpf_blk_state.tests \
 	28-sim-arch_x86.tests \
-	29-sim-pseudo_syscall.tests
+	29-sim-pseudo_syscall.tests \
+	30-sim-socket_syscalls.tests
 
 EXTRA_DIST_TESTSCRIPTS = regression testdiff testgen
 

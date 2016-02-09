@@ -1,0 +1,30 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2016 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <pmoore@redhat.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+30-sim-socket_syscalls	+x86	socketcall	1		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	socketcall	3		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	socketcall	5		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	socketcall	13		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	359		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	362		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	364		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	373		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	accept		5		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	accept		0		1		2	N	N	N	KILL
+30-sim-socket_syscalls	+x86	accept4		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64	socket		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64	connect		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64	accept4		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64	shutdown	0		1		2	N	N	N	ALLOW
+
+test type: bpf-valgrind
+
+# Testname
+30-sim-socket_syscalls
