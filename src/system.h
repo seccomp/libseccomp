@@ -23,7 +23,7 @@
 #define _SYSTEM_H
 
 #include <linux/filter.h>
-#include <linux/prctl.h>
+#include <sys/prctl.h>
 
 #include "configure.h"
 
