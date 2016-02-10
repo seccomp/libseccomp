@@ -135,6 +135,7 @@ EXTRA_DIST = \
 	${EXTRA_DIST_TESTSCRIPTS} \
 	${EXTRA_DIST_TESTVALGRIND}
 
+nodist_00_test_SOURCES = 00-test.c
 EXTRA_PROGRAMS = 00-test
 
 check-build:
