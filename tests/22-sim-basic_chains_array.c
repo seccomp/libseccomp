@@ -1,7 +1,7 @@
 /**
  * Seccomp Library test program
  *
- * Author: Paul Moore <pmoore@redhat.com>, Vitaly Shukela <vi0oss@gmail.com>
+ * Author: Paul Moore <paul@paul-moore.com>, Vitaly Shukela <vi0oss@gmail.com>
  */
 
 /*

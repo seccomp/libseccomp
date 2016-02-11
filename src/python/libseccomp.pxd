@@ -2,7 +2,7 @@
 # Seccomp Library Python Bindings
 #
 # Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
-# Author: Paul Moore <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
 #
 
 #

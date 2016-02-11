@@ -2,7 +2,7 @@
  * Enhanced Seccomp MIPS Specific Code
  *
  * Copyright (c) 2014 Red Hat <pmoore@redhat.com>
- * Author: Paul Moore <pmoore@redhat.com>
+ * Author: Paul Moore <paul@paul-moore.com>
  *
  */
 

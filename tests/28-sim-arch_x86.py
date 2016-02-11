@@ -4,7 +4,7 @@
 # Seccomp Library test program
 #
 # Copyright (c) 2015 Red Hat <pmoore@redhat.com>
-# Author: Paul Moore <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
 #
 # Adapted from 29-sim-arch_x86.c by Mathias Krause <minipli@googlemail.com>
 #

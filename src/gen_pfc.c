@@ -2,7 +2,7 @@
  * Seccomp Pseudo Filter Code (PFC) Generator
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
- * Author: Paul Moore <pmoore@redhat.com>
+ * Author: Paul Moore <paul@paul-moore.com>
  */
 
 /*
