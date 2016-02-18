@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
 	{ "_newselect", (__SCMP_NR_BASE + 142) },
@@ -69,6 +69,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "clone", (__SCMP_NR_BASE + 120) },
 	{ "close", (__SCMP_NR_BASE + 6) },
 	{ "connect", (__SCMP_NR_BASE + 170) },
+	{ "copy_file_range", (__SCMP_NR_BASE + 360) },
 	{ "creat", (__SCMP_NR_BASE + 8) },
 	{ "create_module", __SCMP_NR_BASE + 127 },
 	{ "delete_module", (__SCMP_NR_BASE + 129) },
@@ -209,6 +210,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "mknod", (__SCMP_NR_BASE + 14) },
 	{ "mknodat", (__SCMP_NR_BASE + 290) },
 	{ "mlock", (__SCMP_NR_BASE + 154) },
+	{ "mlock2", (__SCMP_NR_BASE + 359) },
 	{ "mlockall", (__SCMP_NR_BASE + 156) },
 	{ "mmap", (__SCMP_NR_BASE + 90) },
 	{ "mmap2", (__SCMP_NR_BASE + 210) },

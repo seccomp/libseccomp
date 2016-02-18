@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-s390.h"
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -49,6 +49,7 @@ const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "clone", 120 },
 	{ "close", 6 },
 	{ "connect", 362 },
+	{ "copy_file_range", 375 },
 	{ "creat", 8 },
 	{ "create_module", 127 },
 	{ "delete_module", 129 },
@@ -189,6 +190,7 @@ const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "mknod", 14 },
 	{ "mknodat", 290 },
 	{ "mlock", 150 },
+	{ "mlock2", 374 },
 	{ "mlockall", 152 },
 	{ "mmap", 90 },
 	{ "mmap2", 192 },

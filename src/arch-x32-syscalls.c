@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -65,6 +65,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "clone", (X32_SYSCALL_BIT + 56) },
 	{ "close", (X32_SYSCALL_BIT + 3) },
 	{ "connect", (X32_SYSCALL_BIT + 42) },
+	{ "copy_file_range", (X32_SYSCALL_BIT + 326) },
 	{ "creat", (X32_SYSCALL_BIT + 85) },
 	{ "create_module", __PNR_create_module },
 	{ "delete_module", (X32_SYSCALL_BIT + 176) },
@@ -205,6 +206,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "mknod", (X32_SYSCALL_BIT + 133) },
 	{ "mknodat", (X32_SYSCALL_BIT + 259) },
 	{ "mlock", (X32_SYSCALL_BIT + 149) },
+	{ "mlock2", (X32_SYSCALL_BIT + 325) },
 	{ "mlockall", (X32_SYSCALL_BIT + 151) },
 	{ "mmap", (X32_SYSCALL_BIT + 9) },
 	{ "mmap2", __PNR_mmap2 },

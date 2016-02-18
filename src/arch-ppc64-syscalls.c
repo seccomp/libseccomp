@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc64.h"
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -66,6 +66,7 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "clone", 120 },
 	{ "close", 6 },
 	{ "connect", 328 },
+	{ "copy_file_range", 379 },
 	{ "creat", 8 },
 	{ "create_module", 127 },
 	{ "delete_module", 129 },
@@ -206,6 +207,7 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "mknod", 14 },
 	{ "mknodat", 288 },
 	{ "mlock", 150 },
+	{ "mlock2", 378 },
 	{ "mlockall", 152 },
 	{ "mmap", 90 },
 	{ "mmap2", __PNR_mmap2 },
@@ -392,7 +394,7 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "swapcontext", 249 },
 	{ "swapoff", 115 },
 	{ "swapon", 87 },
-	{ "switch_endian", __PNR_switch_endian },
+	{ "switch_endian", 363 },
 	{ "symlink", 83 },
 	{ "symlinkat", 295 },
 	{ "sync", 36 },

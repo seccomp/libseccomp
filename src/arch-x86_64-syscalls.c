@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -65,6 +65,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "clone", 56 },
 	{ "close", 3 },
 	{ "connect", 42 },
+	{ "copy_file_range", 326 },
 	{ "creat", 85 },
 	{ "create_module", 174 },
 	{ "delete_module", 176 },
@@ -205,6 +206,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "mknod", 133 },
 	{ "mknodat", 259 },
 	{ "mlock", 149 },
+	{ "mlock2", 325 },
 	{ "mlockall", 151 },
 	{ "mmap", 9 },
 	{ "mmap2", __PNR_mmap2 },

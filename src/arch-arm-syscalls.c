@@ -37,7 +37,7 @@
 #define __SCMP_NR_BASE			__SCMP_NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 4.3 */
+/* NOTE: based on Linux 4.5-rc4 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
@@ -77,6 +77,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "clone", (__SCMP_NR_BASE + 120) },
 	{ "close", (__SCMP_NR_BASE +  6) },
 	{ "connect", (__SCMP_NR_BASE + 283) },
+	{ "copy_file_range", (__SCMP_NR_BASE + 391) },
 	{ "creat", (__SCMP_NR_BASE +  8) },
 	{ "create_module", __PNR_create_module },
 	{ "delete_module", (__SCMP_NR_BASE + 129) },
@@ -217,6 +218,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "mknod", (__SCMP_NR_BASE + 14) },
 	{ "mknodat", (__SCMP_NR_BASE + 324) },
 	{ "mlock", (__SCMP_NR_BASE + 150) },
+	{ "mlock2", (__SCMP_NR_BASE + 390) },
 	{ "mlockall", (__SCMP_NR_BASE + 152) },
 	{ "mmap", __PNR_mmap },
 	{ "mmap2", (__SCMP_NR_BASE + 192) },
