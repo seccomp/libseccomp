@@ -39,6 +39,12 @@ extern "C" {
 #define SCMP_VER_MINOR		@VERSION_MINOR@
 #define SCMP_VER_MICRO		@VERSION_MICRO@
 
+struct scmp_version {
+	unsigned int major;
+	unsigned int minor;
+	unsigned int micro;
+};
+
 /*
  * types
  */
@@ -251,6 +257,15 @@ struct scmp_arg_cmp {
 /*
  * functions
  */
+
+/**
+ * Query the library version information
+ *
+ * This function returns a pointer to a populated scmp_version struct, the
+ * caller does not need to free the structure when finished.
+ *
+ */
+const struct scmp_version *seccomp_version(void);
 
 /**
  * Initialize the filter state

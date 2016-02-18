@@ -38,6 +38,12 @@
 
 #define API	__attribute__((visibility("default")))
 
+const struct scmp_version library_version = {
+	.major = SCMP_VER_MAJOR,
+	.minor = SCMP_VER_MINOR,
+	.micro = SCMP_VER_MICRO,
+};
+
 /**
  * Validate a filter context
  * @param ctx the filter context
@@ -64,6 +70,12 @@ static int _syscall_valid(int syscall)
 	if (syscall <= -1 && syscall >= -99)
 		return -EINVAL;
 	return 0;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API const struct scmp_version *seccomp_version(void)
+{
+	return &library_version;
 }
 
 /* NOTE - function header comment in include/seccomp.h */

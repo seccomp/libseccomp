@@ -35,3 +35,4 @@ util.pyc
 28-sim-arch_x86
 29-sim-pseudo_syscall
 30-sim-socket_syscalls
+31-basic-version_check
