@@ -47,6 +47,13 @@ struct db_filter_col;
 #define SECCOMP_MODE_STRICT	1 /* uses hard-coded filter. */
 #define SECCOMP_MODE_FILTER	2 /* uses user-supplied filter. */
 
+/* Valid operations for seccomp syscall. */
+#define SECCOMP_SET_MODE_STRICT	0
+#define SECCOMP_SET_MODE_FILTER	1
+
+/* Valid flags for SECCOMP_SET_MODE_FILTER */
+#define SECCOMP_FILTER_FLAG_TSYNC	1
+
 /*
  * All BPF programs must return a 32-bit value.
  * The bottom 16-bits are for optional return data.
@@ -65,14 +72,14 @@ struct db_filter_col;
 #define SECCOMP_RET_ACTION	0x7fff0000U
 #define SECCOMP_RET_DATA	0x0000ffffU
 
-/*
+/**
  * struct seccomp_data - the format the BPF program executes over.
  * @nr: the system call number
  * @arch: indicates system call convention as an AUDIT_ARCH_* value
- *	  as defined in <linux/audit.h>.
+ *        as defined in <linux/audit.h>.
  * @instruction_pointer: at the time of the system call.
  * @args: up to 6 system call arguments always stored as 64-bit values
- *	  regardless of the architecture.
+ *        regardless of the architecture.
  */
 struct seccomp_data {
 	int nr;
@@ -108,6 +115,7 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_FILTER_FLAG_TSYNC	1
 #endif
 
+int sys_chk_seccomp_syscall(void);
 int sys_chk_seccomp_flag(int flag);
 
 int sys_filter_load(const struct db_filter_col *col);

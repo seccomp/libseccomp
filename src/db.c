@@ -811,9 +811,13 @@ int db_col_attr_set(struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_CTL_TSYNC:
 		rc = sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC);
-		if (rc)
-			return rc;
-		col->attr.tsync_enable = (value ? 1 : 0);
+		if (rc == 1) {
+			/* supported */
+			rc = 0;
+			col->attr.tsync_enable = (value ? 1 : 0);
+		} else if (rc == 0)
+			/* unsupported */
+			rc = -EOPNOTSUPP;
 		break;
 	default:
 		rc = -EEXIST;

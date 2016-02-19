@@ -89,12 +89,6 @@ AC_SUBST([VERSION_MINOR])
 AC_SUBST([VERSION_MICRO])
 
 dnl ####
-dnl function checks
-dnl ####
-dnl # NOTE: keep this disabled until we can test on a released 3.17 kernel
-dnl AC_CHECK_FUNCS(seccomp)
-
-dnl ####
 dnl cython checks
 dnl ####
 AC_CHECK_PROG(have_cython, cython, "yes", "no")
