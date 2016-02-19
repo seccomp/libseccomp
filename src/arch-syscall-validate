@@ -492,8 +492,11 @@ function dump_sys() {
 		;;
 	*)
 		echo ""
+		return 1
 		;;
 	esac
+
+	return 0
 }
 
 #
@@ -544,8 +547,11 @@ function dump_lib() {
 		;;
 	*)
 		echo ""
+		return 1
 		;;
 	esac
+
+	return 0
 }
 
 ####
@@ -592,7 +598,7 @@ if [[ $opt_arches == "" ]]; then
 		x86 x86_64 x32 \
 		arm aarch64 \
 		mips mips64 mips64n32 \
-		ppc pcc64 \
+		ppc ppc64 \
 		s390 s390x"
 fi
 
@@ -615,7 +621,15 @@ tmp_sys=$(mktemp -t syscall_validate_XXXXXX)
 for i in $opt_arches; do
 	# dump the syscall tables
 	dump_lib $i > $tmp_lib
+	if [[ $? -ne 0 ]]; then
+		echo "error: unknown arch $i"
+		exit 1
+	fi
 	dump_sys $i "$kernel_dir" > $tmp_sys
+	if [[ $? -ne 0 ]]; then
+		echo "error: unknown arch $i"
+		exit 1
+	fi
 
 	if [[ $opt_lib -eq 1 ]]; then
 		cat $tmp_lib
