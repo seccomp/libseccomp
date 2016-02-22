@@ -36,3 +36,4 @@ util.pyc
 29-sim-pseudo_syscall
 30-sim-socket_syscalls
 31-basic-version_check
+32-live-tsync_allow
