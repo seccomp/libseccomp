@@ -240,10 +240,12 @@ cdef class Attr:
     ACT_DEFAULT - the filter's default action
     ACT_BADARCH - the filter's bad architecture action
     CTL_NNP - the filter's "no new privileges" flag
+    CTL_NNP - the filter's thread sync flag
     """
     ACT_DEFAULT = libseccomp.SCMP_FLTATR_ACT_DEFAULT
     ACT_BADARCH = libseccomp.SCMP_FLTATR_ACT_BADARCH
     CTL_NNP = libseccomp.SCMP_FLTATR_CTL_NNP
+    CTL_TSYNC = libseccomp.SCMP_FLTATR_CTL_TSYNC
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.

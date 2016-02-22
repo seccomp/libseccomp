@@ -23,6 +23,11 @@ from libc.stdint cimport uint8_t, uint32_t, uint64_t
 
 cdef extern from "seccomp.h":
 
+    cdef struct scmp_version:
+        unsigned int major
+        unsigned int minor
+        unsigned int micro
+
     ctypedef void* scmp_filter_ctx
 
     cdef enum:
@@ -48,6 +53,7 @@ cdef extern from "seccomp.h":
         SCMP_FLTATR_ACT_DEFAULT
         SCMP_FLTATR_ACT_BADARCH
         SCMP_FLTATR_CTL_NNP
+        SCMP_FLTATR_CTL_TSYNC
 
     cdef enum scmp_compare:
         SCMP_CMP_NE
@@ -72,6 +78,8 @@ cdef extern from "seccomp.h":
         scmp_compare op
         scmp_datum_t datum_a
         scmp_datum_t datum_b
+
+    scmp_version *seccomp_version()
 
     scmp_filter_ctx seccomp_init(uint32_t def_action)
     int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
@@ -101,9 +109,16 @@ cdef extern from "seccomp.h":
 
     int seccomp_rule_add(scmp_filter_ctx ctx, uint32_t action,
                          int syscall, unsigned int arg_cnt, ...)
-
+    int seccomp_rule_add_array(scmp_filter_ctx ctx,
+                               uint32_t action, int syscall,
+                               unsigned int arg_cnt,
+                               scmp_arg_cmp *arg_array)
     int seccomp_rule_add_exact(scmp_filter_ctx ctx, uint32_t action,
                                int syscall, unsigned int arg_cnt, ...)
+    int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
+                                     uint32_t action, int syscall,
+                                     unsigned int arg_cnt,
+                                     scmp_arg_cmp *arg_array)
 
     int seccomp_export_pfc(scmp_filter_ctx ctx, int fd)
     int seccomp_export_bpf(scmp_filter_ctx ctx, int fd)
