@@ -5,12 +5,16 @@ https://github.com/seccomp/libseccomp
 Andrew Jones <drjones@redhat.com>
 Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
+Bogdan Purcareata <bogdan.purcareata@freescale.com>
+Brian Cain <brian.cain@gmail.com>
 Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
+Heiko Carstens <heiko.carstens@de.ibm.com>
 Jake Edge <jake@lwn.net>
 Jan Engelhardt <jengelh@inai.de>
+Jan Willeke <willeke@linux.vnet.ibm.com>
 Joe MacDonald <joe@deserted.net>
 Kees Cook <keescook@chromium.org>
 Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
@@ -18,6 +22,7 @@ Marcus Meissner <meissner@suse.de>
 Markos Chandras <markos.chandras@imgtec.com>
 Mathias Krause <minipli@googlemail.com>
 Michael Forney <mforney@mforney.org>
+Mike Frysinger <vapier@gentoo.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
 Paul Moore <paul@paul-moore.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
