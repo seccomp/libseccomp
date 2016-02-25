@@ -2,6 +2,16 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.3.0 - February 29, 2015
+- Added support for the s390 and s390x architectures
+- Added support for the ppc, ppc64, and ppc64le architectures
+- Update the internal syscall tables to match the Linux 4.5-rcX releases
+- Filter generation for both multiplexed and direct socket syscalls on x86
+- Support for the musl libc implementation
+- Additions to the API to enable runtime version checking of the library
+- Enable the use of seccomp() instead of prctl() on supported systems
+- Added additional tests to the regression test suite
+
 * Version 2.2.3 - July 8, 2015
 - Fix a problem with 'make check' on 32-bit ARM systems
 
