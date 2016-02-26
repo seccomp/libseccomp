@@ -16,7 +16,7 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-AM_CPPFLAGS = -I$(top_builddir)/include
+AM_CPPFLAGS = -I${top_builddir}/include
 
 noinst_LTLIBRARIES = util.la
 util_la_SOURCES = util.c util.h bpf.h

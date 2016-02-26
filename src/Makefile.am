@@ -53,7 +53,7 @@ arch_syscall_dump_SOURCES = arch-syscall-dump.c ${SOURCES_ALL}
 arch_syscall_check_SOURCES = arch-syscall-check.c ${SOURCES_ALL}
 
 libseccomp_la_SOURCES = ${SOURCES_ALL}
-libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} -I$(top_builddir)/include
+libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} -I${top_builddir}/include
 libseccomp_la_CFLAGS = ${AM_CFLAGS} ${CFLAGS} -fPIC -DPIC -fvisibility=hidden
 libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${LDFLAGS} \
 	-version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
