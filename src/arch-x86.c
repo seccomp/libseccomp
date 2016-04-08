@@ -104,6 +104,15 @@ int _x86_sock_demux(int socketcall)
 	case -117:
 		/* recvmsg */
 		return 372;
+	case -118:
+		/* accept4 */
+		return 364;
+	case -119:
+		/* recvmmsg */
+		return 337;
+	case -120:
+		/* sendmmsg */
+		return 345;
 	}
 
 	return __NR_SCMP_ERROR;
@@ -120,6 +129,12 @@ int _x86_sock_demux(int socketcall)
 int _x86_sock_mux(int syscall)
 {
 	switch (syscall) {
+	case 337:
+		/* recvmmsg */
+		return -119;
+	case 345:
+		/* sendmmsg */
+		return -120;
 	case 359:
 		/* socket */
 		return -101;
@@ -137,7 +152,7 @@ int _x86_sock_mux(int syscall)
 		return -104;
 	case 364:
 		/* accept4 */
-		return __NR_SCMP_UNDEF;
+		return -118;
 	case 365:
 		/* getsockopt */
 		return -115;
@@ -183,7 +198,7 @@ int x86_syscall_rewrite(int *syscall)
 {
 	int sys = *syscall;
 
-	if (sys <= -100 && sys >= -117)
+	if (sys <= -100 && sys >= -120)
 		*syscall = __x86_NR_socketcall;
 	else if (sys <= -200 && sys >= -211)
 		*syscall = __x86_NR_ipc;
@@ -215,8 +230,8 @@ int x86_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 	int sys_a, sys_b;
 	struct db_api_rule_list *rule_a, *rule_b;
 
-	if ((sys <= -100 && sys >= -117) || (sys >= 359 && sys <= 373)) {
-		/* (-100 to -117) : multiplexed socket syscalls
+	if ((sys <= -100 && sys >= -120) || (sys >= 359 && sys <= 373)) {
+		/* (-100 to -120) : multiplexed socket syscalls
 		   (359 to 373)   : direct socket syscalls, Linux 4.4+ */
 
 		/* strict check for the multiplexed socket syscalls */
