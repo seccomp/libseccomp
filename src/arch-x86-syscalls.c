@@ -469,6 +469,48 @@ int x86_syscall_resolve_name(const char *name)
 	const struct arch_syscall_def *table = x86_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
+
+	if (strcmp(name, "accept") == 0)
+		return __PNR_accept;
+	if (strcmp(name, "accept4") == 0)
+		return __PNR_accept4;
+	else if (strcmp(name, "bind") == 0)
+		return __PNR_bind;
+	else if (strcmp(name, "connect") == 0)
+		return __PNR_connect;
+	else if (strcmp(name, "getpeername") == 0)
+		return __PNR_getpeername;
+	else if (strcmp(name, "getsockname") == 0)
+		return __PNR_getsockname;
+	else if (strcmp(name, "getsockopt") == 0)
+		return __PNR_getsockopt;
+	else if (strcmp(name, "listen") == 0)
+		return __PNR_listen;
+	else if (strcmp(name, "recv") == 0)
+		return __PNR_recv;
+	else if (strcmp(name, "recvfrom") == 0)
+		return __PNR_recvfrom;
+	else if (strcmp(name, "recvmsg") == 0)
+		return __PNR_recvmsg;
+	else if (strcmp(name, "recvmmsg") == 0)
+		return __PNR_recvmmsg;
+	else if (strcmp(name, "send") == 0)
+		return __PNR_send;
+	else if (strcmp(name, "sendmsg") == 0)
+		return __PNR_sendmsg;
+	else if (strcmp(name, "sendmmsg") == 0)
+		return __PNR_sendmmsg;
+	else if (strcmp(name, "sendto") == 0)
+		return __PNR_sendto;
+	else if (strcmp(name, "setsockopt") == 0)
+		return __PNR_setsockopt;
+	else if (strcmp(name, "shutdown") == 0)
+		return __PNR_shutdown;
+	else if (strcmp(name, "socket") == 0)
+		return __PNR_socket;
+	else if (strcmp(name, "socketpair") == 0)
+		return __PNR_socketpair;
+
 	for (iter = 0; table[iter].name != NULL; iter++) {
 		if (strcmp(name, table[iter].name) == 0)
 			return table[iter].num;
@@ -492,6 +534,48 @@ const char *x86_syscall_resolve_num(int num)
 	const struct arch_syscall_def *table = x86_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
+
+	if (num == __PNR_accept)
+		return "accept";
+	else if (num == __PNR_accept4)
+		return "accept4";
+	else if (num == __PNR_bind)
+		return "bind";
+	else if (num == __PNR_connect)
+		return "connect";
+	else if (num == __PNR_getpeername)
+		return "getpeername";
+	else if (num == __PNR_getsockname)
+		return "getsockname";
+	else if (num == __PNR_getsockopt)
+		return "getsockopt";
+	else if (num == __PNR_listen)
+		return "listen";
+	else if (num == __PNR_recv)
+		return "recv";
+	else if (num == __PNR_recvfrom)
+		return "recvfrom";
+	else if (num == __PNR_recvmsg)
+		return "recvmsg";
+	else if (num == __PNR_recvmmsg)
+		return "recvmmsg";
+	else if (num == __PNR_send)
+		return "send";
+	else if (num == __PNR_sendmsg)
+		return "sendmsg";
+	else if (num == __PNR_sendmmsg)
+		return "sendmmsg";
+	else if (num == __PNR_sendto)
+		return "sendto";
+	else if (num == __PNR_setsockopt)
+		return "setsockopt";
+	else if (num == __PNR_shutdown)
+		return "shutdown";
+	else if (num == __PNR_socket)
+		return "socket";
+	else if (num == __PNR_socketpair)
+		return "socketpair";
+
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
 		if (num == table[iter].num)
 			return table[iter].name;

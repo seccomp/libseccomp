@@ -18,7 +18,8 @@ test type: bpf-sim
 30-sim-socket_syscalls	+x86	373		0		1		2	N	N	N	ALLOW
 30-sim-socket_syscalls	+x86	accept		5		N		N	N	N	N	ALLOW
 30-sim-socket_syscalls	+x86	accept		0		1		2	N	N	N	KILL
-30-sim-socket_syscalls	+x86	accept4		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	accept4		18		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86	accept4		0		1		2	N	N	N	KILL
 30-sim-socket_syscalls	+x86_64	socket		0		1		2	N	N	N	ALLOW
 30-sim-socket_syscalls	+x86_64	connect		0		1		2	N	N	N	ALLOW
 30-sim-socket_syscalls	+x86_64	accept4		0		1		2	N	N	N	ALLOW
