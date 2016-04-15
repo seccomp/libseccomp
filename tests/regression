@@ -772,6 +772,7 @@ function run_test() {
 		if check_deps valgrind; then
 			run_test_bpf_valgrind "$testnumstr" "$3"
 		else
+			print_result $testnumstr "SKIPPED" "(valgrind not installed)"
 			stats_skipped=$(($stats_skipped+1))
 		fi
 	elif [[ "$4" == "live" ]]; then
