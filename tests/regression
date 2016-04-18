@@ -436,8 +436,8 @@ function run_test_bpf_sim() {
 
 	# do we have any architectures remaining in the list?
 	if [[ $simarch_list == "" ]]; then
-		print_result $(generate_test_num "$1" $2 1) "INFO" \
-			"Test skipped due to architecture difference"
+		print_result $(generate_test_num "$1" $2 1) "SKIPPED" \
+			"(architecture difference)"
 		stats_skipped=$(($stats_skipped+1))
 		return
 	fi
@@ -631,6 +631,7 @@ function run_test_bpf_valgrind() {
 
 	# we only support the native/c test mode here
 	if [[ $mode != "c" ]]; then
+		print_result "$1" "SKIPPED" "(only valid in native/c mode)"
 		stats_skipped=$(($stats_skipped+1))
 		return
 	fi
@@ -772,7 +773,8 @@ function run_test() {
 		if check_deps valgrind; then
 			run_test_bpf_valgrind "$testnumstr" "$3"
 		else
-			print_result $testnumstr "SKIPPED" "(valgrind not installed)"
+			print_result $testnumstr "SKIPPED" \
+				"(valgrind not installed)"
 			stats_skipped=$(($stats_skipped+1))
 		fi
 	elif [[ "$4" == "live" ]]; then
@@ -780,6 +782,8 @@ function run_test() {
 		if [[ -n $type ]]; then
 			run_test_live "$testnumstr" "$3"
 		else
+			print_result $testnumstr "SKIPPED" \
+				"(must specify live tests)"
 			stats_skipped=$(($stats_skipped+1))
 		fi
 	else
