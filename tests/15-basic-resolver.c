@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
 	if (seccomp_syscall_resolve_name("open") != __NR_open)
 		goto fail;
-	if (seccomp_syscall_resolve_name("socket") != __NR_socket)
+	if (seccomp_syscall_resolve_name("read") != __NR_read)
 		goto fail;
 	if (seccomp_syscall_resolve_name("INVALID") != __NR_SCMP_ERROR)
 		goto fail;
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 					      "open") != __NR_open)
 		goto fail;
 	if (seccomp_syscall_resolve_name_arch(SCMP_ARCH_NATIVE,
-					      "socket") != __NR_socket)
+					      "read") != __NR_read)
 		goto fail;
 	if (seccomp_syscall_resolve_name_arch(SCMP_ARCH_NATIVE,
 					      "INVALID") != __NR_SCMP_ERROR)
@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
 		goto fail;
 	free(name);
 
-	name = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE, __NR_socket);
-	if (name == NULL || strcmp(name, "socket") != 0)
+	name = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE, __NR_read);
+	if (name == NULL || strcmp(name, "read") != 0)
 		goto fail;
 	free(name);
 

@@ -33,7 +33,7 @@ def test():
     # this differs from the native test as we don't support the syscall
     # resolution functions by themselves
     f.add_rule(ALLOW, "open")
-    f.add_rule(ALLOW, "socket")
+    f.add_rule(ALLOW, "read")
     try:
         f.add_rule(ALLOW, "INVALID")
     except RuntimeError:
@@ -43,9 +43,9 @@ def test():
     sys_name = resolve_syscall(Arch(), sys_num)
     if (sys_name != "open"):
         raise RuntimeError("Test failure")
-    sys_num = resolve_syscall(Arch(), "socket")
+    sys_num = resolve_syscall(Arch(), "read")
     sys_name = resolve_syscall(Arch(), sys_num)
-    if (sys_name != "socket"):
+    if (sys_name != "read"):
         raise RuntimeError("Test failure")
 
 test()
