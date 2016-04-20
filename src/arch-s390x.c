@@ -184,7 +184,7 @@ int s390x_syscall_rewrite(int *syscall)
 
 	if (sys <= -100 && sys >= -120)
 		*syscall = __s390x_NR_socketcall;
-	else if (sys <= -200 && sys >= -211)
+	else if (sys <= -200 && sys >= -224)
 		*syscall = __s390x_NR_ipc;
 	else if (sys < 0)
 		return -EDOM;
@@ -296,7 +296,7 @@ int s390x_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 				goto fail_transaction;
 		}
 		db_col_transaction_commit(col);
-	} else if (sys <= -200 && sys >= -211) {
+	} else if (sys <= -200 && sys >= -224) {
 		/* multiplexed ipc syscalls */
 		for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 			if ((rule->args[iter].valid != 0) && (strict))
