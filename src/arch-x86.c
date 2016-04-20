@@ -232,7 +232,7 @@ int x86_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 
 	if ((sys <= -100 && sys >= -120) || (sys >= 359 && sys <= 373)) {
 		/* (-100 to -120) : multiplexed socket syscalls
-		   (359 to 373)   : direct socket syscalls, Linux 4.4+ */
+		   (359 to 373)   : direct socket syscalls, Linux 4.3+ */
 
 		/* strict check for the multiplexed socket syscalls */
 		for (iter = 0; iter < rule->args_cnt; iter++) {

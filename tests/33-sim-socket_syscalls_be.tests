@@ -1,0 +1,39 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2016 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname			Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+33-sim-socket_syscalls_be	+s390	socketcall	1		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	socketcall	3		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	socketcall	5		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	socketcall	13		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	359		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	362		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	364		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	373		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	accept		5		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	accept		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+s390	accept4		18		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390	accept4		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+s390x	socketcall	1		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	socketcall	3		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	socketcall	5		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	socketcall	13		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	359		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	362		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	364		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	373		0		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	accept		5		N		N	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	accept		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+s390x	accept4		18		1		2	N	N	N	ALLOW
+33-sim-socket_syscalls_be	+s390x	accept4		0		1		2	N	N	N	KILL
+
+test type: bpf-valgrind
+
+# Testname
+33-sim-socket_syscalls_be
