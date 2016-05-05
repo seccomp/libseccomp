@@ -131,6 +131,12 @@ static const char *bpf_decode_op(const bpf_instr_raw *bpf)
 	case BPF_ALU+BPF_NEG+BPF_K:
 	case BPF_ALU+BPF_NEG+BPF_X:
 		return "neg";
+	case BPF_ALU+BPF_MOD+BPF_K:
+	case BPF_ALU+BPF_MOD+BPF_X:
+		return "mod";
+	case BPF_ALU+BPF_XOR+BPF_K:
+	case BPF_ALU+BPF_XOR+BPF_X:
+		return "xor";
 	case BPF_JMP+BPF_JA+BPF_K:
 	case BPF_JMP+BPF_JA+BPF_X:
 		return "jmp";
