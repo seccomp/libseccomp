@@ -147,6 +147,8 @@ cdef class Arch:
     MIPSEL - MIPS little endian O32 ABI
     MIPSEL64 - MIPS little endian 64-bit ABI
     MIPSEL64N32 - MIPS little endian N32 ABI
+    PARISC - 32-bit PA-RISC
+    PARISC64 - 64-bit PA-RISC
     PPC64 - 64-bit PowerPC
     PPC - 32-bit PowerPC
     """
@@ -165,6 +167,8 @@ cdef class Arch:
     MIPSEL = libseccomp.SCMP_ARCH_MIPSEL
     MIPSEL64 = libseccomp.SCMP_ARCH_MIPSEL64
     MIPSEL64N32 = libseccomp.SCMP_ARCH_MIPSEL64N32
+    PARISC = libseccomp.SCMP_ARCH_PARISC
+    PARISC64 = libseccomp.SCMP_ARCH_PARISC64
     PPC = libseccomp.SCMP_ARCH_PPC
     PPC64 = libseccomp.SCMP_ARCH_PPC64
     PPC64LE = libseccomp.SCMP_ARCH_PPC64LE
@@ -205,6 +209,10 @@ cdef class Arch:
                 self._token = libseccomp.SCMP_ARCH_MIPSEL64
             elif arch == libseccomp.SCMP_ARCH_MIPSEL64N32:
                 self._token = libseccomp.SCMP_ARCH_MIPSEL64N32
+            elif arch == libseccomp.SCMP_ARCH_PARISC:
+                self._token = libseccomp.SCMP_ARCH_PARISC
+            elif arch == libseccomp.SCMP_ARCH_PARISC64:
+                self._token = libseccomp.SCMP_ARCH_PARISC64
             elif arch == libseccomp.SCMP_ARCH_PPC:
                 self._token = libseccomp.SCMP_ARCH_PPC
             elif arch == libseccomp.SCMP_ARCH_PPC64:

@@ -33,6 +33,7 @@
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
+#include "arch-parisc.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
 #include "arch-s390.h"
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
 	int i_mips = 0;
 	int i_mips64 = 0;
 	int i_mips64n32 = 0;
+	int i_parisc = 0;
 	int i_ppc = 0;
 	int i_ppc64 = 0;
 	int i_s390 = 0;
@@ -101,6 +103,8 @@ int main(int argc, char *argv[])
 			      mips64_syscall_iterate_name(i_mips64));
 		syscall_check(str_miss, sys_name, "mips64n32",
 			      mips64n32_syscall_iterate_name(i_mips64n32));
+		syscall_check(str_miss, sys_name, "parisc",
+			      parisc_syscall_iterate_name(i_parisc));
 		syscall_check(str_miss, sys_name, "ppc",
 			      ppc_syscall_iterate_name(i_ppc));
 		syscall_check(str_miss, sys_name, "ppc64",
@@ -135,6 +139,8 @@ int main(int argc, char *argv[])
 			i_mips64 = -1;
 		if (!mips64n32_syscall_iterate_name(++i_mips64n32))
 			i_mips64n32 = -1;
+		if (!parisc_syscall_iterate_name(++i_parisc))
+			i_parisc = -1;
 		if (!ppc_syscall_iterate_name(++i_ppc))
 			i_ppc = -1;
 		if (!ppc64_syscall_iterate_name(++i_ppc64))
@@ -146,6 +152,7 @@ int main(int argc, char *argv[])
 	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0 &&
+		 i_parisc >= 0 &&
 		 i_ppc >= 0 && i_ppc64 >= 0 &&
 		 i_s390 >= 0 && i_s390x >= 0);
 
@@ -189,6 +196,10 @@ int main(int argc, char *argv[])
 		printf("%s: ERROR, mips64n32 has additional syscalls\n",
 		       mips64n32_syscall_iterate_name(i_mips64n32));
 		return 1;
+	}
+	if (i_parisc >= 0) {
+		printf("%s: ERROR, parisc has additional syscalls\n",
+		       parisc_syscall_iterate_name(i_parisc));
 	}
 	if (i_ppc >= 0) {
 		printf("%s: ERROR, ppc has additional syscalls\n",

@@ -265,6 +265,10 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_MIPS64N32;
 			else if (strcmp(optarg, "mipsel64n32") == 0)
 				arch = AUDIT_ARCH_MIPSEL64N32;
+			else if (strcmp(optarg, "parisc") == 0)
+				arch = AUDIT_ARCH_PARISC;
+			else if (strcmp(optarg, "parisc64") == 0)
+				arch = AUDIT_ARCH_PARISC64;
 			else if (strcmp(optarg, "ppc") == 0)
 				arch = AUDIT_ARCH_PPC;
 			else if (strcmp(optarg, "ppc64") == 0)

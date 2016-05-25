@@ -33,6 +33,8 @@ def test(args):
     f.add_arch(Arch("mips"))
     f.add_arch(Arch("mips64"))
     f.add_arch(Arch("mips64n32"))
+    f.add_arch(Arch("parisc"))
+    f.add_arch(Arch("parisc64"))
     f.add_arch(Arch("ppc"))
     f.add_arch(Arch("ppc64"))
     f.add_arch(Arch("s390"))

@@ -52,6 +52,12 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("mips64n32"));
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("parisc"));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("parisc64"));
+	if (rc != 0)
+		goto out;
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("ppc"));
 	if (rc != 0)
 		goto out;

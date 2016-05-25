@@ -38,6 +38,7 @@
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
+#include "arch-parisc.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
 #include "arch-s390.h"
@@ -79,6 +80,10 @@ const struct arch_def *arch_def_native = &arch_def_mips64n32;
 #elif __MIPSEL__
 const struct arch_def *arch_def_native = &arch_def_mipsel64n32;
 #endif /* _MIPS_SIM_NABI32 */
+#elif __hppa64__ /* hppa64 must be checked before hppa */
+const struct arch_def *arch_def_native = &arch_def_parisc64;
+#elif __hppa__
+const struct arch_def *arch_def_native = &arch_def_parisc;
 #elif __PPC64__
 #ifdef __BIG_ENDIAN__
 const struct arch_def *arch_def_native = &arch_def_ppc64;
@@ -139,6 +144,10 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_mips64n32;
 	case SCMP_ARCH_MIPSEL64N32:
 		return &arch_def_mipsel64n32;
+	case SCMP_ARCH_PARISC:
+		return &arch_def_parisc;
+	case SCMP_ARCH_PARISC64:
+		return &arch_def_parisc64;
 	case SCMP_ARCH_PPC:
 		return &arch_def_ppc;
 	case SCMP_ARCH_PPC64:
@@ -185,6 +194,10 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_mips64n32;
 	else if (strcmp(arch_name, "mipsel64n32") == 0)
 		return &arch_def_mipsel64n32;
+	else if (strcmp(arch_name, "parisc64") == 0)
+		return &arch_def_parisc64;
+	else if (strcmp(arch_name, "parisc") == 0)
+		return &arch_def_parisc;
 	else if (strcmp(arch_name, "ppc") == 0)
 		return &arch_def_ppc;
 	else if (strcmp(arch_name, "ppc64") == 0)

@@ -38,6 +38,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
+#include "arch-parisc.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
 #include "arch-s390.h"
@@ -115,6 +116,10 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_MIPS64N32:
 		case SCMP_ARCH_MIPSEL64N32:
 			sys_name = mips64n32_syscall_iterate_name(iter);
+			break;
+		case SCMP_ARCH_PARISC:
+		case SCMP_ARCH_PARISC64:
+			sys_name = parisc_syscall_iterate_name(iter);
 			break;
 		case SCMP_ARCH_PPC:
 			sys_name = ppc_syscall_iterate_name(iter);

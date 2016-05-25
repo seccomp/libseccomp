@@ -62,6 +62,10 @@
 #elif __MIPSEL__
 #define ARCH_NATIVE		AUDIT_ARCH_MIPSEL64N32
 #endif /* _MIPS_SIM_NABI32 */
+#elif __hppa64__
+#define ARCH_NATIVE		AUDIT_ARCH_PARISC64
+#elif __hppa__
+#define ARCH_NATIVE		AUDIT_ARCH_PARISC
 #elif __PPC64__
 #ifdef __BIG_ENDIAN__
 #define ARCH_NATIVE		AUDIT_ARCH_PPC64

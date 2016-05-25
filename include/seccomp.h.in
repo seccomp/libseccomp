@@ -185,6 +185,12 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_S390X		AUDIT_ARCH_S390X
 
 /**
+ * The PA-RISC hppa architecture tokens
+ */
+#define SCMP_ARCH_PARISC	AUDIT_ARCH_PARISC
+#define SCMP_ARCH_PARISC64	AUDIT_ARCH_PARISC64
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */

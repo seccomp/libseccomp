@@ -43,6 +43,8 @@ cdef extern from "seccomp.h":
         SCMP_ARCH_MIPSEL
         SCMP_ARCH_MIPSEL64
         SCMP_ARCH_MIPSEL64N32
+        SCMP_ARCH_PARISC
+        SCMP_ARCH_PARISC64
         SCMP_ARCH_PPC
         SCMP_ARCH_PPC64
         SCMP_ARCH_PPC64LE
