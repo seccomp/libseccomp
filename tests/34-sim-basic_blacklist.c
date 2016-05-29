@@ -36,31 +36,31 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
-	ctx = seccomp_init(SCMP_ACT_KILL);
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(read), 1,
 				    SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(write), 1,
 				    SCMP_A0(SCMP_CMP_EQ, STDOUT_FILENO));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(write), 1,
 				    SCMP_A0(SCMP_CMP_EQ, STDERR_FILENO));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(close), 0);
 	if (rc != 0)
 		goto out;
 
 	rc = seccomp_rule_add_exact(ctx,
-				    SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+				    SCMP_ACT_KILL, SCMP_SYS(rt_sigreturn), 0);
 	if (rc != 0)
 		goto out;
 
