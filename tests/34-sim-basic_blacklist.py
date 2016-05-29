@@ -29,12 +29,12 @@ import util
 from seccomp import *
 
 def test(args):
-    f = SyscallFilter(KILL)
-    f.add_rule_exactly(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
-    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
-    f.add_rule_exactly(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
-    f.add_rule_exactly(ALLOW, "close")
-    f.add_rule_exactly(ALLOW, "rt_sigreturn")
+    f = SyscallFilter(ALLOW)
+    f.add_rule_exactly(KILL, "read", Arg(0, EQ, sys.stdin.fileno()))
+    f.add_rule_exactly(KILL, "write", Arg(0, EQ, sys.stdout.fileno()))
+    f.add_rule_exactly(KILL, "write", Arg(0, EQ, sys.stderr.fileno()))
+    f.add_rule_exactly(KILL, "close")
+    f.add_rule_exactly(KILL, "rt_sigreturn")
     return f
 
 args = util.get_opt()
