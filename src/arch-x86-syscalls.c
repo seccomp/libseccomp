@@ -468,49 +468,6 @@ int x86_syscall_resolve_name(const char *name)
 	unsigned int iter;
 	const struct arch_syscall_def *table = x86_syscall_table;
 
-	/* XXX - plenty of room for future improvement here */
-
-	if (strcmp(name, "accept") == 0)
-		return __PNR_accept;
-	if (strcmp(name, "accept4") == 0)
-		return __PNR_accept4;
-	else if (strcmp(name, "bind") == 0)
-		return __PNR_bind;
-	else if (strcmp(name, "connect") == 0)
-		return __PNR_connect;
-	else if (strcmp(name, "getpeername") == 0)
-		return __PNR_getpeername;
-	else if (strcmp(name, "getsockname") == 0)
-		return __PNR_getsockname;
-	else if (strcmp(name, "getsockopt") == 0)
-		return __PNR_getsockopt;
-	else if (strcmp(name, "listen") == 0)
-		return __PNR_listen;
-	else if (strcmp(name, "recv") == 0)
-		return __PNR_recv;
-	else if (strcmp(name, "recvfrom") == 0)
-		return __PNR_recvfrom;
-	else if (strcmp(name, "recvmsg") == 0)
-		return __PNR_recvmsg;
-	else if (strcmp(name, "recvmmsg") == 0)
-		return __PNR_recvmmsg;
-	else if (strcmp(name, "send") == 0)
-		return __PNR_send;
-	else if (strcmp(name, "sendmsg") == 0)
-		return __PNR_sendmsg;
-	else if (strcmp(name, "sendmmsg") == 0)
-		return __PNR_sendmmsg;
-	else if (strcmp(name, "sendto") == 0)
-		return __PNR_sendto;
-	else if (strcmp(name, "setsockopt") == 0)
-		return __PNR_setsockopt;
-	else if (strcmp(name, "shutdown") == 0)
-		return __PNR_shutdown;
-	else if (strcmp(name, "socket") == 0)
-		return __PNR_socket;
-	else if (strcmp(name, "socketpair") == 0)
-		return __PNR_socketpair;
-
 	for (iter = 0; table[iter].name != NULL; iter++) {
 		if (strcmp(name, table[iter].name) == 0)
 			return table[iter].num;
