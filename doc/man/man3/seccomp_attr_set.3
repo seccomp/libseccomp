@@ -59,10 +59,11 @@ action.
 .TP
 .B SCMP_FLTATR_CTL_NNP
 A flag to specify if the NO_NEW_PRIVS functionality should be enabled before
-loading the seccomp filter into the kernel.  If set to off (
+loading the seccomp filter into the kernel.  Setting this to off (
 .I value
-== 0) then loading the seccomp filter into the kernel will fail if CAP_SYS_ADMIN
-is not set.  Defaults to on (
+== 0) results in no action, meaning that loading the seccomp filter into the
+kernel will fail if CAP_SYS_ADMIN is missing and NO_NEW_PRIVS has not been
+externally set.  Defaults to on (
 .I value
 == 1).
 .TP
