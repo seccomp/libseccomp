@@ -53,8 +53,8 @@ functions all add a new filter rule to the current seccomp filter.  The
 and
 .BR seccomp_rule_add_array ()
 functions will make a "best effort" to add the rule as specified, but may alter
-the rule slightly due to architecture specifics, e.g. socket and ipc functions
-on x86.  The
+the rule slightly due to architecture specifics (e.g. internal rewriting of
+multiplexed syscalls, like socket and ipc functions on x86).  The
 .BR seccomp_rule_add_exact ()
 and
 .BR seccomp_rule_add_exact_array ()
@@ -291,5 +291,6 @@ Paul Moore <paul@paul-moore.com>
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SEE ALSO
 .\" //////////////////////////////////////////////////////////////////////////
+.BR seccomp_syscall_resolve_name_rewrite (3),
 .BR seccomp_syscall_priority (3),
 .BR seccomp_load (3)
