@@ -1,11 +1,9 @@
 /**
- * Enhanced Seccomp AArch64 Syscall Table
+ * riscv64 Syscall Table
  *
- * Copyright (c) 2014 Red Hat <mjuszkiewicz@redhat.com>
- * Author: Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
- */
-
-/*
+ * Copyright (C) 2016 Red Hat Inc.
+ * Author: Richard W.M. Jones <rjones@redhat.com>
+ *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of version 2.1 of the GNU Lesser General Public License as
  * published by the Free Software Foundation.
@@ -24,10 +22,10 @@
 #include <seccomp.h>
 
 #include "arch.h"
-#include "arch-aarch64.h"
+#include "arch-riscv64.h"
 
-/* NOTE: based on Linux 4.5-rc4 */
-const struct arch_syscall_def aarch64_syscall_table[] = { \
+/* Based on Linux 4.1 */
+const struct arch_syscall_def riscv64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
 	{ "_sysctl", __PNR__sysctl },
@@ -259,7 +257,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "prctl", 167 },
 	{ "pread64", 67 },
 	{ "preadv", 69 },
-	{ "preadv2", __PNR_preadv2 },
+	{ "preadv2", 286 },
 	{ "prlimit64", 261 },
 	{ "process_vm_readv", 270 },
 	{ "process_vm_writev", 271 },
@@ -270,7 +268,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "putpmsg", __PNR_putpmsg },
 	{ "pwrite64", 68 },
 	{ "pwritev", 70 },
-	{ "pwritev2", __PNR_pwritev2 },
+	{ "pwritev2", 287 },
 	{ "query_module", __PNR_query_module },
 	{ "quotactl", 60 },
 	{ "read", 63 },
@@ -453,6 +451,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "waitpid", __PNR_waitpid },
 	{ "write", 64 },
 	{ "writev", 66 },
+
 	{ NULL, __NR_SCMP_ERROR },
 };
 
@@ -465,10 +464,10 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
  * numbers; returns __NR_SCMP_ERROR on failure.
  *
  */
-int aarch64_syscall_resolve_name(const char *name)
+int riscv64_syscall_resolve_name(const char *name)
 {
 	unsigned int iter;
-	const struct arch_syscall_def *table = aarch64_syscall_table;
+	const struct arch_syscall_def *table = riscv64_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].name != NULL; iter++) {
@@ -488,10 +487,10 @@ int aarch64_syscall_resolve_name(const char *name)
  * syscall names; returns NULL on failure.
  *
  */
-const char *aarch64_syscall_resolve_num(int num)
+const char *riscv64_syscall_resolve_num(int num)
 {
 	unsigned int iter;
-	const struct arch_syscall_def *table = aarch64_syscall_table;
+	const struct arch_syscall_def *table = riscv64_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
@@ -511,8 +510,8 @@ const char *aarch64_syscall_resolve_num(int num)
  * should only ever be used internally by libseccomp.
  *
  */
-const char *aarch64_syscall_iterate_name(unsigned int spot)
+const char *riscv64_syscall_iterate_name(unsigned int spot)
 {
 	/* XXX - no safety checks here */
-	return aarch64_syscall_table[spot].name;
+	return riscv64_syscall_table[spot].name;
 }

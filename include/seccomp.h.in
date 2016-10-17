@@ -179,6 +179,14 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_PPC64LE	AUDIT_ARCH_PPC64LE
 
 /**
+ * The RISC-V architecture tokens
+ */
+#define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
+#ifndef AUDIT_ARCH_RISCV64
+#define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif
+
+/**
  * The S390 architecture tokens
  */
 #define SCMP_ARCH_S390		AUDIT_ARCH_S390
@@ -1608,6 +1616,16 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_userfaultfd
 #define __NR_userfaultfd	__PNR_userfaultfd
 #endif /* __NR_userfaultfd */
+
+#define __PNR_preadv2		-10201
+#ifndef __NR_preadv2
+#define __NR_preadv2		__PNR_preadv2
+#endif /* __NR_preadv2 */
+
+#define __PNR_pwritev2		-10202
+#ifndef __NR_pwritev2
+#define __NR_pwritev2		__PNR_pwritev2
+#endif /* __NR_pwritev2 */
 
 #ifdef __cplusplus
 }
