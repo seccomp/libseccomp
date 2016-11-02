@@ -168,14 +168,12 @@ API int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token)
 	if (arch_token == 0)
 		arch_token = arch_def_native->token;
 
-	if (arch_valid(arch_token))
+	arch = arch_def_lookup(arch_token);
+	if (arch == NULL)
 		return -EINVAL;
 	if (db_col_arch_exist(col, arch_token))
 		return -EEXIST;
 
-	arch = arch_def_lookup(arch_token);
-	if (arch == NULL)
-		return -EFAULT;
 	return db_col_db_new(col, arch);
 }
 
