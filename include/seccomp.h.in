@@ -366,8 +366,8 @@ int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token);
  * Any new rules added after this function successfully returns will be added
  * to this architecture but existing rules will not be added to this
  * architecture.  If the architecture token is SCMP_ARCH_NATIVE then the native
- * architecture will be assumed.  Returns zero on success, negative values on
- * failure.
+ * architecture will be assumed.  Returns zero on success, -EEXIST if
+ * specified architecture is already present, other negative values on failure.
  *
  */
 int seccomp_arch_add(scmp_filter_ctx ctx, uint32_t arch_token);
