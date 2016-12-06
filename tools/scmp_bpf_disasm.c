@@ -189,6 +189,9 @@ static void bpf_decode_action(uint32_t k)
 	case SECCOMP_RET_TRACE:
 		printf("TRACE(%u)", data);
 		break;
+	case SECCOMP_RET_AUDIT:
+		printf("AUDIT");
+		break;
 	case SECCOMP_RET_ALLOW:
 		printf("ALLOW");
 		break;
