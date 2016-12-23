@@ -44,6 +44,10 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
+	rc = seccomp_rule_add(ctx, SCMP_ACT_AUDIT, SCMP_SYS(rt_sigreturn), 0);
+	if (rc != 0)
+		goto out;
+
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
 	if (rc != 0)
 		goto out;

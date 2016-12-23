@@ -32,6 +32,7 @@ from seccomp import *
 def test(args):
     f = SyscallFilter(KILL)
     f.add_rule(ALLOW, "read")
+    f.add_rule(AUDIT, "rt_sigreturn")
     f.add_rule(ERRNO(errno.EPERM), "write")
     f.add_rule(TRAP, "close")
     f.add_rule(TRACE(1234), "open")
