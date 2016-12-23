@@ -26,6 +26,8 @@
 
 #include <seccomp.h>
 
+#include "util.h"
+
 /**
  * Print the usage information to stderr and exit
  * @param program the name of the current program being invoked
@@ -65,64 +67,10 @@ int main(int argc, char *argv[])
 
 	arch = seccomp_arch_native();
 	if (token == 0) {
-		switch (arch) {
-		case SCMP_ARCH_X86:
-			printf("x86\n");
-			break;
-		case SCMP_ARCH_X86_64:
-			printf("x86_64\n");
-			break;
-		case SCMP_ARCH_X32:
-			printf("x32\n");
-			break;
-		case SCMP_ARCH_ARM:
-			printf("arm\n");
-			break;
-		case SCMP_ARCH_AARCH64:
-			printf("aarch64\n");
-			break;
-		case SCMP_ARCH_MIPS:
-			printf("mips\n");
-			break;
-		case SCMP_ARCH_MIPSEL:
-			printf("mipsel\n");
-			break;
-		case SCMP_ARCH_MIPS64:
-			printf("mips64\n");
-			break;
-		case SCMP_ARCH_MIPSEL64:
-			printf("mipsel64\n");
-			break;
-		case SCMP_ARCH_MIPS64N32:
-			printf("mips64n32\n");
-			break;
-		case SCMP_ARCH_MIPSEL64N32:
-			printf("mipsel64n32\n");
-			break;
-		case SCMP_ARCH_PARISC:
-			printf("parisc\n");
-			break;
-		case SCMP_ARCH_PARISC64:
-			printf("parisc64\n");
-			break;
-		case SCMP_ARCH_PPC:
-			printf("ppc\n");
-			break;
-		case SCMP_ARCH_PPC64:
-			printf("ppc64\n");
-			break;
-		case SCMP_ARCH_PPC64LE:
-			printf("ppc64le\n");
-			break;
-		case SCMP_ARCH_S390:
-			printf("s390\n");
-			break;
-		case SCMP_ARCH_S390X:
-			printf("s390x\n");
-			break;
-		default:
-			printf("unknown\n");
-		}
+		char *name = arch_resolve_token(arch);
+
+		printf("%s\n", (name ? name : "unknown"));
+		free(name);
 	} else
 		printf("%d\n", arch);
 

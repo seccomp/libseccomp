@@ -80,4 +80,6 @@ uint32_t ttoh32(uint32_t arch, uint32_t val);
 uint32_t htot32(uint32_t arch, uint32_t val);
 uint64_t htot64(uint32_t arch, uint64_t val);
 
+char *arch_resolve_token(uint32_t arch_token);
+
 #endif

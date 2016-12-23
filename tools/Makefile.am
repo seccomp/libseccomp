@@ -31,12 +31,13 @@ noinst_PROGRAMS = \
 
 EXTRA_DIST = check-syntax scmp_app_inspector
 
+scmp_arch_detect_SOURCES = scmp_arch_detect.c util.h
 scmp_bpf_disasm_SOURCES = scmp_bpf_disasm.c bpf.h util.h
 scmp_bpf_sim_SOURCES = scmp_bpf_sim.c bpf.h util.h
 
 scmp_sys_resolver_LDADD = ../src/libseccomp.la
 scmp_sys_resolver_LDFLAGS = -static
-scmp_arch_detect_LDADD = ../src/libseccomp.la
+scmp_arch_detect_LDADD = util.la ../src/libseccomp.la
 scmp_arch_detect_LDFLAGS = -static
 scmp_bpf_disasm_LDADD = util.la
 scmp_bpf_sim_LDADD = util.la
