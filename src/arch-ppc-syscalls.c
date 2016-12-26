@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc.h"
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -255,11 +255,15 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "pipe", 42 },
 	{ "pipe2", 317 },
 	{ "pivot_root", 203 },
+	{ "pkey_alloc", __PNR_pkey_alloc },
+	{ "pkey_free", __PNR_pkey_free },
+	{ "pkey_mprotect", __PNR_pkey_mprotect },
 	{ "poll", 167 },
 	{ "ppoll", 281 },
 	{ "prctl", 171 },
 	{ "pread64", 179 },
 	{ "preadv", 320 },
+	{ "preadv2", 380 },
 	{ "prlimit64", 325 },
 	{ "process_vm_readv", 351 },
 	{ "process_vm_writev", 352 },
@@ -270,6 +274,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "putpmsg", 188 },
 	{ "pwrite64", 180 },
 	{ "pwritev", 321 },
+	{ "pwritev2", 381 },
 	{ "query_module", 166 },
 	{ "quotactl", 131 },
 	{ "read", 3 },
