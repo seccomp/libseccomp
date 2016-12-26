@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-parisc.h"
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "_llseek",	140 },
 	{ "_newselect",	142 },
@@ -238,11 +238,15 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "pipe",	42 },
 	{ "pipe2",	313 },
 	{ "pivot_root",	67 },
+	{ "pkey_alloc",	__PNR_pkey_alloc },
+	{ "pkey_free",	__PNR_pkey_free },
+	{ "pkey_mprotect",	__PNR_pkey_mprotect },
 	{ "poll",	168 },
 	{ "ppoll",	274 },
 	{ "prctl",	172 },
 	{ "pread64",	108 },
 	{ "preadv",	315 },
+	{ "preadv2",	347 },
 	{ "prlimit64",	321 },
 	{ "process_vm_readv",	330 },
 	{ "process_vm_writev",	331 },
@@ -253,6 +257,7 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "putpmsg",	197 },
 	{ "pwrite64",	109 },
 	{ "pwritev",	316 },
+	{ "pwritev2",	348 },
 	{ "query_module",	167 },
 	{ "quotactl",	131 },
 	{ "read",	3 },

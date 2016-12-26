@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-s390x.h"
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -238,11 +238,15 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "pipe", 42 },
 	{ "pipe2", 325 },
 	{ "pivot_root", 217 },
+	{ "pkey_alloc", __PNR_pkey_alloc },
+	{ "pkey_free", __PNR_pkey_free },
+	{ "pkey_mprotect", __PNR_pkey_mprotect },
 	{ "poll", 168 },
 	{ "ppoll", 302 },
 	{ "prctl", 172 },
 	{ "pread64", 180 },
 	{ "preadv", 328 },
+	{ "preadv2", 376 },
 	{ "prlimit64", 334 },
 	{ "process_vm_readv", 340 },
 	{ "process_vm_writev", 341 },
@@ -253,6 +257,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "putpmsg", 189 },
 	{ "pwrite64", 181 },
 	{ "pwritev", 329 },
+	{ "pwritev2", 377 },
 	{ "query_module", 167 },
 	{ "quotactl", 131 },
 	{ "read", 3 },

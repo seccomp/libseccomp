@@ -1609,6 +1609,21 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_userfaultfd	__PNR_userfaultfd
 #endif /* __NR_userfaultfd */
 
+#define __PNR_pkey_mprotect	-10201
+#ifndef __NR_pkey_mprotect
+#define __NR_pkey_mprotect	__PNR_pkey_mprotect
+#endif /* __NR_pkey_mprotect */
+
+#define __PNR_pkey_alloc	-10202
+#ifndef __NR_pkey_alloc
+#define __NR_pkey_alloc	__PNR_pkey_alloc
+#endif /* __NR_pkey_alloc */
+
+#define __PNR_pkey_free	-10203
+#ifndef __NR_pkey_free
+#define __NR_pkey_free	__PNR_pkey_free
+#endif /* __NR_pkey_free */
+
 #ifdef __cplusplus
 }
 #endif
