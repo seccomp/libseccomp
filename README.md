@@ -1,4 +1,4 @@
-libseccomp: An Enhanced Seccomp (mode 2) Helper Library
+An Enhanced Seccomp (seccomp-bpf) Helper Library
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
@@ -8,20 +8,20 @@ designed to abstract away the underlying BPF based syscall filter language and
 present a more conventional function-call based filtering interface that should
 be familiar to, and easily adopted by, application developers.
 
-* Online Resources
+## Online Resources
 
 The library source repository currently lives on GitHub at the following URL:
 
-	-> https://github.com/seccomp/libseccomp
+* https://github.com/seccomp/libseccomp
 
 The project mailing list is currently hosted on Google Groups at the URL below,
 please note that a Google account is not required to subscribe to the mailing
 list.
 
-	-> https://groups.google.com/forum/#!forum/libseccomp
-	-> https://groups.google.com/forum/#!forum/libseccomp/join
+* https://groups.google.com/forum/#!forum/libseccomp
+* https://groups.google.com/forum/#!forum/libseccomp/join
 
-* Documentation
+## Documentation
 
 The "doc/" directory contains all of the currently available documentation,
 mostly in the form of manpages.  The top level directory also contains a README
@@ -31,7 +31,7 @@ CHANGELOG files.
 Those who are interested in contributing to the the project are encouraged to
 read the SUBMITTING_PATCHES in the top level directory.
 
-* Building and Installing the Library
+## Building and Installing the Library
 
 If you are building the libseccomp library from an official release tarball,
 you should follow the familiar three step process used by most autotools based
@@ -46,7 +46,7 @@ repository you may need to run the autogen.sh script before running configure.
 In both cases, running "./configure -h" will display a list of build-time
 configuration options.
 
-* Testing the Library
+## Testing the Library
 
 There are a number of tests located in the "tests/" directory and a make target
 which can be used to help automate their execution.  If you want to run the
@@ -58,7 +58,7 @@ library:
 Be warned that the test run can take a while to run and produces a lot of
 output.
 
-* Other Useful Tools
+## Other Useful Tools
 
 The "tools/" directory includes a number of tools which may be helpful in the
 development of the library, or applications using the library.  Not all of
