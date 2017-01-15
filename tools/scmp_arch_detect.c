@@ -114,6 +114,9 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_PPC64LE:
 			printf("ppc64le\n");
 			break;
+		case SCMP_ARCH_RISCV64:
+			printf("riscv64\n");
+			break;
 		case SCMP_ARCH_S390:
 			printf("s390\n");
 			break;

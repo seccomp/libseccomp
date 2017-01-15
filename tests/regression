@@ -25,7 +25,8 @@ GLBL_ARCH_LE_SUPPORT=" \
 	x86 x86_64 x32 \
 	arm aarch64 \
 	mipsel mipsel64 mipsel64n32 \
-	ppc64le"
+	ppc64le \
+	riscv64"
 GLBL_ARCH_BE_SUPPORT=" \
 	mips mips64 mips64n32 \
 	parisc parisc64 \
