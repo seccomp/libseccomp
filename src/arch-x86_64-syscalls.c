@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -254,11 +254,15 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "pipe", 22 },
 	{ "pipe2", 293 },
 	{ "pivot_root", 155 },
+	{ "pkey_alloc", 330 },
+	{ "pkey_free", 331 },
+	{ "pkey_mprotect", 329 },
 	{ "poll", 7 },
 	{ "ppoll", 271 },
 	{ "prctl", 157 },
 	{ "pread64", 17 },
 	{ "preadv", 295 },
+	{ "preadv2", 327 },
 	{ "prlimit64", 302 },
 	{ "process_vm_readv", 310 },
 	{ "process_vm_writev", 311 },
@@ -269,6 +273,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "putpmsg", 182 },
 	{ "pwrite64", 18 },
 	{ "pwritev", 296 },
+	{ "pwritev2", 328 },
 	{ "query_module", 178 },
 	{ "quotactl", 179 },
 	{ "read", 0 },

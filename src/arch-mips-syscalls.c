@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
 	{ "_newselect", (__SCMP_NR_BASE + 142) },
@@ -258,11 +258,15 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "pipe", (__SCMP_NR_BASE + 42) },
 	{ "pipe2", (__SCMP_NR_BASE + 328) },
 	{ "pivot_root", (__SCMP_NR_BASE + 216) },
+	{ "pkey_alloc", (__SCMP_NR_BASE + 364) },
+	{ "pkey_free", (__SCMP_NR_BASE + 365) },
+	{ "pkey_mprotect", (__SCMP_NR_BASE + 363) },
 	{ "poll", (__SCMP_NR_BASE + 188) },
 	{ "ppoll", (__SCMP_NR_BASE + 302) },
 	{ "prctl", (__SCMP_NR_BASE + 192) },
 	{ "pread64", (__SCMP_NR_BASE + 200) },
 	{ "preadv", (__SCMP_NR_BASE + 330) },
+	{ "preadv2", (__SCMP_NR_BASE + 361) },
 	{ "prlimit64", (__SCMP_NR_BASE + 338) },
 	{ "process_vm_readv", (__SCMP_NR_BASE + 345) },
 	{ "process_vm_writev", (__SCMP_NR_BASE + 346) },
@@ -273,6 +277,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "putpmsg", (__SCMP_NR_BASE + 209) },
 	{ "pwrite64", (__SCMP_NR_BASE + 201) },
 	{ "pwritev", (__SCMP_NR_BASE + 331) },
+	{ "pwritev2", (__SCMP_NR_BASE + 362) },
 	{ "query_module", (__SCMP_NR_BASE + 187) },
 	{ "quotactl", (__SCMP_NR_BASE + 131) },
 	{ "read", (__SCMP_NR_BASE + 3) },
