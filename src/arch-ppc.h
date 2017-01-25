@@ -33,6 +33,6 @@ extern const struct arch_def arch_def_ppc;
 int ppc_syscall_resolve_name(const char *name);
 const char *ppc_syscall_resolve_num(int num);
 
-const char *ppc_syscall_iterate_name(unsigned int spot);
+const struct arch_syscall_def *ppc_syscall_iterate(unsigned int spot);
 
 #endif

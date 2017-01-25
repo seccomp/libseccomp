@@ -34,6 +34,6 @@ extern const struct arch_def arch_def_mipsel64;
 int mips64_syscall_resolve_name(const char *name);
 const char *mips64_syscall_resolve_num(int num);
 
-const char *mips64_syscall_iterate_name(unsigned int spot);
+const struct arch_syscall_def *mips64_syscall_iterate(unsigned int spot);
 
 #endif

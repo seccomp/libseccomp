@@ -32,6 +32,6 @@ extern const struct arch_def arch_def_arm;
 int arm_syscall_resolve_name(const char *name);
 const char *arm_syscall_resolve_num(int num);
 
-const char *arm_syscall_iterate_name(unsigned int spot);
+const struct arch_syscall_def *arm_syscall_iterate(unsigned int spot);
 
 #endif

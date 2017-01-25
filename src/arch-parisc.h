@@ -33,6 +33,6 @@ extern const struct arch_def arch_def_parisc64;
 int parisc_syscall_resolve_name(const char *name);
 const char *parisc_syscall_resolve_num(int num);
 
-const char *parisc_syscall_iterate_name(unsigned int spot);
+const struct arch_syscall_def *parisc_syscall_iterate(unsigned int spot);
 
 #endif

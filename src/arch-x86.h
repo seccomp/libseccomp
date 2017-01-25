@@ -33,7 +33,7 @@ extern const struct arch_def arch_def_x86;
 int x86_syscall_resolve_name(const char *name);
 const char *x86_syscall_resolve_num(int num);
 
-const char *x86_syscall_iterate_name(unsigned int spot);
+const struct arch_syscall_def *x86_syscall_iterate(unsigned int spot);
 
 int x86_syscall_rewrite(int *syscall);
 

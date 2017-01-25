@@ -574,15 +574,15 @@ const char *s390x_syscall_resolve_num(int num)
 }
 
 /**
- * Iterate through the syscall table and return the syscall name
+ * Iterate through the syscall table and return the syscall mapping
  * @param spot the offset into the syscall table
  *
- * Return the syscall name at position @spot or NULL on failure.  This function
- * should only ever be used internally by libseccomp.
+ * Return the syscall mapping at position @spot or NULL on failure.  This
+ * function should only ever be used internally by libseccomp.
  *
  */
-const char *s390x_syscall_iterate_name(unsigned int spot)
+const struct arch_syscall_def *s390x_syscall_iterate(unsigned int spot)
 {
 	/* XXX - no safety checks here */
-	return s390x_syscall_table[spot].name;
+	return &s390x_syscall_table[spot];
 }
