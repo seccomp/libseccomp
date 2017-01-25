@@ -84,7 +84,7 @@ function dump_lib_arch() {
 	[[ -z $1 ]] && return
 
 	[[ -n $2 ]] && offset_str="-o $2"
-	$LIB_SYS_DUMP -a $1 $offset_str | sed -e '/[^\t]\+\t-[0-9]\+/d'
+	$LIB_SYS_DUMP -a $1 $offset_str | sed -e '/[^\t]\+\t-[0-9]\+/d' | sort
 }
 
 #
