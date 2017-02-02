@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-aarch64.h"
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.10-rc6+ */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -254,15 +254,15 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "pipe", __PNR_pipe },
 	{ "pipe2", 59 },
 	{ "pivot_root", 41 },
-	{ "pkey_alloc", __PNR_pkey_alloc },
-	{ "pkey_free", __PNR_pkey_free },
-	{ "pkey_mprotect", __PNR_pkey_mprotect },
+	{ "pkey_alloc", 289 },
+	{ "pkey_free", 290 },
+	{ "pkey_mprotect", 288 },
 	{ "poll", __PNR_poll },
 	{ "ppoll", 73 },
 	{ "prctl", 167 },
 	{ "pread64", 67 },
 	{ "preadv", 69 },
-	{ "preadv2", 392 },
+	{ "preadv2", 286 },
 	{ "prlimit64", 261 },
 	{ "process_vm_readv", 270 },
 	{ "process_vm_writev", 271 },
@@ -273,7 +273,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "putpmsg", __PNR_putpmsg },
 	{ "pwrite64", 68 },
 	{ "pwritev", 70 },
-	{ "pwritev2", 393 },
+	{ "pwritev2", 287 },
 	{ "query_module", __PNR_query_module },
 	{ "quotactl", 60 },
 	{ "read", 63 },
