@@ -37,7 +37,7 @@
 #define __SCMP_NR_BASE			__SCMP_NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 4.5-rc4 */
+/* NOTE: based on Linux 4.9 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
@@ -266,11 +266,15 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "pipe", (__SCMP_NR_BASE + 42) },
 	{ "pipe2", (__SCMP_NR_BASE + 359) },
 	{ "pivot_root", (__SCMP_NR_BASE + 218) },
+	{ "pkey_alloc", (__SCMP_NR_BASE + 395) },
+	{ "pkey_free", (__SCMP_NR_BASE + 396) },
+	{ "pkey_mprotect", (__SCMP_NR_BASE + 394) },
 	{ "poll", (__SCMP_NR_BASE + 168) },
 	{ "ppoll", (__SCMP_NR_BASE + 336) },
 	{ "prctl", (__SCMP_NR_BASE + 172) },
 	{ "pread64", (__SCMP_NR_BASE + 180) },
 	{ "preadv", (__SCMP_NR_BASE + 361) },
+	{ "preadv2", (__SCMP_NR_BASE + 392) },
 	{ "prlimit64", (__SCMP_NR_BASE + 369) },
 	{ "process_vm_readv", (__SCMP_NR_BASE + 376) },
 	{ "process_vm_writev", (__SCMP_NR_BASE + 377) },
@@ -281,6 +285,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "putpmsg", __PNR_putpmsg },
 	{ "pwrite64", (__SCMP_NR_BASE + 181) },
 	{ "pwritev", (__SCMP_NR_BASE + 362) },
+	{ "pwritev2", (__SCMP_NR_BASE + 393) },
 	{ "query_module", __PNR_query_module },
 	{ "quotactl", (__SCMP_NR_BASE + 131) },
 	{ "read", (__SCMP_NR_BASE +  3) },
