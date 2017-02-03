@@ -35,7 +35,7 @@ def test():
         quit(1)
     util.install_trap()
 
-    fd = os.open("/dev/null", os.O_WRONLY|os.O_CREAT, 0600)
+    fd = os.open("/dev/null", os.O_WRONLY|os.O_CREAT)
 
     f = SyscallFilter(TRAP)
     # NOTE: additional syscalls required for python
@@ -48,7 +48,7 @@ def test():
     f.load()
 
     try:
-        if not os.write(fd, "testing") == len("testing"):
+        if not os.write(fd, b"testing") == len("testing"):
             raise IOError("failed to write the full test string")
         quit(160)
     except OSError as ex:

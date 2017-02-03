@@ -1,7 +1,7 @@
 #
 # Seccomp Library Python Bindings
 #
-# Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2012,2013,2017 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <paul@paul-moore.com>
 #
 
@@ -68,12 +68,30 @@ Example:
     f.load()
 """
 __author__ =  'Paul Moore <paul@paul-moore.com>'
-__date__ = "7 January 2013"
+__date__ = "3 February 2017"
 
+from cpython.version cimport PY_MAJOR_VERSION
 from libc.stdint cimport uint32_t
 import errno
 
 cimport libseccomp
+
+def c_str(string):
+    """ Convert a Python string to a C string.
+
+    Arguments:
+    string - the Python string
+
+    Description:
+    Convert the Python string into a form usable by C taking into consideration
+    the Python major version, e.g. Python 2.x or Python 3.x.
+    See http://docs.cython.org/en/latest/src/tutorial/strings.html for more
+    information.
+    """
+    if PY_MAJOR_VERSION < 3:
+        return string
+    else:
+        return bytes(string, "ascii")
 
 KILL = libseccomp.SCMP_ACT_KILL
 TRAP = libseccomp.SCMP_ACT_TRAP
@@ -121,7 +139,8 @@ def resolve_syscall(arch, syscall):
     cdef char *ret_str
 
     if isinstance(syscall, basestring):
-        return libseccomp.seccomp_syscall_resolve_name_rewrite(arch, syscall)
+        return libseccomp.seccomp_syscall_resolve_name_rewrite(arch,
+                                                               c_str(syscall))
     elif isinstance(syscall, int):
         ret_str = libseccomp.seccomp_syscall_resolve_num_arch(arch, syscall)
         if ret_str is NULL:
@@ -226,7 +245,7 @@ cdef class Arch:
             else:
                 self._token = 0;
         elif isinstance(arch, basestring):
-            self._token = libseccomp.seccomp_arch_resolve_name(arch)
+            self._token = libseccomp.seccomp_arch_resolve_name(c_str(arch))
         else:
             raise TypeError("Architecture must be an int or str type")
         if self._token == 0:
