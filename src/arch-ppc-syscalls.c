@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc.h"
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.10-rc6+ */
 const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -177,7 +177,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "ioprio_set", 273 },
 	{ "ipc", 117 },
 	{ "kcmp", 354 },
-	{ "kexec_file_load", __PNR_kexec_file_load },
+	{ "kexec_file_load", 382 },
 	{ "kexec_load", 268 },
 	{ "keyctl", 271 },
 	{ "kill", 37 },
