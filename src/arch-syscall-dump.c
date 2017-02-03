@@ -65,8 +65,7 @@ int main(int argc, char *argv[])
 	const struct arch_def *arch = arch_def_native;
 	int offset = 0;
 	int iter;
-	int sys_num;
-	const char *sys_name;
+	const struct arch_syscall_def *sys;
 
 	/* parse the command line */
 	while ((opt = getopt(argc, argv, "a:o:h")) > 0) {
@@ -90,61 +89,62 @@ int main(int argc, char *argv[])
 	do {
 		switch (arch->token) {
 		case SCMP_ARCH_X86:
-			sys_name = x86_syscall_iterate_name(iter);
+			sys = x86_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_X86_64:
-			sys_name = x86_64_syscall_iterate_name(iter);
+			sys = x86_64_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_X32:
-			sys_name = x32_syscall_iterate_name(iter);
+			sys = x32_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_ARM:
-			sys_name = arm_syscall_iterate_name(iter);
+			sys = arm_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_AARCH64:
-			sys_name = aarch64_syscall_iterate_name(iter);
+			sys = aarch64_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_MIPS:
 		case SCMP_ARCH_MIPSEL:
-			sys_name = mips_syscall_iterate_name(iter);
+			sys = mips_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_MIPS64:
 		case SCMP_ARCH_MIPSEL64:
-			sys_name = mips64_syscall_iterate_name(iter);
+			sys = mips64_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_MIPS64N32:
 		case SCMP_ARCH_MIPSEL64N32:
-			sys_name = mips64n32_syscall_iterate_name(iter);
+			sys = mips64n32_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_PPC:
-			sys_name = ppc_syscall_iterate_name(iter);
+			sys = ppc_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_PPC64:
 		case SCMP_ARCH_PPC64LE:
-			sys_name = ppc64_syscall_iterate_name(iter);
+			sys = ppc64_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_S390:
-			sys_name = s390_syscall_iterate_name(iter);
+			sys = s390_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_S390X:
-			sys_name = s390x_syscall_iterate_name(iter);
+			sys = s390x_syscall_iterate(iter);
 			break;
 		default:
 			/* invalid arch */
 			exit_usage(argv[0]);
 		}
-		if (sys_name != NULL) {
-			sys_num = arch_syscall_resolve_name(arch, sys_name);
+		if (sys->name != NULL) {
+			int sys_num = sys->num;
+
 			if (offset > 0 && sys_num > 0)
 				sys_num -= offset;
 
 			/* output the results */
-			printf("%s\t%d\n", sys_name, sys_num);
+			printf("%s\t%d\n", sys->name, sys_num);
 
 			/* next */
 			iter++;
 		}
-	} while (sys_name != NULL);
+	} while (sys->name != NULL);
 
 	return 0;
 }

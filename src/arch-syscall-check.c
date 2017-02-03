@@ -49,9 +49,9 @@
  *
  */
 void syscall_check(char *str_miss, const char *syscall,
-		   const char *arch_name, const char *arch_sys)
+		   const char *arch_name, const struct arch_syscall_def *sys)
 {
-	if (strcmp(syscall, arch_sys)) {
+	if (strcmp(syscall, sys->name)) {
 		if (str_miss[0] != '\0')
 			strcat(str_miss, ",");
 		strcat(str_miss, arch_name);
@@ -75,40 +75,42 @@ int main(int argc, char *argv[])
 	int i_ppc64 = 0;
 	int i_s390 = 0;
 	int i_s390x = 0;
-	const char *sys_name;
 	char str_miss[256];
+	const char *sys_name;
+	const struct arch_syscall_def *sys;
 
 	do {
 		str_miss[0] = '\0';
-		sys_name = x86_syscall_iterate_name(i_x86);
-		if (sys_name == NULL) {
+		sys = x86_syscall_iterate(i_x86);
+		if (sys == NULL || sys->name == NULL) {
 			printf("FAULT\n");
 			return 1;
 		}
+		sys_name = sys->name;
 
 		/* check each arch using x86 as the reference */
 		syscall_check(str_miss, sys_name, "x86_64",
-			      x86_64_syscall_iterate_name(i_x86_64));
+			      x86_64_syscall_iterate(i_x86_64));
 		syscall_check(str_miss, sys_name, "x32",
-			      x32_syscall_iterate_name(i_x32));
+			      x32_syscall_iterate(i_x32));
 		syscall_check(str_miss, sys_name, "arm",
-			      arm_syscall_iterate_name(i_arm));
+			      arm_syscall_iterate(i_arm));
 		syscall_check(str_miss, sys_name, "aarch64",
-			      aarch64_syscall_iterate_name(i_aarch64));
+			      aarch64_syscall_iterate(i_aarch64));
 		syscall_check(str_miss, sys_name, "mips",
-			      mips_syscall_iterate_name(i_mips));
+			      mips_syscall_iterate(i_mips));
 		syscall_check(str_miss, sys_name, "mips64",
-			      mips64_syscall_iterate_name(i_mips64));
+			      mips64_syscall_iterate(i_mips64));
 		syscall_check(str_miss, sys_name, "mips64n32",
-			      mips64n32_syscall_iterate_name(i_mips64n32));
+			      mips64n32_syscall_iterate(i_mips64n32));
 		syscall_check(str_miss, sys_name, "ppc",
-			      ppc_syscall_iterate_name(i_ppc));
+			      ppc_syscall_iterate(i_ppc));
 		syscall_check(str_miss, sys_name, "ppc64",
-			      ppc64_syscall_iterate_name(i_ppc64));
+			      ppc64_syscall_iterate(i_ppc64));
 		syscall_check(str_miss, sys_name, "s390",
-			      s390_syscall_iterate_name(i_s390));
+			      s390_syscall_iterate(i_s390));
 		syscall_check(str_miss, sys_name, "s390x",
-			      s390x_syscall_iterate_name(i_s390x));
+			      s390x_syscall_iterate(i_s390x));
 
 		/* output the results */
 		printf("%s: ", sys_name);
@@ -119,29 +121,29 @@ int main(int argc, char *argv[])
 			printf("OK\n");
 
 		/* next */
-		if (x86_syscall_iterate_name(i_x86 + 1))
+		if (x86_syscall_iterate(i_x86 + 1))
 			i_x86++;
-		if (!x86_64_syscall_iterate_name(++i_x86_64))
+		if (!x86_64_syscall_iterate(++i_x86_64)->name)
 			i_x86_64 = -1;
-		if (!x32_syscall_iterate_name(++i_x32))
+		if (!x32_syscall_iterate(++i_x32)->name)
 			i_x32 = -1;
-		if (!arm_syscall_iterate_name(++i_arm))
+		if (!arm_syscall_iterate(++i_arm)->name)
 			i_arm = -1;
-		if (!aarch64_syscall_iterate_name(++i_aarch64))
+		if (!aarch64_syscall_iterate(++i_aarch64)->name)
 			i_aarch64 = -1;
-		if (!mips_syscall_iterate_name(++i_mips))
+		if (!mips_syscall_iterate(++i_mips)->name)
 			i_mips = -1;
-		if (!mips64_syscall_iterate_name(++i_mips64))
+		if (!mips64_syscall_iterate(++i_mips64)->name)
 			i_mips64 = -1;
-		if (!mips64n32_syscall_iterate_name(++i_mips64n32))
+		if (!mips64n32_syscall_iterate(++i_mips64n32)->name)
 			i_mips64n32 = -1;
-		if (!ppc_syscall_iterate_name(++i_ppc))
+		if (!ppc_syscall_iterate(++i_ppc))
 			i_ppc = -1;
-		if (!ppc64_syscall_iterate_name(++i_ppc64))
+		if (!ppc64_syscall_iterate(++i_ppc64)->name)
 			i_ppc64 = -1;
-		if (!s390_syscall_iterate_name(++i_s390))
+		if (!s390_syscall_iterate(++i_s390)->name)
 			i_s390 = -1;
-		if (!s390x_syscall_iterate_name(++i_s390x))
+		if (!s390x_syscall_iterate(++i_s390x)->name)
 			i_s390x = -1;
 	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
@@ -150,63 +152,52 @@ int main(int argc, char *argv[])
 		 i_s390 >= 0 && i_s390x >= 0);
 
 	/* check for any leftovers */
-	sys_name = x86_syscall_iterate_name(i_x86 + 1);
-	if (sys_name) {
-		printf("%s: ERROR, x86 has additional syscalls\n", sys_name);
+	sys = x86_syscall_iterate(i_x86 + 1);
+	if (sys->name) {
+		printf("ERROR, x86 has additional syscalls\n");
 		return 1;
 	}
 	if (i_x86_64 >= 0) {
-		printf("%s: ERROR, x86_64 has additional syscalls\n",
-		       x86_64_syscall_iterate_name(i_x86_64));
+		printf("ERROR, x86_64 has additional syscalls\n");
 		return 1;
 	}
 	if (i_x32 >= 0) {
-		printf("%s: ERROR, x32 has additional syscalls\n",
-		       x32_syscall_iterate_name(i_x32));
+		printf("ERROR, x32 has additional syscalls\n");
 		return 1;
 	}
 	if (i_arm >= 0) {
-		printf("%s: ERROR, arm has additional syscalls\n",
-		       arm_syscall_iterate_name(i_arm));
+		printf("ERROR, arm has additional syscalls\n");
 		return 1;
 	}
 	if (i_aarch64 >= 0) {
-		printf("%s: ERROR, aarch64 has additional syscalls\n",
-		       aarch64_syscall_iterate_name(i_aarch64));
+		printf("ERROR, aarch64 has additional syscalls\n");
 		return 1;
 	}
 	if (i_mips >= 0) {
-		printf("%s: ERROR, mips has additional syscalls\n",
-		       mips_syscall_iterate_name(i_mips));
+		printf("ERROR, mips has additional syscalls\n");
 		return 1;
 	}
 	if (i_mips64 >= 0) {
-		printf("%s: ERROR, mips64 has additional syscalls\n",
-		       mips64_syscall_iterate_name(i_mips64));
+		printf("ERROR, mips64 has additional syscalls\n");
 		return 1;
 	}
 	if (i_mips64n32 >= 0) {
-		printf("%s: ERROR, mips64n32 has additional syscalls\n",
-		       mips64n32_syscall_iterate_name(i_mips64n32));
+		printf("ERROR, mips64n32 has additional syscalls\n");
 		return 1;
 	}
 	if (i_ppc >= 0) {
-		printf("%s: ERROR, ppc has additional syscalls\n",
-		       ppc_syscall_iterate_name(i_ppc));
+		printf("ERROR, ppc has additional syscalls\n");
 	}
 	if (i_ppc64 >= 0) {
-		printf("%s: ERROR, ppc64 has additional syscalls\n",
-		       ppc64_syscall_iterate_name(i_ppc64));
+		printf("ERROR, ppc64 has additional syscalls\n");
 		return 1;
 	}
 	if (i_s390 >= 0) {
-		printf("%s: ERROR, s390 has additional syscalls\n",
-		       s390_syscall_iterate_name(i_s390));
+		printf("ERROR, s390 has additional syscalls\n");
 		return 1;
 	}
 	if (i_s390x >= 0) {
-		printf("%s: ERROR, s390x has additional syscalls\n",
-		       s390x_syscall_iterate_name(i_s390x));
+		printf("ERROR, s390x has additional syscalls\n");
 		return 1;
 	}
 

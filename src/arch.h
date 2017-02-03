@@ -60,20 +60,7 @@ struct arch_def {
 /* arch_def for the current architecture */
 extern const struct arch_def *arch_def_native;
 
-/* NOTE: Syscall mappings can be found by running the following commands
- *	 on the specific architecture's include file:
- *	   # gcc -E -dM <file> | grep '__NR_'
- *	 where <file> in many cases is /usr/include/asm/unistd.h, however,
- *	 depending on the architecture you may need to use a different header.
- *	 Further, you can automatically format this list for use as a struct
- *	 initializer with the following command:
- *	   # gcc -E -dM <file> | grep '__NR_' | \
- *	     sed -e 's/#define[ \t]\+__NR_//' | sort | \
- *	     sed -e 's/\([^ \t]\+\)\([ \t]\+\)\([0-9]\+\)/\t{ \"\1\", \3 },/'
- *	 Finally, when creating a table/array of this structure, the final
- *	 sentinel entry should be "{ NULL, __NR_SCMP_ERROR }"; see the existing
- *	 tables as an example.
- */
+/* syscall name/num mapping */
 struct arch_syscall_def {
 	const char *name;
 	unsigned int num;
