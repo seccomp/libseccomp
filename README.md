@@ -61,8 +61,14 @@ library:
 Be warned that the test run can take a while to run and produces a lot of
 output.
 
-## Other Useful Tools
+## Developer Tools
 
 The "tools/" directory includes a number of tools which may be helpful in the
 development of the library, or applications using the library.  Not all of
 these tools are installed by default.
+
+## Bug and Vulnerability Reporting
+
+Problems with the libseccomp library can be reported using the GitHub issue
+tracking system or the mailing list.  Those who wish to privately report
+potential vulnerabilities can send mail to paul@paul-moore.com.
