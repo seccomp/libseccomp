@@ -2,6 +2,8 @@ An Enhanced Seccomp (seccomp-bpf) Helper Library
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/608/badge)](https://bestpractices.coreinfrastructure.org/projects/608)
+
 The libseccomp library provides an easy to use, platform independent, interface
 to the Linux Kernel's syscall filtering mechanism.  The libseccomp API is
 designed to abstract away the underlying BPF based syscall filter language and
