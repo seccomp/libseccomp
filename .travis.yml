@@ -4,7 +4,7 @@
 # https://wiki.ubuntu.com/Releases
 
 dist: trusty
-sudo: required
+sudo: false
 
 notifications:
   email:
@@ -12,7 +12,8 @@ notifications:
     on_failure: always
 
 language: c
-compiler: gcc
+compiler:
+  - gcc
 
 addons:
   apt:
@@ -22,22 +23,23 @@ addons:
       - python-dev
       - python-pip
       - valgrind
-
-# NOTE: sudo is required for python/cython to work correctly
+      - clang
 
 # resolve any remaining dependency issues
 before_install:
   # ubuntu 14.04 (trusty) has an old version of cython
-  - sudo pip install cython
+  - pip install cython
 
 # perform the build and fail immediately on error
 install:
-  - sudo ./autogen.sh
-  - sudo ./configure --enable-python
-  - sudo make check-build
+  - ./autogen.sh
+  - ./configure --enable-python
+  - make check-build
 
 # run all of the tests independently, fail if any of the tests error
 script:
-  - (cd src; sudo make check)
-  - (cd tests; sudo make check)
-  - (cd tests; sudo ./regression -T live)
+  - (cd src; make check)
+  - (cd tests; make check)
+  - (cd tests; ./regression -T live)
+  # ubuntu 14.04 (trusty) clang has problems with the cython generated code
+  - make clean && ./configure && scan-build make
