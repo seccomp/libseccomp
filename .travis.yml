@@ -24,11 +24,14 @@ addons:
       - python-pip
       - valgrind
       - clang
+      - lcov
 
 # resolve any remaining dependency issues
 before_install:
   # ubuntu 14.04 (trusty) has an old version of cython
   - pip install cython
+  # see https://github.com/eddyxu/cpp-coveralls
+  - pip install cpp-coveralls
 
 # perform the build and fail immediately on error
 install:
@@ -38,8 +41,15 @@ install:
 
 # run all of the tests independently, fail if any of the tests error
 script:
-  - (cd src; make check)
-  - (cd tests; make check)
-  - (cd tests; ./regression -T live)
+  - make check
+  - LIBSECCOMP_TSTCFG_TYPE=live make -C tests check
   # ubuntu 14.04 (trusty) clang has problems with the cython generated code
   - make clean && ./configure && scan-build make
+  # limit the code coverage tests to the native/c code
+  - make clean && ./configure --enable-code-coverage &&
+    LIBSECCOMP_TSTCFG_TYPE=basic make check-code-coverage &&
+    LIBSECCOMP_TSTCFG_TYPE=bpf-sim make check-code-coverage
+
+after_success:
+  # https://github.com/eddyxu/cpp-coveralls/blob/master/README.md
+  - coveralls --gcov-options '\-lp' --exclude tests --exclude tools
