@@ -16,8 +16,9 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-AM_LDFLAGS = -static
-LDADD = util.la ../src/libseccomp.la
+@CODE_COVERAGE_RULES@
+
+LDADD = util.la ../src/libseccomp.la ${CODE_COVERAGE_LIBS}
 
 check_LTLIBRARIES = util.la
 util_la_SOURCES = util.c util.h

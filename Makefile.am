@@ -37,6 +37,9 @@ check-build: all
 check-syntax:
 	@./tools/check-syntax
 
+check-code-coverage: check-build
+	${MAKE} ${AM_MAKEFLAGS} -C tests check-code-coverage
+
 if COVERITY
 coverity-build: clean
 	cov-build --dir cov-int ${MAKE} ${AM_MAKEFLAGS} check-build

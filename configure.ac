@@ -125,6 +125,12 @@ AC_CHECK_PROG(have_coverity, cov-build, "yes", "no")
 AM_CONDITIONAL(COVERITY, test "$have_coverity" = yes)
 
 dnl ####
+dnl code coverage checks
+dnl -> https://www.gnu.org/software/autoconf-archive/ax_code_coverage.html
+dnl ####
+AX_CODE_COVERAGE
+
+dnl ####
 dnl version dependent files
 dnl ####
 AC_CONFIG_FILES([
