@@ -83,6 +83,7 @@ optional arguments:
   -s SINGLE_TEST specifies individual test number to be run
   -t [TEMP_DIR]  specifies directory to create temporary files in
   -T [TEST_TYPE] only run tests matching the specified type
+                  can also be set via LIBSECCOMP_TSTCFG_TYPE env variable
   -v             specifies that verbose output be provided
 EOF
 }
@@ -966,6 +967,9 @@ if [[ -n $runall ]]; then
 	batch_list=()
 	single_list=()
 fi
+
+# check for configuration via environment variables
+[[ -z $type && -n $LIBSECCOMP_TSTCFG_TYPE ]] && type=$LIBSECCOMP_TSTCFG_TYPE
 
 # open log file for append (default to stdout)
 if [[ -n $logfile ]]; then
