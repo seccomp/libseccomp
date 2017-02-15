@@ -18,6 +18,14 @@
 
 @CODE_COVERAGE_RULES@
 
+if CODE_COVERAGE_ENABLED
+DBG_STATIC =
+else
+DBG_STATIC = -static
+endif
+
+AM_LDFLAGS = ${DBG_STATIC}
+
 LDADD = util.la ../src/libseccomp.la ${CODE_COVERAGE_LIBS}
 
 check_LTLIBRARIES = util.la
