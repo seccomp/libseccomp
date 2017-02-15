@@ -39,3 +39,4 @@ util.pyc
 32-live-tsync_allow
 33-sim-socket_syscalls_be
 34-sim-basic_blacklist
+35-sim-negative_one

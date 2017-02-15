@@ -50,8 +50,9 @@ int main(int argc, char *argv[])
 	if (get_number(argv[1], &first) || get_number(argv[2], &last))
 		return 1;
 
-	for (cur = first; cur <= last; cur++)
-		printf("%" PRIu64 "\n", cur);
+	for (cur = first; cur != last; cur++)
+		printf("%" PRId64 "\n", cur);
+	printf("%" PRId64 "\n", cur);
 
 	return 0;
 }
