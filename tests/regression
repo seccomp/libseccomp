@@ -281,6 +281,10 @@ function run_test_bpf_sim_fuzz() {
 	local testname=${line[0]}
 	local stress_count=${line[1]}
 
+	# check for stress count configuration via environment variables
+	[[ -n $LIBSECCOMP_TSTCFG_STRESSCNT ]] && \
+		stress_count=$LIBSECCOMP_TSTCFG_STRESSCNT
+
 	for i in $(get_seq 1 $stress_count); do
 		local sys=$(generate_random_data)
 		local -a arg=($(generate_random_data) $(generate_random_data) \
