@@ -330,6 +330,10 @@ int arch_syscall_translate(const struct arch_def *arch, int *syscall)
 	int sc_num;
 	const char *sc_name;
 
+	/* special handling for syscall -1 */
+	if (*syscall == -1)
+		return 0;
+
 	if (arch->token != arch_def_native->token) {
 		sc_name = arch_syscall_resolve_num(arch_def_native, *syscall);
 		if (sc_name == NULL)
@@ -360,10 +364,10 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 {
 	int sys = *syscall;
 
-	if (sys >= 0) {
+	if (sys >= -1) {
 		/* we shouldn't be here - no rewrite needed */
 		return 0;
-	} else if (sys < 0 && sys > -100) {
+	} else if (sys < -1 && sys > -100) {
 		/* reserved values */
 		return -EINVAL;
 	} else if (sys <= -100 && sys > -10000) {
@@ -404,10 +408,6 @@ int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
 	int rc;
 	struct db_api_rule_list *rule, *rule_tail;
 
-	/* ensure we aren't using any reserved syscall values */
-	if (syscall < 0 && syscall > -100)
-		return -EINVAL;
-
 	/* translate the syscall */
 	rc = arch_syscall_translate(db->arch, &syscall);
 	if (rc < 0)
@@ -424,9 +424,9 @@ int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
 	rule->next = NULL;
 
 	/* add the new rule to the existing filter */
-	if (db->arch->rule_add == NULL) {
-		/* negative syscalls require a db->arch->rule_add() function */
-		if (syscall < 0 && strict) {
+	if (syscall == -1 || db->arch->rule_add == NULL) {
+		/* syscalls < -1 require a db->arch->rule_add() function */
+		if (syscall < -1 && strict) {
 			rc = -EDOM;
 			goto rule_add_failure;
 		}

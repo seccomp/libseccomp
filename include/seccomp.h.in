@@ -63,6 +63,7 @@ enum scmp_filter_attr {
 	SCMP_FLTATR_ACT_BADARCH = 2,	/**< bad architecture action */
 	SCMP_FLTATR_CTL_NNP = 3,	/**< set NO_NEW_PRIVS on filter load */
 	SCMP_FLTATR_CTL_TSYNC = 4,	/**< sync threads on filter load */
+	SCMP_FLTATR_API_TSKIP = 5,	/**< allow rules with a -1 syscall */
 	_SCMP_FLTATR_MAX,
 };
 

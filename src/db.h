@@ -137,6 +137,8 @@ struct db_filter_attr {
 	uint32_t nnp_enable;
 	/* SECCOMP_FILTER_FLAG_TSYNC related attributes */
 	uint32_t tsync_enable;
+	/* allow rules with a -1 syscall value */
+	uint32_t api_tskip;
 };
 
 struct db_filter {
