@@ -44,7 +44,7 @@ script:
   - LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
   - LIBSECCOMP_TSTCFG_TYPE=live make -C tests check
   # ubuntu 14.04 (trusty) clang has problems with the cython generated code
-  - make clean && ./configure && scan-build make
+  - make clean && ./configure && scan-build --status-bugs make
   # limit the code coverage tests to the native/c code
   - make clean && ./configure --enable-code-coverage &&
     LIBSECCOMP_TSTCFG_TYPE=basic make check-code-coverage &&
