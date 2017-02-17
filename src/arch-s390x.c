@@ -209,7 +209,6 @@ int s390x_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 {
 	int rc;
 	unsigned int iter;
-	size_t args_size;
 	int sys = rule->syscall;
 	int sys_a, sys_b;
 	struct db_api_rule_list *rule_a, *rule_b;
@@ -219,7 +218,7 @@ int s390x_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 		   (359 to 373)   : direct socket syscalls, Linux 4.3+ */
 
 		/* strict check for the multiplexed socket syscalls */
-		for (iter = 0; iter < rule->args_cnt; iter++) {
+		for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 			if ((rule->args[iter].valid != 0) && (strict))
 				return -EINVAL;
 		}
@@ -249,19 +248,9 @@ int s390x_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
 		} else {
 			/* need two rules, dup the first and link together */
 			rule_a = rule;
-			rule_b = malloc(sizeof(*rule_b));
+			rule_b = db_rule_dup(rule_a);
 			if (rule_b == NULL)
 				return -ENOMEM;
-			args_size = sizeof(*rule_b->args) * rule_a->args_cnt;
-			rule_b->args = malloc(args_size);
-			if (rule_b->args == NULL) {
-				free(rule_b);
-				return -ENOMEM;
-			}
-			rule_b->action = rule_a->action;
-			rule_b->syscall = rule_a->syscall;
-			rule_b->args_cnt = rule_a->args_cnt;
-			memcpy(rule_b->args, rule_a->args, args_size);
 			rule_b->prev = rule_a;
 			rule_b->next = NULL;
 			rule_a->next = rule_b;

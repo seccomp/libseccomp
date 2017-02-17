@@ -43,8 +43,7 @@ struct db_api_arg {
 struct db_api_rule_list {
 	uint32_t action;
 	int syscall;
-	struct db_api_arg *args;
-	unsigned int args_cnt;
+	struct db_api_arg args[ARG_COUNT_MAX];
 
 	struct db_api_rule_list *prev, *next;
 };
@@ -188,6 +187,8 @@ struct db_filter_col {
 	for (iter = (list); iter != NULL; iter = iter->next)
 
 int db_action_valid(uint32_t action);
+
+struct db_api_rule_list *db_rule_dup(const struct db_api_rule_list *src);
 
 struct db_filter_col *db_col_init(uint32_t def_action);
 int db_col_reset(struct db_filter_col *col, uint32_t def_action);
