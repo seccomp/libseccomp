@@ -31,6 +31,7 @@
 #include "arch.h"
 #include "db.h"
 #include "system.h"
+#include "helper.h"
 
 /* state values */
 #define _DB_STA_VALID			0xA1B2C3D4
@@ -400,15 +401,12 @@ static struct db_filter *_db_init(const struct arch_def *arch)
 {
 	struct db_filter *db;
 
-	db = malloc(sizeof(*db));
+	db = zmalloc(sizeof(*db));
 	if (db == NULL)
 		return NULL;
 
-	/* clear the buffer for the first time and set the arch */
-	memset(db, 0, sizeof(*db));
+	/* set the arch and reset the DB to a known state */
 	db->arch = arch;
-
-	/* reset the DB to a known state */
 	_db_reset(db);
 
 	return db;
@@ -491,10 +489,9 @@ static int _db_syscall_priority(struct db_filter *db,
 	}
 
 	/* no existing syscall entry - create a phantom entry */
-	s_new = malloc(sizeof(*s_new));
+	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
 		return -ENOMEM;
-	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	s_new->priority = sys_pri;
 	s_new->valid = false;
@@ -608,12 +605,9 @@ struct db_filter_col *db_col_init(uint32_t def_action)
 {
 	struct db_filter_col *col;
 
-	col = malloc(sizeof(*col));
+	col = zmalloc(sizeof(*col));
 	if (col == NULL)
 		return NULL;
-
-	/* clear the buffer for the first time */
-	memset(col, 0, sizeof(*col));
 
 	/* reset the DB to a known state */
 	if (db_col_reset(col, def_action) < 0)
@@ -1019,10 +1013,9 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	struct db_arg_chain_tree *c_prev_hi = NULL, *c_prev_lo = NULL;
 	bool tf_flag;
 
-	s_new = malloc(sizeof(*s_new));
+	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
 		return NULL;
-	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	s_new->valid = true;
 	/* run through the argument chain */
@@ -1037,17 +1030,15 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		    !_db_arg_cmp_need_lo(&chain[iter]))
 			continue;
 
-		c_iter_hi = malloc(sizeof(*c_iter_hi));
+		c_iter_hi = zmalloc(sizeof(*c_iter_hi));
 		if (c_iter_hi == NULL)
 			goto gen_64_failure;
-		memset(c_iter_hi, 0, sizeof(*c_iter_hi));
 		c_iter_hi->refcnt = 1;
-		c_iter_lo = malloc(sizeof(*c_iter_lo));
+		c_iter_lo = zmalloc(sizeof(*c_iter_lo));
 		if (c_iter_lo == NULL) {
 			free(c_iter_hi);
 			goto gen_64_failure;
 		}
-		memset(c_iter_lo, 0, sizeof(*c_iter_lo));
 		c_iter_lo->refcnt = 1;
 
 		/* link this level to the previous level */
@@ -1154,10 +1145,9 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	bool tf_flag;
 
-	s_new = malloc(sizeof(*s_new));
+	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
 		return NULL;
-	memset(s_new, 0, sizeof(*s_new));
 	s_new->num = syscall;
 	s_new->valid = true;
 	/* run through the argument chain */
@@ -1169,10 +1159,9 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		if (!_db_arg_cmp_need_lo(&chain[iter]))
 			continue;
 
-		c_iter = malloc(sizeof(*c_iter));
+		c_iter = zmalloc(sizeof(*c_iter));
 		if (c_iter == NULL)
 			goto gen_32_failure;
-		memset(c_iter, 0, sizeof(*c_iter));
 		c_iter->refcnt = 1;
 		c_iter->arg = chain[iter].arg;
 		c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
@@ -1589,10 +1578,9 @@ int db_col_rule_add(struct db_filter_col *col,
 
 	/* collect the arguments for the filter rule */
 	chain_size = sizeof(*chain) * ARG_COUNT_MAX;
-	chain = malloc(chain_size);
+	chain = zmalloc(chain_size);
 	if (chain == NULL)
 		return -ENOMEM;
-	memset(chain, 0, chain_size);
 	for (iter = 0; iter < arg_cnt; iter++) {
 		arg_data = arg_array[iter];
 		arg_num = arg_data.arg;
@@ -1655,10 +1643,10 @@ int db_col_transaction_start(struct db_filter_col *col)
 	struct db_api_rule_list *rule_o, *rule_s;
 
 	/* allocate the snapshot */
-	snap = malloc(sizeof(*snap));
+	snap = zmalloc(sizeof(*snap));
 	if (snap == NULL)
 		return -ENOMEM;
-	snap->filters = malloc(sizeof(struct db_filter *) * col->filter_cnt);
+	snap->filters = zmalloc(sizeof(struct db_filter *) * col->filter_cnt);
 	if (snap->filters == NULL) {
 		free(snap);
 		return -ENOMEM;

@@ -34,6 +34,7 @@
 #include "arch.h"
 #include "db.h"
 #include "gen_pfc.h"
+#include "helper.h"
 
 struct pfc_sys_list {
 	struct db_sys_list *sys;
@@ -270,12 +271,11 @@ static int _gen_pfc_arch(const struct db_filter_col *col,
 
 	/* sort the syscall list */
 	db_list_foreach(s_iter, db->syscalls) {
-		p_new = malloc(sizeof(*p_new));
+		p_new = zmalloc(sizeof(*p_new));
 		if (p_new == NULL) {
 			rc = -ENOMEM;
 			goto arch_return;
 		}
-		memset(p_new, 0, sizeof(*p_new));
 		p_new->sys = s_iter;
 
 		p_prev = NULL;

@@ -22,7 +22,7 @@ SUBDIRS += python
 endif
 
 SOURCES_ALL = \
-	api.c system.h system.c \
+	api.c system.h system.c helper.h helper.c \
 	gen_pfc.h gen_pfc.c gen_bpf.h gen_bpf.c \
 	hash.h hash.c \
 	db.h db.c \

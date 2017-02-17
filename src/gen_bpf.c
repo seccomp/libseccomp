@@ -39,6 +39,7 @@
 #include "db.h"
 #include "hash.h"
 #include "system.h"
+#include "helper.h"
 
 /* allocation increments */
 #define AINC_BLK			2
@@ -314,11 +315,9 @@ static struct bpf_blk *_blk_alloc(void)
 {
 	struct bpf_blk *blk;
 
-	blk = malloc(sizeof(*blk));
+	blk = zmalloc(sizeof(*blk));
 	if (blk == NULL)
 		return NULL;
-
-	memset(blk, 0, sizeof(*blk));
 	blk->flag_unique = true;
 	blk->acc_start = _ACC_STATE_UNDEF;
 	blk->acc_end = _ACC_STATE_UNDEF;
@@ -568,10 +567,9 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 	if (blk->flag_hash)
 		return 0;
 
-	h_new = malloc(sizeof(*h_new));
+	h_new = zmalloc(sizeof(*h_new));
 	if (h_new == NULL)
 		return -ENOMEM;
-	memset(h_new, 0, sizeof(*h_new));
 
 	/* generate the hash */
 	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
@@ -1932,10 +1930,9 @@ struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 	memset(&state, 0, sizeof(state));
 	state.attr = &col->attr;
 
-	state.bpf = malloc(sizeof(*(state.bpf)));
+	state.bpf = zmalloc(sizeof(*(state.bpf)));
 	if (state.bpf == NULL)
 		return NULL;
-	memset(state.bpf, 0, sizeof(*(state.bpf)));
 
 	rc = _gen_bpf_build_bpf(&state, col);
 	if (rc < 0)
