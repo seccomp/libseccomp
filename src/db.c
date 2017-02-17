@@ -381,7 +381,6 @@ static void _db_reset(struct db_filter *db)
 		r_iter = db->rules;
 		while (r_iter != NULL) {
 			db->rules = r_iter->next;
-			free(r_iter->args);
 			free(r_iter);
 			r_iter = db->rules;
 		}
@@ -510,6 +509,29 @@ static int _db_syscall_priority(struct db_filter *db,
 	}
 
 	return 0;
+}
+
+/**
+ * Duplicate an existing filter rule
+ * @param src the rule to duplicate
+ *
+ * This function makes an exact copy of the given rule, but does not add it
+ * to any lists.  Returns a pointer to the new rule on success, NULL on
+ * failure.
+ *
+ */
+struct db_api_rule_list *db_rule_dup(const struct db_api_rule_list *src)
+{
+	struct db_api_rule_list *dest;
+
+	dest = malloc(sizeof(*dest));
+	if (dest == NULL)
+		return NULL;
+	memcpy(dest, src, sizeof(*dest));
+	dest->prev = NULL;
+	dest->next = NULL;
+
+	return dest;
 }
 
 /**
@@ -989,10 +1011,9 @@ static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
 static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 					   uint32_t action,
 					   unsigned int syscall,
-					   struct db_api_arg *chain)
+					   const struct db_api_arg *chain)
 {
 	unsigned int iter;
-	int chain_len_max;
 	struct db_sys_list *s_new;
 	struct db_arg_chain_tree *c_iter_hi = NULL, *c_iter_lo = NULL;
 	struct db_arg_chain_tree *c_prev_hi = NULL, *c_prev_lo = NULL;
@@ -1005,10 +1026,7 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	s_new->num = syscall;
 	s_new->valid = true;
 	/* run through the argument chain */
-	chain_len_max = arch_arg_count_max(arch);
-	if (chain_len_max < 0)
-		goto gen_64_failure;
-	for (iter = 0; iter < chain_len_max; iter++) {
+	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 		if (chain[iter].valid == 0)
 			continue;
 
@@ -1129,10 +1147,9 @@ gen_64_failure:
 static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 					   uint32_t action,
 					   unsigned int syscall,
-					   struct db_api_arg *chain)
+					   const struct db_api_arg *chain)
 {
 	unsigned int iter;
-	int chain_len_max;
 	struct db_sys_list *s_new;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	bool tf_flag;
@@ -1144,10 +1161,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	s_new->num = syscall;
 	s_new->valid = true;
 	/* run through the argument chain */
-	chain_len_max = arch_arg_count_max(arch);
-	if (chain_len_max < 0)
-		goto gen_32_failure;
-	for (iter = 0; iter < chain_len_max; iter++) {
+	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 		if (chain[iter].valid == 0)
 			continue;
 
@@ -1238,7 +1252,7 @@ int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule)
 	int rc = -ENOMEM;
 	int syscall = rule->syscall;
 	uint32_t action = rule->action;
-	struct db_api_arg *chain = rule->args;
+	const struct db_api_arg *chain = rule->args;
 	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
 	struct db_arg_chain_tree *ec_iter;
@@ -1568,15 +1582,13 @@ int db_col_rule_add(struct db_filter_col *col,
 {
 	int rc = 0, rc_tmp;
 	unsigned int iter;
-	unsigned int chain_len;
 	unsigned int arg_num;
 	size_t chain_size;
 	struct db_api_arg *chain = NULL;
 	struct scmp_arg_cmp arg_data;
 
 	/* collect the arguments for the filter rule */
-	chain_len = ARG_COUNT_MAX;
-	chain_size = sizeof(*chain) * chain_len;
+	chain_size = sizeof(*chain) * ARG_COUNT_MAX;
 	chain = malloc(chain_size);
 	if (chain == NULL)
 		return -ENOMEM;
@@ -1584,7 +1596,7 @@ int db_col_rule_add(struct db_filter_col *col,
 	for (iter = 0; iter < arg_cnt; iter++) {
 		arg_data = arg_array[iter];
 		arg_num = arg_data.arg;
-		if (arg_num < chain_len && chain[arg_num].valid == 0) {
+		if (arg_num < ARG_COUNT_MAX && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
 			chain[arg_num].op = arg_data.op;
@@ -1616,8 +1628,7 @@ int db_col_rule_add(struct db_filter_col *col,
 
 	for (iter = 0; iter < col->filter_cnt; iter++) {
 		rc_tmp = arch_filter_rule_add(col, col->filters[iter], strict,
-					      action, syscall,
-					      chain_len, chain);
+					      action, syscall, chain);
 		if (rc == 0 && rc_tmp < 0)
 			rc = rc_tmp;
 	}
@@ -1639,7 +1650,6 @@ add_return:
 int db_col_transaction_start(struct db_filter_col *col)
 {
 	unsigned int iter;
-	size_t args_size;
 	struct db_filter_snap *snap;
 	struct db_filter *filter_o, *filter_s;
 	struct db_api_rule_list *rule_o, *rule_s;
@@ -1673,19 +1683,9 @@ int db_col_transaction_start(struct db_filter_col *col)
 			continue;
 		do {
 			/* copy the rule */
-			rule_s = malloc(sizeof(*rule_s));
+			rule_s = db_rule_dup(rule_o);
 			if (rule_s == NULL)
 				goto trans_start_failure;
-			args_size = sizeof(*rule_s->args) * rule_o->args_cnt;
-			rule_s->args = malloc(args_size);
-			if (rule_s->args == NULL) {
-				free(rule_s);
-				goto trans_start_failure;
-			}
-			rule_s->action = rule_o->action;
-			rule_s->syscall = rule_o->syscall;
-			rule_s->args_cnt = rule_o->args_cnt;
-			memcpy(rule_s->args, rule_o->args, args_size);
 			if (filter_s->rules != NULL) {
 				rule_s->prev = filter_s->rules->prev;
 				rule_s->next = filter_s->rules;

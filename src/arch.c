@@ -45,8 +45,6 @@
 #include "db.h"
 #include "system.h"
 
-#define default_arg_count_max		6
-
 #define default_arg_offset(x)		(offsetof(struct seccomp_data, args[x]))
 
 #if __i386__
@@ -197,19 +195,6 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_s390x;
 
 	return NULL;
-}
-
-/**
- * Determine the maximum number of syscall arguments
- * @param arch the architecture definition
- *
- * Determine the maximum number of syscall arguments for the given architecture.
- * Returns the number of arguments on success, negative values on failure.
- *
- */
-int arch_arg_count_max(const struct arch_def *arch)
-{
-	return (arch_valid(arch->token) == 0 ? default_arg_count_max : -EDOM);
 }
 
 /**
@@ -401,10 +386,9 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  */
 int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
 			 bool strict, uint32_t action, int syscall,
-			 unsigned int chain_len, struct db_api_arg *chain)
+			 struct db_api_arg *chain)
 {
 	int rc;
-	size_t chain_size = sizeof(*chain) * chain_len;
 	struct db_api_rule_list *rule, *rule_tail;
 
 	/* ensure we aren't using any reserved syscall values */
@@ -420,15 +404,9 @@ int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
 	rule = malloc(sizeof(*rule));
 	if (rule == NULL)
 		return -ENOMEM;
-	rule->args = malloc(chain_size);
-	if (rule->args == NULL) {
-		free(rule);
-		return -ENOMEM;
-	}
 	rule->action = action;
 	rule->syscall = syscall;
-	rule->args_cnt = chain_len;
-	memcpy(rule->args, chain, chain_size);
+	memcpy(rule->args, chain, sizeof(*chain) * ARG_COUNT_MAX);
 	rule->prev = NULL;
 	rule->next = NULL;
 
@@ -466,7 +444,6 @@ rule_add_failure:
 	do {
 		rule_tail = rule;
 		rule = rule->next;
-		free(rule_tail->args);
 		free(rule_tail);
 	} while (rule);
 	return rc;
