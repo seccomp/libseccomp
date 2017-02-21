@@ -69,6 +69,7 @@ cdef extern from "seccomp.h":
     cdef enum:
         SCMP_ACT_KILL
         SCMP_ACT_TRAP
+        SCMP_ACT_AUDIT
         SCMP_ACT_ALLOW
     unsigned int SCMP_ACT_ERRNO(int errno)
     unsigned int SCMP_ACT_TRACE(int value)

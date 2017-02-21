@@ -64,6 +64,7 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_RET_TRAP	0x00030000U
 #define SECCOMP_RET_ERRNO	0x00050000U
 #define SECCOMP_RET_TRACE	0x7ff00000U
+#define SECCOMP_RET_AUDIT	0x7ffe0000U
 #define SECCOMP_RET_ALLOW	0x7fff0000U
 
 /* bpf command classes */

@@ -3,6 +3,8 @@
 #
 # Seccomp Library test program
 #
+# Originally 01-sim-allow.py but updated to use AUDIT.
+#
 # Copyright (c) 2012 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <paul@paul-moore.com>
 #
@@ -22,7 +24,6 @@
 #
 
 import argparse
-import errno
 import sys
 
 import util
@@ -30,12 +31,7 @@ import util
 from seccomp import *
 
 def test(args):
-    f = SyscallFilter(KILL)
-    f.add_rule(ALLOW, "read")
-    f.add_rule(AUDIT, "rt_sigreturn")
-    f.add_rule(ERRNO(errno.EPERM), "write")
-    f.add_rule(TRAP, "close")
-    f.add_rule(TRACE(1234), "open")
+    f = SyscallFilter(AUDIT)
     return f
 
 args = util.get_opt()

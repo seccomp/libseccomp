@@ -1,0 +1,23 @@
+#
+# libseccomp regression test automation data
+#
+# Originally 01-sim-allow.tests but updated for AUDIT
+#
+# Copyright IBM Corp. 2012
+# Author: Corey Bryant <coreyb@linux.vnet.ibm.com>
+#
+
+test type: bpf-sim
+
+# Testname	Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+35-sim-audit	all	0-350	N	N	N	N	N	N	AUDIT
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+35-sim-audit	50
+
+test type: bpf-valgrind
+
+# Testname
+35-sim-audit

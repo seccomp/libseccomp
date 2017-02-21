@@ -130,6 +130,9 @@ static void _pfc_action(FILE *fds, uint32_t action)
 	case SCMP_ACT_TRACE(0):
 		fprintf(fds, "action TRACE(%u);\n", (action & 0x0000ffff));
 		break;
+	case SCMP_ACT_AUDIT:
+		fprintf(fds, "action AUDIT;\n");
+		break;
 	case SCMP_ACT_ALLOW:
 		fprintf(fds, "action ALLOW;\n");
 		break;

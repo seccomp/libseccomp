@@ -128,6 +128,9 @@ static void end_action(uint32_t action, unsigned int line)
 	case SECCOMP_RET_TRACE:
 		fprintf(stdout, "TRACE(%u)\n", data);
 		break;
+	case SECCOMP_RET_AUDIT:
+		fprintf(stdout, "AUDIT\n");
+		break;
 	case SECCOMP_RET_ALLOW:
 		fprintf(stdout, "ALLOW\n");
 		break;

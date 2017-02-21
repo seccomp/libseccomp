@@ -714,6 +714,7 @@ function run_test_live() {
 		rc_trap=161
 		rc_trace=162
 		rc_errno=163
+		rc_audit=164
 		;;
 	mips|mipsel|mips64|mips64n32|mipsel64|mipsel64n32)
 		rc_kill=140
@@ -721,6 +722,7 @@ function run_test_live() {
 		rc_trap=161
 		rc_trace=162
 		rc_errno=163
+		rc_audit=164
 		;;
 	*)
 		print_result $testnumstr "ERROR" "arch $arch not supported"
@@ -743,6 +745,9 @@ function run_test_live() {
 		print_result $1 "ERROR" "unsupported action \"$line_act\""
 		stats_error=$(($stats_error+1))
 	elif [[ $line_act == "ERRNO" && $rc -eq $rc_errno ]]; then
+		print_result $1 "SUCCESS" ""
+		stats_success=$(($stats_success+1))
+	elif [[ $line_act == "AUDIT" && $rc -eq $rc_audit ]]; then
 		print_result $1 "SUCCESS" ""
 		stats_success=$(($stats_success+1))
 	else

@@ -256,6 +256,10 @@ struct scmp_arg_cmp {
  */
 #define SCMP_ACT_TRACE(x)	(0x7ff00000U | ((x) & 0x0000ffffU))
 /**
+ * Allow the syscall to be executed after an audit message is emitted
+ */
+#define SCMP_ACT_AUDIT		0x7ffe0000U
+/**
  * Allow the syscall to be executed
  */
 #define SCMP_ACT_ALLOW		0x7fff0000U

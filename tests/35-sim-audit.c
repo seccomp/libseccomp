@@ -1,6 +1,8 @@
 /**
  * Seccomp Library test program
  *
+ * Originally 01-sim-allow.c but updated to use SCMP_ACT_AUDIT.
+ *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
@@ -36,29 +38,9 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
-	ctx = seccomp_init(SCMP_ACT_KILL);
+	ctx = seccomp_init(SCMP_ACT_AUDIT);
 	if (ctx == NULL)
 		return ENOMEM;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_AUDIT, SCMP_SYS(rt_sigreturn), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_TRAP, SCMP_SYS(close), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
-	if (rc != 0)
-		goto out;
 
 	rc = util_filter_output(&opts, ctx);
 	if (rc)

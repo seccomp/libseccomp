@@ -668,6 +668,8 @@ int db_action_valid(uint32_t action)
 		return 0;
 	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
 		return 0;
+	else if (action == SCMP_ACT_AUDIT)
+		return 0;
 	else if (action == SCMP_ACT_ALLOW)
 		return 0;
 
