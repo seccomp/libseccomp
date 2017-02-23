@@ -1353,13 +1353,32 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 			/* filter out x32 */
 			_BPF_INSTR(instr,
 				   _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
-				   _BPF_JMP_HSH(state->bad_arch_hsh),
+				   _BPF_JMP_NO,
 				   _BPF_JMP_NO,
 				   _BPF_K(state->arch, X32_SYSCALL_BIT));
 			if (b_head != NULL)
 				instr.jf = _BPF_JMP_HSH(b_head->hash);
 			else
 				instr.jf = _BPF_JMP_HSH(state->def_hsh);
+			b_new = _blk_append(state, b_new, &instr);
+			if (b_new == NULL)
+				goto arch_failure;
+			/* NOTE: starting with Linux v4.8 the seccomp filters
+			 *	 are processed both when the syscall is
+			 *	 initially executed as well as after any
+			 *	 tracing processes finish so we need to make
+			 *	 sure we don't trap the -1 syscall which
+			 *	 tracers can use to skip the syscall, see
+			 *	 seccomp(2) for more information */
+			_BPF_INSTR(instr,
+				   _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
+				   _BPF_JMP_NO,
+				   _BPF_JMP_HSH(state->bad_arch_hsh),
+				   _BPF_K(state->arch, -1));
+			if (b_head != NULL)
+				instr.jt = _BPF_JMP_HSH(b_head->hash);
+			else
+				instr.jt = _BPF_JMP_HSH(state->def_hsh);
 			blk_cnt++;
 		} else if (state->arch->token == SCMP_ARCH_X32) {
 			/* filter out x86_64 */
