@@ -65,8 +65,11 @@ static int _ctx_valid(const scmp_filter_ctx *ctx)
  * syscall appears valid, negative values on failure.
  *
  */
-static int _syscall_valid(int syscall)
+static int _syscall_valid(const struct db_filter_col *col, int syscall)
 {
+	/* syscall -1 is used by tracers to skip the syscall */
+	if (col->attr.api_tskip && syscall == -1)
+		return 0;
 	if (syscall <= -1 && syscall >= -99)
 		return -EINVAL;
 	return 0;
@@ -311,7 +314,7 @@ API int seccomp_syscall_priority(scmp_filter_ctx ctx,
 {
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
-	if (db_col_valid(col) || _syscall_valid(syscall))
+	if (db_col_valid(col) || _syscall_valid(col, syscall))
 		return -EINVAL;
 
 	return db_col_syscall_priority(col, syscall, priority);
@@ -331,7 +334,7 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 	if (arg_cnt > 0 && arg_array == NULL)
 		return -EINVAL;
 
-	if (db_col_valid(col) || _syscall_valid(syscall))
+	if (db_col_valid(col) || _syscall_valid(col, syscall))
 		return -EINVAL;
 
 	rc = db_action_valid(action);
@@ -380,7 +383,7 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 	if (arg_cnt > 0 && arg_array == NULL)
 		return -EINVAL;
 
-	if (db_col_valid(col) || _syscall_valid(syscall))
+	if (db_col_valid(col) || _syscall_valid(col, syscall))
 		return -EINVAL;
 
 	rc = db_action_valid(action);

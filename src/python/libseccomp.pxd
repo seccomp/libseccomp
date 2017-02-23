@@ -54,6 +54,7 @@ cdef extern from "seccomp.h":
         SCMP_FLTATR_ACT_BADARCH
         SCMP_FLTATR_CTL_NNP
         SCMP_FLTATR_CTL_TSYNC
+        SCMP_FLTATR_API_TSKIP
 
     cdef enum scmp_compare:
         SCMP_CMP_NE

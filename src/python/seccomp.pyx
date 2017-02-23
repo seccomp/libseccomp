@@ -246,6 +246,7 @@ cdef class Attr:
     ACT_BADARCH = libseccomp.SCMP_FLTATR_ACT_BADARCH
     CTL_NNP = libseccomp.SCMP_FLTATR_CTL_NNP
     CTL_TSYNC = libseccomp.SCMP_FLTATR_CTL_TSYNC
+    API_TSKIP = libseccomp.SCMP_FLTATR_API_TSKIP
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.

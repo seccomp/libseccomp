@@ -90,6 +90,14 @@ is highly recommended to use the
 .BR SCMP_SYS ()
 macro instead.  See the EXAMPLES section below.
 .P
+Starting with Linux v4.8, there may be a need to create a rule with a syscall
+value of -1 to allow tracing programs to skip a syscall invocation; in order
+to create a rule with a -1 syscall value it is necessary to first set the
+.B SCMP_FLTATR_API_TSKIP
+attribute.  See
+.BR seccomp_attr_set (3)
+for more information.
+.P
 The filter context
 .I ctx
 is the value returned by the call to
@@ -292,4 +300,5 @@ Paul Moore <paul@paul-moore.com>
 .\" //////////////////////////////////////////////////////////////////////////
 .BR seccomp_syscall_resolve_name_rewrite (3),
 .BR seccomp_syscall_priority (3),
-.BR seccomp_load (3)
+.BR seccomp_load (3),
+.BR seccomp_attr_set (3)

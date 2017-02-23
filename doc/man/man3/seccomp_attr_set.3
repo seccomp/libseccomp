@@ -76,6 +76,15 @@ greater; attempting to enable this flag on earlier kernels will result in an
 error being returned.  Defaults to off (
 .I value
 == 0).
+.TP
+.B SCMP_FLTATR_ATL_TSKIP
+A flag to specify if libseccomp should allow filter rules to be created for
+the -1 syscall.  The -1 syscall value can be used by tracer programs to skip
+specific syscall invocations, see
+.BR seccomp (2)
+for more information.  Defaults to off (
+.I value
+== 0).
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
@@ -129,4 +138,5 @@ Paul Moore <paul@paul-moore.com>
 .\" //////////////////////////////////////////////////////////////////////////
 .BR seccomp_init (3),
 .BR seccomp_reset (3),
-.BR seccomp_load (3)
+.BR seccomp_load (3),
+.BR seccomp (2)

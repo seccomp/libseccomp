@@ -570,6 +570,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.act_badarch = SCMP_ACT_KILL;
 	col->attr.nnp_enable = 1;
 	col->attr.tsync_enable = 0;
+	col->attr.api_tskip = 0;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -794,6 +795,9 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_TSYNC:
 		*value = col->attr.tsync_enable;
 		break;
+	case SCMP_FLTATR_API_TSKIP:
+		*value = col->attr.api_tskip;
+		break;
 	default:
 		rc = -EEXIST;
 		break;
@@ -840,6 +844,9 @@ int db_col_attr_set(struct db_filter_col *col,
 		} else if (rc == 0)
 			/* unsupported */
 			rc = -EOPNOTSUPP;
+		break;
+	case SCMP_FLTATR_API_TSKIP:
+		col->attr.api_tskip = (value ? 1 : 0);
 		break;
 	default:
 		rc = -EEXIST;
@@ -1534,9 +1541,10 @@ int db_col_syscall_priority(struct db_filter_col *col,
 		if (rc_tmp < 0)
 			goto priority_failure;
 
-		/* if this is a pseudo syscall (syscall < 0) then we need to
-		 * rewrite the syscall for some arch specific reason */
-		if (sc_tmp < 0) {
+		/* if this is a pseudo syscall then we need to rewrite the
+		 * syscall for some arch specific reason, don't forget the
+		 * special handling for syscall -1 */
+		if (sc_tmp < -1) {
 			/* we set this as a strict op - we don't really care
 			 * since priorities are a "best effort" thing - as we
 			 * want to catch the -EDOM error and bail on this
