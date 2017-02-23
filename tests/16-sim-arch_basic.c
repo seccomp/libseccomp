@@ -40,6 +40,21 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
+	/* NOTE: not strictly necessary since we get the native arch by default
+	 *       but it serves as a good sanity check for the code and boosts
+	 *       our code coverage numbers */
+	rc = seccomp_arch_exist(ctx, seccomp_arch_native());
+	if (rc != 0)
+		goto out;
+
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+
+	/* NOTE: more sanity/coverage tests (see above) */
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
 	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
 	if (rc != 0)
 		goto out;

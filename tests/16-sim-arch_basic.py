@@ -30,6 +30,10 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
+    # NOTE: some of these arch functions are not strictly necessary, but are
+    #       here for test sanity/coverage
+    f.remove_arch(Arch())
+    f.add_arch(Arch())
     f.remove_arch(Arch())
     f.add_arch(Arch("x86"))
     f.add_arch(Arch("x86_64"))
