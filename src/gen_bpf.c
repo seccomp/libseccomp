@@ -1945,22 +1945,22 @@ struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 {
 	int rc;
 	struct bpf_state state;
+	struct bpf_program *prgm;
 
 	memset(&state, 0, sizeof(state));
 	state.attr = &col->attr;
 
-	state.bpf = zmalloc(sizeof(*(state.bpf)));
-	if (state.bpf == NULL)
+	prgm = zmalloc(sizeof(*(prgm)));
+	if (prgm == NULL)
 		return NULL;
+	state.bpf = prgm;
 
 	rc = _gen_bpf_build_bpf(&state, col);
-	if (rc < 0)
-		goto bpf_generate_end;
+	if (rc == 0)
+		state.bpf = NULL;
+	_state_release(&state);
 
-bpf_generate_end:
-	if (rc < 0)
-		_state_release(&state);
-	return state.bpf;
+	return prgm;
 }
 
 /**
