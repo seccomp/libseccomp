@@ -42,6 +42,11 @@ def test():
     f.set_attr(Attr.CTL_NNP, 0)
     if f.get_attr(Attr.CTL_NNP) != 0:
         raise RuntimeError("Failed getting Attr.CTL_NNP")
+    if f.get_attr(Attr.CTL_TSYNC) != 0:
+        raise RuntimeError("Failed getting Attr.CTL_TSYNC")
+    f.set_attr(Attr.API_TSKIP, 0)
+    if f.get_attr(Attr.API_TSKIP) != 0:
+        raise RuntimeError("Failed getting Attr.API_TSKIP")
 
 test()
 
