@@ -1,0 +1,23 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2017 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+35-sim-negative_one	+x86	-1		N	N	N	N	N	N	ALLOW
+35-sim-negative_one	+x86_64	-1		N	N	N	N	N	N	ALLOW
+35-sim-negative_one	+x32	-1		N	N	N	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+35-sim-negative_one	50
+
+test type: bpf-valgrind
+
+# Testname
+35-sim-negative_one

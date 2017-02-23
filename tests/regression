@@ -475,7 +475,7 @@ function run_test_bpf_sim() {
 
 		# get low and high syscall values and convert them to numbers
 		low_syscall=$(get_range $LOW "${line[2]}")
-		if [[ ! $low_syscall =~ ^[0-9]+$ ]]; then
+		if [[ ! $low_syscall =~ ^\-?[0-9]+$ ]]; then
 			low_syscall=$($GLBL_SYS_RESOLVER -a $simarch -t \
 				      $low_syscall)
 			if [[ $? -ne 0 ]]; then
@@ -486,7 +486,7 @@ function run_test_bpf_sim() {
 			fi
 		fi
 		high_syscall=$(get_range $HIGH "${line[2]}")
-		if [[ ! $high_syscall =~ ^[0-9]+$ ]]; then
+		if [[ ! $high_syscall =~ ^\-?[0-9]+$ ]]; then
 			high_syscall=$($GLBL_SYS_RESOLVER -a $simarch -t \
 				       $high_syscall)
 			if [[ $? -ne 0 ]]; then
