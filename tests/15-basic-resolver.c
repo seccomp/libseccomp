@@ -27,6 +27,7 @@
 
 int main(int argc, char *argv[])
 {
+	int rc;
 	char *name = NULL;
 
 	if (seccomp_syscall_resolve_name("open") != __NR_open)
@@ -61,6 +62,10 @@ int main(int argc, char *argv[])
 	if (name != NULL)
 		goto fail;
 	free(name);
+
+	rc = seccomp_syscall_resolve_name_rewrite(SCMP_ARCH_NATIVE, "openat");
+	if (rc != __NR_openat)
+		goto fail;
 
 	return 0;
 
