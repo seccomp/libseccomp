@@ -72,7 +72,9 @@ check_PROGRAMS = \
 	32-live-tsync_allow \
 	33-sim-socket_syscalls_be \
 	34-sim-basic_blacklist \
-	35-sim-negative_one
+	35-sim-negative_one \
+	36-sim-ipc_syscalls \
+	37-sim-ipc_syscalls_be
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -110,7 +112,9 @@ EXTRA_DIST_TESTPYTHON = \
 	32-live-tsync_allow.py \
 	33-sim-socket_syscalls_be.py \
 	34-sim-basic_blacklist.py \
-	35-sim-negative_one.py
+	35-sim-negative_one.py \
+	36-sim-ipc_syscalls.py \
+	37-sim-ipc_syscalls_be.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -147,7 +151,9 @@ EXTRA_DIST_TESTCFGS = \
 	32-live-tsync_allow.tests \
 	33-sim-socket_syscalls_be.tests \
 	34-sim-basic_blacklist.tests \
-	35-sim-negative_one.tests
+	35-sim-negative_one.tests \
+	36-sim-ipc_syscalls.tests \
+	37-sim-ipc_syscalls_be.tests
 
 EXTRA_DIST_TESTSCRIPTS = regression testdiff testgen
 

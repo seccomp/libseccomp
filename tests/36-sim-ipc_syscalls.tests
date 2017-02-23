@@ -1,0 +1,39 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2017 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+36-sim-ipc_syscalls	+x86	ipc		1	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		2	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		3	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		4	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		11	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		12	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		13	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		14	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		21	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		22	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		23	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86	ipc		24	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	semop		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	semget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	semctl		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	semtimedop	N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	msgsnd		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	msgrcv		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	msgget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	msgctl		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	shmat		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	shmdt		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	shmget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64	shmctl		N	N	N	N	N	N	ALLOW
+
+test type: bpf-valgrind
+
+# Testname
+36-sim-ipc_syscalls

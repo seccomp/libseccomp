@@ -1,0 +1,27 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2017 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch		Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		1	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		2	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		3	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		4	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		11	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		12	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		13	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		14	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		21	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		22	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		23	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x	ipc		24	N	N	N	N	N	ALLOW
+
+test type: bpf-valgrind
+
+# Testname
+37-sim-ipc_syscalls_be

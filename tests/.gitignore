@@ -40,3 +40,5 @@ util.pyc
 33-sim-socket_syscalls_be
 34-sim-basic_blacklist
 35-sim-negative_one
+36-sim-ipc_syscalls
+37-sim-ipc_syscalls_be
