@@ -572,7 +572,7 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		return -ENOMEM;
 
 	/* generate the hash */
-	h_val = jhash(blk->blks, _BLK_MSZE(blk), 0);
+	h_val = hash(blk->blks, _BLK_MSZE(blk));
 	blk->hash = h_val;
 	blk->flag_hash = true;
 	blk->node = NULL;
