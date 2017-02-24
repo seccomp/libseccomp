@@ -1,0 +1,99 @@
+#
+# pseudo filter code start
+#
+# filter for arch x86_64 (3221225534)
+if ($arch == 3221225534)
+  # filter for syscall "exit" (60) [priority: 65535]
+  if ($syscall == 60)
+    action TRACE(1);
+  # filter for syscall "close" (3) [priority: 65535]
+  if ($syscall == 3)
+    action ERRNO(1);
+  # filter for syscall "open" (2) [priority: 65535]
+  if ($syscall == 2)
+    action KILL;
+  # filter for syscall "write" (1) [priority: 65529]
+  if ($syscall == 1)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+      else
+        if ($a1.hi32 >= 0)
+          if ($a1.lo32 > 1)
+          else
+            if ($a2.hi32 >= 0)
+              if ($a2.lo32 >= 2)
+              else
+                action TRAP;
+            else
+              action TRAP;
+        else
+          if ($a2.hi32 >= 0)
+            if ($a2.lo32 >= 2)
+            else
+              action TRAP;
+          else
+            action TRAP;
+    else
+      if ($a1.hi32 >= 0)
+        if ($a1.lo32 > 1)
+        else
+          if ($a2.hi32 >= 0)
+            if ($a2.lo32 >= 2)
+            else
+              action TRAP;
+          else
+            action TRAP;
+      else
+        if ($a2.hi32 >= 0)
+          if ($a2.lo32 >= 2)
+          else
+            action TRAP;
+        else
+          action TRAP;
+  # filter for syscall "read" (0) [priority: 65527]
+  if ($syscall == 0)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 >= 0)
+          if ($a1.lo32 >= 1)
+            if ($a2.hi32 >= 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+  # default action
+  action ALLOW;
+# filter for arch x86 (1073741827)
+if ($arch == 1073741827)
+  # filter for syscall "close" (6) [priority: 65535]
+  if ($syscall == 6)
+    action ERRNO(1);
+  # filter for syscall "open" (5) [priority: 65535]
+  if ($syscall == 5)
+    action KILL;
+  # filter for syscall "exit" (1) [priority: 65535]
+  if ($syscall == 1)
+    action TRACE(1);
+  # filter for syscall "write" (4) [priority: 65532]
+  if ($syscall == 4)
+    if ($a0 == 0)
+    else
+      if ($a1 > 1)
+      else
+        if ($a2 >= 2)
+        else
+          action TRAP;
+  # filter for syscall "read" (3) [priority: 65531]
+  if ($syscall == 3)
+    if ($a0 == 0)
+      if ($a1 >= 1)
+        if ($a2 > 2)
+          if ($a3 & 0x0000000f == 3)
+            action KILL;
+  # default action
+  action ALLOW;
+# invalid architecture action
+action KILL;
+#
+# pseudo filter code end
+#

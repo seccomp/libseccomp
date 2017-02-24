@@ -76,7 +76,8 @@ check_PROGRAMS = \
 	34-sim-basic_blacklist \
 	35-sim-negative_one \
 	36-sim-ipc_syscalls \
-	37-sim-ipc_syscalls_be
+	37-sim-ipc_syscalls_be \
+	38-basic-pfc_coverage
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -155,7 +156,11 @@ EXTRA_DIST_TESTCFGS = \
 	34-sim-basic_blacklist.tests \
 	35-sim-negative_one.tests \
 	36-sim-ipc_syscalls.tests \
-	37-sim-ipc_syscalls_be.tests
+	37-sim-ipc_syscalls_be.tests \
+	38-basic-pfc_coverage.tests
+
+EXTRA_DIST_TESTBASIC = \
+	38-basic-pfc_coverage.sh
 
 EXTRA_DIST_TESTSCRIPTS = regression testdiff testgen
 
@@ -164,6 +169,7 @@ EXTRA_DIST_TESTVALGRIND = valgrind_test.supp
 EXTRA_DIST = \
 	${EXTRA_DIST_TESTCFGS} \
 	${EXTRA_DIST_TESTPYTHON} \
+	${EXTRA_DIST_TESTBASIC} \
 	${EXTRA_DIST_TESTSCRIPTS} \
 	${EXTRA_DIST_TESTVALGRIND}
 

@@ -42,3 +42,4 @@ util.pyc
 35-sim-negative_one
 36-sim-ipc_syscalls
 37-sim-ipc_syscalls_be
+38-basic-pfc_coverage

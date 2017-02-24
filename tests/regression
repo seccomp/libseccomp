@@ -606,6 +606,13 @@ function run_test_bpf_sim() {
 function run_test_basic() {
 	local rc
 
+	# if the test is a script, only run it in native/c mode
+	if [[ $mode != "c" && $(echo "$2" | grep -q '.sh$') -eq 0 ]]; then
+		print_result "$1" "SKIPPED" "(only valid in native/c mode)"
+		stats_skipped=$(($stats_skipped+1))
+		return
+	fi
+
 	# print out the input test data to the log file
 	print_data "$1" "$2"
 
