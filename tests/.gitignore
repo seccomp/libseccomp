@@ -1,6 +1,7 @@
 *.bpf
 *.bpfd
 *.pfc
+__pycache__/
 miniseq
 util.pyc
 00-test.c

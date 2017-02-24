@@ -5,6 +5,10 @@
 *.pc
 *.swp
 *.orig
+*.gcno
+*.gcda
+*.info
+*-coverage/
 .deps
 .dirstamp
 .libs
