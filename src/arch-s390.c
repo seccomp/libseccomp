@@ -34,7 +34,7 @@ const struct arch_def arch_def_s390 = {
  * no related syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-int _s390_sock_demux(int socketcall)
+static int _s390_sock_demux(int socketcall)
 {
 	switch (socketcall) {
 	case -101:
@@ -110,7 +110,7 @@ int _s390_sock_demux(int socketcall)
  * there is no related pseudo syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-int _s390_sock_mux(int syscall)
+static int _s390_sock_mux(int syscall)
 {
 	switch (syscall) {
 	case 337:

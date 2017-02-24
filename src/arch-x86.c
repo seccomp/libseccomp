@@ -50,7 +50,7 @@ const struct arch_def arch_def_x86 = {
  * no related syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-int _x86_sock_demux(int socketcall)
+static int _x86_sock_demux(int socketcall)
 {
 	switch (socketcall) {
 	case -101:
@@ -126,7 +126,7 @@ int _x86_sock_demux(int socketcall)
  * there is no related pseudo syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-int _x86_sock_mux(int syscall)
+static int _x86_sock_mux(int syscall)
 {
 	switch (syscall) {
 	case 337:
