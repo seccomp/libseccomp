@@ -203,7 +203,7 @@ static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint16_t _htot16(const struct arch_def *arch, uint16_t val)
+static uint16_t _htot16(const struct arch_def *arch, uint16_t val)
 {
 	if (arch->endian == ARCH_ENDIAN_LITTLE)
 		return htole16(val);
@@ -219,7 +219,7 @@ uint16_t _htot16(const struct arch_def *arch, uint16_t val)
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint32_t _htot32(const struct arch_def *arch, uint32_t val)
+static uint32_t _htot32(const struct arch_def *arch, uint32_t val)
 {
 	if (arch->endian == ARCH_ENDIAN_LITTLE)
 		return htole32(val);
