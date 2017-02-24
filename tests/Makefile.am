@@ -18,6 +18,8 @@
 
 @CODE_COVERAGE_RULES@
 
+CODE_COVERAGE_IGNORE_PATTERN = /usr/include/bits/* */arch-syscall-check.c
+
 if CODE_COVERAGE_ENABLED
 DBG_STATIC =
 else
