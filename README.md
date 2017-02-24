@@ -1,4 +1,4 @@
-An Enhanced Seccomp (seccomp-bpf) Helper Library
+Enhanced Seccomp (seccomp-bpf) Helper Library
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
@@ -59,8 +59,18 @@ library:
 
 	# make check
 
-Be warned that the test run can take a while to run and produces a lot of
-output.
+These tests can be safely run on any Linux system, even those where the kernel
+does not support seccomp-bpf (seccomp mode 2).  However, be warned that the
+test run can take a while to run and produces a lot of output.
+
+The generated seccomp-bpf filters can be tested on a live system using the
+"live" tests; they can be executed using the following commands:
+
+	# make check-build
+	# (cd tests; ./regression -T live)
+
+These tests will fail if the running Linux Kernel does not provide the
+necessary support.
 
 ## Developer Tools
 
