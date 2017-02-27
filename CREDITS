@@ -1,5 +1,5 @@
 libseccomp: Contributors
-===============================================================================
+========================================================================
 https://github.com/seccomp/libseccomp
 
 Andrew Jones <drjones@redhat.com>
@@ -9,14 +9,20 @@ Bogdan Purcareata <bogdan.purcareata@freescale.com>
 Brian Cain <brian.cain@gmail.com>
 Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
+David Drysdale <drysdale@google.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
 Heiko Carstens <heiko.carstens@de.ibm.com>
+Helge Deller <deller@gmx.de>
 Jake Edge <jake@lwn.net>
 Jan Engelhardt <jengelh@inai.de>
 Jan Willeke <willeke@linux.vnet.ibm.com>
+Jay Guo <guojiannan@cn.ibm.com>
+Jiannan Guo <guojiannan1101@gmail.com>
 Joe MacDonald <joe@deserted.net>
+Justin Cormack <justin.cormack@docker.com>
 Kees Cook <keescook@chromium.org>
+Luca Bruno <lucab@debian.org>
 Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
 Marcus Meissner <meissner@suse.de>
 Markos Chandras <markos.chandras@imgtec.com>
@@ -27,5 +33,7 @@ Mike Strosaker <strosake@linux.vnet.ibm.com>
 Paul Moore <paul@paul-moore.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
+valoq <valoq@mailbox.org>
 Vicente Olivert Riera <Vincent.Riera@imgtec.com>
 Vitaly Vi Shukela <vi0oss@gmail.com>
+Vladimir Rutsky <rutsky@users.noreply.github.com>
