@@ -194,9 +194,11 @@ int main(int argc, char *argv[])
 	}
 	if (i_parisc >= 0) {
 		printf("ERROR, parisc has additional syscalls\n");
+		return 1;
 	}
 	if (i_ppc >= 0) {
 		printf("ERROR, ppc has additional syscalls\n");
+		return 1;
 	}
 	if (i_ppc64 >= 0) {
 		printf("ERROR, ppc64 has additional syscalls\n");
