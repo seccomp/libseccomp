@@ -1,0 +1,10 @@
+# libseccomp git mailmap file (see git-shortlog documentation)
+
+Paul Moore <paul@paul-moore.com> <pmoore@redhat.com>
+
+Kees Cook <keescook@chromium.org> <kees@debian.org>
+Kees Cook <keescook@chromium.org> <kees@ubuntu.com>
+
+Serge Hallyn <serge.hallyn@ubuntu.com> <serge.hallyn@canonical.com>
+
+Thiago Marcos P. Santos <thiago.santos@intel.com> <tmpsantos@gmail.com>

@@ -40,6 +40,10 @@ release.
 
 #### 7. Update the CREDITS file with any new contributors
 
+	# ./doc/credits_updater > CREDITS
+
+	... the results can be sanity checked with the following git command:
+
 	# git log --pretty=format:"%aN <%aE>" | sort -u
 
 #### 8. Update the CHANGELOG file with significant changes since the last release
