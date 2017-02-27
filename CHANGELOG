@@ -2,6 +2,17 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.3.2 - February 27, 2017
+- Achieved full compliance with the CII Best Practices program
+- Added Travis CI builds to the GitHub repository
+- Added code coverage reporting with the "--enable-code-coverage" configure
+  flag and added Coveralls to the GitHub repository
+- Updated the syscall tables to match Linux v4.10-rc6+
+- Support for building with Python v3.x
+- Allow rules with the -1 syscall if the SCMP_FLTATR_API_TSKIP attribute is
+  set to true
+- Several small documentation fixes
+
 * Version 2.3.1 - April 20, 2016
 - Fixed a problem with 32-bit x86 socket syscalls on some systems
 - Fixed problems with ipc syscalls on 32-bit x86
