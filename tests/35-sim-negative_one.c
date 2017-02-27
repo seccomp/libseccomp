@@ -19,11 +19,6 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-/*
- * Just like mode 1 seccomp we allow 4 syscalls:
- * read, write, exit, and rt_sigreturn
- */
-
 #include <errno.h>
 #include <unistd.h>
 
