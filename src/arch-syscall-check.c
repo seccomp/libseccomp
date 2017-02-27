@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 			printf("OK\n");
 
 		/* next */
-		if (x86_syscall_iterate(i_x86 + 1))
+		if (x86_syscall_iterate(i_x86 + 1)->name)
 			i_x86++;
 		if (!x86_64_syscall_iterate(++i_x86_64)->name)
 			i_x86_64 = -1;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 			i_mips64 = -1;
 		if (!mips64n32_syscall_iterate(++i_mips64n32)->name)
 			i_mips64n32 = -1;
-		if (!ppc_syscall_iterate(++i_ppc))
+		if (!ppc_syscall_iterate(++i_ppc)->name)
 			i_ppc = -1;
 		if (!ppc64_syscall_iterate(++i_ppc64)->name)
 			i_ppc64 = -1;
