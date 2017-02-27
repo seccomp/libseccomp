@@ -12,11 +12,6 @@ test type: bpf-sim
 35-sim-negative_one	+x86_64	-1		N	N	N	N	N	N	ALLOW
 35-sim-negative_one	+x32	-1		N	N	N	N	N	N	ALLOW
 
-test type: bpf-sim-fuzz
-
-# Testname		StressCount
-35-sim-negative_one	50
-
 test type: bpf-valgrind
 
 # Testname
