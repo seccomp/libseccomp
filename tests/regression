@@ -605,6 +605,7 @@ function run_test_bpf_sim() {
 #
 function run_test_basic() {
 	local rc
+	local cmd
 
 	# if the test is a script, only run it in native/c mode
 	if [[ $mode != "c" && $(echo "$2" | grep -q '.sh$') -eq 0 ]]; then
@@ -616,8 +617,15 @@ function run_test_basic() {
 	# print out the input test data to the log file
 	print_data "$1" "$2"
 
+	# check and adjust if we are doing a VPATH build
+	if [[ -x "./$2" ]]; then
+		cmd="./$2"
+	else
+		cmd="${srcdir}/$2"
+	fi
+
 	# run the command
-	run_test_command "$1" "./$2" "" "" ""
+	run_test_command "$1" "$cmd" "" "" ""
 	rc=$?
 	if [[ $rc -ne 0 ]]; then
 		print_result $1 "FAILURE" "$2 rc=$rc"

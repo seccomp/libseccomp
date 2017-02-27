@@ -42,4 +42,5 @@ function verify_deps() {
 verify_deps diff
 
 # compare output to the known good output, fail if different
-./38-basic-pfc_coverage | diff -q 38-basic-pfc_coverage.pfc - > /dev/null
+./38-basic-pfc_coverage | \
+	diff -q ${srcdir:=.}/38-basic-pfc_coverage.pfc - > /dev/null

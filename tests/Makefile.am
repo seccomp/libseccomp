@@ -159,18 +159,18 @@ EXTRA_DIST_TESTCFGS = \
 	37-sim-ipc_syscalls_be.tests \
 	38-basic-pfc_coverage.tests
 
-EXTRA_DIST_TESTBASIC = \
-	38-basic-pfc_coverage.sh
+EXTRA_DIST_TESTSCRIPTS = \
+	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
 
-EXTRA_DIST_TESTSCRIPTS = regression testdiff testgen
+EXTRA_DIST_TESTTOOLS = regression testdiff testgen
 
 EXTRA_DIST_TESTVALGRIND = valgrind_test.supp
 
 EXTRA_DIST = \
 	${EXTRA_DIST_TESTCFGS} \
 	${EXTRA_DIST_TESTPYTHON} \
-	${EXTRA_DIST_TESTBASIC} \
 	${EXTRA_DIST_TESTSCRIPTS} \
+	${EXTRA_DIST_TESTTOOLS} \
 	${EXTRA_DIST_TESTVALGRIND}
 
 nodist_00_test_SOURCES = 00-test.c
