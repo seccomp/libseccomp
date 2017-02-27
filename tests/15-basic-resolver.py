@@ -41,11 +41,11 @@ def test():
 
     sys_num = resolve_syscall(Arch(), "open")
     sys_name = resolve_syscall(Arch(), sys_num)
-    if (sys_name != "open"):
+    if (sys_name != b"open"):
         raise RuntimeError("Test failure")
     sys_num = resolve_syscall(Arch(), "read")
     sys_name = resolve_syscall(Arch(), sys_num)
-    if (sys_name != "read"):
+    if (sys_name != b"read"):
         raise RuntimeError("Test failure")
 
 test()

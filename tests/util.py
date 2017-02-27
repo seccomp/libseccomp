@@ -100,8 +100,8 @@ def write_file(path):
     Description:
     Open the specified file, write a string to the file, and close the file.
     """
-    fd = os.open(path, os.O_WRONLY|os.O_CREAT, 0600)
-    if not os.write(fd, "testing") == len("testing"):
+    fd = os.open(str(path), os.O_WRONLY|os.O_CREAT)
+    if not os.write(fd, b"testing") == len("testing"):
         raise IOError("failed to write the full test string in write_file()")
     os.close(fd)
 
