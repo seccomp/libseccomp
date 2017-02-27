@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 			printf("OK\n");
 
 		/* next */
-		if (x86_syscall_iterate(i_x86 + 1))
+		if (x86_syscall_iterate(i_x86 + 1)->name)
 			i_x86++;
 		if (!x86_64_syscall_iterate(++i_x86_64)->name)
 			i_x86_64 = -1;
