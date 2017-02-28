@@ -38,6 +38,18 @@ command:
 
 ... if there are any faults or errors they will be displayed.
 
+## Make Sure Your Code is Tested
+
+The libseccomp code includes a fairly extensive test suite and any submissions
+which add functionality or significantly change the existing code should
+include additional tests to verify the proper operation of the proposed
+changes.
+
+Code coverage analysis tools has been integrated into the libseccomp code base,
+and can be enabled via the "--enable-code-coverage" configure flag and the
+"check-code-coverage" make target.  Additional details on generating code
+coverage information can be found in the .travis.yml file.
+
 ## Generate the Patch(es)
 
 Depending on how you decided to work with the libseccomp code base and what
