@@ -37,8 +37,19 @@ check-build: all
 check-syntax:
 	@./tools/check-syntax
 
+if CODE_COVERAGE_ENABLED
 check-code-coverage: check-build
 	${MAKE} ${AM_MAKEFLAGS} -C tests check-code-coverage
+endif
+
+if CODE_COVERAGE_ENABLED
+test-code-coverage: check-build
+	${MAKE} ${AM_MAKEFLAGS} -C src check-code-coverage
+	LIBSECCOMP_TSTCFG_TYPE=basic \
+		${MAKE} ${AM_MAKEFLAGS} check-code-coverage
+	LIBSECCOMP_TSTCFG_TYPE=bpf-sim \
+		${MAKE} ${AM_MAKEFLAGS} check-code-coverage
+endif
 
 if COVERITY
 coverity-build: clean

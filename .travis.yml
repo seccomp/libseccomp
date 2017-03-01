@@ -61,11 +61,8 @@ script:
   - LIBSECCOMP_TSTCFG_TYPE=live make -C tests check
   # ubuntu 14.04 (trusty) clang has problems with the cython generated code
   - make clean && ./configure && scan-build --status-bugs make
-  # limit the code coverage tests to the native/c code
-  - make clean && ./configure --enable-code-coverage &&
-    make -C src check-code-coverage &&
-    LIBSECCOMP_TSTCFG_TYPE=basic make check-code-coverage &&
-    LIBSECCOMP_TSTCFG_TYPE=bpf-sim make check-code-coverage
+  # limit the code coverage tests to the 'test-code-coverage' target
+  - make clean && ./configure --enable-code-coverage && make test-code-coverage
 
 after_success:
   # https://github.com/eddyxu/cpp-coveralls/blob/master/README.md
