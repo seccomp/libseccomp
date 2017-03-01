@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 {
 	int rc;
 	scmp_filter_ctx ctx;
+	uint32_t attr;
 
 	/* seccomp_init errors */
 	ctx = seccomp_init(SCMP_ACT_ALLOW + 1);
@@ -171,6 +172,17 @@ int main(int argc, char *argv[])
 	}
 	seccomp_release(ctx);
 	ctx = NULL;
+
+	/* seccomp_attr_* errors */
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_attr_get(ctx, 1000, &attr);
+	if (rc != -EEXIST)
+		return -1;
+	rc = seccomp_attr_set(ctx, 1000, 1);
+	if (rc != -EEXIST)
+		return -1;
 
 	return 0;
 }
