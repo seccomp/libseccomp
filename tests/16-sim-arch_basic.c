@@ -122,6 +122,35 @@ int main(int argc, char *argv[])
 	if (rc)
 		goto out;
 
+	/* not strictly necessary, but let's exercise the code paths */
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_X86);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_X86_64);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_X32);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_ARM);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_AARCH64);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_MIPSEL);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_MIPSEL64);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_MIPSEL64N32);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_PPC64LE);
+	if (rc != 0)
+		goto out;
+
 out:
 	seccomp_release(ctx);
 	return (rc < 0 ? -rc : rc);
