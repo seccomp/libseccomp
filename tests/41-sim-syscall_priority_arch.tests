@@ -1,0 +1,19 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2017 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname			Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+41-sim-syscall_priority_arch	+x86	102		1	N	N	N	N	N	ALLOW
+41-sim-syscall_priority_arch	+x86	102		18	N	N	N	N	N	KILL
+41-sim-syscall_priority_arch	+x86	359		N	N	N	N	N	N	ALLOW
+41-sim-syscall_priority_arch	+x86	364		N	N	N	N	N	N	KILL
+
+test type: bpf-valgrind
+
+# Testname
+41-sim-syscall_priority_arch

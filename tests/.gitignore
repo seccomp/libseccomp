@@ -46,3 +46,4 @@ util.pyc
 38-basic-pfc_coverage
 39-basic-api_level
 40-sim-log
+41-sim-syscall_priority_arch
