@@ -476,9 +476,6 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 			goto bpf_append_blk_failure;
 		}
 		switch (blk->blks[iter].k.type) {
-		case TGT_NONE:
-			i_iter->k = 0;
-			break;
 		case TGT_K:
 			i_iter->k = blk->blks[iter].k.tgt.imm_k;
 			break;
