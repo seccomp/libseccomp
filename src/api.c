@@ -83,6 +83,8 @@ static int _rc_filter(int err)
 	 *       requested operation */
 	case -EOPNOTSUPP:
 	/* NOTE: operation is not supported */
+	case -ERANGE:
+	/* NOTE: provided buffer is too small */
 	case -ESRCH:
 		/* NOTE: operation failed due to multi-threading */
 		return err;
@@ -730,4 +732,36 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 		return _rc_filter_sys(col, -errno);
 
 	return 0;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
+			       size_t *len)
+{
+	int rc;
+	size_t buf_len;
+	struct db_filter_col *col;
+	struct bpf_program *program;
+
+	if (_ctx_valid(ctx) || !len)
+		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
+
+	rc = gen_bpf_generate(col, &program);
+	if (rc < 0)
+		return _rc_filter(rc);
+	buf_len = *len;
+	*len = BPF_PGM_SIZE(program);
+
+	rc = 0;
+	if (buf) {
+		/* If we have a big enough buffer, write the program. */
+		if (*len > buf_len)
+			rc = _rc_filter(-ERANGE);
+		else
+			memcpy(buf, program->blks, *len);
+	}
+	gen_bpf_release(program);
+
+	return rc;
 }

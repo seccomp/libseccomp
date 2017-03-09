@@ -175,6 +175,39 @@ int main(int argc, char *argv[])
 	seccomp_release(ctx);
 	ctx = NULL;
 
+	/* seccomp_export_bpf_mem errors */
+	char buf[1024];
+	size_t buf_len = sizeof(buf);
+	rc = seccomp_export_bpf_mem(ctx, buf, &buf_len);
+	if (rc != -EINVAL)
+		return -1;
+
+	ctx = seccomp_init(SCMP_ACT_KILL);
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_export_bpf_mem(ctx, buf, NULL);
+	if (rc != -EINVAL)
+		return -1;
+	rc = seccomp_export_bpf_mem(ctx, NULL, NULL);
+	if (rc != -EINVAL)
+		return -1;
+
+	rc = seccomp_export_bpf_mem(ctx, NULL, &buf_len);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_export_bpf_mem(ctx, buf, &buf_len);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+	if (rc != 0)
+		return -1;
+	buf_len = 0;
+	rc = seccomp_export_bpf_mem(ctx, buf, &buf_len);
+	if (rc != -ERANGE)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
 	/* seccomp_attr_* errors */
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)

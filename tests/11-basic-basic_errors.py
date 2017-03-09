@@ -87,6 +87,11 @@ def test():
     except RuntimeError:
         pass
 
+    # This shouldn't throw any errors.
+    f = SyscallFilter(ALLOW)
+    f.add_rule(KILL, "read")
+    ret = f.export_bpf_mem()
+
 test()
 
 # kate: syntax python;

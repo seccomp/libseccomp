@@ -13,6 +13,7 @@ seccomp_export_bpf, seccomp_export_pfc \- Export the seccomp filter
 .sp
 .BI "int seccomp_export_bpf(const scmp_filter_ctx " ctx ", int " fd ");"
 .BI "int seccomp_export_pfc(const scmp_filter_ctx " ctx ", int " fd ");"
+.BI "int seccomp_export_bpf_mem(const scmp_filter_ctx " ctx ", void *" buf ", size_t *" len ");"
 .sp
 Link with \fI\-lseccomp\fP.
 .fi
@@ -42,6 +43,26 @@ is the value returned by the call to
 While the two output formats are guaranteed to be functionally equivalent for
 the given seccomp filter configuration, the filter instructions, and their
 ordering, are not guaranteed to be the same in both the BPF and PFC formats.
+.P
+The
+.BR seccomp_export_bpf_mem ()
+function is largely the same as
+.BR seccomp_export_bpf (),
+but instead of writing to a file descriptor, the program will be written to the
+.I buf
+pointer provided by the caller.  The
+.I len
+argument must be initialized with the size of the
+.I buf
+buffer.  If the program was valid,
+.I len
+will be updated with its size in bytes.  If
+.I buf
+was too small to hold the program,
+.I len
+can be consulted to determine the required size.  Passing a NULL
+.I buf
+may also be used to query the required size ahead of time.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
@@ -59,6 +80,9 @@ Invalid input, either the context or architecture token is invalid.
 .TP
 .B -ENOMEM
 The library was unable to allocate enough memory.
+.TP
+.B -ERANGE
+The provided buffer was too small.
 .P
 If the \fISCMP_FLTATR_API_SYSRAWRC\fP filter attribute is non-zero then
 additional error codes may be returned to the caller; these additional error

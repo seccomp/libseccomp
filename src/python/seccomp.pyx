@@ -80,10 +80,12 @@ Example:
 __author__ =  'Paul Moore <paul@paul-moore.com>'
 __date__ = "3 February 2017"
 
+from cpython cimport array
 from cpython.version cimport PY_MAJOR_VERSION
 from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
 from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 from libc.stdlib cimport free
+import array
 import errno
 
 cimport libseccomp
@@ -1043,6 +1045,29 @@ cdef class SyscallFilter:
         rc = libseccomp.seccomp_export_bpf(self._ctx, file.fileno())
         if rc != 0:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
+    def export_bpf_mem(self):
+        """ Export the filter in BPF format.
+
+        Description:
+        Return the filter in Berkeley Packet Filter (BPF) as bytes.
+        The output is identical to what is loaded into the Linux Kernel.
+        """
+        cdef size_t len = 0
+
+        # Figure out how big the program is.
+        rc = libseccomp.seccomp_export_bpf_mem(self._ctx, NULL, <size_t *>&len)
+        if rc != 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
+        # Get the program.
+        cdef array.array data = array.array('b', bytes(len))
+        cdef char[:] program = data
+        rc = libseccomp.seccomp_export_bpf_mem(self._ctx, <void *>&program[0],
+                                               <size_t *>&len)
+        if rc != 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+        return program
 
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;
