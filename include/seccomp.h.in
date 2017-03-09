@@ -25,6 +25,7 @@
 
 #include <elf.h>
 #include <inttypes.h>
+#include <stdlib.h>
 #include <asm/unistd.h>
 #include <linux/audit.h>
 #include <linux/types.h>
@@ -815,6 +816,19 @@ int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd);
  *
  */
 int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
+
+/**
+ * Generate seccomp Berkley Packet Filter (BPF) code and export it to a buffer
+ * @param ctx the filter context
+ * @param buf the destination buffer
+ * @param len on input the length of the buffer, on output the number of bytes
+ * in the program
+ *
+ * This function generates seccomp Berkley Packer Filter (BPF) code and writes
+ * it to the given buffer.  Returns zero on success, negative values on failure.
+ *
+ */
+int seccomp_export_bpf_buf(const scmp_filter_ctx ctx, void *buf, size_t *len);
 
 /*
  * pseudo syscall definitions
