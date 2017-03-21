@@ -97,15 +97,17 @@ static unsigned int _db_tree_free(struct db_arg_chain_tree *tree)
  * Remove a node from an argument chain tree
  * @param tree the pointer to the tree
  * @param node the node to remove
+ * @param action the action used to replace the node
  *
- * This function searches the tree looking for the node and removes it once
- * found.  Returns the number of nodes freed.
+ * This function searches the tree looking for the node and replaces it with
+ * the given action once found.  Returns the number of nodes freed.
  *
  */
 static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
-				    struct db_arg_chain_tree *node)
+				    struct db_arg_chain_tree *node,
+				    uint32_t action)
 {
-	int cnt = 0;
+	int cnt = 0, cnt_tmp;
 	struct db_arg_chain_tree *c_iter;
 
 	if (tree == NULL || *tree == NULL || node == NULL)
@@ -137,8 +139,18 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 		}
 
 		/* check the true/false sub-trees */
-		cnt += _db_tree_remove(&(c_iter->nxt_t), node);
-		cnt += _db_tree_remove(&(c_iter->nxt_f), node);
+		cnt_tmp = _db_tree_remove(&(c_iter->nxt_t), node, action);
+		if (cnt_tmp > 0 && c_iter->nxt_t == NULL) {
+			c_iter->act_t_flg = true;
+			c_iter->act_t = action;
+		}
+		cnt += cnt_tmp;
+		cnt_tmp = _db_tree_remove(&(c_iter->nxt_f), node, action);
+		if (cnt_tmp > 0 && c_iter->nxt_f == NULL) {
+			c_iter->act_f_flg = true;
+			c_iter->act_f = action;
+		}
+		cnt += cnt_tmp;
 
 		c_iter = c_iter->lvl_nxt;
 	} while (c_iter != NULL);
@@ -193,6 +205,7 @@ static int _db_tree_act_check(struct db_arg_chain_tree *tree, uint32_t action)
  * @param existing the starting point into the existing tree
  * @param new pointer to the new tree
  * @param state pointer to the pruning state
+ * @param action the action used to replace the node/tree
  *
  * This function searches the existing and new trees trying to prune each to
  * eliminate redundancy.  Returns the number of nodes removed from the tree on
@@ -203,7 +216,8 @@ static int _db_tree_act_check(struct db_arg_chain_tree *tree, uint32_t action)
 static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 			      struct db_arg_chain_tree *existing,
 			      struct db_arg_chain_tree *new,
-			      struct db_prune_state *state)
+			      struct db_prune_state *state,
+			      uint32_t action)
 {
 	int rc = 0;
 	int rc_tmp;
@@ -227,7 +241,8 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 					/* identical results */
 					if (prev != NULL)
 						return _db_tree_remove(prev,
-								       ec_iter);
+								       ec_iter,
+								       action);
 					else
 						return -1;
 				}
@@ -236,7 +251,8 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 					if (prev == NULL)
 						return -1;
 					rc += _db_tree_remove(&(ec_iter->nxt_t),
-							      ec_iter->nxt_t);
+							      ec_iter->nxt_t,
+							      action);
 					ec_iter->act_t = c_iter->act_t;
 					ec_iter->act_t_flg = true;
 				}
@@ -245,7 +261,8 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 					if (prev == NULL)
 						return -1;
 					rc += _db_tree_remove(&(ec_iter->nxt_f),
-							      ec_iter->nxt_f);
+							      ec_iter->nxt_f,
+							      action);
 					ec_iter->act_f = c_iter->act_f;
 					ec_iter->act_f_flg = true;
 				}
@@ -267,7 +284,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 							     &ec_iter : NULL),
 							    ec_iter->nxt_t,
 							    c_iter->nxt_t,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 				if (state->prefix_new && rc_tmp < 0)
 					return (rc > 0 ? rc : rc_tmp);
@@ -279,7 +296,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 							     &ec_iter : NULL),
 							    ec_iter->nxt_f,
 							    c_iter->nxt_f,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 				if (state->prefix_new && rc_tmp < 0)
 					return (rc > 0 ? rc : rc_tmp);
@@ -296,7 +313,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 							     &ec_iter : NULL),
 							    ec_iter->nxt_t,
 							    c_iter,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 			}
 			if (ec_iter->nxt_f) {
@@ -304,7 +321,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 							     &ec_iter : NULL),
 							    ec_iter->nxt_f,
 							    c_iter,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 			}
 		} else if (db_chain_gt(ec_iter, c_iter)) {
@@ -318,7 +335,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 				rc_tmp = _db_tree_sub_prune(NULL,
 							    ec_iter,
 							    c_iter->nxt_t,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 				if (rc_tmp < 0)
 					return (rc > 0 ? rc : rc_tmp);
@@ -327,7 +344,7 @@ static int _db_tree_sub_prune(struct db_arg_chain_tree **prev,
 				rc_tmp = _db_tree_sub_prune(NULL,
 							    ec_iter,
 							    c_iter->nxt_f,
-							    &state_new);
+							    &state_new, action);
 				rc += (rc_tmp > 0 ? rc_tmp : 0);
 				if (rc_tmp < 0)
 					return (rc > 0 ? rc : rc_tmp);
@@ -338,7 +355,7 @@ next:
 		/* re-check current node and advance to the next node */
 		if (db_chain_zombie(ec_iter)) {
 			ec_iter_tmp = ec_iter->lvl_nxt;
-			rc += _db_tree_remove(prev, ec_iter);
+			rc += _db_tree_remove(prev, ec_iter, action);
 			ec_iter = ec_iter_tmp;
 		} else
 			ec_iter = ec_iter->lvl_nxt;
@@ -1255,7 +1272,7 @@ int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule)
 	const struct db_api_arg *chain = rule->args;
 	struct db_sys_list *s_new, *s_iter, *s_prev = NULL;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
-	struct db_arg_chain_tree *ec_iter;
+	struct db_arg_chain_tree *ec_iter, *ec_prev = NULL;
 	struct db_prune_state state;
 	bool rm_flag = false;
 	unsigned int new_chain_cnt = 0;
@@ -1336,7 +1353,8 @@ add_reset:
 
 	/* check for sub-tree matches */
 	memset(&state, 0, sizeof(state));
-	rc = _db_tree_sub_prune(&(s_iter->chains), ec_iter, c_iter, &state);
+	rc = _db_tree_sub_prune(&(s_iter->chains), ec_iter, c_iter,
+				&state, action);
 	if (rc > 0) {
 		rm_flag = true;
 		s_iter->node_cnt -= rc;
@@ -1369,9 +1387,19 @@ add_reset:
 				}
 				if (ec_iter->act_t_flg == ec_iter->act_f_flg &&
 				    ec_iter->act_t == ec_iter->act_f) {
-					n_cnt = _db_tree_remove(
-							&(s_iter->chains),
-							ec_iter);
+					if (ec_prev &&
+					    ec_prev->arg == ec_iter->arg)
+						n_cnt = _db_tree_remove(
+								&(s_iter->chains),
+								ec_prev,
+								action);
+					else
+						n_cnt = _db_tree_remove(
+								&(s_iter->chains),
+								ec_iter,
+								action);
+					if (s_iter->chains == NULL)
+						s_iter->action = action;
 					s_iter->node_cnt -= n_cnt;
 					goto add_free_ok;
 				}
@@ -1403,6 +1431,7 @@ add_reset:
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_t;
+					ec_prev = ec_iter;
 					ec_iter = ec_iter->nxt_t;
 					s_new->node_cnt--;
 				} else if (ec_iter->act_t_flg) {
@@ -1423,6 +1452,7 @@ add_reset:
 					/* jump to the next level */
 					c_prev = c_iter;
 					c_iter = c_iter->nxt_f;
+					ec_prev = ec_iter;
 					ec_iter = ec_iter->nxt_f;
 					s_new->node_cnt--;
 				} else if (ec_iter->act_f_flg) {
