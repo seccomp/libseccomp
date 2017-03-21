@@ -80,7 +80,8 @@ check_PROGRAMS = \
 	38-basic-pfc_coverage \
 	39-basic-api_level \
 	40-sim-log \
-	41-sim-syscall_priority_arch
+	41-sim-syscall_priority_arch \
+	42-sim-adv_chains
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -122,7 +123,8 @@ EXTRA_DIST_TESTPYTHON = \
 	36-sim-ipc_syscalls.py \
 	37-sim-ipc_syscalls_be.py \
 	40-sim-log.py \
-	41-sim-syscall_priority_arch.py
+	41-sim-syscall_priority_arch.py \
+	42-sim-adv_chains.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -165,7 +167,8 @@ EXTRA_DIST_TESTCFGS = \
 	38-basic-pfc_coverage.tests \
 	39-basic-api_level.tests \
 	40-sim-log.tests \
-	41-sim-syscall_priority_arch.tests
+	41-sim-syscall_priority_arch.tests \
+	42-sim-adv_chains.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc

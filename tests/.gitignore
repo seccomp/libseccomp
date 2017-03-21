@@ -47,3 +47,4 @@ util.pyc
 39-basic-api_level
 40-sim-log
 41-sim-syscall_priority_arch
+42-sim-adv_chains
