@@ -1,7 +1,14 @@
 /**
- * Architecture Detector
+ * Architecture resolver
  *
- * Copyright (c) 2013 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2016 Canonical LTD.
+ * Author: Tyler Hicks <tyhicks@canonical.com
+ */
+
+/**
+ * Originally seccomp_sys_resolver.c:
+ *
+ * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -22,6 +29,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <seccomp.h>
@@ -37,9 +46,7 @@
  */
 static void exit_usage(const char *program)
 {
-	fprintf(stderr,
-		"usage: %s [-h] [-t]\n",
-		program);
+	fprintf(stderr, "usage: %s [-h] <name>|<number>\n", program);
 	exit(EINVAL);
 }
 
@@ -49,15 +56,10 @@ static void exit_usage(const char *program)
 int main(int argc, char *argv[])
 {
 	int opt;
-	int token = 0;
-	uint32_t arch;
 
 	/* parse the command line */
-	while ((opt = getopt(argc, argv, "ht")) > 0) {
+	while ((opt = getopt(argc, argv, "h")) > 0) {
 		switch (opt) {
-		case 't':
-			token = 1;
-			break;
 		case 'h':
 		default:
 			/* usage information */
@@ -65,14 +67,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	arch = seccomp_arch_native();
-	if (token == 0) {
-		char *name = arch_resolve_token(arch);
+	/* sanity checks */
+	if (optind >= argc)
+		exit_usage(argv[0]);
 
-		printf("%s\n", (name ? name : "unknown"));
-		free(name);
-	} else
-		printf("%d\n", arch);
+	/* perform the syscall lookup */
+	if (isdigit(argv[optind][0]) || argv[optind][0] == '-') {
+		char *arch_name = arch_resolve_token(atoi(argv[optind]));
+
+		printf("%s\n", (arch_name ? arch_name : "UNKNOWN"));
+		free(arch_name);
+	} else {
+		uint32_t arch_num = seccomp_arch_resolve_name(argv[optind]);
+
+		printf("%d\n", arch_num);
+	}
 
 	return 0;
 }

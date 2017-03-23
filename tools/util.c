@@ -22,12 +22,15 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <linux/audit.h>
 
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
 #include <endian.h>
+
+#include <seccomp.h>
 
 #include "util.h"
 
@@ -147,4 +150,79 @@ uint64_t htot64(uint32_t arch, uint64_t val)
 		return htole64(val);
 	else
 		return htobe64(val);
+}
+
+/**
+ * Resolve arch token to a name
+ * @param arch_token the architecture token, e.g. SCMP_ARCH_*
+ *
+ * Resolve the given architecture token to the architecture name; it is up to
+ * the caller to free the returned string. Returns the architecture name on
+ * success, NULL on failure.
+ *
+ */
+char *arch_resolve_token(uint32_t arch_token)
+{
+	const char *name;
+
+	switch (arch_token) {
+	case SCMP_ARCH_X86:
+		name = "x86";
+		break;
+	case SCMP_ARCH_X86_64:
+		name = "x86_64";
+		break;
+	case SCMP_ARCH_X32:
+		name = "x32";
+		break;
+	case SCMP_ARCH_ARM:
+		name = "arm";
+		break;
+	case SCMP_ARCH_AARCH64:
+		name = "aarch64";
+		break;
+	case SCMP_ARCH_MIPS:
+		name = "mips";
+		break;
+	case SCMP_ARCH_MIPSEL:
+		name = "mipsel";
+		break;
+	case SCMP_ARCH_MIPS64:
+		name = "mips64";
+		break;
+	case SCMP_ARCH_MIPSEL64:
+		name = "mipsel64";
+		break;
+	case SCMP_ARCH_MIPS64N32:
+		name = "mips64n32";
+		break;
+	case SCMP_ARCH_MIPSEL64N32:
+		name = "mipsel64n32";
+		break;
+	case SCMP_ARCH_PARISC:
+		name = "parisc";
+		break;
+	case SCMP_ARCH_PARISC64:
+		name = "parisc64";
+		break;
+	case SCMP_ARCH_PPC:
+		name = "ppc";
+		break;
+	case SCMP_ARCH_PPC64:
+		name = "ppc64";
+		break;
+	case SCMP_ARCH_PPC64LE:
+		name = "ppc64le";
+		break;
+	case SCMP_ARCH_S390:
+		name = "s390";
+		break;
+	case SCMP_ARCH_S390X:
+		name = "s390x";
+		break;
+	default:
+		name = NULL;
+	}
+
+	return name ? strdup(name) : NULL;
 }
