@@ -1,4 +1,4 @@
-Enhanced Seccomp (seccomp-bpf) Helper Library
+![Enhanced Seccomp Helper Library](https://github.com/seccomp/libseccomp-artwork/blob/master/logo/libseccomp-color_text.png)
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
