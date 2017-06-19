@@ -29,11 +29,11 @@ list.
 
 The "doc/" directory contains all of the currently available documentation,
 mostly in the form of manpages.  The top level directory also contains a README
-file (this file) as well as the LICENSE, CREDITS, SUBMITTING_PATCHES, and
+file (this file) as well as the LICENSE, CREDITS, CONTRIBUTING, and
 CHANGELOG files.
 
 Those who are interested in contributing to the the project are encouraged to
-read the SUBMITTING_PATCHES in the top level directory.
+read the CONTRIBUTING in the top level directory.
 
 ## Building and Installing the Library
 
