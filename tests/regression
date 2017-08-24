@@ -608,7 +608,7 @@ function run_test_basic() {
 	local cmd
 
 	# if the test is a script, only run it in native/c mode
-	if [[ $mode != "c" && $(echo "$2" | grep -q '.sh$') -eq 0 ]]; then
+	if [[ $mode != "c" && "$2" == *.sh ]]; then
 		print_result "$1" "SKIPPED" "(only valid in native/c mode)"
 		stats_skipped=$(($stats_skipped+1))
 		return
