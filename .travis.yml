@@ -43,9 +43,9 @@ env:
 # resolve any remaining dependency issues
 before_install:
   # ubuntu 14.04 (trusty) has an old version of cython
-  - pip install cython
+  - pip install --user cython
   # see https://github.com/eddyxu/cpp-coveralls
-  - pip install cpp-coveralls
+  - pip install --user cpp-coveralls
 
 # perform the build and fail immediately on error
 install:
