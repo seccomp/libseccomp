@@ -36,6 +36,7 @@ struct db_api_arg {
 	enum scmp_compare op;
 	scmp_datum_t mask;
 	scmp_datum_t datum;
+	scmp_datum_t datum_b;
 
 	bool valid;
 };
@@ -59,6 +60,7 @@ struct db_arg_chain_tree {
 	/* syscall argument value */
 	uint32_t mask;
 	uint32_t datum;
+	uint32_t datum_b;
 
 	/* actions */
 	bool act_t_flg;
@@ -83,7 +85,7 @@ struct db_arg_chain_tree {
 #define db_chain_eq(x,y) \
 	(((x)->arg == (y)->arg) && \
 	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum) && \
-	 ((x)->mask == (y)->mask))
+	 ((x)->datum_b == (y)->datum_b) && ((x)->mask == (y)->mask))
 #define db_chain_gt(x,y) \
 	(((x)->arg > (y)->arg) || \
 	 (((x)->arg == (y)->arg) && \

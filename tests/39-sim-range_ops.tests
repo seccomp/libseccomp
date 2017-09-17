@@ -1,0 +1,44 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright Topi Miettinen 2017
+# Author: Topi Miettinen <toiwoton@gmail.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0	Arg1		Arg2	Arg3	Arg4	Arg5	Result
+39-sim-range_ops	all	1000	0	0		2	N	N	N	KILL
+39-sim-range_ops	all	1000	0	0xef		2	N	N	N	KILL
+39-sim-range_ops	all	1000	0	0xf0		2	N	N	N	ALLOW
+39-sim-range_ops	all	1000	0	0xf1		2	N	N	N	ALLOW
+39-sim-range_ops	all	1000	0	0xff		2	N	N	N	ALLOW
+39-sim-range_ops	all	1000	0	0x100		2	N	N	N	KILL
+39-sim-range_ops	all	1001	0	0		2	N	N	N	ALLOW
+39-sim-range_ops	all	1001	0	0xef		2	N	N	N	ALLOW
+39-sim-range_ops	all	1001	0	0xf0		2	N	N	N	KILL
+39-sim-range_ops	all	1001	0	0xf1		2	N	N	N	KILL
+39-sim-range_ops	all	1001	0	0xff		2	N	N	N	KILL
+39-sim-range_ops	all	1001	0	0x100		2	N	N	N	ALLOW
+39-sim-range_ops	all	1002	0	0		2	N	N	N	KILL
+39-sim-range_ops	all	1002	0	0xaefbb		2	N	N	N	KILL
+39-sim-range_ops	all	1002	0	0xaf0bb		2	N	N	N	ALLOW
+39-sim-range_ops	all	1002	0	0xaf1bb		2	N	N	N	ALLOW
+39-sim-range_ops	all	1002	0	0xafebb		2	N	N	N	ALLOW
+39-sim-range_ops	all	1002	0	0xaffbb		2	N	N	N	KILL
+39-sim-range_ops	all	1003	0	0		2	N	N	N	ALLOW
+39-sim-range_ops	all	1003	0	0xaefbb		2	N	N	N	ALLOW
+39-sim-range_ops	all	1003	0	0xaf0bb		2	N	N	N	KILL
+39-sim-range_ops	all	1003	0	0xaf1bb		2	N	N	N	KILL
+39-sim-range_ops	all	1003	0	0xafebb		2	N	N	N	KILL
+39-sim-range_ops	all	1003	0	0xaffbb		2	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+39-sim-range_ops	50
+
+test type: bpf-valgrind
+
+# Testname
+39-sim-range_ops

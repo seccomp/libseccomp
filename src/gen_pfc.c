@@ -178,6 +178,18 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 		/* comparison operation */
 		_indent(fds, lvl);
 		fprintf(fds, "if (");
+		switch (c_iter->op) {
+		case SCMP_CMP_IN_RANGE:
+		case SCMP_CMP_MASKED_IN_RANGE:
+			fprintf(fds, "%u <= ", c_iter->datum);
+			break;
+		case SCMP_CMP_NOT_IN_RANGE:
+		case SCMP_CMP_MASKED_NOT_IN_RANGE:
+			fprintf(fds, "!(%u <= ", c_iter->datum);
+			break;
+		default:
+			break;
+		}
 		_pfc_arg(fds, arch, c_iter);
 		switch (c_iter->op) {
 		case SCMP_CMP_EQ:
@@ -192,13 +204,31 @@ static void _gen_pfc_chain(const struct arch_def *arch,
 		case SCMP_CMP_MASKED_EQ:
 			fprintf(fds, " & 0x%.8x == ", c_iter->mask);
 			break;
+		case SCMP_CMP_MASKED_IN_RANGE:
+		case SCMP_CMP_MASKED_NOT_IN_RANGE:
+			fprintf(fds, " & 0x%.8x", c_iter->mask);
+			break;
+		case SCMP_CMP_IN_RANGE:
+		case SCMP_CMP_NOT_IN_RANGE:
+			break;
 		case SCMP_CMP_NE:
 		case SCMP_CMP_LT:
 		case SCMP_CMP_LE:
 		default:
 			fprintf(fds, " ??? ");
 		}
-		fprintf(fds, "%u)\n", c_iter->datum);
+		switch (c_iter->op) {
+		case SCMP_CMP_IN_RANGE:
+		case SCMP_CMP_MASKED_IN_RANGE:
+			fprintf(fds, " <= %u)\n", c_iter->datum_b);
+			break;
+		case SCMP_CMP_NOT_IN_RANGE:
+		case SCMP_CMP_MASKED_NOT_IN_RANGE:
+			fprintf(fds, " <= %u))\n", c_iter->datum_b);
+			break;
+		default:
+			fprintf(fds, "%u)\n", c_iter->datum);
+		}
 
 		/* true result */
 		if (c_iter->act_t_flg) {

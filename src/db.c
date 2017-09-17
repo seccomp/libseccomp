@@ -964,7 +964,10 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
  */
 static bool _db_arg_cmp_need_lo(const struct db_api_arg *arg)
 {
-	if (arg->op == SCMP_CMP_MASKED_EQ && D64_LO(arg->mask) == 0)
+	if ((arg->op == SCMP_CMP_MASKED_EQ ||
+	     arg->op == SCMP_CMP_MASKED_IN_RANGE ||
+	     arg->op == SCMP_CMP_MASKED_NOT_IN_RANGE)&&
+	    D64_LO(arg->mask) == 0)
 		return false;
 
 	return true;
@@ -980,7 +983,10 @@ static bool _db_arg_cmp_need_lo(const struct db_api_arg *arg)
  */
 static bool _db_arg_cmp_need_hi(const struct db_api_arg *arg)
 {
-	if (arg->op == SCMP_CMP_MASKED_EQ && D64_HI(arg->mask) == 0)
+	if ((arg->op == SCMP_CMP_MASKED_EQ ||
+	     arg->op == SCMP_CMP_MASKED_IN_RANGE ||
+	     arg->op == SCMP_CMP_MASKED_NOT_IN_RANGE) &&
+	    D64_HI(arg->mask) == 0)
 		return false;
 
 	return true;
@@ -996,6 +1002,7 @@ static bool _db_arg_cmp_need_hi(const struct db_api_arg *arg)
 static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
 {
 	node->datum &= node->mask;
+	node->datum_b &= node->mask;
 }
 
 /**
@@ -1088,6 +1095,12 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 			c_iter_lo->op = SCMP_CMP_GT;
 			tf_flag = false;
 			break;
+		case SCMP_CMP_NOT_IN_RANGE:
+		case SCMP_CMP_MASKED_NOT_IN_RANGE:
+			c_iter_hi->op = chain[iter].op;
+			c_iter_lo->op = chain[iter].op;
+			tf_flag = false;
+			break;
 		default:
 			c_iter_hi->op = chain[iter].op;
 			c_iter_lo->op = chain[iter].op;
@@ -1097,6 +1110,8 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		c_iter_lo->mask = D64_LO(chain[iter].mask);
 		c_iter_hi->datum = D64_HI(chain[iter].datum);
 		c_iter_lo->datum = D64_LO(chain[iter].datum);
+		c_iter_hi->datum_b = D64_HI(chain[iter].datum_b);
+		c_iter_lo->datum_b = D64_LO(chain[iter].datum_b);
 
 		/* fixup the mask/datum */
 		_db_node_mask_fixup(c_iter_hi);
@@ -1176,6 +1191,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 		/* implicitly strips off the upper 32 bit */
 		c_iter->mask = chain[iter].mask;
 		c_iter->datum = chain[iter].datum;
+		c_iter->datum_b = chain[iter].datum_b;
 
 		/* link in the new node and update the chain */
 		if (c_prev != NULL) {
@@ -1611,6 +1627,18 @@ int db_col_rule_add(struct db_filter_col *col,
 			case SCMP_CMP_MASKED_EQ:
 				chain[arg_num].mask = arg_data.datum_a;
 				chain[arg_num].datum = arg_data.datum_b;
+				break;
+			case SCMP_CMP_IN_RANGE:
+			case SCMP_CMP_NOT_IN_RANGE:
+				chain[arg_num].mask = DATUM_MAX;
+				chain[arg_num].datum = arg_data.datum_a;
+				chain[arg_num].datum_b = arg_data.datum_b;
+				break;
+			case SCMP_CMP_MASKED_IN_RANGE:
+			case SCMP_CMP_MASKED_NOT_IN_RANGE:
+				chain[arg_num].mask = arg_data.datum_a;
+				chain[arg_num].datum = arg_data.datum_b;
+				chain[arg_num].datum_b = arg_data.datum_c;
 				break;
 			default:
 				rc = -EINVAL;

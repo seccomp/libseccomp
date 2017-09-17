@@ -79,6 +79,10 @@ enum scmp_compare {
 	SCMP_CMP_GE = 5,		/**< greater than or equal */
 	SCMP_CMP_GT = 6,		/**< greater than */
 	SCMP_CMP_MASKED_EQ = 7,		/**< masked equality */
+	SCMP_CMP_IN_RANGE = 8,		/**< in range */
+	SCMP_CMP_NOT_IN_RANGE = 9,	/**< not in range */
+	SCMP_CMP_MASKED_IN_RANGE = 10,	/**< in range, masked */
+	SCMP_CMP_MASKED_NOT_IN_RANGE = 11,	/**< not in range, masked */
 	_SCMP_CMP_MAX,
 };
 
@@ -95,6 +99,7 @@ struct scmp_arg_cmp {
 	enum scmp_compare op;	/**< the comparison op, e.g. SCMP_CMP_* */
 	scmp_datum_t datum_a;
 	scmp_datum_t datum_b;
+	scmp_datum_t datum_c;
 };
 
 /*

@@ -77,7 +77,8 @@ check_PROGRAMS = \
 	35-sim-negative_one \
 	36-sim-ipc_syscalls \
 	37-sim-ipc_syscalls_be \
-	38-basic-pfc_coverage
+	38-basic-pfc_coverage \
+	39-sim-range_ops
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
