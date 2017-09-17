@@ -789,6 +789,38 @@ static struct bpf_blk *_gen_bpf_action_hsh(struct bpf_state *state,
 }
 
 /**
+ * Fixup the jump target for jump if true
+ * @param node the filter chain node
+ * @param act_t_hash hash of action
+ */
+static struct bpf_jump _gen_bpf_fixup_t(const struct db_arg_chain_tree *node,
+				 uint64_t act_t_hash)
+{
+	if (node->nxt_t != NULL)
+		return _BPF_JMP_DB(node->nxt_t);
+	else if (node->act_t_flg)
+		return _BPF_JMP_HSH(act_t_hash);
+	else
+		return _BPF_JMP_NXT(0);
+}
+
+/**
+ * Fixup the jump target for jump if false
+ * @param node the filter chain node
+ * @param act_f_hash hash of action for jump if false
+ */
+static struct bpf_jump _gen_bpf_fixup_f(const struct db_arg_chain_tree *node,
+			     uint64_t act_f_hash)
+{
+	if (node->nxt_f != NULL)
+		return _BPF_JMP_DB(node->nxt_f);
+	else if (node->act_f_flg)
+		return _BPF_JMP_HSH(act_f_hash);
+	else
+		return _BPF_JMP_NXT(0);
+}
+
+/**
  * Generate a BPF instruction block for a given chain node
  * @param state the BPF state
  * @param node the filter chain node
@@ -807,6 +839,7 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 	uint64_t act_t_hash = 0, act_f_hash = 0;
 	struct bpf_blk *blk, *b_act;
 	struct bpf_instr instr;
+	bool fixup = true;
 
 	blk = _blk_alloc();
 	if (blk == NULL)
@@ -875,6 +908,42 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 			   _BPF_JMP_NO, _BPF_JMP_NO,
 			   _BPF_K(state->arch, node->datum));
 		break;
+	case SCMP_CMP_MASKED_IN_RANGE:
+	case SCMP_CMP_IN_RANGE:
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum));
+		instr.jt = _BPF_JMP_IMM(0);
+		instr.jf = _gen_bpf_fixup_f(node, act_f_hash);
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto node_failure;
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGT),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum_b));
+		/* swap true and false paths */
+		instr.jf = _gen_bpf_fixup_t(node, act_t_hash);
+		instr.jt = _gen_bpf_fixup_f(node, act_f_hash);
+		fixup = false;
+		break;
+	case SCMP_CMP_MASKED_NOT_IN_RANGE:
+	case SCMP_CMP_NOT_IN_RANGE:
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGE),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum));
+		instr.jt = _BPF_JMP_IMM(0);
+		instr.jf = _gen_bpf_fixup_f(node, act_f_hash);
+		blk = _blk_append(state, blk, &instr);
+		if (blk == NULL)
+			goto node_failure;
+		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JGT),
+			   _BPF_JMP_NO, _BPF_JMP_NO,
+			   _BPF_K(state->arch, node->datum_b));
+		/* swap true and false paths */
+		instr.jf = _gen_bpf_fixup_t(node, act_t_hash);
+		instr.jt = _gen_bpf_fixup_f(node, act_f_hash);
+		fixup = false;
+		break;
 	case SCMP_CMP_NE:
 	case SCMP_CMP_LT:
 	case SCMP_CMP_LE:
@@ -882,20 +951,10 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		/* fatal error, we should never get here */
 		goto node_failure;
 	}
-
-	/* fixup the jump targets */
-	if (node->nxt_t != NULL)
-		instr.jt = _BPF_JMP_DB(node->nxt_t);
-	else if (node->act_t_flg)
-		instr.jt = _BPF_JMP_HSH(act_t_hash);
-	else
-		instr.jt = _BPF_JMP_NXT(0);
-	if (node->nxt_f != NULL)
-		instr.jf = _BPF_JMP_DB(node->nxt_f);
-	else if (node->act_f_flg)
-		instr.jf = _BPF_JMP_HSH(act_f_hash);
-	else
-		instr.jf = _BPF_JMP_NXT(0);
+	if (fixup) {
+		instr.jt = _gen_bpf_fixup_t(node, act_t_hash);
+		instr.jf = _gen_bpf_fixup_f(node, act_f_hash);
+	}
 	blk = _blk_append(state, blk, &instr);
 	if (blk == NULL)
 		goto node_failure;
