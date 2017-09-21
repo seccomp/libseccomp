@@ -43,4 +43,6 @@ dist_man3_MANS = \
 	man/man3/seccomp_syscall_resolve_name_arch.3 \
 	man/man3/seccomp_syscall_resolve_name_rewrite.3 \
 	man/man3/seccomp_syscall_resolve_num_arch.3 \
-	man/man3/seccomp_version.3
+	man/man3/seccomp_version.3 \
+	man/man3/seccomp_api_get.3 \
+	man/man3/seccomp_api_set.3

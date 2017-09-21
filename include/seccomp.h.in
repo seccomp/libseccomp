@@ -275,6 +275,36 @@ struct scmp_arg_cmp {
 const struct scmp_version *seccomp_version(void);
 
 /**
+ * Query the library's level of API support
+ *
+ * This function returns an API level value indicating the current supported
+ * functionality.  It is important to note that this level of support is
+ * determined at runtime and therefore can change based on the running kernel
+ * and system configuration (e.g. any previously loaded seccomp filters).  This
+ * function can be called multiple times, but it only queries the system the
+ * first time it is called, the API level is cached and used in subsequent
+ * calls.
+ *
+ * The current API levels are described below:
+ *  0 : reserved
+ *  1 : base level
+ *  2 : support for the SCMP_FLTATR_CTL_TSYNC filter attribute
+ *      uses the seccomp(2) syscall instead of the prctl(2) syscall
+ *
+ */
+const unsigned int seccomp_api_get(void);
+
+/**
+ * Set the library's level of API support
+ *
+ * This function forcibly sets the API level of the library at runtime.  Valid
+ * API levels are discussed in the description of the seccomp_api_get()
+ * function.  General use of this function is strongly discouraged.
+ *
+ */
+int seccomp_api_set(unsigned int level);
+
+/**
  * Initialize the filter state
  * @param def_action the default filter action
  *

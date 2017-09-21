@@ -109,7 +109,10 @@ typedef struct sock_filter bpf_instr_raw;
 #endif
 
 int sys_chk_seccomp_syscall(void);
+void sys_set_seccomp_syscall(bool enable);
+
 int sys_chk_seccomp_flag(int flag);
+void sys_set_seccomp_flag(int flag, bool enable);
 
 int sys_filter_load(const struct db_filter_col *col);
 

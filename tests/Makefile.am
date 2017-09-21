@@ -77,7 +77,8 @@ check_PROGRAMS = \
 	35-sim-negative_one \
 	36-sim-ipc_syscalls \
 	37-sim-ipc_syscalls_be \
-	38-basic-pfc_coverage
+	38-basic-pfc_coverage \
+	39-basic-api_level
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -157,7 +158,8 @@ EXTRA_DIST_TESTCFGS = \
 	35-sim-negative_one.tests \
 	36-sim-ipc_syscalls.tests \
 	37-sim-ipc_syscalls_be.tests \
-	38-basic-pfc_coverage.tests
+	38-basic-pfc_coverage.tests \
+	39-basic-api_level.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc

@@ -84,6 +84,9 @@ cdef extern from "seccomp.h":
 
     scmp_version *seccomp_version()
 
+    unsigned int seccomp_api_get()
+    int seccomp_api_set(unsigned int level)
+
     scmp_filter_ctx seccomp_init(uint32_t def_action)
     int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
     void seccomp_release(scmp_filter_ctx ctx)
