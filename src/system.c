@@ -138,6 +138,7 @@ int sys_chk_seccomp_flag(int flag)
 
 /**
  * Force a seccomp() syscall flag support setting
+ * @param flag the seccomp() flag
  * @param enable the intended support state
  *
  * This function overrides the current seccomp() syscall support setting for a
