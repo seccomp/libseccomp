@@ -40,5 +40,21 @@ int main(int argc, char *argv[])
 	if (api != 1)
 		return -3;
 
+	rc = seccomp_api_set(2);
+	if (rc != 0)
+		return -4;
+	api = seccomp_api_get();
+	if (api != 2)
+		return -5;
+
+	/* Attempt to set a high, invalid API level */
+	rc = seccomp_api_set(1024);
+	if (rc != -EINVAL)
+		return -6;
+	/* Ensure that the previously set API level didn't change */
+	api = seccomp_api_get();
+	if (api != 2)
+		return -7;
+
 	return 0;
 }
