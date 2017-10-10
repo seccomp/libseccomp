@@ -150,6 +150,35 @@ def resolve_syscall(arch, syscall):
     else:
         raise TypeError("Syscall must either be an int or str type")
 
+def get_api():
+    """ Query the level of API support
+
+    Description:
+    Returns the API level value indicating the current supported
+    functionality.
+    """
+    level = libseccomp.seccomp_api_get()
+    if level < 0:
+        raise RuntimeError(str.format("Library error (errno = {0})", level))
+
+    return level
+
+def set_api(unsigned int level):
+    """ Set the level of API support
+
+    Arguments:
+    level - the API level
+
+    Description:
+    This function forcibly sets the API level at runtime.  General use
+    of this function is strongly discouraged.
+    """
+    rc = libseccomp.seccomp_api_set(level)
+    if rc == -errno.EINVAL:
+        raise ValueError("Invalid level")
+    elif rc != 0:
+        raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
 cdef class Arch:
     """ Python object representing the SyscallFilter architecture values.
 
