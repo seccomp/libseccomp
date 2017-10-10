@@ -99,7 +99,7 @@ static unsigned int _seccomp_api_update(void)
 
 	/* level 2 */
 	if (sys_chk_seccomp_syscall() &&
-	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC))
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC) == 1)
 		level = 2;
 
 	/* update the stored api level and return */
