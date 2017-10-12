@@ -61,13 +61,18 @@ Example:
     # create a filter object with a default KILL action
     f = SyscallFilter(defaction=KILL)
 
+    # add some basic syscalls which python typically wants
+    f.add_rule(ALLOW, "rt_sigaction")
+    f.add_rule(ALLOW, "rt_sigreturn")
+    f.add_rule(ALLOW, "exit_group")
+    f.add_rule(ALLOW, "brk")
+
     # add syscall filter rules to allow certain syscalls
     f.add_rule(ALLOW, "open")
     f.add_rule(ALLOW, "close")
-    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin))
-    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout))
-    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr))
-    f.add_rule(ALLOW, "rt_sigreturn")
+    f.add_rule(ALLOW, "read", Arg(0, EQ, sys.stdin.fileno()))
+    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stdout.fileno()))
+    f.add_rule(ALLOW, "write", Arg(0, EQ, sys.stderr.fileno()))
 
     # load the filter into the kernel
     f.load()
