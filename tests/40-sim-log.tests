@@ -1,0 +1,21 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright Canonical Ltd. 2017
+# Author: Tyler Hicks <tyhicks@canonical.com>
+#
+
+test type: bpf-sim
+
+# Testname	Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+40-sim-log	all	0-350	N	N	N	N	N	N	LOG
+
+test type: bpf-sim-fuzz
+
+# Testname	StressCount
+40-sim-log	50
+
+test type: bpf-valgrind
+
+# Testname
+40-sim-log

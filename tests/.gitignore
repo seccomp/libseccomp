@@ -45,3 +45,4 @@ util.pyc
 37-sim-ipc_syscalls_be
 38-basic-pfc_coverage
 39-basic-api_level
+40-sim-log
