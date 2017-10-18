@@ -64,6 +64,7 @@ enum scmp_filter_attr {
 	SCMP_FLTATR_CTL_NNP = 3,	/**< set NO_NEW_PRIVS on filter load */
 	SCMP_FLTATR_CTL_TSYNC = 4,	/**< sync threads on filter load */
 	SCMP_FLTATR_API_TSKIP = 5,	/**< allow rules with a -1 syscall */
+	SCMP_FLTATR_CTL_LOG = 6,	/**< log not-allowed actions */
 	_SCMP_FLTATR_MAX,
 };
 
@@ -290,6 +291,7 @@ const struct scmp_version *seccomp_version(void);
  *  1 : base level
  *  2 : support for the SCMP_FLTATR_CTL_TSYNC filter attribute
  *      uses the seccomp(2) syscall instead of the prctl(2) syscall
+ *  3 : support for the SCMP_FLTATR_CTL_LOG filter attribute
  *
  */
 const unsigned int seccomp_api_get(void);

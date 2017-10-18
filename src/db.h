@@ -139,6 +139,8 @@ struct db_filter_attr {
 	uint32_t tsync_enable;
 	/* allow rules with a -1 syscall value */
 	uint32_t api_tskip;
+	/* SECCOMP_FILTER_FLAG_LOG related attributes */
+	uint32_t log_enable;
 };
 
 struct db_filter {

@@ -107,6 +107,9 @@ typedef struct sock_filter bpf_instr_raw;
 #ifndef SECCOMP_FILTER_FLAG_TSYNC
 #define SECCOMP_FILTER_FLAG_TSYNC	1
 #endif
+#ifndef SECCOMP_FILTER_FLAG_LOG
+#define SECCOMP_FILTER_FLAG_LOG		2
+#endif
 
 int sys_chk_seccomp_syscall(void);
 void sys_set_seccomp_syscall(bool enable);
