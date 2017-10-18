@@ -660,18 +660,8 @@ void db_col_release(struct db_filter_col *col)
  */
 int db_action_valid(uint32_t action)
 {
-	if (action == SCMP_ACT_KILL)
+	if (sys_chk_seccomp_action(action) == 1)
 		return 0;
-	else if (action == SCMP_ACT_TRAP)
-		return 0;
-	else if ((action == SCMP_ACT_ERRNO(action & 0x0000ffff)) &&
-		 ((action & 0x0000ffff) < MAX_ERRNO))
-		return 0;
-	else if (action == SCMP_ACT_TRACE(action & 0x0000ffff))
-		return 0;
-	else if (action == SCMP_ACT_ALLOW)
-		return 0;
-
 	return -EINVAL;
 }
 

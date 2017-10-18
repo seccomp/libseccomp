@@ -114,10 +114,15 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_FILTER_FLAG_LOG		2
 #endif
 
+#ifndef SECCOMP_RET_LOG
+#define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
+#endif
+
 int sys_chk_seccomp_syscall(void);
 void sys_set_seccomp_syscall(bool enable);
 
 int sys_chk_seccomp_action(uint32_t action);
+void sys_set_seccomp_action(uint32_t action, bool enable);
 
 int sys_chk_seccomp_flag(int flag);
 void sys_set_seccomp_flag(int flag, bool enable);
