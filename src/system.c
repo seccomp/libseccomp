@@ -42,6 +42,7 @@ static int _nr_seccomp = -1;
 static int _support_seccomp_syscall = -1;
 static int _support_seccomp_flag_tsync = -1;
 static int _support_seccomp_flag_log = -1;
+static int _support_seccomp_action_log = -1;
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -122,11 +123,45 @@ void sys_set_seccomp_syscall(bool enable)
  */
 int sys_chk_seccomp_action(uint32_t action)
 {
-	if (sys_chk_seccomp_syscall() == 1 &&
-	    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0, &action) == 0)
+	if (action == SCMP_ACT_KILL) {
 		return 1;
+	} else if (action == SCMP_ACT_TRAP) {
+		return 1;
+	} else if ((action == SCMP_ACT_ERRNO(action & 0x0000ffff)) &&
+		   ((action & 0x0000ffff) < MAX_ERRNO)) {
+		return 1;
+	} else if (action == SCMP_ACT_TRACE(action & 0x0000ffff)) {
+		return 1;
+	} else if (action == SCMP_ACT_LOG) {
+		if (_support_seccomp_action_log < 0) {
+			if (sys_chk_seccomp_syscall() == 1 &&
+			    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
+				    &action) == 0)
+				_support_seccomp_action_log = 1;
+			else
+				_support_seccomp_action_log = 0;
+		}
+
+		return _support_seccomp_action_log;
+	} else if (action == SCMP_ACT_ALLOW) {
+		return 1;
+	}
 
 	return 0;
+}
+
+/**
+ * Force a seccomp action support setting
+ * @param action the seccomp action
+ * @param enable the intended support state
+ *
+ * This function overrides the current seccomp action support setting; this
+ * is very much a "use at your own risk" function.
+ */
+void sys_set_seccomp_action(uint32_t action, bool enable)
+{
+	if (action == SCMP_ACT_LOG)
+		_support_seccomp_action_log = (enable ? 1 : 0);
 }
 
 /**

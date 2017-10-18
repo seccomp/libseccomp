@@ -79,6 +79,11 @@ can be retrieved using the
 .B PTRACE_GETEVENTMSG
 option.
 .TP
+.B SCMP_ACT_LOG
+The seccomp filter will have no effect on the thread calling the syscall if it
+does not match any of the configured seccomp filter rules but the syscall will
+be logged.
+.TP
 .B SCMP_ACT_ALLOW
 The seccomp filter will have no effect on the thread calling the syscall if it
 does not match any of the configured seccomp filter rules.

@@ -133,6 +133,10 @@ can be retrieved using the
 .B PTRACE_GETEVENTMSG
 option.
 .TP
+.B SCMP_ACT_LOG
+The seccomp filter will have no effect on the thread calling the syscall if it
+matches the filter rule but the syscall will be logged.
+.TP
 .B SCMP_ACT_ALLOW
 The seccomp filter will have no effect on the thread calling the syscall if it
 matches the filter rule.

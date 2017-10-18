@@ -258,6 +258,10 @@ struct scmp_arg_cmp {
  */
 #define SCMP_ACT_TRACE(x)	(0x7ff00000U | ((x) & 0x0000ffffU))
 /**
+ * Allow the syscall to be executed after the action has been logged
+ */
+#define SCMP_ACT_LOG		0x7ffc0000U
+/**
  * Allow the syscall to be executed
  */
 #define SCMP_ACT_ALLOW		0x7fff0000U
@@ -292,6 +296,7 @@ const struct scmp_version *seccomp_version(void);
  *  2 : support for the SCMP_FLTATR_CTL_TSYNC filter attribute
  *      uses the seccomp(2) syscall instead of the prctl(2) syscall
  *  3 : support for the SCMP_FLTATR_CTL_LOG filter attribute
+ *      support for the SCMP_ACT_LOG action
  *
  */
 const unsigned int seccomp_api_get(void);
