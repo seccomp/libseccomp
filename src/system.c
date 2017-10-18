@@ -113,6 +113,23 @@ void sys_set_seccomp_syscall(bool enable)
 }
 
 /**
+ * Check to see if a seccomp action is supported
+ * @param action the seccomp action
+ *
+ * This function checks to see if a seccomp action is supported by the system.
+ * Return one if the action is supported, zero otherwise.
+ *
+ */
+int sys_chk_seccomp_action(uint32_t action)
+{
+	if (sys_chk_seccomp_syscall() == 1 &&
+	    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0, &action) == 0)
+		return 1;
+
+	return 0;
+}
+
+/**
  * Check to see if a seccomp() flag is supported by the kernel
  * @param flag the seccomp() flag
  *
