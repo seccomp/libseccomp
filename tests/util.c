@@ -176,6 +176,8 @@ int util_action_parse(const char *action)
 		return -1; /* not yet supported */
 	else if (strcasecmp(action, "ALLOW") == 0)
 		return SCMP_ACT_ALLOW;
+	else if (strcasecmp(action, "LOG") == 0)
+		return SCMP_ACT_LOG;
 
 	return -1;
 }
