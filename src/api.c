@@ -102,6 +102,11 @@ static unsigned int _seccomp_api_update(void)
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC) == 1)
 		level = 2;
 
+	/* level 3 */
+	if (level == 2 &&
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_LOG) == 1)
+		level = 3;
+
 	/* update the stored api level and return */
 	seccomp_api_level = level;
 	return seccomp_api_level;
@@ -127,10 +132,17 @@ API int seccomp_api_set(unsigned int level)
 	case 1:
 		sys_set_seccomp_syscall(false);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
 		break;
 	case 2:
 		sys_set_seccomp_syscall(true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
+		break;
+	case 3:
+		sys_set_seccomp_syscall(true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
 		break;
 	default:
 		return -EINVAL;

@@ -32,6 +32,10 @@ int main(int argc, char *argv[])
 	uint32_t val = (uint32_t)(-1);
 	scmp_filter_ctx ctx = NULL;
 
+	rc = seccomp_api_set(3);
+	if (rc != 0)
+		return EOPNOTSUPP;
+
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
 		return ENOMEM;
@@ -86,6 +90,17 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 	rc = seccomp_attr_get(ctx, SCMP_FLTATR_API_TSKIP, &val);
+	if (rc != 0)
+		goto out;
+	if (val != 1) {
+		rc = -1;
+		goto out;
+	}
+
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_LOG, 1);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_CTL_LOG, &val);
 	if (rc != 0)
 		goto out;
 	if (val != 1) {

@@ -86,6 +86,14 @@ specific syscall invocations, see
 for more information.  Defaults to off (
 .I value
 == 0).
+.TP
+.B SCMP_FLTATR_CTL_LOG
+A flag to specify if the kernel should log all filter actions taken except for
+the
+.BR SCMP_ACT_ALLOW
+action. Defaults to off (
+.I value
+== 0).
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
