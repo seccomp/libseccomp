@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-s390x.h"
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -376,6 +376,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "stat64", __PNR_stat64 },
 	{ "statfs", 99 },
 	{ "statfs64", 265 },
+	{ "statx", 379 },
 	{ "stime", __PNR_stime },
 	{ "stty", __PNR_stty },
 	{ "subpage_prot", __PNR_subpage_prot },
