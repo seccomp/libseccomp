@@ -27,7 +27,7 @@
 #include "arch.h"
 #include "arch-ppc64.h"
 
-/* NOTE: based on Linux 4.10-rc6+ */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -393,6 +393,7 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "stat64", __PNR_stat64 },
 	{ "statfs", 99 },
 	{ "statfs64", 252 },
+	{ "statx", 383},
 	{ "stime", 25 },
 	{ "stty", 31 },
 	{ "subpage_prot", 310 },

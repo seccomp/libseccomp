@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
 	{ "_newselect", (__SCMP_NR_BASE + 142) },
@@ -396,6 +396,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "stat64", (__SCMP_NR_BASE + 213) },
 	{ "statfs", (__SCMP_NR_BASE + 99) },
 	{ "statfs64", (__SCMP_NR_BASE + 255) },
+	{ "statx", (__SCMP_NR_BASE + 366) },
 	{ "stime", (__SCMP_NR_BASE + 25) },
 	{ "stty", (__SCMP_NR_BASE + 31) },
 	{ "subpage_prot", __PNR_subpage_prot },

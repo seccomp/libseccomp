@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-parisc.h"
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "_llseek",	140 },
 	{ "_newselect",	142 },
@@ -376,6 +376,7 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "stat64",	101 },
 	{ "statfs",	99 },
 	{ "statfs64",	298 },
+	{ "statx",	349 },
 	{ "stime",	25 },
 	{ "stty",	__PNR_stty },
 	{ "subpage_prot", __PNR_subpage_prot },
