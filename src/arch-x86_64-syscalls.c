@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -392,6 +392,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "stat64", __PNR_stat64 },
 	{ "statfs", 137 },
 	{ "statfs64", __PNR_statfs64 },
+	{ "statx", 332 },
 	{ "stime", __PNR_stime },
 	{ "stty", __PNR_stty },
 	{ "subpage_prot", __PNR_subpage_prot },

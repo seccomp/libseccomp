@@ -37,7 +37,7 @@
 #define __SCMP_NR_BASE			__SCMP_NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 4.9 */
+/* NOTE: based on Linux 4.14 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
@@ -404,6 +404,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "stat64", (__SCMP_NR_BASE + 195) },
 	{ "statfs", (__SCMP_NR_BASE + 99) },
 	{ "statfs64", (__SCMP_NR_BASE + 266) },
+	{ "statx", (__SCMP_NR_BASE + 397) },
 	{ "stime", __PNR_stime },
 	{ "stty", __PNR_stty },
 	{ "subpage_prot", __PNR_subpage_prot },
