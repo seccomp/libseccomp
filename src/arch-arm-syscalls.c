@@ -37,7 +37,7 @@
 #define __SCMP_NR_BASE			__SCMP_NR_OABI_SYSCALL_BASE
 #endif
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def arm_syscall_table[] = { \
 	/* NOTE: arm_sync_file_range() and sync_file_range2() share values */
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
@@ -134,6 +134,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "get_mempolicy", (__SCMP_NR_BASE + 320) },
 	{ "get_robust_list", (__SCMP_NR_BASE + 339) },
 	{ "get_thread_area", __PNR_get_thread_area },
+	{ "get_tls", (__SCMP_NR_BASE + (__SCMP_ARM_NR_BASE + 6)) },
 	{ "getcpu", (__SCMP_NR_BASE + 345) },
 	{ "getcwd", (__SCMP_NR_BASE + 183) },
 	{ "getdents", (__SCMP_NR_BASE + 141) },
@@ -316,9 +317,11 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "rt_sigtimedwait", (__SCMP_NR_BASE + 177) },
 	{ "rt_tgsigqueueinfo", (__SCMP_NR_BASE + 363) },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
 	{ "s390_pci_mmio_read", __PNR_s390_pci_mmio_read },
 	{ "s390_pci_mmio_write", __PNR_s390_pci_mmio_write },
 	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
+	{ "s390_sthyi", __PNR_s390_sthyi },
 	{ "sched_get_priority_max", (__SCMP_NR_BASE + 159) },
 	{ "sched_get_priority_min", (__SCMP_NR_BASE + 160) },
 	{ "sched_getaffinity", (__SCMP_NR_BASE + 242) },

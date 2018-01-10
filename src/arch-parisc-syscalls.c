@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-parisc.h"
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "_llseek",	140 },
 	{ "_newselect",	142 },
@@ -106,6 +106,7 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "get_mempolicy",	261 },
 	{ "get_robust_list",	290 },
 	{ "get_thread_area",	214 },
+	{ "get_tls", __PNR_get_tls },
 	{ "getcpu",	296 },
 	{ "getcwd",	110 },
 	{ "getdents",	141 },
@@ -288,9 +289,11 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "rt_sigtimedwait",	177 },
 	{ "rt_tgsigqueueinfo",	317 },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
 	{ "s390_pci_mmio_read", __PNR_s390_pci_mmio_read },
 	{ "s390_pci_mmio_write", __PNR_s390_pci_mmio_write },
 	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
+	{ "s390_sthyi", __PNR_s390_sthyi },
 	{ "sched_get_priority_max",	159 },
 	{ "sched_get_priority_min",	160 },
 	{ "sched_getaffinity",	212 },

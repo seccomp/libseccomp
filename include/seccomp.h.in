@@ -1662,6 +1662,25 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_pkey_free		__PNR_pkey_free
 #endif /* __NR_pkey_free */
 
+#define __PNR_get_tls		-10204
+#ifndef __NR_get_tls
+#ifdef __ARM_NR_get_tls
+#define __NR_get_tls		__ARM_NR_get_tls
+#else
+#define __NR_get_tls		__PNR_get_tls
+#endif
+#endif /* __NR_get_tls */
+
+#define __PNR_s390_guarded_storage	-10205
+#ifndef __NR_s390_guarded_storage
+#define __NR_s390_guarded_storage	__PNR_s390_guarded_storage
+#endif /* __NR_s390_guarded_storage */
+
+#define __PNR_s390_sthyi	-10206
+#ifndef __NR_s390_sthyi
+#define __NR_s390_sthyi		__PNR_s390_sthyi
+#endif /* __NR_s390_sthyi */
+
 #ifdef __cplusplus
 }
 #endif

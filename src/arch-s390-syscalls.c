@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-s390.h"
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -106,6 +106,7 @@ const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "get_mempolicy", 269 },
 	{ "get_robust_list", 305 },
 	{ "get_thread_area", __PNR_get_thread_area },
+	{ "get_tls", __PNR_get_tls },
 	{ "getcpu", 311 },
 	{ "getcwd", 183 },
 	{ "getdents", 141 },
@@ -288,9 +289,11 @@ const struct arch_syscall_def s390_syscall_table[] = { \
 	{ "rt_sigtimedwait", 177 },
 	{ "rt_tgsigqueueinfo", 330 },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", 378 },
 	{ "s390_pci_mmio_read", 353 },
 	{ "s390_pci_mmio_write", 352 },
 	{ "s390_runtime_instr", 342 },
+	{ "s390_sthyi", 380 },
 	{ "sched_get_priority_max", 159 },
 	{ "sched_get_priority_min", 160 },
 	{ "sched_getaffinity", 240 },
