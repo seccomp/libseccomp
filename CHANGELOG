@@ -2,6 +2,9 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.3.3 - January 10, 2018
+- Updated the syscall table for Linux v4.15-rc7
+
 * Version 2.3.2 - February 27, 2017
 - Achieved full compliance with the CII Best Practices program
 - Added Travis CI builds to the GitHub repository
