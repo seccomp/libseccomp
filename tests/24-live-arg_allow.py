@@ -43,6 +43,7 @@ def test():
     f.add_rule(ALLOW, "close")
     f.add_rule(ALLOW, "rt_sigaction")
     f.add_rule(ALLOW, "rt_sigreturn")
+    f.add_rule(ALLOW, "sigaltstack")
     f.add_rule(ALLOW, "exit_group")
     f.add_rule(ALLOW, "brk")
     f.load()
