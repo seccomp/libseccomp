@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -122,6 +122,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "get_mempolicy", (X32_SYSCALL_BIT + 239) },
 	{ "get_robust_list", (X32_SYSCALL_BIT + 531) },
 	{ "get_thread_area", __PNR_get_thread_area },
+	{ "get_tls", __PNR_get_tls },
 	{ "getcpu", (X32_SYSCALL_BIT + 309) },
 	{ "getcwd", (X32_SYSCALL_BIT + 79) },
 	{ "getdents", (X32_SYSCALL_BIT + 78) },
@@ -304,9 +305,11 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "rt_sigtimedwait", (X32_SYSCALL_BIT + 523) },
 	{ "rt_tgsigqueueinfo", (X32_SYSCALL_BIT + 536) },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
 	{ "s390_pci_mmio_read", __PNR_s390_pci_mmio_read },
 	{ "s390_pci_mmio_write", __PNR_s390_pci_mmio_write },
 	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
+	{ "s390_sthyi", __PNR_s390_sthyi },
 	{ "sched_get_priority_max", (X32_SYSCALL_BIT + 146) },
 	{ "sched_get_priority_min", (X32_SYSCALL_BIT + 147) },
 	{ "sched_getaffinity", (X32_SYSCALL_BIT + 204) },

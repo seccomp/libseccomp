@@ -30,7 +30,7 @@
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "_llseek", (__SCMP_NR_BASE + 140) },
 	{ "_newselect", (__SCMP_NR_BASE + 142) },
@@ -126,6 +126,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "get_mempolicy", (__SCMP_NR_BASE + 269) },
 	{ "get_robust_list", (__SCMP_NR_BASE + 310) },
 	{ "get_thread_area", __PNR_get_thread_area },
+	{ "get_tls", __PNR_get_tls },
 	{ "getcpu", (__SCMP_NR_BASE + 312) },
 	{ "getcwd", (__SCMP_NR_BASE + 203) },
 	{ "getdents", (__SCMP_NR_BASE + 141) },
@@ -308,9 +309,11 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "rt_sigtimedwait", (__SCMP_NR_BASE + 197) },
 	{ "rt_tgsigqueueinfo", (__SCMP_NR_BASE + 332) },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
 	{ "s390_pci_mmio_read", __PNR_s390_pci_mmio_read },
 	{ "s390_pci_mmio_write", __PNR_s390_pci_mmio_write },
 	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
+	{ "s390_sthyi", __PNR_s390_sthyi },
 	{ "sched_get_priority_max", (__SCMP_NR_BASE + 163) },
 	{ "sched_get_priority_min", (__SCMP_NR_BASE + 164) },
 	{ "sched_getaffinity", (__SCMP_NR_BASE + 240) },

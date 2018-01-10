@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-aarch64.h"
 
-/* NOTE: based on Linux 4.14 */
+/* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -122,6 +122,7 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "get_mempolicy", 236 },
 	{ "get_robust_list", 100 },
 	{ "get_thread_area", __PNR_get_thread_area },
+	{ "get_tls", __PNR_get_tls },
 	{ "getcpu", 168 },
 	{ "getcwd", 17 },
 	{ "getdents", __PNR_getdents },
@@ -304,9 +305,11 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "rt_sigtimedwait", 137 },
 	{ "rt_tgsigqueueinfo", 240 },
 	{ "rtas", __PNR_rtas },
+	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
 	{ "s390_pci_mmio_read", __PNR_s390_pci_mmio_read },
 	{ "s390_pci_mmio_write", __PNR_s390_pci_mmio_write },
 	{ "s390_runtime_instr", __PNR_s390_runtime_instr },
+	{ "s390_sthyi", __PNR_s390_sthyi },
 	{ "sched_get_priority_max", 125 },
 	{ "sched_get_priority_min", 126 },
 	{ "sched_getaffinity", 123 },
