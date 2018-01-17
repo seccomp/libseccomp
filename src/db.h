@@ -43,6 +43,7 @@ struct db_api_arg {
 struct db_api_rule_list {
 	uint32_t action;
 	int syscall;
+	bool strict;
 	struct db_api_arg args[ARG_COUNT_MAX];
 
 	struct db_api_rule_list *prev, *next;

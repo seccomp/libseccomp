@@ -155,12 +155,12 @@ int main(int argc, char *argv[])
 		goto out;
 
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_TRAP, 1007, 2,
-				    SCMP_A2(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		goto out;
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1007, 2,
-				    SCMP_A2(SCMP_CMP_EQ, 1),
+				    SCMP_A2(SCMP_CMP_EQ, 2),
 				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
 		goto out;

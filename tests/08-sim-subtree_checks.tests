@@ -29,7 +29,7 @@ test type: bpf-sim
 08-sim-subtree_checks	all	1006	0-10	1	2	N	N	N	ALLOW
 08-sim-subtree_checks	all	1006	0-10	1	3	N	N	N	KILL
 08-sim-subtree_checks	all	1006	10	2-100	2	N	N	N	ALLOW
-08-sim-subtree_checks	all	1007	0	0	1	3	N	N	TRAP
+08-sim-subtree_checks	all	1007	0	0	2	3	N	N	TRAP
 08-sim-subtree_checks	all	1007	1	1	1	0-2	1	1	ALLOW
 08-sim-subtree_checks	all	1007	1	1	2	0-2	1	1	ALLOW
 08-sim-subtree_checks	all	1007	1	1	2	4-6	1	1	ALLOW

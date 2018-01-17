@@ -243,10 +243,10 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
 	const char *sys_name = arch_syscall_resolve_num(arch, sys_num);
 
 	_indent(fds, 1);
-	fprintf(fds, "# filter for syscall \"%s\" (%d) [priority: %d]\n",
+	fprintf(fds, "# filter for syscall \"%s\" (%u) [priority: %d]\n",
 		(sys_name ? sys_name : "UNKNOWN"), sys_num, sys->priority);
 	_indent(fds, 1);
-	fprintf(fds, "if ($syscall == %d)\n", sys_num);
+	fprintf(fds, "if ($syscall == %u)\n", sys_num);
 	if (sys->chains == NULL) {
 		_indent(fds, 2);
 		_pfc_action(fds, sys->action);

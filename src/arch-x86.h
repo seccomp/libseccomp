@@ -37,7 +37,6 @@ const struct arch_syscall_def *x86_syscall_iterate(unsigned int spot);
 
 int x86_syscall_rewrite(int *syscall);
 
-int x86_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
-		 struct db_api_rule_list *rule);
+int x86_rule_add(struct db_filter *db, struct db_api_rule_list *rule);
 
 #endif

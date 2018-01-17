@@ -24,7 +24,6 @@ const struct arch_syscall_def *s390_syscall_iterate(unsigned int spot);
 
 int s390_syscall_rewrite(int *syscall);
 
-int s390_rule_add(struct db_filter_col *col, struct db_filter *db, bool strict,
-		  struct db_api_rule_list *rule);
+int s390_rule_add(struct db_filter *db, struct db_api_rule_list *rule);
 
 #endif

@@ -1,7 +1,7 @@
 /**
  * Enhanced Seccomp Architecture/Machine Specific Code
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2012,2018 Red Hat <pmoore@redhat.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -384,13 +384,8 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 
 /**
  * Add a new rule to the specified filter
- * @param col the filter collection
  * @param db the seccomp filter db
- * @param strict the strict flag
- * @param action the filter action
- * @param syscall the syscall number
- * @param chain_len the number of argument filters in the argument filter chain
- * @param chain the argument filter chain
+ * @param strict the rule
  *
  * This function adds a new argument/comparison/value to the seccomp filter for
  * a syscall; multiple arguments can be specified and they will be chained
@@ -400,64 +395,44 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
  * function needs to adjust the rule due to architecture specifics.  Returns
  * zero on success, negative values on failure.
  *
+ * It is important to note that in the case of failure the db may be corrupted,
+ * the caller must use the transaction mechanism if the db integrity is
+ * important.
+ *
  */
-int arch_filter_rule_add(struct db_filter_col *col, struct db_filter *db,
-			 bool strict, uint32_t action, int syscall,
-			 struct db_api_arg *chain)
+int arch_filter_rule_add(struct db_filter *db,
+			 const struct db_api_rule_list *rule)
 {
-	int rc;
-	struct db_api_rule_list *rule, *rule_tail;
+	int rc = 0;
+	int syscall;
+	struct db_api_rule_list *rule_dup = NULL;
+
+	/* create our own rule that we can munge */
+	rule_dup = db_rule_dup(rule);
+	if (rule_dup == NULL)
+		return -ENOMEM;
 
 	/* translate the syscall */
-	rc = arch_syscall_translate(db->arch, &syscall);
+	rc = arch_syscall_translate(db->arch, &rule_dup->syscall);
 	if (rc < 0)
-		return rc;
-
-	/* copy of the chain for each filter in the collection */
-	rule = malloc(sizeof(*rule));
-	if (rule == NULL)
-		return -ENOMEM;
-	rule->action = action;
-	rule->syscall = syscall;
-	memcpy(rule->args, chain, sizeof(*chain) * ARG_COUNT_MAX);
-	rule->prev = NULL;
-	rule->next = NULL;
+		goto rule_add_return;
+	syscall = rule_dup->syscall;
 
 	/* add the new rule to the existing filter */
 	if (syscall == -1 || db->arch->rule_add == NULL) {
 		/* syscalls < -1 require a db->arch->rule_add() function */
-		if (syscall < -1 && strict) {
+		if (syscall < -1 && rule_dup->strict) {
 			rc = -EDOM;
-			goto rule_add_failure;
+			goto rule_add_return;
 		}
-		rc = db_rule_add(db, rule);
+		rc = db_rule_add(db, rule_dup);
 	} else
-		rc = (db->arch->rule_add)(col, db, strict, rule);
-	if (rc == 0) {
-		/* insert the chain to the end of the filter's rule list */
-		rule_tail = rule;
-		while (rule_tail->next)
-			rule_tail = rule_tail->next;
-		if (db->rules != NULL) {
-			rule->prev = db->rules->prev;
-			rule_tail->next = db->rules;
-			db->rules->prev->next = rule;
-			db->rules->prev = rule_tail;
-		} else {
-			rule->prev = rule_tail;
-			rule_tail->next = rule;
-			db->rules = rule;
-		}
-	} else
-		goto rule_add_failure;
+		rc = (db->arch->rule_add)(db, rule_dup);
 
-	return 0;
-
-rule_add_failure:
-	do {
-		rule_tail = rule;
-		rule = rule->next;
-		free(rule_tail);
-	} while (rule);
+rule_add_return:
+	/* NOTE: another reminder that we don't do any db error recovery here,
+	 * use the transaction mechanism as previously mentioned */
+	if (rule_dup != NULL)
+		free(rule_dup);
 	return rc;
 }

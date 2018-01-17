@@ -56,8 +56,10 @@ int main(int argc, char *argv[])
 		goto out;
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_TRAP, 1002, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 1));
-	if (rc != -EEXIST)
+	if (rc != -EEXIST) {
+		rc = EEXIST;
 		goto out;
+	}
 
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1003, 1,
 				    SCMP_A0(SCMP_CMP_NE, 1));
