@@ -105,10 +105,10 @@ def test(args):
                        Arg(1, NE, 1))
 
     f.add_rule_exactly(TRAP, 1007,
-                       Arg(2, EQ, 1),
+                       Arg(2, EQ, 2),
                        Arg(3, EQ, 3))
     f.add_rule_exactly(ALLOW, 1007,
-                       Arg(2, EQ, 1),
+                       Arg(2, EQ, 2),
                        Arg(3, NE, 3))
     f.add_rule_exactly(ALLOW, 1007,
                        Arg(3, NE, 3))
