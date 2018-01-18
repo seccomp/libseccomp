@@ -3,7 +3,7 @@
 https://github.com/seccomp/libseccomp
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/608/badge)](https://bestpractices.coreinfrastructure.org/projects/608)
-[![Build Status](https://travis-ci.org/seccomp/libseccomp.svg?branch=master)](https://travis-ci.org/seccomp/libseccomp)
+[![Build Status](https://img.shields.io/travis/seccomp/libseccomp/master.svg)](https://travis-ci.org/seccomp/libseccomp)
 [![Coverage Status](https://img.shields.io/coveralls/github/seccomp/libseccomp/master.svg)](https://coveralls.io/github/seccomp/libseccomp?branch=master)
 
 The libseccomp library provides an easy to use, platform independent, interface
