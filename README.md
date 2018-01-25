@@ -18,6 +18,11 @@ The library source repository currently lives on GitHub at the following URL:
 
 * https://github.com/seccomp/libseccomp
 
+The Go language bindings repository currently lives on GitHub at the following
+URL:
+
+* https://github.com/seccomp/libseccomp-golang
+
 The project mailing list is currently hosted on Google Groups at the URL below,
 please note that a Google account is not required to subscribe to the mailing
 list.
