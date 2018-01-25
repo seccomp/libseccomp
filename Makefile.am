@@ -70,5 +70,17 @@ coverity-tarball: coverity-build
 	ls -l libseccomp-coverity_$$rev.tar.gz
 endif
 
+help:
+	@echo "libseccomp build system"
+	@echo " make targets:"
+	@echo "  (none):           build the library"
+	@echo "  clean:            remove all build artifacts"
+	@echo "  check:            run the automated regression tests"
+	@echo "  check-build:      build the library and all tests"
+	@echo "  check-syntax:     verify the code style"
+	@echo "  distcheck:        verify the build for distribution"
+	@echo "  dist-gzip:        build a release tarball"
+	@echo "  coverity-tarball: build a tarball for use with Coverity (opt)"
+
 clean-local:
 	${RM} -rf cov-int libseccomp-coverity_*.tar.gz
