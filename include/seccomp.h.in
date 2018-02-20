@@ -1686,6 +1686,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_renameat		__PNR_renameat
 #endif /* __NR_renameat */
 
+#define __PNR_riscv_flush_icache	-10208
+#ifndef __NR_riscv_flush_icache
+#define __NR_riscv_flush_icache		__PNR_riscv_flush_icache
+#endif /* __NR_riscv_flush_icache */
+
 #ifdef __cplusplus
 }
 #endif

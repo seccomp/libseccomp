@@ -296,6 +296,7 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ "renameat2", 357 },
 	{ "request_key", 270 },
 	{ "restart_syscall", 0 },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir", 40 },
 	{ "rt_sigaction", 173 },
 	{ "rt_sigpending", 175 },

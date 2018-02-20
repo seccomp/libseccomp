@@ -299,6 +299,7 @@ const struct arch_syscall_def mips_syscall_table[] = { \
 	{ "renameat2", (__SCMP_NR_BASE + 351) },
 	{ "request_key", (__SCMP_NR_BASE + 281) },
 	{ "restart_syscall", (__SCMP_NR_BASE + 253) },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir", (__SCMP_NR_BASE + 40) },
 	{ "rt_sigaction", (__SCMP_NR_BASE + 194) },
 	{ "rt_sigpending", (__SCMP_NR_BASE + 196) },
