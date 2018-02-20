@@ -41,6 +41,7 @@
 #include "arch-parisc.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
+#include "arch-riscv64.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
 #include "db.h"
@@ -90,6 +91,8 @@ const struct arch_def *arch_def_native = &arch_def_ppc64le;
 #endif
 #elif __PPC__
 const struct arch_def *arch_def_native = &arch_def_ppc;
+#elif __riscv && __riscv_xlen == 64
+const struct arch_def *arch_def_native = &arch_def_riscv64;
 #elif __s390x__ /* s390x must be checked before s390 */
 const struct arch_def *arch_def_native = &arch_def_s390x;
 #elif __s390__
@@ -152,6 +155,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_ppc64;
 	case SCMP_ARCH_PPC64LE:
 		return &arch_def_ppc64le;
+	case SCMP_ARCH_RISCV64:
+		return &arch_def_ppc64;
 	case SCMP_ARCH_S390:
 		return &arch_def_s390;
 	case SCMP_ARCH_S390X:
@@ -202,6 +207,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_ppc64;
 	else if (strcmp(arch_name, "ppc64le") == 0)
 		return &arch_def_ppc64le;
+	else if (strcmp(arch_name, "riscv64") == 0)
+		return &arch_def_riscv64;
 	else if (strcmp(arch_name, "s390") == 0)
 		return &arch_def_s390;
 	else if (strcmp(arch_name, "s390x") == 0)

@@ -181,6 +181,19 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_PPC64LE	AUDIT_ARCH_PPC64LE
 
 /**
+ * The RISC-V architecture tokens.
+ *
+ * RISC-V support for audit is not ready yet.
+ */
+#ifndef AUDIT_ARCH_RISCV64
+#ifndef EM_RISCV
+#define EM_RISCV		243
+#endif /* EM_RISCV64 */
+#define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_RISCV64 */
+#define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
+
+/**
  * The S390 architecture tokens
  */
 #define SCMP_ARCH_S390		AUDIT_ARCH_S390

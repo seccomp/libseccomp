@@ -74,6 +74,11 @@
 #endif
 #elif __PPC__
 #define ARCH_NATIVE		AUDIT_ARCH_PPC
+#elif __riscv && __riscv_xlen == 64
+/* kernel audit support for riscv is not yet ready */
+#define EM_RISCV		243
+#define AUDIT_ARCH_RISCV64	(EM_RISCV64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#define ARCH_NATIVE		AUDIT_ARCH_RISCV64
 #elif __s390x__ /* s390x must be checked before s390 */
 #define ARCH_NATIVE		AUDIT_ARCH_S390X
 #elif __s390__
