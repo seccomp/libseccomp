@@ -117,8 +117,11 @@ static void _pfc_arg(FILE *fds,
  */
 static void _pfc_action(FILE *fds, uint32_t action)
 {
-	switch (action & 0xffff0000) {
-	case SCMP_ACT_KILL:
+	switch (action & SECCOMP_RET_ACTION_FULL) {
+	case SCMP_ACT_KILL_PROCESS:
+		fprintf(fds, "action KILL-PROCESS;\n");
+		break;
+	case SCMP_ACT_KILL_THREAD:
 		fprintf(fds, "action KILL;\n");
 		break;
 	case SCMP_ACT_TRAP:

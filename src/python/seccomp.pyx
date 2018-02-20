@@ -29,7 +29,8 @@ based filtering interface that should be familiar to, and easily adopted
 by application developers.
 
 Filter action values:
-    KILL - kill the process
+    KILL_PROCESS - kill the process
+    KILL - kill the thread
     LOG - allow the syscall to be executed after the action has been logged
     ALLOW - allow the syscall to execute
     TRAP - a SIGSYS signal will be thrown
@@ -94,6 +95,7 @@ def c_str(string):
     else:
         return bytes(string, "ascii")
 
+KILL_PROCESS = libseccomp.SCMP_ACT_KILL_PROCESS
 KILL = libseccomp.SCMP_ACT_KILL
 TRAP = libseccomp.SCMP_ACT_TRAP
 LOG = libseccomp.SCMP_ACT_LOG
@@ -545,7 +547,8 @@ cdef class SyscallFilter:
         """ Add a new rule to filter.
 
         Arguments:
-        action - the rule action: KILL, TRAP, ERRNO(), TRACE(), LOG, or ALLOW
+        action - the rule action: KILL_PROCESS, KILL, TRAP, ERRNO(), TRACE(),
+                 LOG, or ALLOW
         syscall - the syscall name or number
         args - variable number of Arg objects
 
@@ -627,7 +630,8 @@ cdef class SyscallFilter:
         """ Add a new rule to filter.
 
         Arguments:
-        action - the rule action: KILL, TRAP, ERRNO(), TRACE(), LOG, or ALLOW
+        action - the rule action: KILL_PROCESS, KILL, TRAP, ERRNO(), TRACE(),
+                 LOG, or ALLOW
         syscall - the syscall name or number
         args - variable number of Arg objects
 

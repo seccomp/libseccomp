@@ -56,11 +56,14 @@ struct sock_filter {
 typedef struct sock_filter bpf_instr_raw;
 
 /* seccomp return masks */
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
 #define SECCOMP_RET_ACTION	0x7fff0000U
 #define SECCOMP_RET_DATA	0x0000ffffU
 
 /* seccomp action values */
-#define SECCOMP_RET_KILL	0x00000000U
+#define SECCOMP_RET_KILL_PROCESS 0x80000000U
+#define SECCOMP_RET_KILL_THREAD 0x00000000U
+#define SECCOMP_RET_KILL	SECCOMP_RET_KILL_THREAD
 #define SECCOMP_RET_TRAP	0x00030000U
 #define SECCOMP_RET_ERRNO	0x00050000U
 #define SECCOMP_RET_TRACE	0x7ff00000U

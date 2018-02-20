@@ -112,11 +112,14 @@ static void exit_error(unsigned int rc, unsigned int line)
  */
 static void end_action(uint32_t action, unsigned int line)
 {
-	uint32_t act = action & SECCOMP_RET_ACTION;
+	uint32_t act = action & SECCOMP_RET_ACTION_FULL;
 	uint32_t data = action & SECCOMP_RET_DATA;
 
 	switch (act) {
-	case SECCOMP_RET_KILL:
+	case SECCOMP_RET_KILL_PROCESS:
+		fprintf(stdout, "KILL-PROCESS\n");
+		break;
+	case SECCOMP_RET_KILL_THREAD:
 		fprintf(stdout, "KILL\n");
 		break;
 	case SECCOMP_RET_TRAP:

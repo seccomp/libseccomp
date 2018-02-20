@@ -123,7 +123,26 @@ void sys_set_seccomp_syscall(bool enable)
  */
 int sys_chk_seccomp_action(uint32_t action)
 {
-	if (action == SCMP_ACT_KILL) {
+	int rc, nr_seccomp;
+	uint32_t kaction = action & SECCOMP_RET_ACTION_FULL;
+
+
+	nr_seccomp = arch_syscall_resolve_name(arch_def_native, "seccomp");
+	if (nr_seccomp != __NR_SCMP_ERROR) {
+		rc = syscall(nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
+			     &kaction);
+		if (rc == -EPERM)
+			/* valgrind currently doesn't support the seccomp()
+			 * syscall.  continue processing
+			 */
+			rc = 0;
+		else if (rc < 0)
+			return 0;
+	}
+
+	if (action == SCMP_ACT_KILL_PROCESS) {
+		return 1;
+	} else if (action == SCMP_ACT_KILL_THREAD) {
 		return 1;
 	} else if (action == SCMP_ACT_TRAP) {
 		return 1;

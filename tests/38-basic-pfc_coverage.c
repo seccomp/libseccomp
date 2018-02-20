@@ -80,6 +80,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1), SCMP_SYS(exit), 0);
 	if (rc < 0)
 		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(fstat), 0);
+	if (rc < 0)
+		goto out;
 
 	rc = seccomp_export_pfc(ctx, fd);
 	if (rc < 0)
