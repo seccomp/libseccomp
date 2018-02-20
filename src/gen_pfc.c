@@ -110,6 +110,10 @@ static void _pfc_arg(FILE *fds,
 		fprintf(fds, "$a%d", node->arg);
 }
 
+#ifndef SECCOMP_RET_ACTION_FULL
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
+#endif
+
 /**
  * Display a string representation of the filter action
  * @param fds the file stream to send the output
