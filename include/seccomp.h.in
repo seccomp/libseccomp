@@ -1681,6 +1681,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_s390_sthyi		__PNR_s390_sthyi
 #endif /* __NR_s390_sthyi */
 
+#define __PNR_renameat		-10207
+#ifndef __NR_renameat
+#define __NR_renameat		__PNR_renameat
+#endif /* __NR_renameat */
+
 #ifdef __cplusplus
 }
 #endif
