@@ -124,8 +124,10 @@ void sys_set_seccomp_syscall(bool enable)
 int sys_chk_seccomp_action(uint32_t action)
 {
 	int rc, nr_seccomp;
-	uint32_t kaction = action & SECCOMP_RET_ACTION_FULL;
 
+/* SECCOMP_RET_ACTION_FULL was defined in kernel v4.14 */
+#ifdef SECCOMP_RET_ACTION_FULL
+	uint32_t kaction = action & SECCOMP_RET_ACTION_FULL;
 
 	nr_seccomp = arch_syscall_resolve_name(arch_def_native, "seccomp");
 	if (nr_seccomp != __NR_SCMP_ERROR) {
@@ -139,6 +141,7 @@ int sys_chk_seccomp_action(uint32_t action)
 		else if (rc < 0)
 			return 0;
 	}
+#endif
 
 	if (action == SCMP_ACT_KILL_PROCESS) {
 		return 1;
