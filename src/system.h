@@ -37,6 +37,13 @@ struct db_filter_col;
 /* system header file */
 #include <linux/seccomp.h>
 
+/* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
+ * defined on older kernels
+ */
+#ifndef SECCOMP_RET_ACTION_FULL
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
+#endif
+
 #else
 
 /* NOTE: the definitions below were taken from the Linux Kernel sources */
