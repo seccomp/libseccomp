@@ -13,7 +13,5 @@ test type: bpf-sim
 43-sim-kill_process	+x86_64	2		N	N	N	N	N	N	KILL
 43-sim-kill_process	+x86_64	3		N	N	N	N	N	N	KILL_PROCESS
 
-test type: bpf-valgrind
-
 # Testname
 43-sim-kill_process
