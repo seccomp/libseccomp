@@ -8,7 +8,7 @@ if ($arch == 3221225534)
     action TRACE(1);
   # filter for syscall "fstat" (5) [priority: 65535]
   if ($syscall == 5)
-    action KILL-PROCESS;
+    action KILL_PROCESS;
   # filter for syscall "close" (3) [priority: 65535]
   if ($syscall == 3)
     action ERRNO(1);
@@ -70,7 +70,7 @@ if ($arch == 3221225534)
 if ($arch == 1073741827)
   # filter for syscall "fstat" (108) [priority: 65535]
   if ($syscall == 108)
-    action KILL-PROCESS;
+    action KILL_PROCESS;
   # filter for syscall "close" (6) [priority: 65535]
   if ($syscall == 6)
     action ERRNO(1);

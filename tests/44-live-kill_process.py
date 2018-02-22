@@ -3,7 +3,7 @@
 #
 # Seccomp Library test program
 #
-# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2013 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <paul@paul-moore.com>
 #
 
@@ -22,28 +22,47 @@
 #
 
 import argparse
-import errno
+import os
 import sys
+import threading
+import time
 
 import util
 
 from seccomp import *
 
-def test(args):
-    set_api(4)
+def child_start(param):
+    param = 1
 
-    f = SyscallFilter(KILL)
-    f.add_rule(ALLOW, "read")
-    f.add_rule(LOG, "rt_sigreturn")
-    f.add_rule(ERRNO(errno.EPERM), "write")
-    f.add_rule(TRAP, "close")
-    f.add_rule(TRACE(1234), "open")
-    f.add_rule(KILL_PROCESS, "stat")
-    return f
+    try:
+        fd = os.open("/dev/null", os.O_WRONLY)
+    except IOError as ex:
+        param = ex.errno
+        quit(ex.errno)
 
-args = util.get_opt()
-ctx = test(args)
-util.filter_output(args, ctx)
+def test():
+    f = SyscallFilter(KILL_PROCESS)
+    f.add_rule(ALLOW, "clone")
+    f.add_rule(ALLOW, "exit")
+    f.add_rule(ALLOW, "exit_group")
+    f.add_rule(ALLOW, "futex")
+    f.add_rule(ALLOW, "madvise")
+    f.add_rule(ALLOW, "mmap")
+    f.add_rule(ALLOW, "mprotect")
+    f.add_rule(ALLOW, "munmap")
+    f.add_rule(ALLOW, "nanosleep")
+    f.add_rule(ALLOW, "set_robust_list")
+    f.load()
+
+    param = 0
+    threading.Thread(target = child_start, args = (param, ))
+    thread.start()
+
+    time.sleep(1)
+
+    quit(-errno.EACCES)
+
+test()
 
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;

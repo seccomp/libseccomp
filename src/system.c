@@ -43,6 +43,7 @@ static int _support_seccomp_syscall = -1;
 static int _support_seccomp_flag_tsync = -1;
 static int _support_seccomp_flag_log = -1;
 static int _support_seccomp_action_log = -1;
+static int _support_seccomp_kill_process = -1;
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -123,28 +124,17 @@ void sys_set_seccomp_syscall(bool enable)
  */
 int sys_chk_seccomp_action(uint32_t action)
 {
-	int rc, nr_seccomp;
-
-/* SECCOMP_RET_ACTION_FULL was defined in kernel v4.14 */
-#ifdef SECCOMP_RET_ACTION_FULL
-	uint32_t kaction = action & SECCOMP_RET_ACTION_FULL;
-
-	nr_seccomp = arch_syscall_resolve_name(arch_def_native, "seccomp");
-	if (nr_seccomp != __NR_SCMP_ERROR) {
-		rc = syscall(nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
-			     &kaction);
-		if (rc == -EPERM)
-			/* valgrind currently doesn't support the seccomp()
-			 * syscall.  continue processing
-			 */
-			rc = 0;
-		else if (rc < 0)
-			return 0;
-	}
-#endif
-
 	if (action == SCMP_ACT_KILL_PROCESS) {
-		return 1;
+		if (_support_seccomp_kill_process < 0) {
+			if (sys_chk_seccomp_syscall() == 1 &&
+			    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
+				    &action) == 0)
+				_support_seccomp_kill_process = 1;
+			else
+				_support_seccomp_kill_process = 0;
+		}
+
+		return _support_seccomp_kill_process;
 	} else if (action == SCMP_ACT_KILL_THREAD) {
 		return 1;
 	} else if (action == SCMP_ACT_TRAP) {
@@ -184,6 +174,8 @@ void sys_set_seccomp_action(uint32_t action, bool enable)
 {
 	if (action == SCMP_ACT_LOG)
 		_support_seccomp_action_log = (enable ? 1 : 0);
+	else if (action == SCMP_ACT_KILL_PROCESS)
+		_support_seccomp_kill_process = (enable ? 1 : 0);
 }
 
 /**

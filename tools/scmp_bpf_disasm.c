@@ -178,7 +178,7 @@ static void bpf_decode_action(uint32_t k)
 
 	switch (act) {
 	case SECCOMP_RET_KILL_PROCESS:
-		printf("KILL-PROCESS");
+		printf("KILL_PROCESS");
 		break;
 	case SECCOMP_RET_KILL_THREAD:
 		printf("KILL");

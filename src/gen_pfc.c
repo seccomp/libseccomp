@@ -35,6 +35,7 @@
 #include "db.h"
 #include "gen_pfc.h"
 #include "helper.h"
+#include "system.h"
 
 struct pfc_sys_list {
 	struct db_sys_list *sys;
@@ -110,10 +111,6 @@ static void _pfc_arg(FILE *fds,
 		fprintf(fds, "$a%d", node->arg);
 }
 
-#ifndef SECCOMP_RET_ACTION_FULL
-#define SECCOMP_RET_ACTION_FULL 0xffff0000U
-#endif
-
 /**
  * Display a string representation of the filter action
  * @param fds the file stream to send the output
@@ -123,7 +120,7 @@ static void _pfc_action(FILE *fds, uint32_t action)
 {
 	switch (action & SECCOMP_RET_ACTION_FULL) {
 	case SCMP_ACT_KILL_PROCESS:
-		fprintf(fds, "action KILL-PROCESS;\n");
+		fprintf(fds, "action KILL_PROCESS;\n");
 		break;
 	case SCMP_ACT_KILL_THREAD:
 		fprintf(fds, "action KILL;\n");

@@ -38,6 +38,10 @@ int main(int argc, char *argv[])
 	/* stdout */
 	fd = 1;
 
+	rc = seccomp_api_set(4);
+	if (rc != 0)
+		return EOPNOTSUPP;
+
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL) {
 		rc = ENOMEM;

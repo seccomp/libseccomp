@@ -117,7 +117,7 @@ static void end_action(uint32_t action, unsigned int line)
 
 	switch (act) {
 	case SECCOMP_RET_KILL_PROCESS:
-		fprintf(stdout, "KILL-PROCESS\n");
+		fprintf(stdout, "KILL_PROCESS\n");
 		break;
 	case SECCOMP_RET_KILL_THREAD:
 		fprintf(stdout, "KILL\n");
