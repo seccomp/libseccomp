@@ -61,15 +61,15 @@ def do_read():
         try:
             os.read(fd, x['sz'])
             if x['exp_rc'] < 0:
-		os.close(fd)
+                os.close(fd)
                 raise IOError("Erroneously read %d bytes.  Expected rc = %d" %
                     (x['sz'], x['exp_rc']))
         except OSError as ex:
             if -ex.errno != x['exp_rc']:
-		os.close(fd)
+                os.close(fd)
                 raise IOError("Expected errno %d but os.read(%d bytes) caused errno %d" %
                     (-x['exp_rc'], x['sz'], ex.errno))
-	os.close(fd)
+    os.close(fd)
 
 def test():
     f = SyscallFilter(DEFAULT_ACTION)
