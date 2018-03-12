@@ -621,25 +621,25 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 			return 0;
 		} else if (db_chain_lt(x_iter, n_iter)) {
 			/* try to move along the current level */
-			if (x_iter->lvl_prv == NULL) {
+			if (x_iter->lvl_nxt == NULL) {
 				/* add to the end of this level */
 				_db_level_get(x_iter);
 				_db_tree_get(n_iter);
-				n_iter->lvl_nxt = x_iter;
-				x_iter->lvl_prv = n_iter;
+				n_iter->lvl_prv = x_iter;
+				x_iter->lvl_nxt = n_iter;
 				return 0;
 			} else
-				/* prev */
-				x_iter = x_iter->lvl_prv;
+				/* next */
+				x_iter = x_iter->lvl_nxt;
 		} else {
 			/* add before the existing node on this level*/
 			_db_level_get(x_iter);
 			_db_tree_get(n_iter);
-			if (x_iter->lvl_nxt != NULL)
-				x_iter->lvl_nxt->lvl_prv = n_iter;
-			n_iter->lvl_nxt = x_iter->lvl_nxt;
-			n_iter->lvl_prv = x_iter;
-			x_iter->lvl_nxt = n_iter;
+			if (x_iter->lvl_prv != NULL)
+				x_iter->lvl_prv->lvl_nxt = n_iter;
+			n_iter->lvl_prv = x_iter->lvl_prv;
+			n_iter->lvl_nxt = x_iter;
+			x_iter->lvl_prv = n_iter;
 			return 0;
 		}
 	} while (x_iter);
