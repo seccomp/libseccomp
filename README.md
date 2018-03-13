@@ -30,6 +30,29 @@ list.
 * https://groups.google.com/forum/#!forum/libseccomp
 * https://groups.google.com/forum/#!forum/libseccomp/join
 
+## Supported Architectures
+
+The libseccomp library currently supports the architectures listed below:
+
+* 32-bit x86 (x86)
+* 64-bit x86 (x86_64)
+* 64-bit x86 x32 ABI (x32)
+* 32-bit ARM EABI (arm)
+* 64-bit ARM (aarch64)
+* 32-bit MIPS (mips)
+* 32-bit MIPS little endian (mipsel)
+* 64-bit MIPS (mips64)
+* 64-bit MIPS little endian (mipsel64)
+* 64-bit MIPS n32 ABI (mips64n32)
+* 64-bit MIPS n32 ABI little endian (mipsel64n32)
+* 32-bit PA-RISC (parisc)
+* 64-bit PA-RISC (parisc64)
+* 32-bit PowerPC (ppc)
+* 64-bit PowerPC (ppc64)
+* 64-bit PowerPC little endian (ppc64le)
+* 32-bit s390 (s390)
+* 64-bit s390x (s390x)
+
 ## Documentation
 
 The "doc/" directory contains all of the currently available documentation,
