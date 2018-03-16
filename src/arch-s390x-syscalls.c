@@ -279,6 +279,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "renameat2", 347 },
 	{ "request_key", 279 },
 	{ "restart_syscall", 7 },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir", 40 },
 	{ "rt_sigaction", 174 },
 	{ "rt_sigpending", 176 },

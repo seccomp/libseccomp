@@ -307,6 +307,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "renameat2", (__SCMP_NR_BASE + 382) },
 	{ "request_key", (__SCMP_NR_BASE + 310) },
 	{ "restart_syscall", (__SCMP_NR_BASE +  0) },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir", (__SCMP_NR_BASE + 40) },
 	{ "rt_sigaction", (__SCMP_NR_BASE + 174) },
 	{ "rt_sigpending", (__SCMP_NR_BASE + 176) },

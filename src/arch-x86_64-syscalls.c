@@ -295,6 +295,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "renameat2", 316 },
 	{ "request_key", 249 },
 	{ "restart_syscall", 219 },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir", 84 },
 	{ "rt_sigaction", 13 },
 	{ "rt_sigpending", 127 },

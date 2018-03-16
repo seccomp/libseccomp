@@ -1,8 +1,10 @@
 /**
  * Enhanced Seccomp AArch64 Syscall Table
  *
- * Copyright (c) 2014 Red Hat <mjuszkiewicz@redhat.com>
- * Author: Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
+ * Copyright (c) 2018 Icenowy Zheng <icenowy@aosc.io>
+ *
+ * Based on arch-aarch64-syscalls.c, which is:
+ *   Copyright (c) 2014 Red Hat
  */
 
 /*
@@ -24,10 +26,10 @@
 #include <seccomp.h>
 
 #include "arch.h"
-#include "arch-aarch64.h"
+#include "arch-riscv64.h"
 
-/* NOTE: based on Linux 4.15-rc7 */
-const struct arch_syscall_def aarch64_syscall_table[] = { \
+/* NOTE: based on Linux 4.15 */
+const struct arch_syscall_def riscv64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
 	{ "_sysctl", __PNR__sysctl },
@@ -291,11 +293,11 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ "remap_file_pages", 234 },
 	{ "removexattr", 14 },
 	{ "rename", __PNR_rename },
-	{ "renameat", 38 },
+	{ "renameat", __PNR_renameat },
 	{ "renameat2", 276 },
 	{ "request_key", 218 },
 	{ "restart_syscall", 128 },
-	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
+	{ "riscv_flush_icache", 259 },
 	{ "rmdir", __PNR_rmdir },
 	{ "rt_sigaction", 134 },
 	{ "rt_sigpending", 136 },
@@ -473,10 +475,10 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
  * numbers; returns __NR_SCMP_ERROR on failure.
  *
  */
-int aarch64_syscall_resolve_name(const char *name)
+int riscv64_syscall_resolve_name(const char *name)
 {
 	unsigned int iter;
-	const struct arch_syscall_def *table = aarch64_syscall_table;
+	const struct arch_syscall_def *table = riscv64_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].name != NULL; iter++) {
@@ -496,10 +498,10 @@ int aarch64_syscall_resolve_name(const char *name)
  * syscall names; returns NULL on failure.
  *
  */
-const char *aarch64_syscall_resolve_num(int num)
+const char *riscv64_syscall_resolve_num(int num)
 {
 	unsigned int iter;
-	const struct arch_syscall_def *table = aarch64_syscall_table;
+	const struct arch_syscall_def *table = riscv64_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
@@ -519,8 +521,8 @@ const char *aarch64_syscall_resolve_num(int num)
  * function should only ever be used internally by libseccomp.
  *
  */
-const struct arch_syscall_def *aarch64_syscall_iterate(unsigned int spot)
+const struct arch_syscall_def *riscv64_syscall_iterate(unsigned int spot)
 {
 	/* XXX - no safety checks here */
-	return &aarch64_syscall_table[spot];
+	return &riscv64_syscall_table[spot];
 }
