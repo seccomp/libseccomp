@@ -34,6 +34,7 @@ test type: bpf-sim
 08-sim-subtree_checks	all	1007	1	1	2	0-2	1	1	ALLOW
 08-sim-subtree_checks	all	1007	1	1	2	4-6	1	1	ALLOW
 08-sim-subtree_checks	all	1007	1	1	0	3	1	1	KILL
+08-sim-subtree_checks	all	1007	5	5	5	5	11	1	ALLOW
 
 test type: bpf-sim-fuzz
 

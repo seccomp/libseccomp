@@ -112,6 +112,8 @@ def test(args):
                        Arg(3, NE, 3))
     f.add_rule_exactly(ALLOW, 1007,
                        Arg(3, NE, 3))
+    f.add_rule_exactly(ALLOW, 1007,
+                       Arg(4, GT, 4))
     return f
 
 args = util.get_opt()
