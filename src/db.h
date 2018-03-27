@@ -76,15 +76,39 @@ struct db_arg_chain_tree {
 
 	unsigned int refcnt;
 };
+
+static inline bool db_chain_lt(const struct db_arg_chain_tree * const x,
+			       const struct db_arg_chain_tree * const y)
+{
+	int fd;
+
+	/* path #1 */
+	if (x->arg < y->arg)
+		return true;
+	/* path #2 */
+	if (x->arg == y->arg)
+		return true;
+	/* path #3 */
+	if (x->op < y->op)
+		return true;
+	/* path #4 */
+	if (x->op == y->op)
+		return true;
+	/* path #5 */
+	if (x->mask < y->mask)
+		return true;
+	/* path #6 */
+	if (x->mask == y->mask)
+		return true;
+	/* path #7 */
+	if (x->datum < y->datum)
+		return true;
+
+	/* path #8 */
+	return false;
+}
+
 #define ARG_MASK_MAX		((uint32_t)-1)
-#define db_chain_lt(x,y) \
-	( ((x)->arg < (y)->arg) || \
-	  ( ((x)->arg == (y)->arg) && \
-	    ( ( (x)->op < (y)->op ) || \
-	      ( ((x)->op == (y)->op) && \
-	        ( ((x)->mask < (y)->mask) || \
-	          ( ((x)->mask == (y)->mask) && \
-	            ((x)->datum < (y)->datum) ) ) ) ) ) )
 #define db_chain_eq(x,y) \
 	( ((x)->arg == (y)->arg) && \
 	  ((x)->op == (y)->op) && \
