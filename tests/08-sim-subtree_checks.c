@@ -168,10 +168,6 @@ int main(int argc, char *argv[])
 				    SCMP_A3(SCMP_CMP_NE, 3));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1007, 1,
-				    SCMP_A4(SCMP_CMP_GT, 10));
-	if (rc != 0)
-		goto out;
 
 	rc = util_filter_output(&opts, ctx);
 	if (rc)
