@@ -48,3 +48,6 @@ util.pyc
 40-sim-log
 41-sim-syscall_priority_arch
 42-sim-adv_chains
+43-sim-a2_order
+44-live-a2_order
+45-sim-chain_code_coverage

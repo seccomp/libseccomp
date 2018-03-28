@@ -1,0 +1,36 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+test type: bpf-sim
+
+# Testname	Arch		Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+43-sim-a2_order	all		read		4		0x856B008	30	N	N	N	ALLOW
+43-sim-a2_order	all		read		4		0x856B008	64	N	N	N	ALLOW
+43-sim-a2_order	all		read		4		0x856B008	65	N	N	N	KILL
+43-sim-a2_order	all		read		4		0x856B008	128	N	N	N	KILL
+43-sim-a2_order	all		read		4		0x856B008	129	N	N	N	ERRNO(5)
+43-sim-a2_order	all		read		4		0x856B008	250	N	N	N	ERRNO(5)
+43-sim-a2_order	all		read		4		0x856B008	256	N	N	N	ERRNO(5)
+43-sim-a2_order	all		read		4		0x856B008	257	N	N	N	ERRNO(6)
+43-sim-a2_order	all		read		4		0x856B008	512	N	N	N	ERRNO(6)
+43-sim-a2_order	all		read		4		0x856B008	513	N	N	N	ERRNO(7)
+43-sim-a2_order	all		read		4		0x856B008	1024	N	N	N	ERRNO(7)
+43-sim-a2_order	all		read		4		0x856B008	1025	N	N	N	ERRNO(8)
+43-sim-a2_order	all		read		4		0x856B008	2048	N	N	N	ERRNO(8)
+43-sim-a2_order	all		read		4		0x856B008	2049	N	N	N	ERRNO(9)
+43-sim-a2_order	all		read		4		0x856B008	4096	N	N	N	ERRNO(9)
+43-sim-a2_order	all		read		4		0x856B008	4097	N	N	N	ERRNO(10)
+43-sim-a2_order	all		read		4		0x856B008	8192	N	N	N	ERRNO(10)
+43-sim-a2_order	all		read		4		0x856B008	8193	N	N	N	ERRNO(11)
+43-sim-a2_order	all		read		4		0x856B008	16536	N	N	N	ERRNO(11)
+43-sim-a2_order	all		read		4		0x856B008	16537	N	N	N	ERRNO(12)
+
+# Testname	StressCount
+test type: bpf-valgrind
+
+# Testname
+43-sim-a2_order

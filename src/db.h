@@ -76,19 +76,43 @@ struct db_arg_chain_tree {
 
 	unsigned int refcnt;
 };
+
+static inline bool db_chain_lt(const struct db_arg_chain_tree * const x,
+			       const struct db_arg_chain_tree * const y)
+{
+	if (x->arg < y->arg)
+		/* path #1 */
+		return true;
+
+	if (x->arg == y->arg) {
+		if (x->op < y->op)
+			/* path #2 */
+			return true;
+
+		if (x->op == y->op) {
+			if (x->mask < y->mask)
+				/* path #3 */
+				return true;
+
+			if ((x->mask == y->mask) &&
+			    (x->datum < y->datum))
+				/* path #4 */
+				return true;
+		}
+	}
+
+	/* path #5 */
+	return false;
+}
+
 #define ARG_MASK_MAX		((uint32_t)-1)
-#define db_chain_lt(x,y) \
-	(((x)->arg < (y)->arg) || \
-	 (((x)->arg == (y)->arg) && \
-	  (((x)->op < (y)->op) || (((x)->mask & (y)->mask) == (y)->mask))))
 #define db_chain_eq(x,y) \
-	(((x)->arg == (y)->arg) && \
-	 ((x)->op == (y)->op) && ((x)->datum == (y)->datum) && \
-	 ((x)->mask == (y)->mask))
+	( ((x)->arg == (y)->arg) && \
+	  ((x)->op == (y)->op) && \
+	  ((x)->datum == (y)->datum) && \
+	  ((x)->mask == (y)->mask) )
 #define db_chain_gt(x,y) \
-	(((x)->arg > (y)->arg) || \
-	 (((x)->arg == (y)->arg) && \
-	  (((x)->op > (y)->op) || (((x)->mask & (y)->mask) != (y)->mask))))
+	( !(db_chain_eq(x,y) || db_chain_lt(x,y)) )
 #define db_chain_action(x) \
 	(((x)->act_t_flg) || ((x)->act_f_flg))
 #define db_chain_zombie(x) \
