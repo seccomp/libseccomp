@@ -45,39 +45,36 @@ int main(int argc, char *argv[])
 	 * simpler */
 
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A3(SCMP_CMP_GE, 1));
-	if (rc != 0)
-		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A3(SCMP_CMP_NE, 2));
-	if (rc != 0)
-		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A3(SCMP_CMP_MASKED_EQ, 0xffff, 3));
+				    SCMP_A0(SCMP_CMP_GE, 1));
 	if (rc != 0)
 		goto out;
 
-	/* This covers db_chain_lt() path #1 */
+	/* db_chain_lt() path #1 - due to "A4" > "A3" */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A5(SCMP_CMP_LT, 4));
+				    SCMP_A1(SCMP_CMP_GE, 2));
 	if (rc != 0)
 		goto out;
 
-	/* This covers  db_chain_lt() path #3 */
+	/* db_chain_lt() path #2 - due to "GT" > "GE" */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A2(SCMP_CMP_GT, 5));
+				    SCMP_A0(SCMP_CMP_GT, 3));
 	if (rc != 0)
 		goto out;
 
-	/* This covers  db_chain_lt() path #4 and path #6 */
+	/* db_chain_lt() path #3 - due to the second mask (0xff) being greater
+	 * than the first (0xf) */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A2(SCMP_CMP_LT, 6));
+				    SCMP_A2(SCMP_CMP_MASKED_EQ, 0xf, 4));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
+				    SCMP_A2(SCMP_CMP_MASKED_EQ, 0xff, 5));
 	if (rc != 0)
 		goto out;
 
-	/* This covers  db_chain_lt() path #5 */
+	/* db_chain_lt() path #4 - due to datum (6) > previous datum (5) */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
-				    SCMP_A2(SCMP_CMP_NE, 7));
+				    SCMP_A2(SCMP_CMP_MASKED_EQ, 0xff, 6));
 	if (rc != 0)
 		goto out;
 

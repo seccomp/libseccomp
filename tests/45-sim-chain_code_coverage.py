@@ -31,13 +31,12 @@ from seccomp import *
 def test(args):
     f = SyscallFilter(KILL)
     # the syscall and argument numbers are all fake to make the test simpler
-    f.add_rule_exactly(ALLOW, 1008, Arg(3, GE, 1))
-    f.add_rule_exactly(ALLOW, 1008, Arg(3, NE, 2))
-    f.add_rule_exactly(ALLOW, 1008, Arg(3, MASKED_EQ, 0xffff, 3))
-    f.add_rule_exactly(ALLOW, 1008, Arg(5, LT, 4))
-    f.add_rule_exactly(ALLOW, 1008, Arg(2, GT, 5))
-    f.add_rule_exactly(ALLOW, 1008, Arg(2, LT, 6))
-    f.add_rule_exactly(ALLOW, 1008, Arg(2, NE, 7))
+    f.add_rule_exactly(ALLOW, 1008, Arg(0, GE, 1))
+    f.add_rule_exactly(ALLOW, 1008, Arg(1, GE, 2))
+    f.add_rule_exactly(ALLOW, 1008, Arg(0, GT, 3))
+    f.add_rule_exactly(ALLOW, 1008, Arg(2, MASKED_EQ, 0xf, 4))
+    f.add_rule_exactly(ALLOW, 1008, Arg(2, MASKED_EQ, 0xff, 5))
+    f.add_rule_exactly(ALLOW, 1008, Arg(2, MASKED_EQ, 0xff, 6))
 
     return f
 

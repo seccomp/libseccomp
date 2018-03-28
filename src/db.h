@@ -81,22 +81,27 @@ static inline bool db_chain_lt(const struct db_arg_chain_tree * const x,
 			       const struct db_arg_chain_tree * const y)
 {
 	if (x->arg < y->arg)
+		/* path #1 */
 		return true;
 
 	if (x->arg == y->arg) {
 		if (x->op < y->op)
+			/* path #2 */
 			return true;
 
 		if (x->op == y->op) {
 			if (x->mask < y->mask)
+				/* path #3 */
 				return true;
 
 			if ((x->mask == y->mask) &&
 			    (x->datum < y->datum))
+				/* path #4 */
 				return true;
 		}
 	}
 
+	/* path #5 */
 	return false;
 }
 
