@@ -83,7 +83,8 @@ check_PROGRAMS = \
 	41-sim-syscall_priority_arch \
 	42-sim-adv_chains \
 	43-sim-a2_order \
-	44-live-a2_order
+	44-live-a2_order \
+	45-sim-chain_code_coverage
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -128,7 +129,8 @@ EXTRA_DIST_TESTPYTHON = \
 	41-sim-syscall_priority_arch.py \
 	42-sim-adv_chains.py \
 	43-sim-a2_order.py \
-	44-live-a2_order.py
+	44-live-a2_order.py \
+	45-sim-chain_code_coverage.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -174,7 +176,8 @@ EXTRA_DIST_TESTCFGS = \
 	41-sim-syscall_priority_arch.tests \
 	42-sim-adv_chains.tests \
 	43-sim-a2_order.tests \
-	44-live-a2_order.tests
+	44-live-a2_order.tests \
+	45-sim-chain_code_coverage.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
