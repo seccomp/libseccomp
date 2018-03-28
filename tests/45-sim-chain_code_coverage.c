@@ -88,6 +88,15 @@ int main(int argc, char *argv[])
 				    SCMP_A5(SCMP_CMP_MASKED_EQ, 0xffff, 12));
 	if (rc != 0)
 		goto out;
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 5,
+				    SCMP_A0(SCMP_CMP_NE, 7),
+				    SCMP_A1(SCMP_CMP_LT, 8),
+				    SCMP_A2(SCMP_CMP_EQ, 9),
+				    SCMP_A3(SCMP_CMP_GE, 10),
+				    SCMP_A4(SCMP_CMP_GT, 11),
+				    SCMP_A5(SCMP_CMP_MASKED_EQ, 0xffff, 13));
+	if (rc != 0)
+		goto out;
 
 	rc = util_filter_output(&opts, ctx);
 	if (rc)
