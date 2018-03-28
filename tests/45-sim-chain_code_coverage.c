@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	/* db_chain_lt() path #1 - due to "A4" > "A3" */
+	/* db_chain_lt() path #1 - due to "A1" > "A0" */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
 				    SCMP_A1(SCMP_CMP_GE, 2));
 	if (rc != 0)
@@ -75,6 +75,17 @@ int main(int argc, char *argv[])
 	/* db_chain_lt() path #4 - due to datum (6) > previous datum (5) */
 	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 1,
 				    SCMP_A2(SCMP_CMP_MASKED_EQ, 0xff, 6));
+	if (rc != 0)
+		goto out;
+
+	/* attempt to hit some of the lvl_prv and lvl_nxt code in db.c */
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1008, 5,
+				    SCMP_A0(SCMP_CMP_NE, 7),
+				    SCMP_A1(SCMP_CMP_LT, 8),
+				    SCMP_A2(SCMP_CMP_EQ, 9),
+				    SCMP_A3(SCMP_CMP_GE, 10),
+				    SCMP_A4(SCMP_CMP_GT, 11),
+				    SCMP_A5(SCMP_CMP_MASKED_EQ, 0xffff, 12));
 	if (rc != 0)
 		goto out;
 
