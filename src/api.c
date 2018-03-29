@@ -149,13 +149,6 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_LOG, true);
-		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, false);
-		break;
-	case 4:
-		sys_set_seccomp_syscall(true);
-		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
-		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
-		sys_set_seccomp_action(SCMP_ACT_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
 		break;
 	default:

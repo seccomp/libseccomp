@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_api_set(4);
+	rc = seccomp_api_set(3);
 	if (rc != 0)
 		return EOPNOTSUPP;
 

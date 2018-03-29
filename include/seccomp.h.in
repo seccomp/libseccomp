@@ -305,7 +305,7 @@ const struct scmp_version *seccomp_version(void);
  *      uses the seccomp(2) syscall instead of the prctl(2) syscall
  *  3 : support for the SCMP_FLTATR_CTL_LOG filter attribute
  *      support for the SCMP_ACT_LOG action
- *  4 : support for the SCMP_ACT_KILL_PROCESS action
+ *      support for the SCMP_ACT_KILL_PROCESS action
  *
  */
 const unsigned int seccomp_api_get(void);

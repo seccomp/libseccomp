@@ -30,7 +30,7 @@ import util
 from seccomp import *
 
 def test(args):
-    set_api(4)
+    set_api(3)
 
     f = SyscallFilter(KILL)
     f.add_rule(ALLOW, "read")
