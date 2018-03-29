@@ -37,13 +37,6 @@ struct db_filter_col;
 /* system header file */
 #include <linux/seccomp.h>
 
-/* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
- * defined on older kernels
- */
-#ifndef SECCOMP_RET_ACTION_FULL
-#define SECCOMP_RET_ACTION_FULL 0xffff0000U
-#endif
-
 #else
 
 /* NOTE: the definitions below were taken from the Linux Kernel sources */
@@ -126,6 +119,13 @@ typedef struct sock_filter bpf_instr_raw;
 
 #ifndef SECCOMP_RET_LOG
 #define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
+#endif
+
+/* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
+ * defined on older kernels
+ */
+#ifndef SECCOMP_RET_ACTION_FULL
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
 #endif
 
 int sys_chk_seccomp_syscall(void);
