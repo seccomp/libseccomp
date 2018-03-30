@@ -11,7 +11,7 @@ test type: bpf-sim
 43-sim-kill_process	+x86_64	0		N	N	N	N	N	N	ALLOW
 43-sim-kill_process	+x86_64	1		N	N	N	N	N	N	ERRNO(5)
 43-sim-kill_process	+x86_64	2		N	N	N	N	N	N	KILL
-43-sim-kill_process	+x86_64	3		N	N	N	N	N	N	KILL_PROCESS
+43-sim-kill_process	+x86_64	3		100	N	N	N	N	N	KILL_PROCESS
+43-sim-kill_process	+x86_64	3		101	N	N	N	N	N	ERRNO(6)
+43-sim-kill_process	+x86_64	4		N	N	N	N	N	N	KILL_PROCESS
 
-# Testname
-43-sim-kill_process

@@ -59,6 +59,11 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(6), SCMP_SYS(close), 1,
+			      SCMP_A0(SCMP_CMP_GT, 100));
+	if (rc != 0)
+		goto out;
+
 	rc = util_filter_output(&opts, ctx);
 	if (rc)
 		goto out;

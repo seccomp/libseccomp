@@ -35,6 +35,7 @@ def test(args):
     f.add_rule_exactly(ALLOW, "read")
     f.add_rule_exactly(ERRNO(5), "write")
     f.add_rule_exactly(KILL, "open")
+    f.add_rule_exactly(ERRNO(6), "close", Arg(0, GT, 100))
     return f
 
 args = util.get_opt()
