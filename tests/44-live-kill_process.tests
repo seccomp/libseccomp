@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+test type: live
+
+# Testname		Result
+44-live-kill_process	KILL_PROCESS

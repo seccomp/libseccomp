@@ -168,6 +168,8 @@ int util_action_parse(const char *action)
 
 	if (strcasecmp(action, "KILL") == 0)
 		return SCMP_ACT_KILL;
+	if (strcasecmp(action, "KILL_PROCESS") == 0)
+		return SCMP_ACT_KILL_PROCESS;
 	else if (strcasecmp(action, "TRAP") == 0)
 		return SCMP_ACT_TRAP;
 	else if (strcasecmp(action, "ERRNO") == 0)

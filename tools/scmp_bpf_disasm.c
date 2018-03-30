@@ -173,11 +173,14 @@ static const char *bpf_decode_op(const bpf_instr_raw *bpf)
  */
 static void bpf_decode_action(uint32_t k)
 {
-	uint32_t act = k & SECCOMP_RET_ACTION;
+	uint32_t act = k & SECCOMP_RET_ACTION_FULL;
 	uint32_t data = k & SECCOMP_RET_DATA;
 
 	switch (act) {
-	case SECCOMP_RET_KILL:
+	case SECCOMP_RET_KILL_PROCESS:
+		printf("KILL_PROCESS");
+		break;
+	case SECCOMP_RET_KILL_THREAD:
 		printf("KILL");
 		break;
 	case SECCOMP_RET_TRAP:

@@ -26,7 +26,7 @@ else
 DBG_STATIC = -static
 endif
 
-AM_LDFLAGS = ${DBG_STATIC}
+AM_LDFLAGS = ${DBG_STATIC} -lpthread
 
 LDADD = util.la ../src/libseccomp.la ${CODE_COVERAGE_LIBS}
 
@@ -81,7 +81,9 @@ check_PROGRAMS = \
 	39-basic-api_level \
 	40-sim-log \
 	41-sim-syscall_priority_arch \
-	42-sim-adv_chains
+	42-sim-adv_chains \
+	43-sim-kill_process \
+	44-live-kill_process
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -124,7 +126,9 @@ EXTRA_DIST_TESTPYTHON = \
 	37-sim-ipc_syscalls_be.py \
 	40-sim-log.py \
 	41-sim-syscall_priority_arch.py \
-	42-sim-adv_chains.py
+	42-sim-adv_chains.py \
+	43-sim-kill_process.py \
+	44-live-kill_process.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -168,7 +172,9 @@ EXTRA_DIST_TESTCFGS = \
 	39-basic-api_level.tests \
 	40-sim-log.tests \
 	41-sim-syscall_priority_arch.tests \
-	42-sim-adv_chains.tests
+	42-sim-adv_chains.tests \
+	43-sim-kill_process.tests \
+	44-live-kill_process.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc

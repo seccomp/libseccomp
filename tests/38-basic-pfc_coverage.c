@@ -38,6 +38,10 @@ int main(int argc, char *argv[])
 	/* stdout */
 	fd = 1;
 
+	rc = seccomp_api_set(3);
+	if (rc != 0)
+		return EOPNOTSUPP;
+
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL) {
 		rc = ENOMEM;
@@ -78,6 +82,9 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1), SCMP_SYS(exit), 0);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(fstat), 0);
 	if (rc < 0)
 		goto out;
 
