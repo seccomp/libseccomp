@@ -619,7 +619,7 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 			}
 
 			return 0;
-		} else if (db_chain_lt(x_iter, n_iter)) {
+		} else if (!db_chain_lt(x_iter, n_iter)) {
 			/* try to move along the current level */
 			if (x_iter->lvl_nxt == NULL) {
 				/* add to the end of this level */
@@ -640,6 +640,8 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 			n_iter->lvl_prv = x_iter->lvl_prv;
 			n_iter->lvl_nxt = x_iter;
 			x_iter->lvl_prv = n_iter;
+			if (*existing == x_iter)
+				*existing = n_iter;
 			return 0;
 		}
 	} while (x_iter);
