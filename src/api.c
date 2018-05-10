@@ -120,7 +120,7 @@ API const struct scmp_version *seccomp_version(void)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-API const unsigned int seccomp_api_get(void)
+API unsigned int seccomp_api_get(void)
 {
 	/* update the api level, if needed */
 	return _seccomp_api_update();

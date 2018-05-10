@@ -299,7 +299,7 @@ const struct scmp_version *seccomp_version(void);
  *      support for the SCMP_ACT_LOG action
  *
  */
-const unsigned int seccomp_api_get(void);
+unsigned int seccomp_api_get(void);
 
 /**
  * Set the library's level of API support
