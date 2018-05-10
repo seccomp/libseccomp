@@ -15,6 +15,10 @@ language: c
 compiler:
   - gcc
 
+language: python
+python:
+  - "nightly"
+
 addons:
   coverity_scan:
     project:
@@ -27,9 +31,6 @@ addons:
   apt:
     packages:
       - build-essential
-      - python
-      - python-dev
-      - python-pip
       - valgrind
       - clang
       - lcov
@@ -43,9 +44,9 @@ env:
 # resolve any remaining dependency issues
 before_install:
   # ubuntu 14.04 (trusty) has an old version of cython
-  - pip install --user cython
+  - pip install cython
   # see https://github.com/eddyxu/cpp-coveralls
-  - pip install --user cpp-coveralls
+  - pip install cpp-coveralls
 
 # perform the build and fail immediately on error
 install:
