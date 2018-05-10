@@ -112,6 +112,7 @@ AS_IF([test "$enable_python" = yes], [
 	AS_IF([test "$CYTHON_VER_MAJ" -eq 0 -a "$CYTHON_VER_MIN" -lt 16], [
 		AC_MSG_ERROR([python bindings require cython 0.16 or higher])
 	])
+	AM_PATH_PYTHON
 ])
 AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = yes])
 AC_DEFINE_UNQUOTED([ENABLE_PYTHON],

@@ -16,14 +16,12 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-PYTHON = /usr/bin/env python
-
 PY_DISTUTILS = \
 	VERSION_RELEASE="@PACKAGE_VERSION@" \
 	CPPFLAGS="-I\${top_srcdir}/include ${AM_CPPFLAGS} ${CPPFLAGS}" \
 	CFLAGS="${AM_CFLAGS} ${CFLAGS}" \
 	LDFLAGS="${AM_LDFLAGS} ${LDFLAGS}" \
-	${PYTHON} ./setup.py
+	${PYTHON} ${srcdir}/setup.py
 
 # support silent builds
 PY_BUILD_0 = @echo "  PYTHON  " $@; ${PY_DISTUTILS} -q build
@@ -38,10 +36,17 @@ EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py
 all-local: build
 
 build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
+	[ ${srcdir} == ${builddir} ] || cp ${srcdir}/seccomp.pyx ${builddir}
 	${PY_BUILD} && touch build
 
 install-exec-local: build
-	${PY_INSTALL} --prefix=${DESTDIR}/${prefix}
+	${PY_INSTALL} --install-lib=${DESTDIR}/${pkgpythondir} \
+		--record=${DESTDIR}/${pkgpythondir}/install_files.txt
+
+uninstall-local:
+	cat ${DESTDIR}/${pkgpythondir}/install_files.txt | xargs ${RM} -f
+	${RM} -f ${DESTDIR}/${pkgpythondir}/install_files.txt
 
 clean-local:
+	[ ${srcdir} == ${builddir} ] || ${RM} -f ${builddir}/seccomp.pyx
 	${RM} -rf seccomp.c build

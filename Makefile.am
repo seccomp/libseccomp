@@ -32,6 +32,9 @@ AM_MAKEFLAGS_1 =
 AM_MAKEFLAGS_ = ${AM_MAKEFLAGS_0}
 AM_MAKEFLAGS = ${AM_MAKEFLAGS_@AM_V@}
 
+# enable python during distcheck
+AM_DISTCHECK_CONFIGURE_FLAGS = --enable-python
+
 check-build: all
 	${MAKE} ${AM_MAKEFLAGS} -C src check-build
 	${MAKE} ${AM_MAKEFLAGS} -C tests check-build

@@ -125,6 +125,7 @@ EXTRA_DIST_TESTPYTHON = \
 	35-sim-negative_one.py \
 	36-sim-ipc_syscalls.py \
 	37-sim-ipc_syscalls_be.py \
+	39-basic-api_level.py \
 	40-sim-log.py \
 	41-sim-syscall_priority_arch.py \
 	42-sim-adv_chains.py \
