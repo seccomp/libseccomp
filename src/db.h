@@ -77,39 +77,6 @@ struct db_arg_chain_tree {
 	unsigned int refcnt;
 };
 #define ARG_MASK_MAX		((uint32_t)-1)
-#define db_chain_lt(x,y) \
-	( ((x)->arg < (y)->arg) || \
-	  ( ((x)->arg == (y)->arg) && \
-	    ( ( (x)->op < (y)->op ) || \
-	      ( ((x)->op == (y)->op) && \
-		( ((x)->mask < (y)->mask) || \
-		  ( ((x)->mask == (y)->mask) && \
-		    ((x)->datum < (y)->datum) ) ) ) ) ) )
-#define db_chain_eq(x,y) \
-	( ((x)->arg == (y)->arg) && \
-	  ((x)->op == (y)->op) && \
-	  ((x)->datum == (y)->datum) && \
-	  ((x)->mask == (y)->mask) )
-#define db_chain_gt(x,y) \
-	( !(db_chain_eq(x,y) || db_chain_lt(x,y)) )
-#define db_chain_action(x) \
-	(((x)->act_t_flg) || ((x)->act_f_flg))
-#define db_chain_zombie(x) \
-	((x)->nxt_t == NULL && !((x)->act_t_flg) && \
-	 (x)->nxt_f == NULL && !((x)->act_f_flg))
-#define db_chain_leaf(x) \
-	((x)->nxt_t == NULL && (x)->nxt_f == NULL)
-#define db_chain_eq_result(x,y) \
-	((((x)->nxt_t != NULL && (y)->nxt_t != NULL) || \
-	  ((x)->nxt_t == NULL && (y)->nxt_t == NULL)) && \
-	 (((x)->nxt_f != NULL && (y)->nxt_f != NULL) || \
-	  ((x)->nxt_f == NULL && (y)->nxt_f == NULL)) && \
-	 ((x)->act_t_flg == (y)->act_t_flg) && \
-	 ((x)->act_f_flg == (y)->act_f_flg) && \
-	 (((x)->act_t_flg && (x)->act_t == (y)->act_t) || \
-	  (!((x)->act_t_flg))) && \
-	 (((x)->act_f_flg && (x)->act_f == (y)->act_f) || \
-	  (!((x)->act_f_flg))))
 
 struct db_sys_list {
 	/* native syscall number */

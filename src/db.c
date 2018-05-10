@@ -63,6 +63,68 @@ struct db_iter_state {
 };
 
 /**
+ * Determine if node "a" is less than node "b"
+ * @param a tree node
+ * @param b tree node
+ *
+ * The logic is best explained by looking at the comparison code in the
+ * function.
+ *
+ */
+static bool _db_chain_lt(const struct db_arg_chain_tree *a,
+			 const struct db_arg_chain_tree *b)
+{
+	return ((a->arg < b->arg) ||
+		((a->arg == b->arg) &&
+		 ((a->op < b->op) ||
+		  ((a->op == b->op) &&
+		   ((a->mask < b->mask) ||
+		    ((a->mask == b->mask) &&
+		     (a->datum < b->datum)))))));
+}
+
+/**
+ * Determine if two nodes have equal argument datum values
+ * @param a tree node
+ * @param b tree node
+ *
+ * In order to return true the nodes must have the same datum and mask for the
+ * same argument.
+ *
+ */
+static bool _db_chain_eq(const struct db_arg_chain_tree *a,
+			 const struct db_arg_chain_tree *b)
+{
+	return ((a->arg == b->arg) && (a->op == b->op) &&
+		(a->datum == b->datum) && (a->mask == b->mask));
+}
+
+/**
+ * Determine if a given tree node is a leaf node
+ * @param iter the node to test
+ *
+ * A leaf node is a node with no other nodes beneath it.
+ *
+ */
+static bool _db_chain_leaf(const struct db_arg_chain_tree *iter)
+{
+	return (iter->nxt_t == NULL && iter->nxt_f == NULL);
+}
+
+/**
+ * Determine if a given tree node is a zombie node
+ * @param iter the node to test
+ *
+ * A zombie node is a leaf node that also has no true or false actions.
+ *
+ */
+static bool _db_chain_zombie(const struct db_arg_chain_tree *iter)
+{
+	return (_db_chain_leaf(iter) &&
+		!(iter->act_t_flg) && !(iter->act_f_flg));
+}
+
+/**
  * Free a syscall filter argument chain tree
  * @param tree the argument chain list
  *
@@ -232,7 +294,7 @@ static unsigned int _db_tree_remove(struct db_arg_chain_tree **tree,
 		cnt += _db_tree_remove(&(c_iter->nxt_f), node);
 
 		/* check for empty/zombie nodes */
-		if (db_chain_zombie(c_iter))
+		if (_db_chain_zombie(c_iter))
 			goto remove;
 
 		/* next node on this level */
@@ -351,14 +413,14 @@ static int _db_tree_prune(struct db_arg_chain_tree **existing,
 		x_iter_next = x_iter->lvl_nxt;
 
 		/* compare the two nodes */
-		if (db_chain_eq(x_iter, n_iter)) {
+		if (_db_chain_eq(x_iter, n_iter)) {
 			/* we have a match */
 			state_new.flags |= _DB_IST_M_MATCHSET;
 
 			/* check if either tree is finished */
-			if (db_chain_leaf(n_iter))
+			if (_db_chain_leaf(n_iter))
 				state_new.flags |= _DB_IST_N_FINISHED;
-			if (db_chain_leaf(x_iter))
+			if (_db_chain_leaf(x_iter))
 				state_new.flags |= _DB_IST_X_FINISHED;
 
 			/* don't remove nodes if we have more actions/levels */
@@ -434,7 +496,7 @@ static int _db_tree_prune(struct db_arg_chain_tree **existing,
 				/* no - the new tree is "longer" */
 				goto prune_return;
 			}
-		} else if (db_chain_lt(x_iter, n_iter)) {
+		} else if (_db_chain_lt(x_iter, n_iter)) {
 			/* check the next level in the existing tree */
 			if (x_iter->nxt_t) {
 				_db_node_get(x_iter);
@@ -547,7 +609,7 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 	 * take this extra reference */
 
 	do {
-		if (db_chain_eq(x_iter, n_iter)) {
+		if (_db_chain_eq(x_iter, n_iter)) {
 			if (n_iter->act_t_flg) {
 				if (!x_iter->act_t_flg) {
 					/* new node has a true action */
@@ -619,7 +681,7 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 			}
 
 			return 0;
-		} else if (!db_chain_lt(x_iter, n_iter)) {
+		} else if (!_db_chain_lt(x_iter, n_iter)) {
 			/* try to move along the current level */
 			if (x_iter->lvl_nxt == NULL) {
 				/* add to the end of this level */
