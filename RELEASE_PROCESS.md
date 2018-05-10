@@ -62,9 +62,9 @@ release.
 
 #### 11. Update the version number in configure.ac AC_INIT(...) macro
 
-#### 12. Tag the release in the repository
+#### 12. Tag the release in the repository with a signed tag
 
-	# git tag -m "version X.Y.Z" vX.Y.Z
+	# git tag -s -m "version X.Y.Z" vX.Y.Z
 	# git push --tags
 
 #### 13. Build final release tarball
