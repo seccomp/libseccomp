@@ -81,6 +81,12 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
+	/* bug #117 - seccomp_export_pfc hangs on prioritized syscalls
+	 * with no rules */
+	rc = seccomp_syscall_priority(ctx, SCMP_SYS(poll), 255);
+	if (rc < 0)
+		goto out;
+
 	rc = seccomp_export_pfc(ctx, fd);
 	if (rc < 0)
 		goto out;
