@@ -517,12 +517,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if ((optind > 1) && (optind < argc)) {
-		int opt_file = optind - 1 ;
-		file = fopen(argv[opt_file], "r");
+	if (optind < argc) {
+		file = fopen(argv[optind], "r");
 		if (file == NULL) {
 			fprintf(stderr, "error: unable to open \"%s\" (%s)\n",
-				argv[opt_file], strerror(errno));
+				argv[optind], strerror(errno));
 			return errno;
 		}
 	} else
