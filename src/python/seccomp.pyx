@@ -46,7 +46,7 @@ Argument comparison values (see the Arg class):
     EQ - arg == datum_a
     GT - arg > datum_a
     GE - arg >= datum_a
-    MASKED_EQ - (arg & datum_b) == datum_a
+    MASKED_EQ - (arg & datum_a) == datum_b
 
 
 Example:
