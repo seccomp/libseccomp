@@ -35,8 +35,6 @@ scmp_bpf_disasm_SOURCES = scmp_bpf_disasm.c bpf.h util.h
 scmp_bpf_sim_SOURCES = scmp_bpf_sim.c bpf.h util.h
 
 scmp_sys_resolver_LDADD = ../src/libseccomp.la
-scmp_sys_resolver_LDFLAGS = -static
 scmp_arch_detect_LDADD = ../src/libseccomp.la
-scmp_arch_detect_LDFLAGS = -static
 scmp_bpf_disasm_LDADD = util.la
 scmp_bpf_sim_LDADD = util.la
