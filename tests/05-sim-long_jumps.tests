@@ -11,11 +11,11 @@ test type: bpf-sim
 05-sim-long_jumps	all	1	1	2		3			4	5	6	ALLOW
 05-sim-long_jumps	all	2	N	N		N			N	N	N	KILL
 05-sim-long_jumps	all	999	N	N		N			N	N	N	KILL
-05-sim-long_jumps	x86	1000	0-5 	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
-05-sim-long_jumps	x86_64	1000	0-5 	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
-05-sim-long_jumps	x86	1000	95-99	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-sim-long_jumps	x86,x32	1000	0-5	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-sim-long_jumps	x86_64	1000	0-5	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+05-sim-long_jumps	x86,x32	1000	95-99	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
 05-sim-long_jumps	x86_64	1000	95-99	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
-05-sim-long_jumps	x86	1000	100	0x856B008	0x7FFFFFFE		N	N	N	KILL
+05-sim-long_jumps	x86,x32	1000	100	0x856B008	0x7FFFFFFE		N	N	N	KILL
 05-sim-long_jumps	x86_64	1000	100	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	KILL
 05-sim-long_jumps	all	1001	N	N		N			N	N	N	KILL
 05-sim-long_jumps	all	99	1	N		N			N	N	N	KILL

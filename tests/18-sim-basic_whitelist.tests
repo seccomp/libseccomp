@@ -20,6 +20,8 @@ test type: bpf-sim
 18-sim-basic_whitelist	x86	174-350		N		N		N	N	N	N	KILL
 18-sim-basic_whitelist	x86_64	4-14		N		N		N	N	N	N	KILL
 18-sim-basic_whitelist	x86_64	16-350		N		N		N	N	N	N	KILL
+18-sim-basic_whitelist	x32	4-512		N		N		N	N	N	N	KILL
+18-sim-basic_whitelist	x32	514-560		N		N		N	N	N	N	KILL
 
 test type: bpf-sim-fuzz
 

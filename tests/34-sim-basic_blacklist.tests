@@ -20,6 +20,8 @@ test type: bpf-sim
 34-sim-basic_blacklist	x86	174-350		N		N		N	N	N	N	ALLOW
 34-sim-basic_blacklist	x86_64	4-14		N		N		N	N	N	N	ALLOW
 34-sim-basic_blacklist	x86_64	16-350		N		N		N	N	N	N	ALLOW
+34-sim-basic_blacklist	x32	4-512		N		N		N	N	N	N	ALLOW
+34-sim-basic_blacklist	x32	514-560		N		N		N	N	N	N	ALLOW
 
 test type: bpf-sim-fuzz
 
