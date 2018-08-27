@@ -238,6 +238,7 @@ int main(int argc, char *argv[])
 	size_t file_read_len;
 	struct seccomp_data sys_data;
 	struct bpf_program bpf_prg;
+	int32_t x32callbit = 0;
 
 	/* initialize the syscall record */
 	memset(&sys_data, 0, sizeof(sys_data));
@@ -250,9 +251,10 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_I386;
 			else if (strcmp(optarg, "x86_64") == 0)
 				arch = AUDIT_ARCH_X86_64;
-			else if (strcmp(optarg, "x32") == 0)
+			else if (strcmp(optarg, "x32") == 0) {
 				arch = AUDIT_ARCH_X86_64;
-			else if (strcmp(optarg, "arm") == 0)
+				x32callbit = 0x40000000;
+			} else if (strcmp(optarg, "arm") == 0)
 				arch = AUDIT_ARCH_ARM;
 			else if (strcmp(optarg, "aarch64") == 0)
 				arch = AUDIT_ARCH_AARCH64;
@@ -320,6 +322,9 @@ int main(int argc, char *argv[])
 			exit_usage(argv[0]);
 		}
 	}
+
+	/* adjust x32 syscall nr */
+	sys_data.nr |= x32callbit;
 
 	/* adjust the endianess of sys_data to match the target */
 	sys_data.nr = htot32(arch, sys_data.nr);

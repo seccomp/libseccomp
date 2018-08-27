@@ -43,26 +43,26 @@ int main(int argc, char *argv[])
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 2,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1001, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1001 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 0));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1002, 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1002 | X32_CALL_BIT, 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_syscall_priority(ctx, 1000, 3);
+	rc = seccomp_syscall_priority(ctx, 1000 | X32_CALL_BIT, 3);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_syscall_priority(ctx, 1001, 2);
+	rc = seccomp_syscall_priority(ctx, 1001 | X32_CALL_BIT, 2);
 	if (rc != 0)
 		goto out;
-	rc = seccomp_syscall_priority(ctx, 1002, 1);
+	rc = seccomp_syscall_priority(ctx, 1002 | X32_CALL_BIT, 1);
 	if (rc != 0)
 		goto out;
 

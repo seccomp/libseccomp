@@ -40,55 +40,55 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 3));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 4));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 5));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 6));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 7));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 8));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 9));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 11));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 12));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 13));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 14));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_EQ, 15));
 	if (rc != 0)
 		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 1,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000 | X32_CALL_BIT, 1,
 				    SCMP_A0(SCMP_CMP_GE, 16));
 	if (rc != 0)
 		goto out;

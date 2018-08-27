@@ -22,6 +22,12 @@
 #ifndef _UTIL_TEST_H
 #define _UTIL_TEST_H
 
+#if defined(__x86_64__) && defined(__ILP32__)
+#define X32_CALL_BIT 0x40000000
+#else
+#define X32_CALL_BIT 0
+#endif
+
 struct util_options {
 	int bpf_flg;
 };

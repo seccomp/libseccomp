@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
 
 	/* NOTE - syscalls referenced by number to make the test simpler */
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1, 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1 | X32_CALL_BIT, 0);
 	if (rc != 0)
 		goto out;
 
 	/* same syscall, many chains */
 	for (iter = 0; iter < 100; iter++) {
-		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 					    SCMP_A0(SCMP_CMP_EQ, iter),
 					    SCMP_A1(SCMP_CMP_NE, 0x0),
 					    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
 
 	/* many syscalls, same chain */
 	for (iter = 100; iter < 200; iter++) {
-		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, iter, 1,
+		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, iter | X32_CALL_BIT, 1,
 					    SCMP_A0(SCMP_CMP_NE, 0));
 		if (rc != 0)
 			goto out;
 	}
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 4, 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 4 | X32_CALL_BIT, 0);
 	if (rc != 0)
 		goto out;
 

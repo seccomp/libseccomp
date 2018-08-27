@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 10, 2,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 10 | X32_CALL_BIT, 2,
 				    SCMP_A0(SCMP_CMP_EQ, 11),
 				    SCMP_A1(SCMP_CMP_NE, 12));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 20, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 20 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 21),
 				    SCMP_A1(SCMP_CMP_NE, 22),
 				    SCMP_A2(SCMP_CMP_EQ, 23));

@@ -43,35 +43,35 @@ int main(int argc, char *argv[])
 	/* the syscall and argument numbers are all fake to make the test
 	 * simpler */
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_EQ, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_MASKED_EQ, 0x00ff, 1),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_MASKED_EQ, 0xffff, 11),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_MASKED_EQ, 0xffff, 111),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000 | X32_CALL_BIT, 3,
 				    SCMP_A0(SCMP_CMP_EQ, 0),
 				    SCMP_A1(SCMP_CMP_MASKED_EQ, 0xff00, 1000),
 				    SCMP_A2(SCMP_CMP_EQ, 2));
