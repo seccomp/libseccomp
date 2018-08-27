@@ -152,6 +152,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
 	if (rc != 0)
 		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 0);
+	if (rc != 0)
+		goto out;
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(stat), 0);
 	if (rc != 0)
 		goto out;
