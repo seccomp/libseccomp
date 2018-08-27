@@ -30,7 +30,7 @@ const struct arch_def arch_def_x32 = {
 	.token = SCMP_ARCH_X32,
 	/* NOTE: this seems odd but the kernel treats x32 like x86_64 here */
 	.token_bpf = AUDIT_ARCH_X86_64,
-	.size = ARCH_SIZE_32,
+	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_LITTLE,
 	.syscall_resolve_name = x32_syscall_resolve_name,
 	.syscall_resolve_num = x32_syscall_resolve_num,
