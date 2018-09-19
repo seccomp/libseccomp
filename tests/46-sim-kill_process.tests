@@ -1,0 +1,16 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+46-sim-kill_process	+x86_64	0		N	N	N	N	N	N	ALLOW
+46-sim-kill_process	+x86_64	1		N	N	N	N	N	N	ERRNO(5)
+46-sim-kill_process	+x86_64	2		N	N	N	N	N	N	KILL
+46-sim-kill_process	+x86_64	3		100	N	N	N	N	N	KILL_PROCESS
+46-sim-kill_process	+x86_64	3		101	N	N	N	N	N	ERRNO(6)
+46-sim-kill_process	+x86_64	4		N	N	N	N	N	N	KILL_PROCESS

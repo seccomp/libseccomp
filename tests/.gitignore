@@ -51,3 +51,5 @@ util.pyc
 43-sim-a2_order
 44-live-a2_order
 45-sim-chain_code_coverage
+46-sim-kill_process
+47-live-kill_process
