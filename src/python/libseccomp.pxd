@@ -69,6 +69,7 @@ cdef extern from "seccomp.h":
         SCMP_CMP_MASKED_EQ
 
     cdef enum:
+        SCMP_ACT_KILL_PROCESS
         SCMP_ACT_KILL
         SCMP_ACT_TRAP
         SCMP_ACT_LOG

@@ -52,6 +52,10 @@ The thread will be terminated by the kernel with SIGSYS when it calls a syscall
 that does not match any of the configured seccomp filter rules.  The thread
 will not be able to catch the signal.
 .TP
+.B SCMP_ACT_KILL_PROCESS
+The entire process will be terminated by the kernel with SIGSYS when it calls a
+syscall that does not match any of the configured seccomp filter rules.
+.TP
 .B SCMP_ACT_TRAP
 The thread will be sent a SIGSYS signal when it calls a syscall that does not
 match any of the configured seccomp filter rules.  It may catch this and change

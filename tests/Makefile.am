@@ -26,7 +26,7 @@ else
 DBG_STATIC = -static
 endif
 
-AM_LDFLAGS = ${DBG_STATIC}
+AM_LDFLAGS = ${DBG_STATIC} -lpthread
 
 LDADD = util.la ../src/libseccomp.la ${CODE_COVERAGE_LIBS}
 
@@ -84,7 +84,9 @@ check_PROGRAMS = \
 	42-sim-adv_chains \
 	43-sim-a2_order \
 	44-live-a2_order \
-	45-sim-chain_code_coverage
+	45-sim-chain_code_coverage \
+	46-sim-kill_process \
+	47-live-kill_process
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -131,7 +133,9 @@ EXTRA_DIST_TESTPYTHON = \
 	42-sim-adv_chains.py \
 	43-sim-a2_order.py \
 	44-live-a2_order.py \
-	45-sim-chain_code_coverage.py
+	45-sim-chain_code_coverage.py \
+	46-sim-kill_process.py \
+	47-live-kill_process.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -178,7 +182,9 @@ EXTRA_DIST_TESTCFGS = \
 	42-sim-adv_chains.tests \
 	43-sim-a2_order.tests \
 	44-live-a2_order.tests \
-	45-sim-chain_code_coverage.tests
+	45-sim-chain_code_coverage.tests \
+	46-sim-kill_process.tests \
+	47-live-kill_process.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
