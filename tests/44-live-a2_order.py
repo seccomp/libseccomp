@@ -91,6 +91,7 @@ def test():
     f.add_rule(ALLOW, "exit")
     f.add_rule(ALLOW, "brk")
     f.add_rule(ALLOW, "open")
+    f.add_rule(ALLOW, "openat")
     f.add_rule(ALLOW, "stat")
     f.add_rule(ALLOW, "write")
     f.load()
