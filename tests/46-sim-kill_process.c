@@ -1,8 +1,8 @@
 /**
  * Seccomp Library test program
  *
- * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
- * Author: Paul Moore <paul@paul-moore.com>
+ * Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+ * Author: Tom Hromatka <tom.hromatka@oracle.com>
  */
 
 /*
@@ -36,35 +36,31 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
-	rc = seccomp_api_set(3);
-	if (rc != 0)
-		return EOPNOTSUPP;
-
-	ctx = seccomp_init(SCMP_ACT_KILL);
+	ctx = seccomp_init(SCMP_ACT_KILL_PROCESS);
 	if (ctx == NULL)
 		return ENOMEM;
+
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86_64);
+	if (rc != 0)
+		goto out;
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_LOG, SCMP_SYS(rt_sigreturn), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(5), SCMP_SYS(write), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(write), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_THREAD, SCMP_SYS(open), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_TRAP, SCMP_SYS(close), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
-	if (rc != 0)
-		goto out;
-
-	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(stat), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(6), SCMP_SYS(close), 1,
+			      SCMP_A0(SCMP_CMP_GT, 100));
 	if (rc != 0)
 		goto out;
 

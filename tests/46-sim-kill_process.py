@@ -3,8 +3,8 @@
 #
 # Seccomp Library test program
 #
-# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
-# Author: Paul Moore <paul@paul-moore.com>
+# Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
 #
 
 #
@@ -22,7 +22,6 @@
 #
 
 import argparse
-import errno
 import sys
 
 import util
@@ -30,15 +29,13 @@ import util
 from seccomp import *
 
 def test(args):
-    set_api(3)
-
-    f = SyscallFilter(KILL)
-    f.add_rule(ALLOW, "read")
-    f.add_rule(LOG, "rt_sigreturn")
-    f.add_rule(ERRNO(errno.EPERM), "write")
-    f.add_rule(TRAP, "close")
-    f.add_rule(TRACE(1234), "open")
-    f.add_rule(KILL_PROCESS, "stat")
+    f = SyscallFilter(KILL_PROCESS)
+    f.remove_arch(Arch())
+    f.add_arch(Arch("x86_64"))
+    f.add_rule_exactly(ALLOW, "read")
+    f.add_rule_exactly(ERRNO(5), "write")
+    f.add_rule_exactly(KILL, "open")
+    f.add_rule_exactly(ERRNO(6), "close", Arg(0, GT, 100))
     return f
 
 args = util.get_opt()
