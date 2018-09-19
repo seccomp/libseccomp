@@ -135,18 +135,21 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, false);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_LOG, false);
+		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, false);
 		break;
 	case 2:
 		sys_set_seccomp_syscall(true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_LOG, false);
+		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, false);
 		break;
 	case 3:
 		sys_set_seccomp_syscall(true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_LOG, true);
+		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
 		break;
 	default:
 		return -EINVAL;

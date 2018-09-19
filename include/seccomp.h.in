@@ -244,7 +244,15 @@ struct scmp_arg_cmp {
 /**
  * Kill the process
  */
-#define SCMP_ACT_KILL		0x00000000U
+#define SCMP_ACT_KILL_PROCESS	0x80000000U
+/**
+ * Kill the thread
+ */
+#define SCMP_ACT_KILL_THREAD	0x00000000U
+/**
+ * Kill the thread, defined for backward compatibility
+ */
+#define SCMP_ACT_KILL		SCMP_ACT_KILL_THREAD
 /**
  * Throw a SIGSYS signal
  */
@@ -297,6 +305,7 @@ const struct scmp_version *seccomp_version(void);
  *      uses the seccomp(2) syscall instead of the prctl(2) syscall
  *  3 : support for the SCMP_FLTATR_CTL_LOG filter attribute
  *      support for the SCMP_ACT_LOG action
+ *      support for the SCMP_ACT_KILL_PROCESS action
  *
  */
 unsigned int seccomp_api_get(void);

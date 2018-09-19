@@ -55,13 +55,16 @@ struct db_filter_col;
  * The ordering ensures that a min_t() over composed return values always
  * selects the least permissive choice.
  */
-#define SECCOMP_RET_KILL	0x00000000U /* kill the task immediately */
+#define SECCOMP_RET_KILL_PROCESS 0x80000000U /* kill the process immediately */
+#define SECCOMP_RET_KILL_THREAD	0x00000000U /* kill the thread immediately */
+#define SECCOMP_RET_KILL	SECCOMP_RET_KILL_THREAD /* default to killing the thread */
 #define SECCOMP_RET_TRAP	0x00030000U /* disallow and force a SIGSYS */
 #define SECCOMP_RET_ERRNO	0x00050000U /* returns an errno */
 #define SECCOMP_RET_TRACE	0x7ff00000U /* pass to a tracer or disallow */
 #define SECCOMP_RET_ALLOW	0x7fff0000U /* allow */
 
 /* Masks for the return value sections. */
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
 #define SECCOMP_RET_ACTION	0x7fff0000U
 #define SECCOMP_RET_DATA	0x0000ffffU
 
@@ -116,6 +119,13 @@ typedef struct sock_filter bpf_instr_raw;
 
 #ifndef SECCOMP_RET_LOG
 #define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
+#endif
+
+/* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
+ * defined on older kernels
+ */
+#ifndef SECCOMP_RET_ACTION_FULL
+#define SECCOMP_RET_ACTION_FULL 0xffff0000U
 #endif
 
 int sys_chk_seccomp_syscall(void);
