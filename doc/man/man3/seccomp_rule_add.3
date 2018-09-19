@@ -111,6 +111,10 @@ values are as follows:
 The thread will be killed by the kernel when it calls a syscall that matches
 the filter rule.
 .TP
+.B SCMP_ACT_KILL_PROCESS
+The process will be killed by the kernel when it calls a syscall that matches
+the filter rule.
+.TP
 .B SCMP_ACT_TRAP
 The thread will throw a SIGSYS signal when it calls a syscall that matches the
 filter rule.
