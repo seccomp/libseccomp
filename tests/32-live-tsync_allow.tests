@@ -7,5 +7,5 @@
 
 test type: live
 
-# Testname		Result
-32-live-tsync_allow	ALLOW
+# Testname		API	Result
+32-live-tsync_allow	2	ALLOW

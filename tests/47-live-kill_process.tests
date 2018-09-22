@@ -7,5 +7,5 @@
 
 test type: live
 
-# Testname		Result
-47-live-kill_process	KILL_PROCESS
+# Testname		API	Result
+47-live-kill_process	3	KILL_PROCESS

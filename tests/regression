@@ -35,6 +35,7 @@ GLBL_ARCH_BE_SUPPORT=" \
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
 GLBL_SYS_SIM="../tools/scmp_bpf_sim"
+GLBL_SYS_API="../tools/scmp_api_level"
 
 ####
 # functions
@@ -709,12 +710,23 @@ function run_test_bpf_valgrind() {
 #
 function run_test_live() {
 	local rc
+	local api
 	local line=($2)
 
 	# parse the test line
 	line_cmd=${line[0]}
-	line_act=${line[1]}
-	line_test="$line_cmd $line_act"
+	line_api=${line[1]}
+	line_act=${line[2]}
+	line_test="$line_cmd $line_api $line_act"
+
+	# check the api level
+	api=$($GLBL_SYS_API)
+	if [[ $api -lt $line_api ]]; then
+		# runtime api level is too low
+		print_result "$1" "SKIPPED" "(api level)"
+		stats_skipped=$(($stats_skipped+1))
+		return
+	fi
 
 	# print out the input test data to the log file
 	print_data "$1" "$2"

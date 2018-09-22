@@ -7,5 +7,5 @@
 
 test type: live
 
-# Testname		Result
-44-live-a2_order	ALLOW
+# Testname		API	Result
+44-live-a2_order	1	ALLOW

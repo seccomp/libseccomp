@@ -7,5 +7,5 @@
 
 test type: live
 
-# Testname		Result
-24-live-arg_allow	ALLOW
+# Testname		API	Result
+24-live-arg_allow	1	ALLOW

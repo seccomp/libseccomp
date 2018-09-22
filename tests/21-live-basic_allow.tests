@@ -7,5 +7,5 @@
 
 test type: live
 
-# Testname		Result
-21-live-basic_allow	ALLOW
+# Testname		API	Result
+21-live-basic_allow	1	ALLOW
