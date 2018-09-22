@@ -1591,11 +1591,6 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_spu_run		__PNR_spu_run
 #endif /* __NR_spu_run */
 
-#define __PNR_subpage_prot	-10189
-#ifndef __NR_subpage_prot
-#define __NR_subpage_prot	__PNR_subpage_prot
-#endif /* __NR_subpage_prot */
-
 #define __PNR_swapcontext	-10190
 #ifndef __NR_swapcontext
 #define __NR_swapcontext	__PNR_swapcontext
@@ -1689,6 +1684,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_s390_sthyi
 #define __NR_s390_sthyi		__PNR_s390_sthyi
 #endif /* __NR_s390_sthyi */
+
+#define __PNR_subpage_prot	-10207
+#ifndef __NR_subpage_prot
+#define __NR_subpage_prot	__PNR_subpage_prot
+#endif /* __NR_subpage_prot */
 
 #ifdef __cplusplus
 }
