@@ -1,4 +1,4 @@
-.TH "seccomp_rule_add" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_rule_add" 3 "17 February 2019" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,24 @@ seccomp_rule_add, seccomp_rule_add_exact \- Add a seccomp filter rule
 .BI "struct scmp_arg_cmp SCMP_A3(enum scmp_compare " op ", " ... ");"
 .BI "struct scmp_arg_cmp SCMP_A4(enum scmp_compare " op ", " ... ");"
 .BI "struct scmp_arg_cmp SCMP_A5(enum scmp_compare " op ", " ... ");"
+.sp
+.BI "struct scmp_arg_cmp SCMP_CMP64(unsigned int " arg ","
+.BI "                             enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A0_64(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A1_64(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A2_64(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A3_64(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A4_64(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A5_64(enum scmp_compare " op ", " ... ");"
+.sp
+.BI "struct scmp_arg_cmp SCMP_CMP32(unsigned int " arg ","
+.BI "                             enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A0_32(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A1_32(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A2_32(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A3_32(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A4_32(enum scmp_compare " op ", " ... ");"
+.BI "struct scmp_arg_cmp SCMP_A5_32(enum scmp_compare " op ", " ... ");"
 .sp
 .BI "int seccomp_rule_add(scmp_filter_ctx " ctx ", uint32_t " action ","
 .BI "                     int " syscall ", unsigned int " arg_cnt ", " ... ");"
@@ -71,15 +89,36 @@ loaded into the kernel using
 .BR seccomp_load (3).
 .P
 The
+.BR SCMP_CMP (),
+.BR SCMP_CMP64 (),
+.BR SCMP_A{0-5} (),
+and
+.BR SCMP_A{0-5}_64 ()
+macros generate a scmp_arg_cmp structure for use with the above functions. The
+.BR SCMP_CMP ()
+and
+.BR SCMP_CMP64 ()
+macros allows the caller to specify an arbitrary argument along with the
+comparison operator, 64-bit mask, and 64-bit datum values where the
+.BR SCMP_A{0-5} ()
+and
+.BR SCMP_A{0-5}_64 ()
+macros are specific to a certain argument.
+.P
+The
+.BR SCMP_CMP32 ()
+and
+.BR SCMP_A{0-5}_32 ()
+macros are similar to the variants above, but they take 32-bit mask and 32-bit
+datum values.
+.P
+It is recommended that whenever possible developers avoid using the
 .BR SCMP_CMP ()
 and
 .BR SCMP_A{0-5} ()
-macros generate a scmp_arg_cmp structure for use with the above functions. The
-.BR SCMP_CMP ()
-macro allows the caller to specify an arbitrary argument along with the
-comparison operator, mask, and datum values where the
-.BR SCMP_A{0-5} ()
-macros are specific to a certain argument.  See the EXAMPLES section below.
+macros and use the variants which are explicitly 32 or 64-bit.  This should
+help eliminate problems caused by an unwanted sign extension of negative datum
+values.
 .P
 While it is possible to specify the
 .I syscall
