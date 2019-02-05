@@ -1947,7 +1947,7 @@ int db_col_transaction_start(struct db_filter_col *col)
 	unsigned int iter;
 	struct db_filter_snap *snap;
 	struct db_filter *filter_o, *filter_s;
-	struct db_api_rule_list *rule_o, *rule_s, *rule_tmp;
+	struct db_api_rule_list *rule_o, *rule_s = NULL, *rule_tmp;
 
 	/* allocate the snapshot */
 	snap = zmalloc(sizeof(*snap));
@@ -2004,6 +2004,7 @@ int db_col_transaction_start(struct db_filter_col *col)
 				rule_tmp->next = rule_s;
 				filter_s->rules = rule_s;
 			}
+			rule_s = NULL;
 
 			/* next rule */
 			rule_o = rule_o->next;
@@ -2017,6 +2018,8 @@ int db_col_transaction_start(struct db_filter_col *col)
 	return 0;
 
 trans_start_failure:
+	if (rule_s != NULL)
+		free(rule_s);
 	_db_snap_release(snap);
 	return -ENOMEM;
 }
