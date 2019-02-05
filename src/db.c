@@ -1089,7 +1089,7 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 
 	/* verify that the endianess is a match */
 	if (col_dst->endian != col_src->endian)
-		return -EEXIST;
+		return -EDOM;
 
 	/* make sure we don't have any arch/filter collisions */
 	for (iter_a = 0; iter_a < col_dst->filter_cnt; iter_a++) {
@@ -1286,7 +1286,7 @@ int db_col_db_add(struct db_filter_col *col, struct db_filter *db)
 	struct db_filter **dbs;
 
 	if (col->endian != 0 && col->endian != db->arch->endian)
-		return -EEXIST;
+		return -EDOM;
 
 	if (db_col_arch_exist(col, db->arch->token))
 		return -EEXIST;
