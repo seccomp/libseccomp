@@ -3,7 +3,7 @@
 # https://docs.travis-ci.com/user/trusty-ci-environment
 # https://wiki.ubuntu.com/Releases
 
-dist: trusty
+dist: xenial
 sudo: false
 
 notifications:
@@ -43,7 +43,7 @@ env:
 
 # resolve any remaining dependency issues
 before_install:
-  # ubuntu 14.04 (trusty) has an old version of cython
+  # assume the distro has an old version of cython
   - pip install cython
   # see https://github.com/eddyxu/cpp-coveralls
   - pip install cpp-coveralls
