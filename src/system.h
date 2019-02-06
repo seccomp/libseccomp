@@ -117,6 +117,9 @@ typedef struct sock_filter bpf_instr_raw;
 #ifndef SECCOMP_FILTER_FLAG_LOG
 #define SECCOMP_FILTER_FLAG_LOG			(1UL << 1)
 #endif
+#ifndef SECCOMP_FILTER_FLAG_SPEC_ALLOW
+#define SECCOMP_FILTER_FLAG_SPEC_ALLOW		(1UL << 2)
+#endif
 
 #ifndef SECCOMP_RET_LOG
 #define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
