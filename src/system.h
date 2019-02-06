@@ -60,6 +60,7 @@ struct db_filter_col;
 #define SECCOMP_RET_KILL	SECCOMP_RET_KILL_THREAD /* default to killing the thread */
 #define SECCOMP_RET_TRAP	0x00030000U /* disallow and force a SIGSYS */
 #define SECCOMP_RET_ERRNO	0x00050000U /* returns an errno */
+#define SECCOMP_RET_USER_NOTIF	0x7fc00000U /* notifies userspace */
 #define SECCOMP_RET_TRACE	0x7ff00000U /* pass to a tracer or disallow */
 #define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
 #define SECCOMP_RET_ALLOW	0x7fff0000U /* allow */
@@ -85,6 +86,38 @@ struct seccomp_data {
 	__u64 args[6];
 };
 
+struct seccomp_notif_sizes {
+	__u16 seccomp_notif;
+	__u16 seccomp_notif_resp;
+	__u16 seccomp_data;
+};
+
+struct seccomp_notif {
+	__u64 id;
+	__u32 pid;
+	__u32 flags;
+	struct seccomp_data data;
+};
+
+struct seccomp_notif_resp {
+	__u64 id;
+	__s64 val;
+	__s32 error;
+	__u32 flags;
+};
+
+#define SECCOMP_IOC_MAGIC               '!'
+#define SECCOMP_IO(nr)                  _IO(SECCOMP_IOC_MAGIC, nr)
+#define SECCOMP_IOR(nr, type)           _IOR(SECCOMP_IOC_MAGIC, nr, type)
+#define SECCOMP_IOW(nr, type)           _IOW(SECCOMP_IOC_MAGIC, nr, type)
+#define SECCOMP_IOWR(nr, type)          _IOWR(SECCOMP_IOC_MAGIC, nr, type)
+
+/* Flags for seccomp notification fd ioctl. */
+#define SECCOMP_IOCTL_NOTIF_RECV        SECCOMP_IOWR(0, struct seccomp_notif)
+#define SECCOMP_IOCTL_NOTIF_SEND        SECCOMP_IOWR(1, \
+						     struct seccomp_notif_resp)
+#define SECCOMP_IOCTL_NOTIF_ID_VALID    SECCOMP_IOR(2, __u64)
+
 #endif /* HAVE_LINUX_SECCOMP_H */
 
 /* rename some of the socket filter types to make more sense */
@@ -109,6 +142,9 @@ typedef struct sock_filter bpf_instr_raw;
 #ifndef SECCOMP_GET_ACTION_AVAIL
 #define SECCOMP_GET_ACTION_AVAIL	2
 #endif
+#ifndef SECCOMP_GET_NOTIF_SIZES
+#define SECCOMP_GET_NOTIF_SIZES		3
+#endif
 
 /* flags for the seccomp() syscall */
 #ifndef SECCOMP_FILTER_FLAG_TSYNC
@@ -116,6 +152,16 @@ typedef struct sock_filter bpf_instr_raw;
 #endif
 #ifndef SECCOMP_FILTER_FLAG_LOG
 #define SECCOMP_FILTER_FLAG_LOG		(1UL << 1)
+#endif
+#ifndef SECCOMP_FILTER_FLAG_SPEC_ALLOW
+#define SECCOMP_FILTER_FLAG_SPEC_ALLOW		(1UL << 2)
+#endif
+#ifndef SECCOMP_FILTER_FLAG_NEW_LISTENER
+#define SECCOMP_FILTER_FLAG_NEW_LISTENER	(1UL << 3)
+#endif
+
+#ifndef SECCOMP_RET_LOG
+#define SECCOMP_RET_LOG		0x7ffc0000U /* allow after logging */
 #endif
 
 /* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
@@ -130,6 +176,46 @@ typedef struct sock_filter bpf_instr_raw;
  */
 #ifndef SECCOMP_RET_LOG
 #define SECCOMP_RET_LOG			0x7fc00000U
+#endif
+
+/* SECCOMP_RET_USER_NOTIF was added in kernel 5.0.  It may not be defined on
+ * older kernels. This version also added the structures below, so let's define
+ * those if the header doesn't have this definiton.
+ */
+#ifndef SECCOMP_RET_USER_NOTIF
+#define SECCOMP_RET_USER_NOTIF	 0x7fc00000U
+
+struct seccomp_notif_sizes {
+	__u16 seccomp_notif;
+	__u16 seccomp_notif_resp;
+	__u16 seccomp_data;
+};
+
+struct seccomp_notif {
+	__u64 id;
+	__u32 pid;
+	__u32 flags;
+	struct seccomp_data data;
+};
+
+struct seccomp_notif_resp {
+	__u64 id;
+	__s64 val;
+	__s32 error;
+	__u32 flags;
+};
+
+#define SECCOMP_IOC_MAGIC               '!'
+#define SECCOMP_IO(nr)                  _IO(SECCOMP_IOC_MAGIC, nr)
+#define SECCOMP_IOR(nr, type)           _IOR(SECCOMP_IOC_MAGIC, nr, type)
+#define SECCOMP_IOW(nr, type)           _IOW(SECCOMP_IOC_MAGIC, nr, type)
+#define SECCOMP_IOWR(nr, type)          _IOWR(SECCOMP_IOC_MAGIC, nr, type)
+
+/* Flags for seccomp notification fd ioctl. */
+#define SECCOMP_IOCTL_NOTIF_RECV        SECCOMP_IOWR(0, struct seccomp_notif)
+#define SECCOMP_IOCTL_NOTIF_SEND        SECCOMP_IOWR(1, \
+						     struct seccomp_notif_resp)
+#define SECCOMP_IOCTL_NOTIF_ID_VALID    SECCOMP_IOR(2, __u64)
 #endif
 
 int sys_chk_seccomp_syscall(void);
