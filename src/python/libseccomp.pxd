@@ -59,6 +59,7 @@ cdef extern from "seccomp.h":
         SCMP_FLTATR_API_TSKIP
         SCMP_FLTATR_CTL_LOG
         SCMP_FLTATR_SPEC_ALLOW
+        SCMP_FLTATR_NEW_LISTENER
 
     cdef enum scmp_compare:
         SCMP_CMP_NE
@@ -75,6 +76,7 @@ cdef extern from "seccomp.h":
         SCMP_ACT_TRAP
         SCMP_ACT_LOG
         SCMP_ACT_ALLOW
+        SCMP_ACT_USER_NOTIF
     unsigned int SCMP_ACT_ERRNO(int errno)
     unsigned int SCMP_ACT_TRACE(int value)
 
@@ -132,6 +134,5 @@ cdef extern from "seccomp.h":
 
     int seccomp_export_pfc(scmp_filter_ctx ctx, int fd)
     int seccomp_export_bpf(scmp_filter_ctx ctx, int fd)
-
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;

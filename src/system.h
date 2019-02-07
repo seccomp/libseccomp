@@ -24,6 +24,7 @@
 
 #include <linux/filter.h>
 #include <sys/prctl.h>
+#include <sys/ioctl.h>
 
 #include "configure.h"
 
@@ -178,10 +179,7 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_RET_LOG			0x7fc00000U
 #endif
 
-/* SECCOMP_RET_USER_NOTIF was added in kernel 5.0.  It may not be defined on
- * older kernels. This version also added the structures below, so let's define
- * those if the header doesn't have this definiton.
- */
+/* SECCOMP_RET_USER_NOTIF was added in kernel 5.0. */
 #ifndef SECCOMP_RET_USER_NOTIF
 #define SECCOMP_RET_USER_NOTIF	 0x7fc00000U
 
@@ -227,6 +225,11 @@ void sys_set_seccomp_action(uint32_t action, bool enable);
 int sys_chk_seccomp_flag(int flag);
 void sys_set_seccomp_flag(int flag, bool enable);
 
-int sys_filter_load(const struct db_filter_col *col);
+int sys_filter_load(struct db_filter_col *col);
 
+int sys_notif_alloc(struct seccomp_notif **req,
+		    struct seccomp_notif_resp **resp);
+int sys_notif_receive(int fd, struct seccomp_notif *req);
+int sys_notif_send_resp(int fd, struct seccomp_notif_resp *resp);
+int sys_notif_id_valid(int fd, uint64_t id);
 #endif

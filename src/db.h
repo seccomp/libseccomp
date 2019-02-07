@@ -118,6 +118,8 @@ struct db_filter_attr {
 	uint32_t log_enable;
 	/* SPEC_ALLOW related attributes */
 	uint32_t spec_allow;
+	/* SECCOMP_FILTER_FLAG_NEW_LISTENER attributes */
+	uint32_t new_listener;
 };
 
 struct db_filter {
@@ -153,6 +155,9 @@ struct db_filter_col {
 
 	/* transaction snapshots */
 	struct db_filter_snap *snapshots;
+
+	/* notification fd that was returned from seccomp() */
+	int notif_fd;
 };
 
 /**

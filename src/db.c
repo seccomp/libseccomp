@@ -1283,6 +1283,9 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_SPEC_ALLOW:
 		*value = col->attr.spec_allow;
 		break;
+	case SCMP_FLTATR_NEW_LISTENER:
+		*value = col->attr.new_listener;
+		break;
 	default:
 		rc = -EEXIST;
 		break;
@@ -1350,6 +1353,17 @@ int db_col_attr_set(struct db_filter_col *col,
 			/* supported */
 			rc = 0;
 			col->attr.spec_allow = (value ? 1 : 0);
+		} else if (rc == 0) {
+			/* unsupported */
+			rc = -EOPNOTSUPP;
+		}
+		break;
+	case SCMP_FLTATR_NEW_LISTENER:
+		rc = sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER);
+		if (rc == 1) {
+			/* supported */
+			rc = 0;
+			col->attr.new_listener = (value ? 1 : 0);
 		} else if (rc == 0) {
 			/* unsupported */
 			rc = -EOPNOTSUPP;

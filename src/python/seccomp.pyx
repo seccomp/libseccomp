@@ -309,6 +309,7 @@ cdef class Attr:
     API_TSKIP = libseccomp.SCMP_FLTATR_API_TSKIP
     CTL_LOG = libseccomp.SCMP_FLTATR_CTL_LOG
     SPEC_ALLOW = libseccomp.SCMP_FLTATR_SPEC_ALLOW
+    NEW_LISTENER = libseccomp.SCMP_FLTATR_NEW_LISTENER
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.

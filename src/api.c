@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/ioctl.h>
 
 #include <seccomp.h>
 
@@ -34,6 +35,7 @@
 #include "db.h"
 #include "gen_pfc.h"
 #include "gen_bpf.h"
+#include "helper.h"
 #include "system.h"
 
 #define API	__attribute__((visibility("default")))
@@ -112,6 +114,10 @@ static unsigned int _seccomp_api_update(void)
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW) == 1)
 		level = 4;
 
+	if (level == 4 &&
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER) == 1)
+		level = 5;
+
 	/* update the stored api level and return */
 	seccomp_api_level = level;
 	return seccomp_api_level;
@@ -162,6 +168,16 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_action(SCMP_ACT_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, true);
+		break;
+	case 5:
+		sys_set_seccomp_syscall(true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
+		sys_set_seccomp_action(SCMP_ACT_LOG, true);
+		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, true);
+		sys_set_seccomp_action(SCMP_ACT_USER_NOTIF, true);
 		break;
 	default:
 		return -EINVAL;
@@ -537,4 +553,54 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 		return -errno;
 
 	return 0;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notif_alloc(struct seccomp_notif **req,
+			    struct seccomp_notif_resp **resp)
+{
+	return sys_notif_alloc(req, resp);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API void seccomp_notif_free(struct seccomp_notif *req,
+			    struct seccomp_notif_resp *resp)
+{
+	if (req)
+		free(req);
+	if (resp)
+		free(resp);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notif_receive(int fd, struct seccomp_notif *req)
+{
+	return sys_notif_receive(fd, req);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notif_send_resp(int fd, struct seccomp_notif_resp *resp)
+{
+	return sys_notif_send_resp(fd, resp);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notif_id_valid(int fd, uint64_t id)
+{
+	return sys_notif_id_valid(fd, id);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notif_fd(const scmp_filter_ctx ctx)
+{
+	struct db_filter_col *col;
+
+	if (_ctx_valid(ctx))
+		return -EINVAL;
+	col = (struct db_filter_col *)ctx;
+
+	if (!col->attr.new_listener)
+		return -EINVAL;
+
+	return col->notif_fd;
 }
