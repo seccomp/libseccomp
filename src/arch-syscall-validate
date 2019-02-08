@@ -196,6 +196,7 @@ function dump_lib_arm() {
 function dump_sys_aarch64() {
 	gcc -E -dM -I$1/include/uapi \
 		-D__BITS_PER_LONG=64 -D__ARCH_WANT_RENAMEAT \
+		-D__ARCH_WANT_NEW_STAT \
 		$1/include/uapi/asm-generic/unistd.h | \
 		grep "^#define __NR_" | \
 		sed -e '/__NR_syscalls/d' | \
@@ -235,11 +236,14 @@ function dump_lib_aarch64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips() {
+	pushd $1 2>&1 > /dev/null
+	make ARCH=mips archheaders
+	popd 2>&1 > /dev/null
 	# _MIPS_SIM values:
 	#   _MIPS_SIM_ABI32 == 1
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=1 $1/arch/mips/include/uapi/asm/unistd.h | \
+	gcc -E -dM -I$1/arch/mips/include/uapi -I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=1 $1/arch/mips/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
@@ -269,11 +273,14 @@ function dump_lib_mips() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64() {
+	pushd $1 2>&1 > /dev/null
+	make ARCH=mips archheaders
+	popd 2>&1 > /dev/null
 	# _MIPS_SIM values:
 	#   _MIPS_SIM_ABI32 == 1
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=3 $1/arch/mips/include/uapi/asm/unistd.h | \
+	gcc -E -dM -I$1/arch/mips/include/uapi -I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=3 $1/arch/mips/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
@@ -303,11 +310,14 @@ function dump_lib_mips64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64n32() {
+	pushd $1 2>&1 > /dev/null
+	make ARCH=mips archheaders
+	popd 2>&1 > /dev/null
 	# _MIPS_SIM values:
 	#   _MIPS_SIM_ABI32 == 1
 	#   _MIPS_SIM_NABI32 == 2
 	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi -D_MIPS_SIM=2 $1/arch/mips/include/uapi/asm/unistd.h | \
+	gcc -E -dM -I$1/arch/mips/include/uapi -I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=2 $1/arch/mips/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | \
 		grep -v "^#define __NR_O32_" | \
 		grep -v "^#define __NR_N32_" | \
@@ -337,10 +347,13 @@ function dump_lib_mips64n32() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_ppc() {
-	gcc -E -dM $1/arch/powerpc/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | \
-		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/' | \
-		sort
+	cat $1/arch/powerpc/kernel/syscalls/syscall.tbl | grep -v "^#" | \
+		sed -ne "/[0-9]\+[ \t]\+\(common\|nospu\|32\)/p" | \
+		awk '{ print $3"\t"$1 }' | sort | (cat -; \
+			(cat $1/arch/powerpc/include/uapi/asm/unistd.h | \
+			grep "^#define __PPC_NR_" | grep -v "^#define __PPC_NR_BASE" | \
+			sed -e 's/#define _PPC_NR_\([a-z0-9_]*\)[ \t]\+(__PPC_NR_BASE+\(.*\))/\1 983040 + \2/' | \
+			awk '{ print $1"\t"$2+$4 }')) | sort
 }
 
 #
@@ -361,10 +374,13 @@ function dump_lib_ppc() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_ppc64() {
-	gcc -E -dM -D__powerpc64__ $1/arch/powerpc/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | \
-		sed -e 's/#define[ \t]\+__NR_\([a-z0-9_]\+\)[ \t]\+\([0-9]\+\)/\1\t\2/' | \
-		sort
+	cat $1/arch/powerpc/kernel/syscalls/syscall.tbl | grep -v "^#" | \
+		sed -ne "/[0-9]\+[ \t]\+\(common\|nospu\|64\)/p" | \
+		awk '{ print $3"\t"$1 }' | sort | (cat -; \
+			(cat $1/arch/powerpc/include/uapi/asm/unistd.h | \
+			grep "^#define __PPC_NR_" | grep -v "^#define __PPC_NR_BASE" | \
+			sed -e 's/#define _PPC_NR_\([a-z0-9_]*\)[ \t]\+(__PPC_NR_BASE+\(.*\))/\1 983040 + \2/' | \
+			awk '{ print $1"\t"$2+$4 }')) | sort
 }
 
 #
@@ -385,16 +401,13 @@ function dump_lib_ppc64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390() {
-	gcc -E -dM $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_timer_create[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t254 + \2/' | \
-		while read line; do \
-			if echo "$line" | grep -q "+"; then \
-				echo "$line" | awk '{ print $1"\t"$2+$4 }'; \
-			else \
-				echo "$line"; \
-			fi; \
-		done | \
-		sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
+	cat $1/arch/s390/kernel/syscalls/syscall.tbl | grep -v "^#" | \
+		sed -ne "/[0-9]\+[ \t]\+\(common\|32\)/p" | \
+		awk '{ print $3"\t"$1 }' | sort | (cat -; \
+			(cat $1/arch/s390/include/uapi/asm/unistd.h | \
+			grep "^#define __PPC_NR_" | grep -v "^#define __PPC_NR_BASE" | \
+			sed -e 's/#define _PPC_NR_\([a-z0-9_]*\)[ \t]\+(__PPC_NR_BASE+\(.*\))/\1 983040 + \2/' | \
+			awk '{ print $1"\t"$2+$4 }')) | sort
 }
 
 #
@@ -415,16 +428,13 @@ function dump_lib_s390() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390x() {
-	gcc -E -dM -D __s390x__ $1/arch/s390/include/uapi/asm/unistd.h | grep __NR | \
-		sed -e 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_timer_create[ \t]*+[ \t]*\([0-9]\+\)).*/\1\t254 + \2/' | \
-		while read line; do \
-			if echo "$line" | grep -q "+"; then \
-				echo "$line" | awk '{ print $1"\t"$2+$4 }'; \
-			else \
-				echo "$line"; \
-			fi; \
-		done | \
-		sed 's/#define __NR_//g' | sed 's/ /\t/g' | sort
+	cat $1/arch/s390/kernel/syscalls/syscall.tbl | grep -v "^#" | \
+		sed -ne "/[0-9]\+[ \t]\+\(common\|64\)/p" | \
+		awk '{ print $3"\t"$1 }' | sort | (cat -; \
+			(cat $1/arch/s390/include/uapi/asm/unistd.h | \
+			grep "^#define __PPC_NR_" | grep -v "^#define __PPC_NR_BASE" | \
+			sed -e 's/#define _PPC_NR_\([a-z0-9_]*\)[ \t]\+(__PPC_NR_BASE+\(.*\))/\1 983040 + \2/' | \
+			awk '{ print $1"\t"$2+$4 }')) | sort
 }
 
 #
