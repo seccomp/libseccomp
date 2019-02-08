@@ -1690,6 +1690,21 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #define __NR_subpage_prot	__PNR_subpage_prot
 #endif /* __NR_subpage_prot */
 
+#define __PNR_statx		-10208
+#ifndef __NR_statx
+#define __NR_statx		__PNR_statx
+#endif /* __NR_statx */
+
+#define __PNR_io_pgetevents	-10209
+#ifndef __NR_io_pgetevents
+#define __NR_io_pgetevents	__PNR_io_pgetevents
+#endif /* __NR_io_pgetevents */
+
+#define __PNR_rseq		-10210
+#ifndef __NR_rseq
+#define __NR_rseq		__PNR_rseq
+#endif /* __NR_rseq */
+
 #ifdef __cplusplus
 }
 #endif
