@@ -29,6 +29,7 @@ import util
 from seccomp import *
 
 def test(args):
+    set_api(3)
     f = SyscallFilter(KILL_PROCESS)
     f.remove_arch(Arch())
     f.add_arch(Arch("x86_64"))

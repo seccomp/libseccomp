@@ -15,7 +15,8 @@ test type: bpf-sim
 06-sim-actions	all		stat		N		N		N	N	N	N	KILL_PROCESS
 06-sim-actions	all		rt_sigreturn	N		N		N	N	N	N	LOG
 06-sim-actions	x86		0-2		N		N		N	N	N	N	KILL
-06-sim-actions	x86		7-172		N		N		N	N	N	N	KILL
+06-sim-actions	x86		7-105		N		N		N	N	N	N	KILL
+06-sim-actions	x86		107-172		N		N		N	N	N	N	KILL
 06-sim-actions	x86		174-350		N		N		N	N	N	N	KILL
 06-sim-actions	x86_64		5-14		N		N		N	N	N	N	KILL
 06-sim-actions	x86_64		16-350		N		N		N	N	N	N	KILL
