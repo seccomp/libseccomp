@@ -207,8 +207,10 @@ struct scmp_arg_cmp {
 	_SCMP_MACRO_DISPATCHER_IMPL2(func, nargs)
 #define _SCMP_MACRO_DISPATCHER_IMPL2(func, nargs) \
 	func ## nargs
-#define _SCMP_CMP32_1(x, y, z)		SCMP_CMP64(x, y, (uint32_t)(z))
-#define _SCMP_CMP32_2(x, y, z, q)	SCMP_CMP64(x, y, (uint32_t)(z), (uint32_t)(q))
+#define _SCMP_CMP32_1(x, y, z) \
+	SCMP_CMP64(x, y, (uint32_t)(z))
+#define _SCMP_CMP32_2(x, y, z, q) \
+	SCMP_CMP64(x, y, (uint32_t)(z), (uint32_t)(q))
 
 /**
  * Specify a 64-bit argument comparison struct for use in declaring rules
