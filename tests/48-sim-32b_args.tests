@@ -8,24 +8,24 @@
 test type: bpf-sim
 
 # Testname		Arch	Syscall	Arg0			Arg1	Arg2	Arg3	Arg4	Arg5	Result
-48-sim-32b_args		x86_64	1000	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1000	0xffffffff		N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1000	0xffffffffffffffff	N	N	N	N	N	ALLOW
-48-sim-32b_args		x86_64	1032	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1032	0xffffffff		N	N	N	N	N	ALLOW
-48-sim-32b_args		x86_64	1032	0xffffffffffffffff	N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1064	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1064	0xffffffff		N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	1064	0xffffffffffffffff	N	N	N	N	N	ALLOW
-48-sim-32b_args		x86_64	2000	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2000	0xffffffff		N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2000	0xffffffffffffffff	N	N	N	N	N	ALLOW
-48-sim-32b_args		x86_64	2032	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2032	0xffffffff		N	N	N	N	N	ALLOW
-48-sim-32b_args		x86_64	2032	0xffffffffffffffff	N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2064	0x0			N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2064	0xffffffff		N	N	N	N	N	KILL
-48-sim-32b_args		x86_64	2064	0xffffffffffffffff	N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	1000	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1000	0xffffffff		N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1000	0xffffffffffffffff	N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	1032	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1032	0xffffffff		N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	1032	0xffffffffffffffff	N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1064	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1064	0xffffffff		N	N	N	N	N	KILL
+48-sim-32b_args		all_64	1064	0xffffffffffffffff	N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	2000	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2000	0xffffffff		N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2000	0xffffffffffffffff	N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	2032	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2032	0xffffffff		N	N	N	N	N	ALLOW
+48-sim-32b_args		all_64	2032	0xffffffffffffffff	N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2064	0x0			N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2064	0xffffffff		N	N	N	N	N	KILL
+48-sim-32b_args		all_64	2064	0xffffffffffffffff	N	N	N	N	N	ALLOW
 
 test type: bpf-sim-fuzz
 
