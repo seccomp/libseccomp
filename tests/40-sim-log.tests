@@ -7,8 +7,8 @@
 
 test type: bpf-sim
 
-# Testname	Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-40-sim-log	all	0-350	N	N	N	N	N	N	LOG
+# Testname	Arch		Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+40-sim-log	all,-x32	0-350	N	N	N	N	N	N	LOG
 
 test type: bpf-sim-fuzz
 

@@ -7,10 +7,10 @@
 
 test type: bpf-sim
 
-# Testname			Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-45-sim-chain_code_coverage	all	1008	1	1	1	1	1	1	ALLOW
-45-sim-chain_code_coverage	all	1008	1	2	1	1	1	1	ALLOW
-45-sim-chain_code_coverage	all	1008	4	1	1	1	1	1	ALLOW
-45-sim-chain_code_coverage	all	1008	1	1	0x14	1	1	1	ALLOW
-45-sim-chain_code_coverage	all	1008	4	1	0x15	1	1	1	ALLOW
-45-sim-chain_code_coverage	all	1008	4	1	0x106	1	1	1	ALLOW
+# Testname			Arch		Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+45-sim-chain_code_coverage	all,-x32	1008	1	1	1	1	1	1	ALLOW
+45-sim-chain_code_coverage	all,-x32	1008	1	2	1	1	1	1	ALLOW
+45-sim-chain_code_coverage	all,-x32	1008	4	1	1	1	1	1	ALLOW
+45-sim-chain_code_coverage	all,-x32	1008	1	1	0x14	1	1	1	ALLOW
+45-sim-chain_code_coverage	all,-x32	1008	4	1	0x15	1	1	1	ALLOW
+45-sim-chain_code_coverage	all,-x32	1008	4	1	0x106	1	1	1	ALLOW

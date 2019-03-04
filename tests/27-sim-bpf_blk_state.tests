@@ -7,11 +7,11 @@
 
 test type: bpf-sim
 
-# Testname		Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
-27-sim-bpf_blk_state	all	1000		0-2		N		N	N	N	N	ALLOW
-27-sim-bpf_blk_state	all	1000		3-9		N		N	N	N	N	KILL
-27-sim-bpf_blk_state	all	1000		10		N		N	N	N	N	ALLOW
-27-sim-bpf_blk_state	all	1000		11-32		N		N	N	N	N	KILL
+# Testname		Arch		Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+27-sim-bpf_blk_state	all,-x32	1000		0-2		N		N	N	N	N	ALLOW
+27-sim-bpf_blk_state	all,-x32	1000		3-9		N		N	N	N	N	KILL
+27-sim-bpf_blk_state	all,-x32	1000		10		N		N	N	N	N	ALLOW
+27-sim-bpf_blk_state	all,-x32	1000		11-32		N		N	N	N	N	KILL
 
 test type: bpf-sim-fuzz
 
