@@ -497,6 +497,10 @@ static int _db_tree_prune(struct db_arg_chain_tree **existing,
 				goto prune_return;
 			}
 		} else if (_db_chain_lt(x_iter, n_iter)) {
+			/* bail if we have a prefix on the new tree */
+			if (state->flags & _DB_IST_N_PREFIX)
+				goto prune_return;
+
 			/* check the next level in the existing tree */
 			if (x_iter->nxt_t) {
 				_db_node_get(x_iter);
