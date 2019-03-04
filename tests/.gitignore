@@ -53,3 +53,4 @@ util.pyc
 45-sim-chain_code_coverage
 46-sim-kill_process
 47-live-kill_process
+48-sim-32b_args
