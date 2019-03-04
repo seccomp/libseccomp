@@ -32,6 +32,22 @@ GLBL_ARCH_BE_SUPPORT=" \
 	ppc ppc64 \
 	s390 s390x"
 
+GLBL_ARCH_32B_SUPPORT=" \
+	x86 x32 \
+	arm \
+	mips mipsel mips64n32 mipsel64n32 \
+	parisc \
+	ppc \
+	s390"
+
+GLBL_ARCH_64B_SUPPORT=" \
+	x86_64 \
+	aarch64 \
+	mips64 \
+	parisc64 \
+	ppc64 \
+	s390x"
+
 GLBL_SYS_ARCH="../tools/scmp_arch_detect"
 GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
 GLBL_SYS_SIM="../tools/scmp_bpf_sim"
@@ -418,6 +434,26 @@ function run_test_bpf_sim() {
 		+all_be)
 			# add all of the big endian architectures
 			simarch_tmp+=" $GLBL_ARCH_BE_SUPPORT"
+			;;
+		all_32)
+			# add the native arch only if it is 32-bit
+			if echo "$GLBL_ARCH_32B_SUPPORT" | grep -qw "$arch"; then
+				simarch_tmp+=" $arch"
+			fi
+			;;
+		+all_32)
+			# add all of the 32-bit architectures
+			simarch_tmp+=" $GLBL_ARCH_32B_SUPPORT"
+			;;
+		all_64)
+			# add the native arch only if it is 64-bit
+			if echo "$GLBL_ARCH_64B_SUPPORT" | grep -qw "$arch"; then
+				simarch_tmp+=" $arch"
+			fi
+			;;
+		+all_64)
+			# add all of the 64-bit architectures
+			simarch_tmp+=" $GLBL_ARCH_64B_SUPPORT"
 			;;
 		+*)
 			# add the architecture specified
