@@ -108,6 +108,10 @@ static unsigned int _seccomp_api_update(void)
 	    sys_chk_seccomp_action(SCMP_ACT_LOG) == 1)
 		level = 3;
 
+	if (level == 3 &&
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW) == 1)
+		level = 4;
+
 	/* update the stored api level and return */
 	seccomp_api_level = level;
 	return seccomp_api_level;
