@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	uint32_t val = (uint32_t)(-1);
 	scmp_filter_ctx ctx = NULL;
 
-	rc = seccomp_api_set(3);
+	rc = seccomp_api_set(4);
 	if (rc != 0)
 		return EOPNOTSUPP;
 
@@ -101,6 +101,20 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 	rc = seccomp_attr_get(ctx, SCMP_FLTATR_CTL_LOG, &val);
+	if (rc != 0)
+		goto out;
+	if (val != 1) {
+		rc = -1;
+		goto out;
+	}
+
+
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_SPEC_ALLOW, 1);
+	if (rc == -EOPNOTSUPP)
+		goto out;
+	else if (rc != 0)
+		goto out;
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_SPEC_ALLOW, &val);
 	if (rc != 0)
 		goto out;
 	if (val != 1) {

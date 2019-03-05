@@ -44,6 +44,7 @@ static int _support_seccomp_flag_tsync = -1;
 static int _support_seccomp_flag_log = -1;
 static int _support_seccomp_action_log = -1;
 static int _support_seccomp_kill_process = -1;
+static int _support_seccomp_flag_spec_allow = -1;
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -221,6 +222,11 @@ int sys_chk_seccomp_flag(int flag)
 			_support_seccomp_flag_log = _sys_chk_seccomp_flag_kernel(flag);
 
 		return _support_seccomp_flag_log;
+	case SECCOMP_FILTER_FLAG_SPEC_ALLOW:
+		if (_support_seccomp_flag_spec_allow < 0)
+			_support_seccomp_flag_spec_allow = _sys_chk_seccomp_flag_kernel(flag);
+
+		return _support_seccomp_flag_spec_allow;
 	}
 
 	return -EOPNOTSUPP;
@@ -243,6 +249,9 @@ void sys_set_seccomp_flag(int flag, bool enable)
 		break;
 	case SECCOMP_FILTER_FLAG_LOG:
 		_support_seccomp_flag_log = (enable ? 1 : 0);
+		break;
+	case SECCOMP_FILTER_FLAG_SPEC_ALLOW:
+		_support_seccomp_flag_spec_allow = (enable ? 1 : 0);
 		break;
 	}
 }
@@ -280,6 +289,8 @@ int sys_filter_load(const struct db_filter_col *col)
 			flgs |= SECCOMP_FILTER_FLAG_TSYNC;
 		if (col->attr.log_enable)
 			flgs |= SECCOMP_FILTER_FLAG_LOG;
+		if (col->attr.spec_allow)
+			flgs |= SECCOMP_FILTER_FLAG_SPEC_ALLOW;
 		rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flgs, prgm);
 		if (rc > 0 && col->attr.tsync_enable)
 			/* always return -ESRCH if we fail to sync threads */

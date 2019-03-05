@@ -1280,6 +1280,9 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_LOG:
 		*value = col->attr.log_enable;
 		break;
+	case SCMP_FLTATR_SPEC_ALLOW:
+		*value = col->attr.spec_allow;
+		break;
 	default:
 		rc = -EEXIST;
 		break;
@@ -1336,6 +1339,17 @@ int db_col_attr_set(struct db_filter_col *col,
 			/* supported */
 			rc = 0;
 			col->attr.log_enable = (value ? 1 : 0);
+		} else if (rc == 0) {
+			/* unsupported */
+			rc = -EOPNOTSUPP;
+		}
+		break;
+	case SCMP_FLTATR_SPEC_ALLOW:
+		rc = sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW);
+		if (rc == 1) {
+			/* supported */
+			rc = 0;
+			col->attr.spec_allow = (value ? 1 : 0);
 		} else if (rc == 0) {
 			/* unsupported */
 			rc = -EOPNOTSUPP;
