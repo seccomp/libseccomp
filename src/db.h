@@ -116,6 +116,8 @@ struct db_filter_attr {
 	uint32_t api_tskip;
 	/* SECCOMP_FILTER_FLAG_LOG related attributes */
 	uint32_t log_enable;
+	/* SPEC_ALLOW related attributes */
+	uint32_t spec_allow;
 };
 
 struct db_filter {

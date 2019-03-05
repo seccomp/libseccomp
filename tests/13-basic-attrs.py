@@ -29,7 +29,7 @@ import util
 from seccomp import *
 
 def test():
-    set_api(3)
+    set_api(4)
 
     f = SyscallFilter(ALLOW)
     if f.get_attr(Attr.ACT_DEFAULT) != ALLOW:
@@ -52,6 +52,9 @@ def test():
     f.set_attr(Attr.CTL_LOG, 1)
     if f.get_attr(Attr.CTL_LOG) != 1:
         raise RuntimeError("Failed getting Attr.CTL_LOG")
+    f.set_attr(Attr.SPEC_ALLOW, 1)
+    if f.get_attr(Attr.SPEC_ALLOW) != 1:
+        raise RuntimeError("Failed getting Attr.SPEC_ALLOW")
 
 test()
 
