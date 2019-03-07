@@ -112,24 +112,24 @@ typedef struct sock_filter bpf_instr_raw;
 
 /* flags for the seccomp() syscall */
 #ifndef SECCOMP_FILTER_FLAG_TSYNC
-#define SECCOMP_FILTER_FLAG_TSYNC		(1UL << 0)
+#define SECCOMP_FILTER_FLAG_TSYNC	(1UL << 0)
 #endif
 #ifndef SECCOMP_FILTER_FLAG_LOG
-#define SECCOMP_FILTER_FLAG_LOG			(1UL << 1)
+#define SECCOMP_FILTER_FLAG_LOG		(1UL << 1)
 #endif
 
 /* SECCOMP_RET_ACTION_FULL was added in kernel v4.14.  It may not be
  * defined on older kernels
  */
 #ifndef SECCOMP_RET_ACTION_FULL
-#define SECCOMP_RET_ACTION_FULL 0xffff0000U
+#define SECCOMP_RET_ACTION_FULL		0xffff0000U
 #endif
 
 /* SECCOMP_RET_LOG was added in kernel v4.14.  It may not be defined on
  * older kernels.
  */
 #ifndef SECCOMP_RET_LOG
-#define SECCOMP_RET_LOG	 0x7fc00000U
+#define SECCOMP_RET_LOG			0x7fc00000U
 #endif
 
 int sys_chk_seccomp_syscall(void);
