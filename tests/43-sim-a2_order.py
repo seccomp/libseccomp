@@ -41,7 +41,17 @@ def test(args):
     f.add_rule(ERRNO(9), "read", Arg(2, GT, 2048))
     f.add_rule(ERRNO(10), "read", Arg(2, GT, 4096))
     f.add_rule(ERRNO(11), "read", Arg(2, GT, 8192))
-    f.add_rule(ERRNO(12), "read", Arg(2, GT, 16536))
+    f.add_rule(ERRNO(12), "read", Arg(2, GT, 16384))
+    f.add_rule(ALLOW, "write", Arg(2, GE, 32768))
+    f.add_rule(ERRNO(5), "write", Arg(2, LT, 128))
+    f.add_rule(ERRNO(6), "write", Arg(2, LT, 256))
+    f.add_rule(ERRNO(7), "write", Arg(2, LT, 512))
+    f.add_rule(ERRNO(8), "write", Arg(2, LT, 1024))
+    f.add_rule(ERRNO(9), "write", Arg(2, LT, 2048))
+    f.add_rule(ERRNO(10), "write", Arg(2, LT, 4096))
+    f.add_rule(ERRNO(11), "write", Arg(2, LT, 8192))
+    f.add_rule(ERRNO(12), "write", Arg(2, LT, 16384))
+
     return f
 
 args = util.get_opt()

@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 	 * reads of this size should fall through to the default action -
 	 * SCMP_ACT_KILL in this test's case.
 	 */
-
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A2(SCMP_CMP_LE, 64));
 	if (rc != 0)
@@ -78,7 +77,48 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(12), SCMP_SYS(read), 1,
-			      SCMP_A2(SCMP_CMP_GT, 16536));
+			      SCMP_A2(SCMP_CMP_GT, 16384));
+	if (rc != 0)
+		goto out;
+
+	/* note - a "hole" was intentionally left between 16384 and 32768.
+	 * writes of this size should fall through to the default action -
+	 * SCMP_ACT_KILL in this test's case.
+	 */
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_GE, 32768));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(5), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 128));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(6), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 256));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(7), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 512));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(8), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 1024));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(9), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 2048));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(10), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 4096));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(11), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 8192));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(12), SCMP_SYS(write), 1,
+			      SCMP_A2(SCMP_CMP_LT, 16384));
 	if (rc != 0)
 		goto out;
 
