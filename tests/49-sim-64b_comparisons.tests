@@ -1,0 +1,25 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2019 Cisco Systems, Inc. <pmoore2@cisco.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0		Arg1	Arg2	Arg3	Arg4	Arg5	Result
+49-sim-64b_comparisons	all_64	1000	0x000000000000	N	N	N	N	N	ALLOW
+49-sim-64b_comparisons	all_64	1000	0x123000000000	N	N	N	N	N	ALLOW
+49-sim-64b_comparisons	all_64	1000	0x1230f0000000	N	N	N	N	N	ALLOW
+49-sim-64b_comparisons	all_64	1000	0x123400000000	N	N	N	N	N	ALLOW
+49-sim-64b_comparisons	all_64	1000	0x123450000000	N	N	N	N	N	ALLOW
+49-sim-64b_comparisons	all_64	1000	0x123460000000	N	N	N	N	N	KILL
+49-sim-64b_comparisons	all_64	1000	0x1234f0000000	N	N	N	N	N	KILL
+49-sim-64b_comparisons	all_64	1000	0x123500000000	N	N	N	N	N	KILL
+49-sim-64b_comparisons	all_64	1000	0x1235f0000000	N	N	N	N	N	KILL
+49-sim-64b_comparisons	all_64	1000	0x123600000000	N	N	N	N	N	KILL
+
+test type: bpf-valgrind
+
+# Testname
+49-sim-64b_comparisons

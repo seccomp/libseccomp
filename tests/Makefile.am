@@ -87,7 +87,8 @@ check_PROGRAMS = \
 	45-sim-chain_code_coverage \
 	46-sim-kill_process \
 	47-live-kill_process \
-	48-sim-32b_args
+	48-sim-32b_args \
+	49-sim-64b_comparisons
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -137,7 +138,8 @@ EXTRA_DIST_TESTPYTHON = \
 	45-sim-chain_code_coverage.py \
 	46-sim-kill_process.py \
 	47-live-kill_process.py \
-	48-sim-32b_args.py
+	48-sim-32b_args.py \
+	49-sim-64b_comparisons.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -187,7 +189,8 @@ EXTRA_DIST_TESTCFGS = \
 	45-sim-chain_code_coverage.tests \
 	46-sim-kill_process.tests \
 	47-live-kill_process.tests \
-	48-sim-32b_args.tests
+	48-sim-32b_args.tests \
+	49-sim-64b_comparisons.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc

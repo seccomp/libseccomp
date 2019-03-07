@@ -54,3 +54,4 @@ util.pyc
 46-sim-kill_process
 47-live-kill_process
 48-sim-32b_args
+49-sim-64b_comparisons
