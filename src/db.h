@@ -52,14 +52,18 @@ struct db_api_rule_list {
 struct db_arg_chain_tree {
 	/* argument number (a0 = 0, a1 = 1, etc.) */
 	unsigned int arg;
+	/* true to indicate this is the high 32-bit word of a 64-bit value */
+	bool arg_h_flg;
 	/* argument bpf offset */
 	unsigned int arg_offset;
 
 	/* comparison operator */
 	enum scmp_compare op;
+	enum scmp_compare op_orig;
 	/* syscall argument value */
 	uint32_t mask;
 	uint32_t datum;
+	scmp_datum_t datum_full;
 
 	/* actions */
 	bool act_t_flg;
