@@ -854,6 +854,13 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 			goto node_failure;
 	}
 
+	/* set the accumulator state at the end of the block */
+	/* NOTE: the accumulator end state is very critical when we are
+	 *       assembling the final state; we assume that however we leave
+	 *       this instruction block the accumulator state is represented
+	 *       by blk->acc_end, it must be kept correct */
+	blk->acc_end = *a_state;
+
 	/* check the accumulator against the datum */
 	switch (node->op) {
 	case SCMP_CMP_MASKED_EQ:
@@ -898,7 +905,6 @@ static struct bpf_blk *_gen_bpf_node(struct bpf_state *state,
 		goto node_failure;
 
 	blk->node = node;
-	blk->acc_end = *a_state;
 	return blk;
 
 node_failure:
@@ -953,7 +959,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		case TGT_PTR_DB:
 			node = (struct db_arg_chain_tree *)i_iter->jt.tgt.db;
 			b_new = _gen_bpf_chain(state, sys, node,
-					       nxt_jump, &blk->acc_start);
+					       nxt_jump, &blk->acc_end);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jt = _BPF_JMP_HSH(b_new->hash);
@@ -979,7 +985,7 @@ static struct bpf_blk *_gen_bpf_chain_lvl_res(struct bpf_state *state,
 		case TGT_PTR_DB:
 			node = (struct db_arg_chain_tree *)i_iter->jf.tgt.db;
 			b_new = _gen_bpf_chain(state, sys, node,
-					       nxt_jump, &blk->acc_start);
+					       nxt_jump, &blk->acc_end);
 			if (b_new == NULL)
 				return NULL;
 			i_iter->jf = _BPF_JMP_HSH(b_new->hash);
