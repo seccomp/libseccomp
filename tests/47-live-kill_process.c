@@ -53,24 +53,21 @@ static const unsigned int whitelist[] = {
  */
 void *child_start(void *param)
 {
-	int fd, *i = (int *)param;
-
-	*i = 1;
+	int fd;
 
 	/* make a disallowed syscall */
 	fd = open("/dev/null", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	/* we should never get here.  seccomp should kill the entire
-	 * process when open() is called.
-	  */
-	if (fd < 0)
-		*i = fd;
+	 * process when open() is called. */
+	if (fd >= 0)
+		close(fd);
 
 	return NULL;
 }
 
 int main(int argc, char *argv[])
 {
-	int rc, i, param = 0;
+	int rc, i;
 	scmp_filter_ctx ctx = NULL;
 	pthread_t child_thread;
 
@@ -88,7 +85,7 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	rc = pthread_create(&child_thread, NULL, child_start, &param);
+	rc = pthread_create(&child_thread, NULL, child_start, NULL);
 	if (rc != 0)
 		goto out;
 

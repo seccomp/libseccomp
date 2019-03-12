@@ -65,7 +65,7 @@ static const struct size_and_rc test_cases[] = {
 static int do_read(int sz, int expected_rc)
 {
 	char *buf = NULL;
-	int rc = -1000, zero_fd;
+	int rc = -1000, zero_fd = -1;
 
 	zero_fd = open("/dev/zero", O_RDONLY);
 	if (zero_fd <= 0)
@@ -85,7 +85,7 @@ static int do_read(int sz, int expected_rc)
 	}
 
 error:
-	if (zero_fd)
+	if (zero_fd >= 0)
 		close(zero_fd);
 	if (buf)
 		free(buf);
