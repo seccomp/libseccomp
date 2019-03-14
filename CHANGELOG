@@ -2,6 +2,25 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.4.0 - March 14, 2019
+- Update the syscall table for Linux v5.0-rc5
+- Added support for the SCMP_ACT_KILL_PROCESS action
+- Added support for the SCMP_ACT_LOG action and SCMP_FLTATR_CTL_LOG attribute
+- Added explicit 32-bit (SCMP_AX_32(...)) and 64-bit (SCMP_AX_64(...)) argument
+  comparison macros to help protect against unexpected sign extension
+- Added support for the parisc and parisc64 architectures
+- Added the ability to query and set the libseccomp API level via
+  seccomp_api_get(3) and seccomp_api_set(3)
+- Return -EDOM on an endian mismatch when adding an architecture to a filter
+- Renumber the pseudo syscall number for subpage_prot() so it no longer
+  conflicts with spu_run()
+- Fix PFC generation when a syscall is prioritized, but no rule exists
+- Numerous fixes to the seccomp-bpf filter generation code
+- Switch our internal hashing function to jhash/Lookup3 to MurmurHash3
+- Numerous tests added to the included test suite, coverage now at ~92%
+- Update our Travis CI configuration to use Ubuntu 16.04
+- Numerous documentation fixes and updates
+
 * Version 2.3.3 - January 10, 2018
 - Updated the syscall table for Linux v4.15-rc7
 
