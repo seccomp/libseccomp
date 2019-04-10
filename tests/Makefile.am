@@ -88,7 +88,8 @@ check_PROGRAMS = \
 	46-sim-kill_process \
 	47-live-kill_process \
 	48-sim-32b_args \
-	49-sim-64b_comparisons
+	49-sim-64b_comparisons \
+	50-sim-hash_collision
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -139,7 +140,8 @@ EXTRA_DIST_TESTPYTHON = \
 	46-sim-kill_process.py \
 	47-live-kill_process.py \
 	48-sim-32b_args.py \
-	49-sim-64b_comparisons.py
+	49-sim-64b_comparisons.py \
+	50-sim-hash_collision.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -190,7 +192,8 @@ EXTRA_DIST_TESTCFGS = \
 	46-sim-kill_process.tests \
 	47-live-kill_process.tests \
 	48-sim-32b_args.tests \
-	49-sim-64b_comparisons.tests
+	49-sim-64b_comparisons.tests \
+	50-sim-hash_collision.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
