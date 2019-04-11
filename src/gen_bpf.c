@@ -141,6 +141,9 @@ struct bpf_blk {
 
 struct bpf_hash_bkt {
 	struct bpf_blk *blk;
+	struct acc_state acc_start;
+	struct acc_state acc_end;
+
 	struct bpf_hash_bkt *next;
 	unsigned int found;
 };
@@ -556,7 +559,7 @@ static void _state_release(struct bpf_state *state)
 static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		    unsigned int found)
 {
-	uint64_t h_val;
+	uint64_t h_val, h_val_tmp[3];
 	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
 	struct bpf_blk *blk = *blk_p;
 	struct bpf_blk *b_iter;
@@ -569,11 +572,16 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		return -ENOMEM;
 
 	/* generate the hash */
-	h_val = hash(blk->blks, _BLK_MSZE(blk));
+	h_val_tmp[0] = hash(blk->blks, _BLK_MSZE(blk));
+	h_val_tmp[1] = hash(&blk->acc_start, sizeof(blk->acc_start));
+	h_val_tmp[2] = hash(&blk->acc_end, sizeof(blk->acc_end));
+	h_val = hash(h_val_tmp, sizeof(h_val_tmp));
 	blk->hash = h_val;
 	blk->flag_hash = true;
 	blk->node = NULL;
 	h_new->blk = blk;
+	h_new->acc_start = blk->acc_start;
+	h_new->acc_end = blk->acc_end;
 	h_new->found = (found ? 1 : 0);
 
 	/* insert the block into the hash table */
@@ -584,7 +592,9 @@ hsh_add_restart:
 			if ((h_iter->blk->hash == h_val) &&
 			    (_BLK_MSZE(h_iter->blk) == _BLK_MSZE(blk)) &&
 			    (memcmp(h_iter->blk->blks, blk->blks,
-				    _BLK_MSZE(blk)) == 0)) {
+				    _BLK_MSZE(blk)) == 0) &&
+			    _ACC_CMP_EQ(h_iter->acc_start, blk->acc_start) &&
+			    _ACC_CMP_EQ(h_iter->acc_end, blk->acc_end)) {
 				/* duplicate block */
 				free(h_new);
 
