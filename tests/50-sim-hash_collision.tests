@@ -8,11 +8,11 @@
 test type: bpf-sim
 
 # Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-50-sim-hash_collision	+x86_64 1000		1	N	N	N	N	N	ALLOW
-50-sim-hash_collision	+x86_64 1000		2	N	N	N	N	N	ALLOW
-50-sim-hash_collision	+x86_64 1000		3	N	N	N	N	N	ERRNO(100)
-50-sim-hash_collision	+x86_64 1001		1	2	3	N	N	N	ALLOW
-50-sim-hash_collision	+x86_64 1001		1	1	N	N	N	N	ALLOW
-50-sim-hash_collision	+x86_64 1001		2	N	N	N	N	N	ERRNO(100)
-50-sim-hash_collision	+x86_64 1001		1	3	N	N	N	N	ERRNO(100)
-50-sim-hash_collision	+x86_64 1001		1	2	4	N	N	N	ERRNO(100)
+50-sim-hash_collision	x86_64 1000		1	N	N	N	N	N	ALLOW
+50-sim-hash_collision	x86_64 1000		2	N	N	N	N	N	ALLOW
+50-sim-hash_collision	x86_64 1000		3	N	N	N	N	N	ERRNO(100)
+50-sim-hash_collision	x86_64 1001		1	2	3	N	N	N	ALLOW
+50-sim-hash_collision	x86_64 1001		1	1	N	N	N	N	ALLOW
+50-sim-hash_collision	x86_64 1001		2	N	N	N	N	N	ERRNO(100)
+50-sim-hash_collision	x86_64 1001		1	3	N	N	N	N	ERRNO(100)
+50-sim-hash_collision	x86_64 1001		1	2	4	N	N	N	ERRNO(100)
