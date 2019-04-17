@@ -2,6 +2,10 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.4.1 - April 17, 2019
+- Fix a BPF generation bug where the optimizer mistakenly identified duplicate
+  BPF code blocks
+
 * Version 2.4.0 - March 14, 2019
 - Update the syscall table for Linux v5.0-rc5
 - Added support for the SCMP_ACT_KILL_PROCESS action
