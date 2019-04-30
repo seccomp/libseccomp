@@ -54,7 +54,7 @@ def test():
         raise RuntimeError("Failed getting Attr.CTL_LOG")
     f.set_attr(Attr.CTL_SSB, 1)
     if f.get_attr(Attr.CTL_SSB) != 1:
-        raise RuntimeError("Failed getting Attr.SPEC_ALLOW")
+        raise RuntimeError("Failed getting Attr.CTL_SSB")
 
 test()
 
