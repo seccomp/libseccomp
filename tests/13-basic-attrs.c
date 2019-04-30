@@ -109,12 +109,10 @@ int main(int argc, char *argv[])
 	}
 
 
-	rc = seccomp_attr_set(ctx, SCMP_FLTATR_SPEC_ALLOW, 1);
-	if (rc == -EOPNOTSUPP)
+	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_SSB, 1);
+	if (rc != 0)
 		goto out;
-	else if (rc != 0)
-		goto out;
-	rc = seccomp_attr_get(ctx, SCMP_FLTATR_SPEC_ALLOW, &val);
+	rc = seccomp_attr_get(ctx, SCMP_FLTATR_CTL_SSB, &val);
 	if (rc != 0)
 		goto out;
 	if (val != 1) {
