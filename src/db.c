@@ -1053,6 +1053,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	if (col->filters)
 		free(col->filters);
 	col->filters = NULL;
+	col->notify_fd = -1;
 
 	/* set the endianess to undefined */
 	col->endian = 0;

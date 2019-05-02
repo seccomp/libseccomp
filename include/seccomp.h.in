@@ -26,6 +26,8 @@
 #include <inttypes.h>
 #include <asm/unistd.h>
 #include <linux/audit.h>
+#include <linux/types.h>
+#include <linux/seccomp.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -320,6 +322,10 @@ struct scmp_arg_cmp {
  */
 #define SCMP_ACT_TRAP		0x00030000U
 /**
+ * Notifies userspace
+ */
+#define SCMP_ACT_NOTIFY	 	0x7fc00000U
+/**
  * Return the specified error code
  */
 #define SCMP_ACT_ERRNO(x)	(0x00050000U | ((x) & 0x0000ffffU))
@@ -335,6 +341,25 @@ struct scmp_arg_cmp {
  * Allow the syscall to be executed
  */
 #define SCMP_ACT_ALLOW		0x7fff0000U
+
+/* SECCOMP_RET_USER_NOTIF was added in kernel v5.0. */
+#ifndef SECCOMP_RET_USER_NOTIF
+#define SECCOMP_RET_USER_NOTIF	0x7fc00000U
+
+struct seccomp_notif {
+	__u64 id;
+	__u32 pid;
+	__u32 flags;
+	struct seccomp_data data;
+};
+
+struct seccomp_notif_resp {
+	__u64 id;
+	__s64 val;
+	__s32 error;
+	__u32 flags;
+};
+#endif
 
 /*
  * functions
@@ -369,6 +394,7 @@ const struct scmp_version *seccomp_version(void);
  *      support for the SCMP_ACT_LOG action
  *      support for the SCMP_ACT_KILL_PROCESS action
  *  4 : support for the SCMP_FLTATR_CTL_SSB filter attrbute
+ *  5 : support for the SCMP_ACT_NOTIFY action
  *
  */
 unsigned int seccomp_api_get(void);
@@ -672,6 +698,72 @@ int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 				 uint32_t action, int syscall,
 				 unsigned int arg_cnt,
 				 const struct scmp_arg_cmp *arg_array);
+
+/**
+ * Allocate a pair of notification request/response structures.
+ * @param req the request location
+ * @param resp the response location
+ *
+ * This function allocates a pair of request/response structure by computing
+ * the correct sized based on the currently running kernel. It returns zero on
+ * success, and negative values on failure.
+ *
+ */
+int seccomp_notify_alloc(struct seccomp_notif **req,
+			 struct seccomp_notif_resp **resp);
+
+/**
+ * Free a pair of notification request/response structures.
+ * @param req the request location
+ * @param resp the response location
+ */
+void seccomp_notify_free(struct seccomp_notif *req,
+			 struct seccomp_notif_resp *resp);
+/**
+ * Receive a notification from a seccomp notification fd.
+ * @param fd the notification fd
+ * @param req the request buffer to save into
+ *
+ * Blocks waiting for a notification on this fd. This function is thread safe
+ * (synchronization is performed in the kernel). Returns zero on success,
+ * negative values on error.
+ *
+ */
+int seccomp_notify_receive(int fd, struct seccomp_notif *req);
+
+/**
+ * Send a notification response to a seccomp notification fd.
+ * @param fd the notification fd
+ * @param resp the response buffer to use
+ *
+ * Sends a notification response on this fd. This function is thread safe
+ * (synchronization is performed in the kernel). Returns zero on success,
+ * negative values on error.
+ *
+ */
+int seccomp_notify_respond(int fd, struct seccomp_notif_resp *resp);
+
+/**
+ * Check if a notification id is still valid.
+ * @param fd the notification fd
+ * @param id the id to test
+ *
+ * Checks to see if a notification id is still valid. Returns 0 on success, and
+ * negative values on failure.
+ *
+ */
+int seccomp_notify_id_valid(int fd, uint64_t id);
+
+/**
+ * Return the notification fd from a filter that has already been loaded.
+ * @param ctx the filter context
+ *
+ * This returns the listener fd that was generated when the seccomp policy was
+ * loaded. This is only valid after seccomp_load() with a filter that makes
+ * use of SCMP_ACT_NOTIFY.
+ *
+ */
+int seccomp_notify_fd(const scmp_filter_ctx ctx);
 
 /**
  * Generate seccomp Pseudo Filter Code (PFC) and export it to a file

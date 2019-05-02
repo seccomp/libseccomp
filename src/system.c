@@ -26,12 +26,14 @@
 #define _GNU_SOURCE
 #include <unistd.h>
 
+#include "system.h"
+
 #include <seccomp.h>
 
 #include "arch.h"
 #include "db.h"
 #include "gen_bpf.h"
-#include "system.h"
+#include "helper.h"
 
 /* NOTE: the seccomp syscall whitelist is currently disabled for testing
  *       purposes, but unless we can verify all of the supported ABIs before
@@ -45,6 +47,8 @@ static int _support_seccomp_flag_log = -1;
 static int _support_seccomp_action_log = -1;
 static int _support_seccomp_kill_process = -1;
 static int _support_seccomp_flag_spec_allow = -1;
+static int _support_seccomp_flag_new_listener = -1;
+static int _support_seccomp_user_notif = -1;
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -158,6 +162,18 @@ int sys_chk_seccomp_action(uint32_t action)
 		return _support_seccomp_action_log;
 	} else if (action == SCMP_ACT_ALLOW) {
 		return 1;
+	} else if (action == SCMP_ACT_NOTIFY) {
+		if (_support_seccomp_user_notif < 0) {
+			struct seccomp_notif_sizes sizes;
+			if (sys_chk_seccomp_syscall() == 1 &&
+			    syscall(_nr_seccomp, SECCOMP_GET_NOTIF_SIZES, 0,
+				    &sizes) == 0)
+				_support_seccomp_user_notif = 1;
+			else
+				_support_seccomp_user_notif = 0;
+		}
+
+		return _support_seccomp_user_notif;
 	}
 
 	return 0;
@@ -173,10 +189,17 @@ int sys_chk_seccomp_action(uint32_t action)
  */
 void sys_set_seccomp_action(uint32_t action, bool enable)
 {
-	if (action == SCMP_ACT_LOG)
+	switch (action) {
+	case SCMP_ACT_LOG:
 		_support_seccomp_action_log = (enable ? 1 : 0);
-	else if (action == SCMP_ACT_KILL_PROCESS)
+		break;
+	case SCMP_ACT_KILL_PROCESS:
 		_support_seccomp_kill_process = (enable ? 1 : 0);
+		break;
+	case SCMP_ACT_NOTIFY:
+		_support_seccomp_user_notif = (enable ? 1 : 0);
+		break;
+	}
 }
 
 /**
@@ -227,6 +250,11 @@ int sys_chk_seccomp_flag(int flag)
 			_support_seccomp_flag_spec_allow = _sys_chk_seccomp_flag_kernel(flag);
 
 		return _support_seccomp_flag_spec_allow;
+	case SECCOMP_FILTER_FLAG_NEW_LISTENER:
+		if (_support_seccomp_flag_new_listener < 0)
+			_support_seccomp_flag_new_listener = _sys_chk_seccomp_flag_kernel(flag);
+
+		return _support_seccomp_flag_new_listener;
 	}
 
 	return -EOPNOTSUPP;
@@ -253,6 +281,9 @@ void sys_set_seccomp_flag(int flag, bool enable)
 	case SECCOMP_FILTER_FLAG_SPEC_ALLOW:
 		_support_seccomp_flag_spec_allow = (enable ? 1 : 0);
 		break;
+	case SECCOMP_FILTER_FLAG_NEW_LISTENER:
+		_support_seccomp_flag_new_listener = (enable ? 1 : 0);
+		break;
 	}
 }
 
@@ -266,7 +297,7 @@ void sys_set_seccomp_flag(int flag, bool enable)
  * error.
  *
  */
-int sys_filter_load(const struct db_filter_col *col)
+int sys_filter_load(struct db_filter_col *col)
 {
 	int rc;
 	struct bpf_program *prgm = NULL;
@@ -291,10 +322,17 @@ int sys_filter_load(const struct db_filter_col *col)
 			flgs |= SECCOMP_FILTER_FLAG_LOG;
 		if (col->attr.spec_allow)
 			flgs |= SECCOMP_FILTER_FLAG_SPEC_ALLOW;
+		if (_support_seccomp_user_notif > 0)
+			flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
 		rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flgs, prgm);
 		if (rc > 0 && col->attr.tsync_enable)
 			/* always return -ESRCH if we fail to sync threads */
 			errno = ESRCH;
+		if (rc > 0 && _support_seccomp_user_notif > 0) {
+			/* return 0 on NEW_LISTENER success, but save the fd */
+			col->notify_fd = rc;
+			rc = 0;
+		}
 	} else
 		rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, prgm);
 
@@ -302,6 +340,72 @@ filter_load_out:
 	/* cleanup and return */
 	gen_bpf_release(prgm);
 	if (rc < 0)
+		return -errno;
+	return rc;
+}
+
+int sys_notify_alloc(struct seccomp_notif **req,
+		     struct seccomp_notif_resp **resp)
+{
+	int rc;
+	static struct seccomp_notif_sizes sizes = { 0, 0, 0 };
+
+	if (_support_seccomp_syscall <= 0)
+		return -EOPNOTSUPP;
+
+	if (sizes.seccomp_notif == 0 && sizes.seccomp_notif_resp == 0) {
+		rc = syscall(__NR_seccomp, SECCOMP_GET_NOTIF_SIZES, 0, &sizes);
+		if (rc < 0)
+			return -errno;
+	}
+	if (sizes.seccomp_notif == 0 || sizes.seccomp_notif_resp == 0)
+		return -EFAULT;
+
+	if (req) {
+		*req = zmalloc(sizes.seccomp_notif);
+		if (!*req)
+			return -ENOMEM;
+	}
+
+	if (resp) {
+		*resp = zmalloc(sizes.seccomp_notif_resp);
+		if (!*resp) {
+			if (req)
+				free(*req);
+			return -ENOMEM;
+		}
+	}
+
+	return 0;
+}
+
+int sys_notify_receive(int fd, struct seccomp_notif *req)
+{
+	if (_support_seccomp_user_notif <= 0)
+		return -EOPNOTSUPP;
+
+	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_RECV, req) < 0)
+		return -errno;
+
+	return 0;
+}
+
+int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
+{
+	if (_support_seccomp_user_notif <= 0)
+		return -EOPNOTSUPP;
+
+	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_SEND, resp) < 0)
+		return -errno;
+	return 0;
+}
+
+int sys_notify_id_valid(int fd, uint64_t id)
+{
+	if (_support_seccomp_user_notif <= 0)
+		return -EOPNOTSUPP;
+
+	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID, &id) < 0)
 		return -errno;
 	return 0;
 }

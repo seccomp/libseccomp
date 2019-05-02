@@ -153,6 +153,9 @@ struct db_filter_col {
 
 	/* transaction snapshots */
 	struct db_filter_snap *snapshots;
+
+	/* notification fd that was returned from seccomp() */
+	int notify_fd;
 };
 
 /**
