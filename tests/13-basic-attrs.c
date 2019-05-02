@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	uint32_t val = (uint32_t)(-1);
 	scmp_filter_ctx ctx = NULL;
 
-	rc = seccomp_api_set(4);
+	rc = seccomp_api_set(5);
 	if (rc != 0)
 		return EOPNOTSUPP;
 

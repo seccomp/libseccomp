@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright Cisco Systems 2019
+# Author: Tycho Andersen <tycho@tycho.ws>
+#
+
+test type: live
+
+# Testname			API	Result
+51-live-user_notification	5	ALLOW

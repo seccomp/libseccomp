@@ -29,7 +29,7 @@ import util
 from seccomp import *
 
 def test():
-    set_api(4)
+    set_api(5)
 
     f = SyscallFilter(ALLOW)
     if f.get_attr(Attr.ACT_DEFAULT) != ALLOW:
