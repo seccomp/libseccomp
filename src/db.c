@@ -1069,6 +1069,10 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
+	if (def_action == SCMP_ACT_NOTIFY)
+		col->notify_used = true;
+	else
+		col->notify_used = false;
 
 	/* reset the initial db */
 	db = _db_init(arch_def_native);
@@ -1150,20 +1154,6 @@ void db_col_release(struct db_filter_col *col)
 }
 
 /**
- * Validate the seccomp action
- * @param action the seccomp action
- *
- * Verify that the given action is a valid seccomp action; return zero if
- * valid, -EINVAL if invalid.
- */
-int db_action_valid(uint32_t action)
-{
-	if (sys_chk_seccomp_action(action) == 1)
-		return 0;
-	return -EINVAL;
-}
-
-/**
  * Validate a filter collection
  * @param col the seccomp filter collection
  *
@@ -1174,6 +1164,30 @@ int db_action_valid(uint32_t action)
 int db_col_valid(struct db_filter_col *col)
 {
 	if (col != NULL && col->state == _DB_STA_VALID && col->filter_cnt > 0)
+		return 0;
+	return -EINVAL;
+}
+
+/**
+ * Validate the seccomp action
+ * @param col the seccomp filter collection
+ * @param action the seccomp action
+ *
+ * Verify that the given action is a valid seccomp action; return zero if
+ * valid, -EINVAL if invalid.
+ */
+int db_col_action_valid(const struct db_filter_col *col, uint32_t action)
+{
+	if (col != NULL) {
+		/* NOTE: in some cases we don't have a filter collection yet,
+		 *       but when we do we need to do the following checks */
+
+		/* kernel disallows TSYNC and NOTIFY in one filter */
+		if (col->attr.tsync_enable && action == SCMP_ACT_NOTIFY)
+			return -EINVAL;
+	}
+
+	if (sys_chk_seccomp_action(action) == 1)
 		return 0;
 	return -EINVAL;
 }
@@ -1315,7 +1329,7 @@ int db_col_attr_set(struct db_filter_col *col,
 		return -EACCES;
 		break;
 	case SCMP_FLTATR_ACT_BADARCH:
-		if (db_action_valid(value) == 0)
+		if (db_col_action_valid(col, value) == 0)
 			col->attr.act_badarch = value;
 		else
 			return -EINVAL;
@@ -1328,6 +1342,9 @@ int db_col_attr_set(struct db_filter_col *col,
 		if (rc == 1) {
 			/* supported */
 			rc = 0;
+			/* kernel disallows TSYNC and NOTIFY in one filter */
+			if (value && col->notify_used)
+				return -EINVAL;
 			col->attr.tsync_enable = (value ? 1 : 0);
 		} else if (rc == 0)
 			/* unsupported */
@@ -2281,6 +2298,9 @@ add_arch_fail:
 		db_col_transaction_abort(col);
 
 add_return:
+	/* update the misc state */
+	if (rc == 0 && action == SCMP_ACT_NOTIFY)
+		col->notify_used = true;
 	if (chain != NULL)
 		free(chain);
 	return rc;

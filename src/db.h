@@ -156,6 +156,7 @@ struct db_filter_col {
 
 	/* notification fd that was returned from seccomp() */
 	int notify_fd;
+	bool notify_used;
 };
 
 /**
@@ -170,8 +171,6 @@ struct db_filter_col {
 #define db_list_foreach(iter,list) \
 	for (iter = (list); iter != NULL; iter = iter->next)
 
-int db_action_valid(uint32_t action);
-
 struct db_api_rule_list *db_rule_dup(const struct db_api_rule_list *src);
 
 struct db_filter_col *db_col_init(uint32_t def_action);
@@ -179,6 +178,8 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action);
 void db_col_release(struct db_filter_col *col);
 
 int db_col_valid(struct db_filter_col *col);
+
+int db_col_action_valid(const struct db_filter_col *col, uint32_t action);
 
 int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src);
 

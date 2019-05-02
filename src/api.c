@@ -190,7 +190,7 @@ API int seccomp_api_set(unsigned int level)
 /* NOTE - function header comment in include/seccomp.h */
 API scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
-	if (db_action_valid(def_action) < 0)
+	if (db_col_action_valid(NULL, def_action) < 0)
 		return NULL;
 
 	return db_col_init(def_action);
@@ -201,7 +201,8 @@ API int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
-	if (ctx == NULL || db_action_valid(def_action) < 0)
+	/* use a NULL filter collection here since we are resetting it */
+	if (ctx == NULL || db_col_action_valid(NULL, def_action) < 0)
 		return -EINVAL;
 
 	return db_col_reset(col, def_action);
@@ -441,7 +442,7 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 	if (db_col_valid(col) || _syscall_valid(col, syscall))
 		return -EINVAL;
 
-	rc = db_action_valid(action);
+	rc = db_col_action_valid(col, action);
 	if (rc < 0)
 		return rc;
 	if (action == col->attr.act_default)
@@ -490,7 +491,7 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 	if (db_col_valid(col) || _syscall_valid(col, syscall))
 		return -EINVAL;
 
-	rc = db_action_valid(action);
+	rc = db_col_action_valid(col, action);
 	if (rc < 0)
 		return rc;
 	if (action == col->attr.act_default)

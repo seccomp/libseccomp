@@ -719,6 +719,7 @@ int seccomp_notify_alloc(struct seccomp_notif **req,
  */
 void seccomp_notify_free(struct seccomp_notif *req,
 			 struct seccomp_notif_resp *resp);
+
 /**
  * Receive a notification from a seccomp notification fd.
  * @param fd the notification fd
