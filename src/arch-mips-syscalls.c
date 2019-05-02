@@ -26,6 +26,7 @@
 
 #include "arch.h"
 #include "arch-mips.h"
+#include "syscall-hashmap.h"
 
 /* O32 ABI */
 #define __SCMP_NR_BASE		4000
@@ -480,16 +481,16 @@ const struct arch_syscall_def mips_syscall_table[] = { \
  */
 int mips_syscall_resolve_name(const char *name)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table = mips_syscall_table;
-
-	/* XXX - plenty of room for future improvement here */
-	for (iter = 0; table[iter].name != NULL; iter++) {
-		if (strcmp(name, table[iter].name) == 0)
-			return table[iter].num;
+	const int eno = sizeof(mips_syscall_table) / sizeof(*mips_syscall_table) - 1;
+	static struct syscall_hashmap_entry hmap[sizeof(mips_syscall_table) / sizeof(*mips_syscall_table) - 1];
+	/* Code below is not thread-safe */
+	static bool hashmap_ready = false;
+	if (!hashmap_ready) {
+		hashmap_ready = true;
+		build_syscall_hashmap(mips_syscall_table, hmap, eno);
 	}
 
-	return __NR_SCMP_ERROR;
+	return syscall_hashmap_resolve(hmap, eno, name);
 }
 
 /**

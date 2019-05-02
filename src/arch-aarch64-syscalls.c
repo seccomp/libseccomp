@@ -25,6 +25,7 @@
 
 #include "arch.h"
 #include "arch-aarch64.h"
+#include "syscall-hashmap.h"
 
 /* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def aarch64_syscall_table[] = { \
@@ -476,16 +477,16 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
  */
 int aarch64_syscall_resolve_name(const char *name)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table = aarch64_syscall_table;
-
-	/* XXX - plenty of room for future improvement here */
-	for (iter = 0; table[iter].name != NULL; iter++) {
-		if (strcmp(name, table[iter].name) == 0)
-			return table[iter].num;
+	const int eno = sizeof(aarch64_syscall_table) / sizeof(*aarch64_syscall_table) - 1;
+	static struct syscall_hashmap_entry hmap[sizeof(aarch64_syscall_table) / sizeof(*aarch64_syscall_table) - 1];
+	/* Code below is not thread-safe */
+	static bool hashmap_ready = false;
+	if (!hashmap_ready) {
+		hashmap_ready = true;
+		build_syscall_hashmap(aarch64_syscall_table, hmap, eno);
 	}
 
-	return __NR_SCMP_ERROR;
+	return syscall_hashmap_resolve(hmap, eno, name);
 }
 
 /**

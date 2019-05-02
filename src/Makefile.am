@@ -31,6 +31,7 @@ SOURCES_ALL = \
 	hash.h hash.c \
 	db.h db.c \
 	arch.c arch.h \
+	syscall-hashmap.h syscall-hashmap.c \
 	arch-x86.h arch-x86.c arch-x86-syscalls.c \
 	arch-x86_64.h arch-x86_64.c arch-x86_64-syscalls.c \
 	arch-x32.h arch-x32.c arch-x32-syscalls.c \

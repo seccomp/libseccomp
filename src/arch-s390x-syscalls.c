@@ -9,6 +9,7 @@
 
 #include "arch.h"
 #include "arch-s390x.h"
+#include "syscall-hashmap.h"
 
 /* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def s390x_syscall_table[] = { \
@@ -16,7 +17,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "_newselect", __PNR__newselect },
 	{ "_sysctl", 149 },
 	{ "accept", __PNR_accept },
-	{ "accept4", 364 },
+	{ "accept4", __PNR_accept4 },
 	{ "access", 33 },
 	{ "acct", 51 },
 	{ "add_key", 278 },
@@ -27,7 +28,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "arm_sync_file_range", __PNR_arm_sync_file_range },
 	{ "arch_prctl", __PNR_arch_prctl },
 	{ "bdflush", 134 },
-	{ "bind", 361 },
+	{ "bind", __PNR_bind },
 	{ "bpf", 351 },
 	{ "break", __PNR_break },
 	{ "breakpoint", __PNR_breakpoint },
@@ -48,7 +49,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "clock_settime", 259 },
 	{ "clone", 120 },
 	{ "close", 6 },
-	{ "connect", 362 },
+	{ "connect", __PNR_connect },
 	{ "copy_file_range", 375 },
 	{ "creat", 8 },
 	{ "create_module", 127 },
@@ -120,7 +121,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "getgroups", 205 },
 	{ "getgroups32", __PNR_getgroups32 },
 	{ "getitimer", 105 },
-	{ "getpeername", 368 },
+	{ "getpeername", __PNR_getpeername },
 	{ "getpgid", 132 },
 	{ "getpgrp", 65 },
 	{ "getpid", 20 },
@@ -135,8 +136,8 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "getrlimit", 191 },
 	{ "getrusage", 77 },
 	{ "getsid", 147 },
-	{ "getsockname", 367 },
-	{ "getsockopt", 365 },
+	{ "getsockname", __PNR_getsockname },
+	{ "getsockopt", __PNR_getsockopt },
 	{ "gettid", 236 },
 	{ "gettimeofday", 78 },
 	{ "getuid", 199 },
@@ -171,7 +172,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "lgetxattr", 228 },
 	{ "link", 9 },
 	{ "linkat", 296 },
-	{ "listen", 363 },
+	{ "listen", __PNR_listen },
 	{ "listxattr", 230 },
 	{ "llistxattr", 231 },
 	{ "lock", __PNR_lock },
@@ -270,9 +271,9 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "readv", 145 },
 	{ "reboot", 88 },
 	{ "recv", __PNR_recv },
-	{ "recvfrom", 371 },
-	{ "recvmmsg", 357 },
-	{ "recvmsg", 372 },
+	{ "recvfrom", __PNR_recvfrom },
+	{ "recvmmsg", __PNR_recvmmsg },
+	{ "recvmsg", __PNR_recvmsg },
 	{ "remap_file_pages", 267 },
 	{ "removexattr", 233 },
 	{ "rename", 38 },
@@ -318,9 +319,9 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "send", __PNR_send },
 	{ "sendfile", 187 },
 	{ "sendfile64", __PNR_sendfile64 },
-	{ "sendmmsg", 358 },
-	{ "sendmsg", 370 },
-	{ "sendto", 369 },
+	{ "sendmmsg", __PNR_sendmmsg },
+	{ "sendmsg", __PNR_sendmsg },
+	{ "sendto", __PNR_sendto },
 	{ "set_mempolicy", 270 },
 	{ "set_robust_list", 304 },
 	{ "set_thread_area", __PNR_set_thread_area },
@@ -350,7 +351,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "setreuid32", __PNR_setreuid32 },
 	{ "setrlimit", 75 },
 	{ "setsid", 66 },
-	{ "setsockopt", 366 },
+	{ "setsockopt", __PNR_setsockopt },
 	{ "settimeofday", 79 },
 	{ "setuid", 213 },
 	{ "setuid32", __PNR_setuid32 },
@@ -360,7 +361,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "shmctl", __PNR_shmctl },
 	{ "shmdt", __PNR_shmdt },
 	{ "shmget", __PNR_shmget },
-	{ "shutdown", 373 },
+	{ "shutdown", __PNR_shutdown },
 	{ "sigaction", 67 },
 	{ "sigaltstack", 186 },
 	{ "signal", 48 },
@@ -370,9 +371,9 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "sigprocmask", 126 },
 	{ "sigreturn", 119 },
 	{ "sigsuspend", 72 },
-	{ "socket", 359 },
+	{ "socket", __PNR_socket },
 	{ "socketcall", 102 },
-	{ "socketpair", 360 },
+	{ "socketpair", __PNR_socketpair },
 	{ "splice", 306 },
 	{ "spu_create", __PNR_spu_create },
 	{ "spu_run", __PNR_spu_run },
@@ -460,58 +461,16 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
  */
 int s390x_syscall_resolve_name(const char *name)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table = s390x_syscall_table;
-
-	/* XXX - plenty of room for future improvement here */
-
-	if (strcmp(name, "accept") == 0)
-		return __PNR_accept;
-	if (strcmp(name, "accept4") == 0)
-		return __PNR_accept4;
-	else if (strcmp(name, "bind") == 0)
-		return __PNR_bind;
-	else if (strcmp(name, "connect") == 0)
-		return __PNR_connect;
-	else if (strcmp(name, "getpeername") == 0)
-		return __PNR_getpeername;
-	else if (strcmp(name, "getsockname") == 0)
-		return __PNR_getsockname;
-	else if (strcmp(name, "getsockopt") == 0)
-		return __PNR_getsockopt;
-	else if (strcmp(name, "listen") == 0)
-		return __PNR_listen;
-	else if (strcmp(name, "recv") == 0)
-		return __PNR_recv;
-	else if (strcmp(name, "recvfrom") == 0)
-		return __PNR_recvfrom;
-	else if (strcmp(name, "recvmsg") == 0)
-		return __PNR_recvmsg;
-	else if (strcmp(name, "recvmmsg") == 0)
-		return __PNR_recvmmsg;
-	else if (strcmp(name, "send") == 0)
-		return __PNR_send;
-	else if (strcmp(name, "sendmsg") == 0)
-		return __PNR_sendmsg;
-	else if (strcmp(name, "sendmmsg") == 0)
-		return __PNR_sendmmsg;
-	else if (strcmp(name, "sendto") == 0)
-		return __PNR_sendto;
-	else if (strcmp(name, "setsockopt") == 0)
-		return __PNR_setsockopt;
-	else if (strcmp(name, "shutdown") == 0)
-		return __PNR_shutdown;
-	else if (strcmp(name, "socket") == 0)
-		return __PNR_socket;
-	else if (strcmp(name, "socketpair") == 0)
-		return __PNR_socketpair;
-
-	for (iter = 0; table[iter].name != NULL; iter++) {
-		if (strcmp(name, table[iter].name) == 0)
-			return table[iter].num;
+	const int eno = sizeof(s390x_syscall_table) / sizeof(*s390x_syscall_table) - 1;
+	static struct syscall_hashmap_entry hmap[sizeof(s390x_syscall_table) / sizeof(*s390x_syscall_table) - 1];
+	/* Code below is not thread-safe */
+	static bool hashmap_ready = false;
+	if (!hashmap_ready) {
+		hashmap_ready = true;
+		build_syscall_hashmap(s390x_syscall_table, hmap, eno);
 	}
 
-	return __NR_SCMP_ERROR;
+	return syscall_hashmap_resolve(hmap, eno, name);
 }
 
 /**
@@ -529,47 +488,6 @@ const char *s390x_syscall_resolve_num(int num)
 	const struct arch_syscall_def *table = s390x_syscall_table;
 
 	/* XXX - plenty of room for future improvement here */
-
-	if (num == __PNR_accept)
-		return "accept";
-	else if (num == __PNR_accept4)
-		return "accept4";
-	else if (num == __PNR_bind)
-		return "bind";
-	else if (num == __PNR_connect)
-		return "connect";
-	else if (num == __PNR_getpeername)
-		return "getpeername";
-	else if (num == __PNR_getsockname)
-		return "getsockname";
-	else if (num == __PNR_getsockopt)
-		return "getsockopt";
-	else if (num == __PNR_listen)
-		return "listen";
-	else if (num == __PNR_recv)
-		return "recv";
-	else if (num == __PNR_recvfrom)
-		return "recvfrom";
-	else if (num == __PNR_recvmsg)
-		return "recvmsg";
-	else if (num == __PNR_recvmmsg)
-		return "recvmmsg";
-	else if (num == __PNR_send)
-		return "send";
-	else if (num == __PNR_sendmsg)
-		return "sendmsg";
-	else if (num == __PNR_sendmmsg)
-		return "sendmmsg";
-	else if (num == __PNR_sendto)
-		return "sendto";
-	else if (num == __PNR_setsockopt)
-		return "setsockopt";
-	else if (num == __PNR_shutdown)
-		return "shutdown";
-	else if (num == __PNR_socket)
-		return "socket";
-	else if (num == __PNR_socketpair)
-		return "socketpair";
 
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
 		if (num == table[iter].num)
