@@ -19,7 +19,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-from libc.stdint cimport uint8_t, uint32_t, uint64_t
+from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 
 cdef extern from "seccomp.h":
 
@@ -75,6 +76,7 @@ cdef extern from "seccomp.h":
         SCMP_ACT_TRAP
         SCMP_ACT_LOG
         SCMP_ACT_ALLOW
+        SCMP_ACT_NOTIFY
     unsigned int SCMP_ACT_ERRNO(int errno)
     unsigned int SCMP_ACT_TRACE(int value)
 
@@ -85,6 +87,29 @@ cdef extern from "seccomp.h":
         scmp_compare op
         scmp_datum_t datum_a
         scmp_datum_t datum_b
+
+    cdef struct seccomp_data:
+        int nr
+        uint32_t arch
+        uint64_t instruction_pointer
+        uint64_t args[6]
+
+    cdef struct seccomp_notif_sizes:
+        uint16_t seccomp_notif
+        uint16_t seccomp_notif_resp
+        uint16_t seccomp_data
+
+    cdef struct seccomp_notif:
+        uint64_t id
+        uint32_t pid
+        uint32_t flags
+        seccomp_data data
+
+    cdef struct seccomp_notif_resp:
+        uint64_t id
+        int64_t val
+        int32_t error
+        uint32_t flags
 
     scmp_version *seccomp_version()
 
@@ -129,6 +154,13 @@ cdef extern from "seccomp.h":
                                      uint32_t action, int syscall,
                                      unsigned int arg_cnt,
                                      scmp_arg_cmp *arg_array)
+
+    int seccomp_notify_alloc(seccomp_notif **req, seccomp_notif_resp **resp)
+    void seccomp_notify_free(seccomp_notif *req, seccomp_notif_resp *resp)
+    int seccomp_notify_receive(int fd, seccomp_notif *req)
+    int seccomp_notify_respond(int fd, seccomp_notif_resp *resp)
+    int seccomp_notify_id_valid(int fd, uint64_t id)
+    int seccomp_notify_fd(scmp_filter_ctx ctx)
 
     int seccomp_export_pfc(scmp_filter_ctx ctx, int fd)
     int seccomp_export_bpf(scmp_filter_ctx ctx, int fd)
