@@ -70,3 +70,27 @@ libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${CODE_COVERAGE_LDFLAGS} ${LDFLAGS} \
 
 check-build:
 	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}
+
+FORCE: ;
+
+arch-x86-syscalls.c: arch-x86-syscall-hashmap.c
+arch-x86_64-syscalls.c: arch-x86_64-syscall-hashmap.c
+arch-x32-syscalls.c: arch-x32-syscall-hashmap.c
+arch-arm-syscalls.c: arch-arm-syscall-hashmap.c
+arch-aarch64-syscalls.c: arch-aarch64-syscall-hashmap.c
+arch-mips-syscalls.c: arch-mips-syscall-hashmap.c
+arch-mips64-syscalls.c: arch-mips64-syscall-hashmap.c
+arch-mips64n32-syscalls.c: arch-mips64n32-syscall-hashmap.c
+arch-parisc-syscalls.c: arch-parisc-syscall-hashmap.c
+arch-ppc-syscalls.c: arch-ppc-syscall-hashmap.c
+arch-ppc64-syscalls.c: arch-ppc64-syscall-hashmap.c
+arch-s390-syscalls.c: arch-s390-syscall-hashmap.c
+arch-s390x-syscalls.c: arch-s390x-syscall-hashmap.c
+
+arch-%-syscall-hashmap.c: syscall-hashmap-template.c FORCE
+	if [ "$@" -nt "arch-$*-syscalls.c" ]; then exit 0; fi; \
+	(echo '#include "arch-$*-syscalls.c"' && cat syscall-hashmap-template.c) | $(COMPILE) -x c - -o 'arch-$*-syscall-hashmap-printer' -DGENERATING_HASHMAP -DARCH='$*' && \
+	'./arch-$*-syscall-hashmap-printer' > $@
+
+clean-local:
+	${RM} -rf arch-*-syscall-hashmap.c arch-*-syscall-hashmap-printer

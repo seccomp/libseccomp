@@ -470,6 +470,12 @@ const struct arch_syscall_def mips64n32_syscall_table[] = { \
 	{ NULL, __NR_SCMP_ERROR },
 };
 
+const struct syscall_hashmap_entry mips64n32_syscall_hashmap[] = {
+#ifndef GENERATING_HASHMAP
+#include "arch-mips64n32-syscall-hashmap.c"
+#endif
+};
+
 /**
  * Resolve a syscall name to a number
  * @param name the syscall name
@@ -481,16 +487,8 @@ const struct arch_syscall_def mips64n32_syscall_table[] = { \
  */
 int mips64n32_syscall_resolve_name(const char *name)
 {
-	const int eno = sizeof(mips64n32_syscall_table) / sizeof(*mips64n32_syscall_table) - 1;
-	static struct syscall_hashmap_entry hmap[sizeof(mips64n32_syscall_table) / sizeof(*mips64n32_syscall_table) - 1];
-	/* Code below is not thread-safe */
-	static bool hashmap_ready = false;
-	if (!hashmap_ready) {
-		hashmap_ready = true;
-		build_syscall_hashmap(mips64n32_syscall_table, hmap, eno);
-	}
-
-	return syscall_hashmap_resolve(hmap, eno, name);
+	return syscall_hashmap_resolve(mips64n32_syscall_hashmap,
+		sizeof(mips64n32_syscall_hashmap) / sizeof(*mips64n32_syscall_hashmap), name);
 }
 
 /**

@@ -26,6 +26,7 @@
 
 #include "arch.h"
 #include "arch-ppc.h"
+#include "syscall-hashmap.h"
 
 /* NOTE: based on Linux 4.15-rc7 */
 const struct arch_syscall_def ppc_syscall_table[] = { \
@@ -466,6 +467,12 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
 	{ NULL, __NR_SCMP_ERROR },
 };
 
+const struct syscall_hashmap_entry ppc_syscall_hashmap[] = {
+#ifndef GENERATING_HASHMAP
+#include "arch-ppc-syscall-hashmap.c"
+#endif
+};
+
 /**
  * Resolve a syscall name to a number
  * @param name the syscall name
@@ -477,16 +484,8 @@ const struct arch_syscall_def ppc_syscall_table[] = { \
  */
 int ppc_syscall_resolve_name(const char *name)
 {
-	unsigned int iter;
-	const struct arch_syscall_def *table = ppc_syscall_table;
-
-	/* XXX - plenty of room for future improvement here */
-	for (iter = 0; table[iter].name != NULL; iter++) {
-		if (strcmp(name, table[iter].name) == 0)
-			return table[iter].num;
-	}
-
-	return __NR_SCMP_ERROR;
+	return syscall_hashmap_resolve(ppc_syscall_hashmap,
+		sizeof(ppc_syscall_hashmap) / sizeof(*ppc_syscall_hashmap), name);
 }
 
 /**

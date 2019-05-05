@@ -450,6 +450,12 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ NULL, __NR_SCMP_ERROR },
 };
 
+const struct syscall_hashmap_entry parisc_syscall_hashmap[] = {
+#ifndef GENERATING_HASHMAP
+#include "arch-parisc-syscall-hashmap.c"
+#endif
+};
+
 /**
  * Resolve a syscall name to a number
  * @param name the syscall name
@@ -461,16 +467,8 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
  */
 int parisc_syscall_resolve_name(const char *name)
 {
-	const int eno = sizeof(parisc_syscall_table) / sizeof(*parisc_syscall_table) - 1;
-	static struct syscall_hashmap_entry hmap[sizeof(parisc_syscall_table) / sizeof(*parisc_syscall_table) - 1];
-	/* Code below is not thread-safe */
-	static bool hashmap_ready = false;
-	if (!hashmap_ready) {
-		hashmap_ready = true;
-		build_syscall_hashmap(parisc_syscall_table, hmap, eno);
-	}
-
-	return syscall_hashmap_resolve(hmap, eno, name);
+	return syscall_hashmap_resolve(parisc_syscall_hashmap,
+		sizeof(parisc_syscall_hashmap) / sizeof(*parisc_syscall_hashmap), name);
 }
 
 /**

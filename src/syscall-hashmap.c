@@ -20,19 +20,7 @@
 
 #include "arch.h"
 #include "hash.h"
-
-struct syscall_hashmap_entry {
-	/* Both structures are combined into one to simplify usage */
-	struct {
-		uint32_t value;
-		int record_idx;
-	} hash;
-
-	struct {
-		struct arch_syscall_def syscall;
-		int next_record_idx;
-	} record;
-};
+#include "syscall-hashmap.h"
 
 /**
  * Hashes a syscall name
@@ -84,13 +72,13 @@ void build_syscall_hashmap(const struct arch_syscall_def *syscall_table,
 	}
 }
 
-int syscall_hashmap_resolve(struct syscall_hashmap_entry *entries, unsigned eno,
-                            const char *name)
+int syscall_hashmap_resolve(const struct syscall_hashmap_entry *entries,
+                            unsigned eno, const char *name)
 {
 	uint32_t hash = syscall_hashmap_hasher(name) % eno;
 	unsigned rid = entries[hash].hash.record_idx;
 	while (rid != -1) {
-		struct syscall_hashmap_entry *entry = entries + rid;
+		const struct syscall_hashmap_entry *entry = entries + rid;
 		if (strcmp(name, entry->record.syscall.name) == 0)
 			return entry->record.syscall.num;
 		rid = entry->record.next_record_idx;

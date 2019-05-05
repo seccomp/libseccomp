@@ -1,3 +1,5 @@
 libseccomp.a
 arch-syscall-check
 arch-syscall-dump
+arch-*-syscall-hashmap-printer
+arch-*-syscall-hashmap.c

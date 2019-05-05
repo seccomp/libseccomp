@@ -466,6 +466,12 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
 	{ NULL, __NR_SCMP_ERROR },
 };
 
+const struct syscall_hashmap_entry aarch64_syscall_hashmap[] = {
+#ifndef GENERATING_HASHMAP
+#include "arch-aarch64-syscall-hashmap.c"
+#endif
+};
+
 /**
  * Resolve a syscall name to a number
  * @param name the syscall name
@@ -477,16 +483,8 @@ const struct arch_syscall_def aarch64_syscall_table[] = { \
  */
 int aarch64_syscall_resolve_name(const char *name)
 {
-	const int eno = sizeof(aarch64_syscall_table) / sizeof(*aarch64_syscall_table) - 1;
-	static struct syscall_hashmap_entry hmap[sizeof(aarch64_syscall_table) / sizeof(*aarch64_syscall_table) - 1];
-	/* Code below is not thread-safe */
-	static bool hashmap_ready = false;
-	if (!hashmap_ready) {
-		hashmap_ready = true;
-		build_syscall_hashmap(aarch64_syscall_table, hmap, eno);
-	}
-
-	return syscall_hashmap_resolve(hmap, eno, name);
+	return syscall_hashmap_resolve(aarch64_syscall_hashmap,
+		sizeof(aarch64_syscall_hashmap) / sizeof(*aarch64_syscall_hashmap), name);
 }
 
 /**
