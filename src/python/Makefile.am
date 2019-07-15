@@ -40,12 +40,12 @@ build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
 	${PY_BUILD} && touch build
 
 install-exec-local: build
-	${PY_INSTALL} --install-lib=${DESTDIR}/${pkgpythondir} \
-		--record=${DESTDIR}/${pkgpythondir}/install_files.txt
+	${PY_INSTALL} --install-lib=${DESTDIR}/${pyexecdir} \
+		--record=${DESTDIR}/${pyexecdir}/install_files.txt
 
 uninstall-local:
-	cat ${DESTDIR}/${pkgpythondir}/install_files.txt | xargs ${RM} -f
-	${RM} -f ${DESTDIR}/${pkgpythondir}/install_files.txt
+	cat ${DESTDIR}/${pyexecdir}/install_files.txt | xargs ${RM} -f
+	${RM} -f ${DESTDIR}/${pyexecdir}/install_files.txt
 
 clean-local:
 	[ ${srcdir} == ${builddir} ] || ${RM} -f ${builddir}/seccomp.pyx
