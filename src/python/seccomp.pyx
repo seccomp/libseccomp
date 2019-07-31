@@ -19,6 +19,8 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
+# cython: language_level = 3str
+
 """ Python bindings for the libseccomp library
 
 The libseccomp library provides and easy to use, platform independent,
