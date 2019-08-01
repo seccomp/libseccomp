@@ -209,6 +209,7 @@ cdef class Arch:
     PARISC64 - 64-bit PA-RISC
     PPC64 - 64-bit PowerPC
     PPC - 32-bit PowerPC
+    RISCV64 - 64-bit RISC-V
     """
 
     cdef int _token
@@ -230,6 +231,7 @@ cdef class Arch:
     PPC = libseccomp.SCMP_ARCH_PPC
     PPC64 = libseccomp.SCMP_ARCH_PPC64
     PPC64LE = libseccomp.SCMP_ARCH_PPC64LE
+    RISCV64 = libseccomp.SCMP_ARCH_RISCV64
     S390 = libseccomp.SCMP_ARCH_S390
     S390X = libseccomp.SCMP_ARCH_S390X
 

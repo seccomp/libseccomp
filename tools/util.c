@@ -74,6 +74,8 @@
 #endif
 #elif __PPC__
 #define ARCH_NATIVE		AUDIT_ARCH_PPC
+#elif __riscv && __riscv_xlen == 64
+#define ARCH_NATIVE		AUDIT_ARCH_RISCV64
 #elif __s390x__ /* s390x must be checked before s390 */
 #define ARCH_NATIVE		AUDIT_ARCH_S390X
 #elif __s390__

@@ -283,6 +283,7 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "renameat2",	337 },
 	{ "request_key",	265 },
 	{ "restart_syscall",	0 },
+	{ "riscv_flush_icache", __PNR_riscv_flush_icache },
 	{ "rmdir",	40 },
 	{ "rseq",	__PNR_rseq },
 	{ "rt_sigaction",	174 },

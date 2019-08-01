@@ -36,6 +36,7 @@
 #include "arch-parisc.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
+#include "arch-riscv64.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
 
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
 	int i_parisc = 0;
 	int i_ppc = 0;
 	int i_ppc64 = 0;
+	int i_riscv64 = 0;
 	int i_s390 = 0;
 	int i_s390x = 0;
 	char str_miss[256];
@@ -111,6 +113,8 @@ int main(int argc, char *argv[])
 			      ppc_syscall_iterate(i_ppc));
 		syscall_check(str_miss, sys_name, "ppc64",
 			      ppc64_syscall_iterate(i_ppc64));
+		syscall_check(str_miss, sys_name, "riscv64",
+			      riscv64_syscall_iterate(i_riscv64));
 		syscall_check(str_miss, sys_name, "s390",
 			      s390_syscall_iterate(i_s390));
 		syscall_check(str_miss, sys_name, "s390x",
@@ -147,6 +151,8 @@ int main(int argc, char *argv[])
 			i_ppc = -1;
 		if (!ppc64_syscall_iterate(++i_ppc64)->name)
 			i_ppc64 = -1;
+		if (!riscv64_syscall_iterate(++i_riscv64)->name)
+			i_riscv64 = -1;
 		if (!s390_syscall_iterate(++i_s390)->name)
 			i_s390 = -1;
 		if (!s390x_syscall_iterate(++i_s390x)->name)
@@ -156,6 +162,7 @@ int main(int argc, char *argv[])
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0 &&
 		 i_parisc >= 0 &&
 		 i_ppc >= 0 && i_ppc64 >= 0 &&
+		 i_riscv64 >=0 &&
 		 i_s390 >= 0 && i_s390x >= 0);
 
 	/* check for any leftovers */
@@ -202,6 +209,10 @@ int main(int argc, char *argv[])
 	}
 	if (i_ppc64 >= 0) {
 		printf("ERROR, ppc64 has additional syscalls\n");
+		return 1;
+	}
+	if (i_riscv64 >= 0) {
+		printf("ERROR, riscv64 has additional syscalls\n");
 		return 1;
 	}
 	if (i_s390 >= 0) {

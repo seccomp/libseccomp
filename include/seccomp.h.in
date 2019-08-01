@@ -196,6 +196,19 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_PARISC64	AUDIT_ARCH_PARISC64
 
 /**
+ * The RISC-V architecture tokens
+ */
+#ifndef EM_RISCV
+#define EM_RISCV		243
+#endif /* EM_RISCV */
+
+#ifndef AUDIT_ARCH_RISCV64
+#define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_RISCV64 */
+
+#define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
@@ -1860,6 +1873,16 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_rseq
 #define __NR_rseq		__PNR_rseq
 #endif /* __NR_rseq */
+
+#define __PNR_riscv_flush_icache	-10211
+#ifndef __NR_riscv_flush_icache
+#define __NR_riscv_flush_icache		__PNR_riscv_flush_icache
+#endif /* __NR_riscv_flush_icache */
+
+#define __PNR_renameat		-10212
+#ifndef __NR_renameat
+#define __NR_renameat		__PNR_renameat
+#endif /* __NR_renameat */
 
 #ifdef __cplusplus
 }
