@@ -109,8 +109,8 @@ AC_ARG_ENABLE([python],
 	[build the python bindings, requires cython])])
 AS_IF([test "$enable_python" = yes], [
 	# cython version check
-	AS_IF([test "$CYTHON_VER_MAJ" -eq 0 -a "$CYTHON_VER_MIN" -lt 16], [
-		AC_MSG_ERROR([python bindings require cython 0.16 or higher])
+	AS_IF([test "$CYTHON_VER_MAJ" -eq 0 -a "$CYTHON_VER_MIN" -lt 29], [
+		AC_MSG_ERROR([python bindings require cython 0.29 or higher])
 	])
 	AM_PATH_PYTHON
 ])

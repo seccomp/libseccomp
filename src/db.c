@@ -1063,6 +1063,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.nnp_enable = 1;
 	col->attr.tsync_enable = 0;
 	col->attr.api_tskip = 0;
+	col->attr.log_enable = 0;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;

@@ -24,7 +24,7 @@ pkgconf_DATA = libseccomp.pc
 
 EXTRA_DIST = \
 	CHANGELOG CREDITS LICENSE \
-	README.md CONTRIBUTING.md RELEASE_PROCESS.md
+	README.md CONTRIBUTING.md SECURITY.md
 
 # support silent builds
 AM_MAKEFLAGS_0 = --quiet --no-print-directory

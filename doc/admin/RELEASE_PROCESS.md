@@ -65,7 +65,7 @@ release.
 #### 12. Tag the release in the repository with a signed tag
 
 	# git tag -s -m "version X.Y.Z" vX.Y.Z
-	# git push --tags
+	# git push <repo> vX.Y.Z
 
 #### 13. Build final release tarball
 
@@ -95,3 +95,11 @@ release.
   * libseccomp-X.Y.Z.tar.gz.asc
   * libseccomp-X.Y.Z.tar.gz.SHA256SUM
   * libseccomp-X.Y.Z.tar.gz.SHA256SUM.asc
+
+#### 18. Update the GitHub release notes for older releases which are now unsupported
+
+The following Markdown text is suggested at the top of the release note, see old GitHub releases for examples.
+
+```
+***This release is no longer supported upsteam, please use a more recent release***
+```
