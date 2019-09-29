@@ -22,6 +22,7 @@
 #
 
 CHK_C_LIST="include/seccomp.h.in \
+	    include/seccomp-syscalls.h \
 	    src/*.c src/*.h \
 	    tests/*.c tests/*.h \
 	    tools/*.c tools/*.h"
