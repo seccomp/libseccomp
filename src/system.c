@@ -215,10 +215,12 @@ static int _sys_chk_seccomp_flag_kernel(int flag)
 	/* this is an invalid seccomp(2) call because the last argument
 	 * is NULL, but depending on the errno value of EFAULT we can
 	 * guess if the filter flag is supported or not */
-	if (sys_chk_seccomp_syscall() == 1 &&
-	    syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flag, NULL) == -1 &&
-	    errno == EFAULT)
+	int rc;
+	if (sys_chk_seccomp_syscall() == 1) {
+	    rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flag, NULL);
+	    if (rc == -1 && errno == EFAULT)
 		return 1;
+	}
 
 	return 0;
 }
