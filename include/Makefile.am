@@ -16,4 +16,4 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-include_HEADERS = seccomp.h
+include_HEADERS = seccomp.h seccomp-syscalls.h
