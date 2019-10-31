@@ -242,6 +242,36 @@
 #define __PNR_statx				-10208
 #define __PNR_io_pgetevents			-10209
 #define __PNR_rseq				-10210
+#define __PNR_setrlimit				-10211
+#define __PNR_clock_adjtime64			-10212
+#define __PNR_clock_getres_time64		-10213
+#define __PNR_clock_gettime64			-10214
+#define __PNR_clock_nanosleep_time64		-10215
+#define __PNR_clock_settime64			-10216
+#define __PNR_clone3				-10217
+#define __PNR_fsconfig				-10218
+#define __PNR_fsmount				-10219
+#define __PNR_fsopen				-10220
+#define __PNR_fspick				-10221
+#define __PNR_futex_time64			-10222
+#define __PNR_io_pgetevents_time64		-10223
+#define __PNR_move_mount			-10224
+#define __PNR_mq_timedreceive_time64		-10225
+#define __PNR_mq_timedsend_time64		-10226
+#define __PNR_open_tree				-10227
+#define __PNR_pidfd_open			-10228
+#define __PNR_pidfd_send_signal			-10229
+#define __PNR_ppoll_time64			-10230
+#define __PNR_pselect6_time64			-10231
+#define __PNR_recvmmsg_time64			-10232
+#define __PNR_rt_sigtimedwait_time64		-10233
+#define __PNR_sched_rr_get_interval_time64	-10234
+#define __PNR_semtimedop_time64			-10235
+#define __PNR_timer_gettime64			-10236
+#define __PNR_timer_settime64			-10237
+#define __PNR_timerfd_gettime64			-10238
+#define __PNR_timerfd_settime64			-10239
+#define __PNR_utimensat_time64			-10240
 
 /*
  * libseccomp syscall definitions
@@ -395,15 +425,51 @@
 
 #define __SNR_clock_adjtime		__NR_clock_adjtime
 
+#ifdef __NR_clock_adjtime64
+#define __SNR_clock_adjtime64		__NR_clock_adjtime64
+#else
+#define __SNR_clock_adjtime64		__PNR_clock_adjtime64
+#endif
+
 #define __SNR_clock_getres		__NR_clock_getres
+
+#ifdef __NR_clock_getres_time64
+#define __SNR_clock_getres_time64	__NR_clock_getres_time64
+#else
+#define __SNR_clock_getres_time64	__PNR_clock_getres_time64
+#endif
 
 #define __SNR_clock_gettime		__NR_clock_gettime
 
+#ifdef __NR_clock_gettime64
+#define __SNR_clock_gettime64		__NR_clock_gettime64
+#else
+#define __SNR_clock_gettime64		__PNR_clock_gettime64
+#endif
+
 #define __SNR_clock_nanosleep		__NR_clock_nanosleep
+
+#ifdef __NR_clock_nanosleep_time64
+#define __SNR_clock_nanosleep_time64	__NR_clock_nanosleep_time64
+#else
+#define __SNR_clock_nanosleep_time64	__PNR_clock_nanosleep_time64
+#endif
 
 #define __SNR_clock_settime		__NR_clock_settime
 
+#ifdef __NR_clock_settime64
+#define __SNR_clock_settime64		__NR_clock_settime64
+#else
+#define __SNR_clock_settime64		__PNR_clock_settime64
+#endif
+
 #define __SNR_clone			__NR_clone
+
+#ifdef __NR_clone3
+#define __SNR_clone3			__NR_clone3
+#else
+#define __SNR_clone3			__PNR_clone3
+#endif
 
 #define __SNR_close			__NR_close
 
@@ -563,7 +629,31 @@
 
 #define __SNR_fremovexattr		__NR_fremovexattr
 
+#ifdef __NR_fsconfig
+#define __SNR_fsconfig			__NR_fsconfig
+#else
+#define __SNR_fsconfig			__PNR_fsconfig
+#endif
+
 #define __SNR_fsetxattr			__NR_fsetxattr
+
+#ifdef __NR_fsmount
+#define __SNR_fsmount			__NR_fsmount
+#else
+#define __SNR_fsmount			__PNR_fsmount
+#endif
+
+#ifdef __NR_fsopen
+#define __SNR_fsopen			__NR_fsopen
+#else
+#define __SNR_fsopen			__PNR_fsopen
+#endif
+
+#ifdef __NR_fspick
+#define __SNR_fspick			__NR_fspick
+#else
+#define __SNR_fspick			__PNR_fspick
+#endif
 
 #ifdef __NR_fstat
 #define __SNR_fstat			__NR_fstat
@@ -616,6 +706,12 @@
 #endif
 
 #define __SNR_futex			__NR_futex
+
+#ifdef __NR_futex_time64
+#define __SNR_futex_time64		__NR_futex_time64
+#else
+#define __SNR_futex_time64		__PNR_futex_time64
+#endif
 
 #ifdef __NR_futimesat
 #define __SNR_futimesat			__NR_futimesat
@@ -849,6 +945,12 @@
 #define __SNR_io_pgetevents		__PNR_io_pgetevents
 #endif
 
+#ifdef __NR_io_pgetevents_time64
+#define __SNR_io_pgetevents_time64	__NR_io_pgetevents_time64
+#else
+#define __SNR_io_pgetevents_time64	__PNR_io_pgetevents_time64
+#endif
+
 #define __SNR_io_setup			__NR_io_setup
 
 #define __SNR_io_submit			__NR_io_submit
@@ -1025,6 +1127,12 @@
 
 #define __SNR_mount			__NR_mount
 
+#ifdef __NR_move_mount
+#define __SNR_move_mount		__NR_move_mount
+#else
+#define __SNR_move_mount		__PNR_move_mount
+#endif
+
 #ifdef __NR_move_pages
 #define __SNR_move_pages		__NR_move_pages
 #else
@@ -1047,7 +1155,19 @@
 
 #define __SNR_mq_timedreceive		__NR_mq_timedreceive
 
+#ifdef __NR_mq_timedreceive_time64
+#define __SNR_mq_timedreceive_time64	__NR_mq_timedreceive_time64
+#else
+#define __SNR_mq_timedreceive_time64	__PNR_mq_timedreceive_time64
+#endif
+
 #define __SNR_mq_timedsend		__NR_mq_timedsend
+
+#ifdef __NR_mq_timedsend_time64
+#define __SNR_mq_timedsend_time64	__NR_mq_timedsend_time64
+#else
+#define __SNR_mq_timedsend_time64	__PNR_mq_timedsend_time64
+#endif
 
 #define __SNR_mq_unlink			__NR_mq_unlink
 
@@ -1157,6 +1277,12 @@
 
 #define __SNR_open_by_handle_at		__NR_open_by_handle_at
 
+#ifdef __NR_open_tree
+#define __SNR_open_tree			__NR_open_tree
+#else
+#define __SNR_open_tree			__PNR_open_tree
+#endif
+
 #define __SNR_openat			__NR_openat
 
 #ifdef __NR_pause
@@ -1186,6 +1312,18 @@
 #define __SNR_perf_event_open		__NR_perf_event_open
 
 #define __SNR_personality		__NR_personality
+
+#ifdef __NR_pidfd_open
+#define __SNR_pidfd_open		__NR_pidfd_open
+#else
+#define __SNR_pidfd_open		__PNR_pidfd_open
+#endif
+
+#ifdef __NR_pidfd_send_signal
+#define __SNR_pidfd_send_signal		__NR_pidfd_send_signal
+#else
+#define __SNR_pidfd_send_signal		__PNR_pidfd_send_signal
+#endif
 
 #ifdef __NR_pipe
 #define __SNR_pipe			__NR_pipe
@@ -1221,7 +1359,11 @@
 #define __SNR_poll			__PNR_poll
 #endif
 
-#define __SNR_ppoll			__NR_ppoll
+#ifdef __NR_ppoll_time64
+#define __SNR_ppoll_time64		__NR_ppoll_time64
+#else
+#define __SNR_ppoll_time64		__PNR_ppoll_time64
+#endif
 
 #define __SNR_prctl			__NR_prctl
 
@@ -1250,6 +1392,12 @@
 #endif
 
 #define __SNR_pselect6			__NR_pselect6
+
+#ifdef __NR_pselect6_time64
+#define __SNR_pselect6_time64		__NR_pselect6_time64
+#else
+#define __SNR_pselect6_time64		__PNR_pselect6_time64
+#endif
 
 #define __SNR_ptrace			__NR_ptrace
 
@@ -1317,6 +1465,12 @@
 #define __SNR_recvmmsg			__PNR_recvmmsg
 #endif
 
+#ifdef __NR_recvmmsg_time64
+#define __SNR_recvmmsg_time64		__NR_recvmmsg_time64
+#else
+#define __SNR_recvmmsg_time64		__PNR_recvmmsg_time64
+#endif
+
 #ifdef __NR_recvmsg
 #define __SNR_recvmsg			__NR_recvmsg
 #else
@@ -1366,6 +1520,12 @@
 #define __SNR_rt_sigsuspend		__NR_rt_sigsuspend
 
 #define __SNR_rt_sigtimedwait		__NR_rt_sigtimedwait
+
+#ifdef __NR_rt_sigtimedwait_time64
+#define __SNR_rt_sigtimedwait_time64	__NR_rt_sigtimedwait_time64
+#else
+#define __SNR_rt_sigtimedwait_time64	__PNR_rt_sigtimedwait_time64
+#endif
 
 #define __SNR_rt_tgsigqueueinfo		__NR_rt_tgsigqueueinfo
 
@@ -1419,6 +1579,12 @@
 
 #define __SNR_sched_rr_get_interval	__NR_sched_rr_get_interval
 
+#ifdef __NR_sched_rr_get_interval_time64
+#define __SNR_sched_rr_get_interval_time64	__NR_sched_rr_get_interval_time64
+#else
+#define __SNR_sched_rr_get_interval_time64	__PNR_sched_rr_get_interval_time64
+#endif
+
 #define __SNR_sched_setaffinity		__NR_sched_setaffinity
 
 #define __SNR_sched_setattr		__NR_sched_setattr
@@ -1465,6 +1631,12 @@
 #define __SNR_semtimedop		__NR_semtimedop
 #else
 #define __SNR_semtimedop		__PNR_semtimedop
+#endif
+
+#ifdef __NR_semtimedop_time64
+#define __SNR_semtimedop_time64		__NR_semtimedop_time64
+#else
+#define __SNR_semtimedop_time64		__PNR_semtimedop_time64
 #endif
 
 #ifdef __NR_send
@@ -1637,7 +1809,11 @@
 #define __SNR_setreuid32		__PNR_setreuid32
 #endif
 
+#ifdef __NR_setrlimit
 #define __SNR_setrlimit			__NR_setrlimit
+#else
+#define __SNR_setrlimit			__PNR_setrlimit
+#endif
 
 #define __SNR_setsid			__NR_setsid
 
@@ -1921,7 +2097,19 @@
 
 #define __SNR_timer_gettime		__NR_timer_gettime
 
+#ifdef __NR_timer_gettime64
+#define __SNR_timer_gettime64		__NR_timer_gettime64
+#else
+#define __SNR_timer_gettime64		__PNR_timer_gettime64
+#endif
+
 #define __SNR_timer_settime		__NR_timer_settime
+
+#ifdef __NR_timer_settime64
+#define __SNR_timer_settime64		__NR_timer_settime64
+#else
+#define __SNR_timer_settime64		__PNR_timer_settime64
+#endif
 
 #ifdef __NR_timerfd
 #define __SNR_timerfd			__NR_timerfd
@@ -1933,7 +2121,19 @@
 
 #define __SNR_timerfd_gettime		__NR_timerfd_gettime
 
+#ifdef __NR_timerfd_gettime64
+#define __SNR_timerfd_gettime64		__NR_timerfd_gettime64
+#else
+#define __SNR_timerfd_gettime64		__PNR_timerfd_gettime64
+#endif
+
 #define __SNR_timerfd_settime		__NR_timerfd_settime
+
+#ifdef __NR_timerfd_settime64
+#define __SNR_timerfd_settime64		__NR_timerfd_settime64
+#else
+#define __SNR_timerfd_settime64		__PNR_timerfd_settime64
+#endif
 
 #define __SNR_times			__NR_times
 
@@ -2036,6 +2236,12 @@
 #endif
 
 #define __SNR_utimensat			__NR_utimensat
+
+#ifdef __NR_utimensat_time64
+#define __SNR_utimensat_time64		__NR_utimensat_time64
+#else
+#define __SNR_utimensat_time64		__PNR_utimensat_time64
+#endif
 
 #ifdef __NR_utimes
 #define __SNR_utimes			__NR_utimes

@@ -43,16 +43,16 @@ const struct arch_def arch_def_x86 = {
 };
 
 /**
- * Convert a multiplexed pseudo socket syscall into a direct syscall
- * @param socketcall the multiplexed pseudo syscall number
+ * Convert a multiplexed pseudo syscall into a direct syscall
+ * @param syscall the multiplexed pseudo syscall number
  *
  * Return the related direct syscall number, __NR_SCMP_UNDEF is there is
  * no related syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-static int _x86_sock_demux(int socketcall)
+static int _x86_syscall_demux(int syscall)
 {
-	switch (socketcall) {
+	switch (syscall) {
 	case -101:
 		/* socket */
 		return 359;
@@ -113,20 +113,56 @@ static int _x86_sock_demux(int socketcall)
 	case -120:
 		/* sendmmsg */
 		return 345;
+	case -201:
+		/* semop - not defined */
+		return __NR_SCMP_UNDEF;
+	case -202:
+		/* semget */
+		return 393;
+	case -203:
+		/* semctl */
+		return 394;
+	case -204:
+		/* semtimedop - not defined */
+		return __NR_SCMP_UNDEF;
+	case -211:
+		/* msgsnd */
+		return 400;
+	case -212:
+		/* msgrcv */
+		return 401;
+	case -213:
+		/* msgget */
+		return 399;
+	case -214:
+		/* msgctl */
+		return 402;
+	case -221:
+		/* shmat */
+		return 397;
+	case -222:
+		/* shmdt */
+		return 398;
+	case -223:
+		/* shmget */
+		return 395;
+	case -224:
+		/* shmctl */
+		return 396;
 	}
 
 	return __NR_SCMP_ERROR;
 }
 
 /**
- * Convert a direct socket syscall into multiplexed pseudo socket syscall
+ * Convert a direct syscall into multiplexed pseudo socket syscall
  * @param syscall the direct syscall
  *
  * Return the related multiplexed pseduo syscall number, __NR_SCMP_UNDEF is
  * there is no related pseudo syscall, or __NR_SCMP_ERROR otherwise.
  *
  */
-static int _x86_sock_mux(int syscall)
+static int _x86_syscall_mux(int syscall)
 {
 	switch (syscall) {
 	case 337:
@@ -180,6 +216,36 @@ static int _x86_sock_mux(int syscall)
 	case 373:
 		/* shutdown */
 		return -113;
+	case 393:
+		/* semget */
+		return -202;
+	case 394:
+		/* semctl */
+		return -203;
+	case 400:
+		/* msgsnd */
+		return -211;
+	case 401:
+		/* msgrcv */
+		return -212;
+	case 399:
+		/* msgget */
+		return -213;
+	case 402:
+		/* msgctl */
+		return -214;
+	case 397:
+		/* shmat */
+		return -221;
+	case 398:
+		/* shmdt */
+		return -222;
+	case 395:
+		/* shmget */
+		return -223;
+	case 396:
+		/* shmctl */
+		return -224;
 	}
 
 	return __NR_SCMP_ERROR;
@@ -244,7 +310,7 @@ int x86_rule_add(struct db_filter *db, struct db_api_rule_list *rule)
 
 		/* determine both the muxed and direct syscall numbers */
 		if (sys > 0) {
-			sys_a = _x86_sock_mux(sys);
+			sys_a = _x86_syscall_mux(sys);
 			if (sys_a == __NR_SCMP_ERROR) {
 				rc = __NR_SCMP_ERROR;
 				goto add_return;
@@ -252,7 +318,7 @@ int x86_rule_add(struct db_filter *db, struct db_api_rule_list *rule)
 			sys_b = sys;
 		} else {
 			sys_a = sys;
-			sys_b = _x86_sock_demux(sys);
+			sys_b = _x86_syscall_demux(sys);
 			if (sys_b == __NR_SCMP_ERROR) {
 				rc = __NR_SCMP_ERROR;
 				goto add_return;
@@ -305,24 +371,81 @@ int x86_rule_add(struct db_filter *db, struct db_api_rule_list *rule)
 			if (rc < 0)
 				goto add_return;
 		}
-	} else if (sys <= -200 && sys >= -224) {
-		/* multiplexed ipc syscalls */
+	} else if ((sys <= -200 && sys >= -224) || (sys >= 393 && sys <= 402)) {
+		/* (-200 to -224) : multiplexed ipc syscalls
+		   (393 to 402) : direct ipc syscalls */
+
+		/* strict check for the multiplexed socket syscalls */
 		for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
 			if ((rule->args[iter].valid != 0) && (rule->strict)) {
 				rc = -EINVAL;
 				goto add_return;
 			}
 		}
-		rule->args[0].arg = 0;
-		rule->args[0].op = SCMP_CMP_EQ;
-		rule->args[0].mask = DATUM_MAX;
-		rule->args[0].datum = abs(sys) % 200;
-		rule->args[0].valid = 1;
-		rule->syscall = __x86_NR_ipc;
 
-		rc = db_rule_add(db, rule);
-		if (rc < 0)
-			goto add_return;
+		/* determine both the muxed and direct syscall numbers */
+		if (sys > 0) {
+			sys_a = _x86_syscall_mux(sys);
+			if (sys_a == __NR_SCMP_ERROR) {
+				rc = __NR_SCMP_ERROR;
+				goto add_return;
+			}
+			sys_b = sys;
+		} else {
+			sys_a = sys;
+			sys_b = _x86_syscall_demux(sys);
+			if (sys_b == __NR_SCMP_ERROR) {
+				rc = __NR_SCMP_ERROR;
+				goto add_return;
+			}
+		}
+
+		/* use rule_a for the multiplexed syscall and use rule_b for
+		 * the direct wired syscall */
+
+		if (sys_a == __NR_SCMP_UNDEF) {
+			rule_a = NULL;
+			rule_b = rule;
+		} else if (sys_b == __NR_SCMP_UNDEF) {
+			rule_a = rule;
+			rule_b = NULL;
+		} else {
+			/* need two rules, dup the first and link together */
+			rule_a = rule;
+			rule_dup = db_rule_dup(rule_a);
+			rule_b = rule_dup;
+			if (rule_b == NULL)
+				goto add_return;
+			rule_b->prev = rule_a;
+			rule_b->next = NULL;
+			rule_a->next = rule_b;
+		}
+
+		/* multiplexed socket syscalls */
+		if (rule_a != NULL) {
+			rule_a->syscall = __x86_NR_ipc;
+			rule_a->args[0].arg = 0;
+			rule_a->args[0].op = SCMP_CMP_EQ;
+			rule_a->args[0].mask = DATUM_MAX;
+			rule_a->args[0].datum = (-sys_a) % 200;
+			rule_a->args[0].valid = 1;
+		}
+
+		/* direct wired socket syscalls */
+		if (rule_b != NULL)
+			rule_b->syscall = sys_b;
+
+		/* we should be protected by a transaction checkpoint */
+		if (rule_a != NULL) {
+			rc = db_rule_add(db, rule_a);
+			if (rc < 0)
+				goto add_return;
+		}
+		if (rule_b != NULL) {
+			rc = db_rule_add(db, rule_b);
+			if (rc < 0)
+				goto add_return;
+		}
 	} else if (sys >= 0) {
 		/* normal syscall processing */
 		rc = db_rule_add(db, rule);
