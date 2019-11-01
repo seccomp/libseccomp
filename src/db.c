@@ -2180,6 +2180,44 @@ priority_failure:
 }
 
 /**
+ * Add a new rule to a single filter
+ * @param filter the filter
+ * @param rule the filter rule
+ *
+ * This is a helper function for db_col_rule_add() and similar functions, it
+ * isn't generally useful.  Returns zero on success, negative values on error.
+ *
+ */
+static int _db_col_rule_add(struct db_filter *filter,
+			    struct db_api_rule_list *rule)
+{
+	int rc;
+	struct db_api_rule_list *iter;
+
+	/* add the rule to the filter */
+	rc = arch_filter_rule_add(filter, rule);
+	if (rc != 0)
+		return rc;
+
+	/* insert the chain to the end of the rule list */
+	iter = rule;
+	while (iter->next)
+		iter = iter->next;
+	if (filter->rules != NULL) {
+		rule->prev = filter->rules->prev;
+		iter->next = filter->rules;
+		filter->rules->prev->next = rule;
+		filter->rules->prev = iter;
+	} else {
+		rule->prev = iter;
+		iter->next = rule;
+		filter->rules = rule;
+	}
+
+	return 0;
+}
+
+/**
  * Add a new rule to the current filter
  * @param col the filter collection
  * @param strict the strict flag
@@ -2207,7 +2245,7 @@ int db_col_rule_add(struct db_filter_col *col,
 	size_t chain_size;
 	struct db_api_arg *chain = NULL;
 	struct scmp_arg_cmp arg_data;
-	struct db_api_rule_list *rule, *rule_tmp;
+	struct db_api_rule_list *rule;
 	struct db_filter *db;
 
 	/* collect the arguments for the filter rule */
@@ -2255,9 +2293,6 @@ int db_col_rule_add(struct db_filter_col *col,
 
 	/* add the rule to the different filters in the collection */
 	for (iter = 0; iter < col->filter_cnt; iter++) {
-
-		/* TODO: consolidate with db_col_transaction_start() */
-
 		db = col->filters[iter];
 
 		/* create the rule */
@@ -2268,24 +2303,10 @@ int db_col_rule_add(struct db_filter_col *col,
 		}
 
 		/* add the rule */
-		rc_tmp = arch_filter_rule_add(db, rule);
-		if (rc_tmp == 0) {
-			/* insert the chain to the end of the rule list */
-			rule_tmp = rule;
-			while (rule_tmp->next)
-				rule_tmp = rule_tmp->next;
-			if (db->rules != NULL) {
-				rule->prev = db->rules->prev;
-				rule_tmp->next = db->rules;
-				db->rules->prev->next = rule;
-				db->rules->prev = rule_tmp;
-			} else {
-				rule->prev = rule_tmp;
-				rule_tmp->next = rule;
-				db->rules = rule;
-			}
-		} else
+		rc_tmp = _db_col_rule_add(db, rule);
+		if (rc_tmp != 0)
 			free(rule);
+
 add_arch_fail:
 		if (rc_tmp != 0 && rc == 0)
 			rc = rc_tmp;
@@ -2320,7 +2341,7 @@ int db_col_transaction_start(struct db_filter_col *col)
 	unsigned int iter;
 	struct db_filter_snap *snap;
 	struct db_filter *filter_o, *filter_s;
-	struct db_api_rule_list *rule_o, *rule_s = NULL, *rule_tmp;
+	struct db_api_rule_list *rule_o, *rule_s = NULL;
 
 	/* allocate the snapshot */
 	snap = zmalloc(sizeof(*snap));
@@ -2350,33 +2371,15 @@ int db_col_transaction_start(struct db_filter_col *col)
 		if (rule_o == NULL)
 			continue;
 		do {
-
-			/* TODO: consolidate with db_col_rule_add() */
-
 			/* duplicate the rule */
 			rule_s = db_rule_dup(rule_o);
 			if (rule_s == NULL)
 				goto trans_start_failure;
 
 			/* add the rule */
-			rc = arch_filter_rule_add(filter_s, rule_s);
+			rc = _db_col_rule_add(filter_s, rule_s);
 			if (rc != 0)
 				goto trans_start_failure;
-
-			/* insert the chain to the end of the rule list */
-			rule_tmp = rule_s;
-			while (rule_tmp->next)
-				rule_tmp = rule_tmp->next;
-			if (filter_s->rules != NULL) {
-				rule_s->prev = filter_s->rules->prev;
-				rule_tmp->next = filter_s->rules;
-				filter_s->rules->prev->next = rule_s;
-				filter_s->rules->prev = rule_tmp;
-			} else {
-				rule_s->prev = rule_tmp;
-				rule_tmp->next = rule_s;
-				filter_s->rules = rule_s;
-			}
 			rule_s = NULL;
 
 			/* next rule */
