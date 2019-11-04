@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86.h"
 
-/* NOTE: based on Linux 4.15-rc7 */
+/* NOTE: based on Linux v5.4-rc4 */
 const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "_llseek", 140 },
 	{ "_newselect", 142 },
@@ -58,11 +58,17 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "chown32", 212 },
 	{ "chroot", 61 },
 	{ "clock_adjtime", 343 },
+	{ "clock_adjtime64", 405 },
 	{ "clock_getres", 266 },
+	{ "clock_getres_time64", 406 },
 	{ "clock_gettime", 265 },
+	{ "clock_gettime64", 403 },
 	{ "clock_nanosleep", 267 },
+	{ "clock_nanosleep_time64", 407 },
 	{ "clock_settime", 264 },
+	{ "clock_settime64", 404 },
 	{ "clone", 120 },
+	{ "clone3", 435 },
 	{ "close", 6 },
 	{ "connect", 362 },
 	{ "copy_file_range", 377 },
@@ -106,7 +112,11 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "flock", 143 },
 	{ "fork", 2 },
 	{ "fremovexattr", 237 },
+	{ "fsconfig", 431 },
 	{ "fsetxattr", 228 },
+	{ "fsmount", 432 },
+	{ "fsopen", 430 },
+	{ "fspick", 433 },
 	{ "fstat", 108 },
 	{ "fstat64", 197 },
 	{ "fstatat64", 300 },
@@ -117,6 +127,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "ftruncate", 93 },
 	{ "ftruncate64", 194 },
 	{ "futex", 240 },
+	{ "futex_time64", 422 },
 	{ "futimesat", 299 },
 	{ "get_kernel_syms", 130 },
 	{ "get_mempolicy", 275 },
@@ -169,6 +180,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "io_destroy", 246 },
 	{ "io_getevents", 247 },
 	{ "io_pgetevents", 385 },
+	{ "io_pgetevents_time64", 416 },
 	{ "io_setup", 245 },
 	{ "io_submit", 248 },
 	{ "io_uring_setup", 425 },
@@ -217,6 +229,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "mmap2", 192 },
 	{ "modify_ldt", 123 },
 	{ "mount", 21 },
+	{ "move_mount", 429 },
 	{ "move_pages", 317 },
 	{ "mprotect", 125 },
 	{ "mpx", 56 },
@@ -224,13 +237,15 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "mq_notify", 281 },
 	{ "mq_open", 277 },
 	{ "mq_timedreceive", 280 },
+	{ "mq_timedreceive_time64", 419 },
 	{ "mq_timedsend", 279 },
+	{ "mq_timedsend_time64", 418 },
 	{ "mq_unlink", 278 },
 	{ "mremap", 163 },
-	{ "msgctl", __PNR_msgctl },
-	{ "msgget", __PNR_msgget },
-	{ "msgrcv", __PNR_msgrcv },
-	{ "msgsnd", __PNR_msgsnd },
+	{ "msgctl", 402 },
+	{ "msgget", 399 },
+	{ "msgrcv", 401 },
+	{ "msgsnd", 400 },
 	{ "msync", 144 },
 	{ "multiplexer", __PNR_multiplexer },
 	{ "munlock", 151 },
@@ -249,6 +264,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "oldwait4", __PNR_oldwait4 },
 	{ "open", 5 },
 	{ "open_by_handle_at", 342 },
+	{ "open_tree", 428 },
 	{ "openat", 295 },
 	{ "pause", 29 },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
@@ -256,6 +272,8 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "pciconfig_write", __PNR_pciconfig_write },
 	{ "perf_event_open", 336 },
 	{ "personality", 136 },
+	{ "pidfd_open", 434 },
+	{ "pidfd_send_signal", 424 },
 	{ "pipe", 42 },
 	{ "pipe2", 331 },
 	{ "pivot_root", 217 },
@@ -264,6 +282,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "pkey_mprotect", 380 },
 	{ "poll", 168 },
 	{ "ppoll", 309 },
+	{ "ppoll_time64", 414 },
 	{ "prctl", 172 },
 	{ "pread64", 180 },
 	{ "preadv", 333 },
@@ -274,6 +293,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "prof", 44 },
 	{ "profil", 98 },
 	{ "pselect6", 308 },
+	{ "pselect6_time64", 413 },
 	{ "ptrace", 26 },
 	{ "putpmsg", 189 },
 	{ "pwrite64", 181 },
@@ -291,6 +311,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "recv", __PNR_recv },
 	{ "recvfrom", 371 },
 	{ "recvmmsg", 337 },
+	{ "recvmmsg_time64", 417 },
 	{ "recvmsg", 372 },
 	{ "remap_file_pages", 257 },
 	{ "removexattr", 235 },
@@ -308,6 +329,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "rt_sigreturn", 173 },
 	{ "rt_sigsuspend", 179 },
 	{ "rt_sigtimedwait", 177 },
+	{ "rt_sigtimedwait_time64", 421 },
 	{ "rt_tgsigqueueinfo", 335 },
 	{ "rtas", __PNR_rtas },
 	{ "s390_guarded_storage", __PNR_s390_guarded_storage },
@@ -322,6 +344,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "sched_getparam", 155 },
 	{ "sched_getscheduler", 157 },
 	{ "sched_rr_get_interval", 161 },
+	{ "sched_rr_get_interval_time64", 423 },
 	{ "sched_setaffinity", 241 },
 	{ "sched_setattr", 351 },
 	{ "sched_setparam", 154 },
@@ -330,10 +353,11 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "seccomp", 354 },
 	{ "security", __PNR_security },
 	{ "select", 82 },
-	{ "semctl", __PNR_semctl },
-	{ "semget", __PNR_semget },
+	{ "semctl", 394 },
+	{ "semget", 393 },
 	{ "semop", __PNR_semop },
 	{ "semtimedop", __PNR_semtimedop },
+	{ "semtimedop_time64", 420 },
 	{ "send", __PNR_send },
 	{ "sendfile", 187 },
 	{ "sendfile64", 239 },
@@ -375,10 +399,10 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "setuid32", 213 },
 	{ "setxattr", 226 },
 	{ "sgetmask", 68 },
-	{ "shmat", __PNR_shmat },
-	{ "shmctl", __PNR_shmctl },
-	{ "shmdt", __PNR_shmdt },
-	{ "shmget", __PNR_shmget },
+	{ "shmat", 397 },
+	{ "shmctl", 396 },
+	{ "shmdt", 398 },
+	{ "shmget", 395 },
 	{ "shutdown", 373 },
 	{ "sigaction", 67 },
 	{ "sigaltstack", 186 },
@@ -427,11 +451,15 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "timer_delete", 263 },
 	{ "timer_getoverrun", 262 },
 	{ "timer_gettime", 261 },
+	{ "timer_gettime64", 408 },
 	{ "timer_settime", 260 },
+	{ "timer_settime64", 409 },
 	{ "timerfd", __PNR_timerfd },
 	{ "timerfd_create", 322 },
 	{ "timerfd_gettime", 326 },
+	{ "timerfd_gettime64", 410 },
 	{ "timerfd_settime", 325 },
+	{ "timerfd_settime64", 411 },
 	{ "times", 43 },
 	{ "tkill", 238 },
 	{ "truncate", 92 },
@@ -453,6 +481,7 @@ const struct arch_syscall_def x86_syscall_table[] = { \
 	{ "ustat", 62 },
 	{ "utime", 30 },
 	{ "utimensat", 320 },
+	{ "utimensat_time64", 412 },
 	{ "utimes", 271 },
 	{ "vfork", 190 },
 	{ "vhangup", 111 },
@@ -486,7 +515,7 @@ int x86_syscall_resolve_name(const char *name)
 
 	if (strcmp(name, "accept") == 0)
 		return __PNR_accept;
-	if (strcmp(name, "accept4") == 0)
+	else if (strcmp(name, "accept4") == 0)
 		return __PNR_accept4;
 	else if (strcmp(name, "bind") == 0)
 		return __PNR_bind;
@@ -524,6 +553,31 @@ int x86_syscall_resolve_name(const char *name)
 		return __PNR_socket;
 	else if (strcmp(name, "socketpair") == 0)
 		return __PNR_socketpair;
+
+	if (strcmp(name, "semop") == 0)
+		return __PNR_semop;
+	else if (strcmp(name, "semget") == 0)
+		return __PNR_semget;
+	else if (strcmp(name, "semctl") == 0)
+		return __PNR_semctl;
+	else if (strcmp(name, "semtimedop") == 0)
+		return __PNR_semtimedop;
+	else if (strcmp(name, "msgsnd") == 0)
+		return __PNR_msgsnd;
+	else if (strcmp(name, "msgrcv") == 0)
+		return __PNR_msgrcv;
+	else if (strcmp(name, "msgget") == 0)
+		return __PNR_msgget;
+	else if (strcmp(name, "msgctl") == 0)
+		return __PNR_msgctl;
+	else if (strcmp(name, "shmat") == 0)
+		return __PNR_shmat;
+	else if (strcmp(name, "shmdt") == 0)
+		return __PNR_shmdt;
+	else if (strcmp(name, "shmget") == 0)
+		return __PNR_shmget;
+	else if (strcmp(name, "shmctl") == 0)
+		return __PNR_shmctl;
 
 	for (iter = 0; table[iter].name != NULL; iter++) {
 		if (strcmp(name, table[iter].name) == 0)
@@ -589,6 +643,33 @@ const char *x86_syscall_resolve_num(int num)
 		return "socket";
 	else if (num == __PNR_socketpair)
 		return "socketpair";
+
+	if (num == __PNR_semop)
+		return "semop";
+	else if (num == __PNR_semget)
+		return "semget";
+	else if (num == __PNR_semctl)
+		return "semctl";
+	else if (num == __PNR_semtimedop)
+		return "semtimedop";
+	else if (num == __PNR_msgsnd)
+		return "msgsnd";
+	else if (num == __PNR_msgrcv)
+		return "msgrcv";
+	else if (num == __PNR_msgget)
+		return "msgget";
+	else if (num == __PNR_msgctl)
+		return "msgctl";
+	else if (num == __PNR_shmat)
+		return "shmat";
+	else if (num == __PNR_shmdt)
+		return "shmdt";
+	else if (num == __PNR_shmdt)
+		return "shmget";
+	else if (num == __PNR_shmget)
+		return "shmget";
+	else if (num == __PNR_shmctl)
+		return "shmctl";
 
 	for (iter = 0; table[iter].num != __NR_SCMP_ERROR; iter++) {
 		if (num == table[iter].num)
