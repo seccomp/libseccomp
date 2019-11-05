@@ -142,7 +142,8 @@ EXTRA_DIST_TESTPYTHON = \
 	47-live-kill_process.py \
 	48-sim-32b_args.py \
 	49-sim-64b_comparisons.py \
-	50-sim-hash_collision.py
+	50-sim-hash_collision.py \
+	51-live-user_notification.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
