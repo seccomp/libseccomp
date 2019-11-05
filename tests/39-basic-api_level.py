@@ -50,6 +50,16 @@ def test():
     if api != 3:
         raise RuntimeError("Failed getting API level 3")
 
+    set_api(4)
+    api = get_api()
+    if api != 4:
+        raise RuntimeError("Failed getting API level 4")
+
+    set_api(5)
+    api = get_api()
+    if api != 5:
+        raise RuntimeError("Failed getting API level 5")
+
     # Attempt to set a high, invalid API level
     try:
         set_api(1024)
@@ -59,7 +69,7 @@ def test():
         raise RuntimeError("Missing failure when setting invalid API level")
     # Ensure that the previously set API level didn't change
     api = get_api()
-    if api != 3:
+    if api != 5:
         raise RuntimeError("Failed getting old API level after setting an invalid API level")
 
 test()

@@ -51,6 +51,12 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
+	/* NOTE: we are using a different approach to test for the native arch
+	 *       to exercise slightly different code paths */
+	rc = seccomp_arch_exist(ctx, 0);
+	if (rc != -EEXIST)
+		goto out;
+
 	/* NOTE: more sanity/coverage tests (see above) */
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_NATIVE);
 	if (rc != 0)
