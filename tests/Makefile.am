@@ -90,7 +90,8 @@ check_PROGRAMS = \
 	48-sim-32b_args \
 	49-sim-64b_comparisons \
 	50-sim-hash_collision \
-	51-live-user_notification
+	51-live-user_notification \
+	52-basic-load
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -143,7 +144,8 @@ EXTRA_DIST_TESTPYTHON = \
 	48-sim-32b_args.py \
 	49-sim-64b_comparisons.py \
 	50-sim-hash_collision.py \
-	51-live-user_notification.py
+	51-live-user_notification.py \
+	52-basic-load.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -196,7 +198,8 @@ EXTRA_DIST_TESTCFGS = \
 	48-sim-32b_args.tests \
 	49-sim-64b_comparisons.tests \
 	50-sim-hash_collision.tests \
-	51-live-user_notification.tests
+	51-live-user_notification.tests \
+	52-basic-load.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
