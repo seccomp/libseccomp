@@ -55,15 +55,15 @@ int main(int argc, char *argv[])
 	unsigned int arch;
 	char *name = NULL;
 
-	if (seccomp_syscall_resolve_name("open") != __NR_open)
+	if (seccomp_syscall_resolve_name("open") != __SNR_open)
 		goto fail;
-	if (seccomp_syscall_resolve_name("read") != __NR_read)
+	if (seccomp_syscall_resolve_name("read") != __SNR_read)
 		goto fail;
 	if (seccomp_syscall_resolve_name("INVALID") != __NR_SCMP_ERROR)
 		goto fail;
 
 	rc = seccomp_syscall_resolve_name_rewrite(SCMP_ARCH_NATIVE, "openat");
-	if (rc != __NR_openat)
+	if (rc != __SNR_openat)
 		goto fail;
 
 	while ((arch = arch_list[iter++]) != -1) {
