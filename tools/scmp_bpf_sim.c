@@ -289,6 +289,8 @@ int main(int argc, char *argv[])
 				exit_fault(EINVAL);
 			break;
 		case 'f':
+			if (opt_file)
+				exit_fault(EINVAL);
 			opt_file = strdup(optarg);
 			if (opt_file == NULL)
 				exit_fault(ENOMEM);
