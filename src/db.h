@@ -135,6 +135,7 @@ struct db_filter_snap {
 	/* individual filters */
 	struct db_filter **filters;
 	unsigned int filter_cnt;
+	bool shadow;
 
 	struct db_filter_snap *next;
 };

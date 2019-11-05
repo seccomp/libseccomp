@@ -909,6 +909,9 @@ static void _db_snap_release(struct db_filter_snap *snap)
 {
 	unsigned int iter;
 
+	if (snap == NULL)
+		return;
+
 	if (snap->filter_cnt > 0) {
 		for (iter = 0; iter < snap->filter_cnt; iter++) {
 			if (snap->filters[iter])
@@ -1134,12 +1137,20 @@ init_failure:
 void db_col_release(struct db_filter_col *col)
 {
 	unsigned int iter;
+	struct db_filter_snap *snap;
 
 	if (col == NULL)
 		return;
 
 	/* set the state, just in case */
 	col->state = _DB_STA_FREED;
+
+	/* free any snapshots */
+	while (col->snapshots != NULL) {
+		snap = col->snapshots;
+		col->snapshots = snap->next;
+		_db_snap_release(snap);
+	}
 
 	/* free any filters */
 	for (iter = 0; iter < col->filter_cnt; iter++)
@@ -2343,6 +2354,20 @@ int db_col_transaction_start(struct db_filter_col *col)
 	struct db_filter *filter_o, *filter_s;
 	struct db_api_rule_list *rule_o, *rule_s = NULL;
 
+	/* check to see if a shadow snapshot exists */
+	if (col->snapshots && col->snapshots->shadow) {
+		/* we have a shadow!  this will be easy */
+
+		/* NOTE: we don't bother to do any verification of the shadow
+		 *       because we start a new transaction every time we add
+		 *       a new rule to the filter(s); if this ever changes we
+		 *       will need to add a mechanism to verify that the shadow
+		 *       transaction is current/correct */
+
+		col->snapshots->shadow = false;
+		return 0;
+	}
+
 	/* allocate the snapshot */
 	snap = zmalloc(sizeof(*snap));
 	if (snap == NULL)
@@ -2436,14 +2461,114 @@ void db_col_transaction_abort(struct db_filter_col *col)
  * Commit the top most seccomp filter transaction
  * @param col the filter collection
  *
- * This function commits the most recent seccomp filter transaction.
+ * This function commits the most recent seccomp filter transaction and
+ * attempts to create a shadow transaction that is a duplicate of the current
+ * filter to speed up future transactions.
  *
  */
 void db_col_transaction_commit(struct db_filter_col *col)
 {
+	int rc;
+	unsigned int iter;
 	struct db_filter_snap *snap;
+	struct db_filter *filter_o, *filter_s;
+	struct db_api_rule_list *rule_o, *rule_s;
 
 	snap = col->snapshots;
+	if (snap == NULL)
+		return;
+
+	/* check for a shadow set by a higher transaction commit */
+	if (snap->shadow) {
+		/* leave the shadow intact, but drop the next snapshot */
+		if (snap->next) {
+			snap->next = snap->next->next;
+			_db_snap_release(snap->next);
+		}
+		return;
+	}
+
+	/* adjust the number of filters if needed */
+	if (col->filter_cnt > snap->filter_cnt) {
+		unsigned int tmp_i;
+		struct db_filter **tmp_f;
+
+		/* add filters */
+		tmp_f = realloc(snap->filters,
+				sizeof(struct db_filter *) * col->filter_cnt);
+		if (tmp_f == NULL)
+			goto shadow_err;
+		snap->filters = tmp_f;
+		do {
+			tmp_i = snap->filter_cnt;
+			snap->filters[tmp_i] =
+				_db_init(col->filters[tmp_i]->arch);
+			if (snap->filters[tmp_i] == NULL)
+				goto shadow_err;
+			snap->filter_cnt++;
+		} while (snap->filter_cnt < col->filter_cnt);
+	} else if (col->filter_cnt < snap->filter_cnt) {
+		/* remove filters */
+
+		/* NOTE: while we release the filters we no longer need, we
+		 *       don't bother to resize the filter array, we just
+		 *       adjust the filter counter, this *should* be harmless
+		 *       at the cost of a not reaping all the memory possible */
+
+		do {
+			_db_release(snap->filters[snap->filter_cnt--]);
+		} while (snap->filter_cnt > col->filter_cnt);
+	}
+
+	/* loop through each filter and update the rules on the snapshot */
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		filter_o = col->filters[iter];
+		filter_s = snap->filters[iter];
+
+		/* skip ahead to the new rule(s) */
+		rule_o = filter_o->rules;
+		rule_s = filter_s->rules;
+		if (rule_o == NULL)
+			/* nothing to shadow */
+			continue;
+		if (rule_s != NULL) {
+			do {
+				rule_o = rule_o->next;
+				rule_s = rule_s->next;
+			} while (rule_s != filter_s->rules);
+
+			/* did we actually add any rules? */
+			if (rule_o == filter_o->rules)
+				/* no, we are done in this case */
+				continue;
+		}
+
+		/* update the old snapshot to make it a shadow */
+		do {
+			/* duplicate the rule */
+			rule_s = db_rule_dup(rule_o);
+			if (rule_s == NULL)
+				goto shadow_err;
+
+			/* add the rule */
+			rc = _db_col_rule_add(filter_s, rule_s);
+			if (rc != 0) {
+				free(rule_s);
+				goto shadow_err;
+			}
+
+			/* next rule */
+			rule_o = rule_o->next;
+		} while (rule_o != filter_o->rules);
+	}
+
+	/* success, mark the snapshot as a shadow and return */
+	snap->shadow = true;
+	return;
+
+shadow_err:
+	/* we failed making a shadow, cleanup and return */
 	col->snapshots = snap->next;
 	_db_snap_release(snap);
+	return;
 }
