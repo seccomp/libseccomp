@@ -2,6 +2,17 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.4.2 - November 7, 2019
+- Update the syscall table for Linux v5.4-rc4
+- Stop defining __NR_x values for syscalls that don't exist.  Libseccomp
+  now uses __SNR_x internally
+- Update the Cython language level to "3str"
+- Add support for io-uring related system calls
+- Clarify the maintainer documentation and release process
+- Fix python module name issue introduced in the v2.4.0 release.  The module
+  is now named "seccomp" as it was previously
+- Deliver the SECURITY.md file in releases
+
 * Version 2.4.1 - April 17, 2019
 - Fix a BPF generation bug where the optimizer mistakenly identified duplicate
   BPF code blocks
