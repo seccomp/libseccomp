@@ -13,6 +13,7 @@ David Drysdale <drysdale@google.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
 Felix Abecassis <fabecassis@nvidia.com>
+Felix Geyer <debfx@fobos.de>
 Heiko Carstens <heiko.carstens@de.ibm.com>
 Helge Deller <deller@gmx.de>
 Jake Edge <jake@lwn.net>
@@ -35,6 +36,8 @@ Mike Frysinger <vapier@gentoo.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
 Paul Moore <paul@paul-moore.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
+Stéphane Graber <stgraber@ubuntu.com>
+Stephen Coleman <omegacoleman@gmail.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
 Tobias Klauser <tklauser@distanz.ch>
 Tom Hromatka <tom.hromatka@oracle.com>
