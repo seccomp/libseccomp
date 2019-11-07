@@ -664,8 +664,6 @@ const char *x86_syscall_resolve_num(int num)
 		return "shmat";
 	else if (num == __PNR_shmdt)
 		return "shmdt";
-	else if (num == __PNR_shmdt)
-		return "shmget";
 	else if (num == __PNR_shmget)
 		return "shmget";
 	else if (num == __PNR_shmctl)
