@@ -272,6 +272,7 @@
 #define __PNR_timerfd_gettime64			-10238
 #define __PNR_timerfd_settime64			-10239
 #define __PNR_utimensat_time64			-10240
+#define __PNR_ppoll				-10241
 
 /*
  * libseccomp syscall definitions
@@ -1357,6 +1358,12 @@
 #define __SNR_poll			__NR_poll
 #else
 #define __SNR_poll			__PNR_poll
+#endif
+
+#ifdef __NR_ppoll
+#define __SNR_ppoll			__NR_ppoll
+#else
+#define __SNR_ppoll			__PNR_ppoll
 #endif
 
 #ifdef __NR_ppoll_time64
