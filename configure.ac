@@ -91,11 +91,11 @@ AC_SUBST([VERSION_MICRO])
 dnl ####
 dnl cython checks
 dnl ####
-AC_CHECK_PROG(have_cython, cython, "yes", "no")
-AS_IF([test "$have_cython" = yes], [
-	AS_ECHO("checking cython version... $(cython -V 2>&1 | cut -d' ' -f 3)")
-	CYTHON_VER_MAJ=$(cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 1);
-	CYTHON_VER_MIN=$(cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 2);
+AC_CHECK_PROGS(cython, cython3 cython, "no")
+AS_IF([test "$cython" != no], [
+	AS_ECHO("checking cython version... $($cython -V 2>&1 | cut -d' ' -f 3)")
+	CYTHON_VER_MAJ=$($cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 1);
+	CYTHON_VER_MIN=$($cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 2);
 ],[
 	CYTHON_VER_MAJ=0
 	CYTHON_VER_MIN=0
@@ -112,7 +112,7 @@ AS_IF([test "$enable_python" = yes], [
 	AS_IF([test "$CYTHON_VER_MAJ" -eq 0 -a "$CYTHON_VER_MIN" -lt 29], [
 		AC_MSG_ERROR([python bindings require cython 0.29 or higher])
 	])
-	AM_PATH_PYTHON
+	AM_PATH_PYTHON([3])
 ])
 AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = yes])
 AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
