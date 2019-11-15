@@ -159,11 +159,14 @@ struct bpf_state {
 	/* default action */
 	uint64_t def_hsh;
 
-	/* target arch - NOTE: be careful, temporary use only! */
-	const struct arch_def *arch;
-
 	/* bpf program */
 	struct bpf_program *bpf;
+
+	/* WARNING - the following variables are temporary use only */
+	const struct arch_def *arch;
+	struct bpf_blk *b_head;
+	struct bpf_blk *b_tail;
+	struct bpf_blk *b_new;
 };
 
 /**
@@ -1266,29 +1269,27 @@ static struct bpf_blk *_gen_bpf_syscall(struct bpf_state *state,
 }
 
 /**
- * Generate the BPF instruction blocks for a given filter/architecture
+ * Loop through the syscalls in the db_filter and generate their bpf
  * @param state the BPF state
  * @param db the filter DB
  * @param db_secondary the secondary DB
- *
- * Generate the BPF instruction block for the given filter DB(s)/architecture(s)
- * and return a pointer to the block on succes, NULL on failure.  The resulting
- * block assumes that the architecture token has already been loaded into the
- * BPF accumulator.
- *
+ * @param Number of blocks added by this function
  */
-static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
-				     const struct db_filter *db,
-				     const struct db_filter *db_secondary)
+static int _gen_bpf_syscalls(struct bpf_state *state,
+			     const struct db_filter *db,
+			     const struct db_filter *db_secondary,
+			     unsigned int *blks_added)
 {
-	int rc;
-	unsigned int blk_cnt = 0;
-	bool acc_reset;
-	struct bpf_instr instr;
 	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter;
-	struct bpf_blk *b_head = NULL, *b_tail = NULL, *b_iter, *b_new;
+	bool acc_reset;
+	int rc = 0;
 
 	state->arch = db->arch;
+	state->b_head = NULL;
+	state->b_tail = NULL;
+	state->b_new = NULL;
+
+	*blks_added = 0;
 
 	/* sort the syscall list */
 	_sys_priority_sort(db->syscalls, &s_head, &s_tail);
@@ -1307,39 +1308,72 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 			continue;
 
 		/* build the syscall filter */
-		b_new = _gen_bpf_syscall(state, s_iter,
-					 (b_head == NULL ?
-					  state->def_hsh : b_head->hash),
+		state->b_new = _gen_bpf_syscall(state, s_iter,
+					 (state->b_head == NULL ?
+					  state->def_hsh : state->b_head->hash),
 					 (s_iter == s_head ?
 					  acc_reset : false));
-		if (b_new == NULL)
-			goto arch_failure;
+		if (state->b_new == NULL)
+			goto out;
 
 		/* add the filter to the list head */
-		b_new->prev = NULL;
-		b_new->next = b_head;
-		if (b_tail != NULL) {
-			b_head->prev = b_new;
-			b_head = b_new;
+		state->b_new->prev = NULL;
+		state->b_new->next = state->b_head;
+		if (state->b_tail != NULL) {
+			state->b_head->prev = state->b_new;
+			state->b_head = state->b_new;
 		} else {
-			b_head = b_new;
-			b_tail = b_head;
+			state->b_head = state->b_new;
+			state->b_tail = state->b_head;
 		}
 
-		if (b_tail->next != NULL)
-			b_tail = b_tail->next;
-		blk_cnt++;
+		if (state->b_tail->next != NULL)
+			state->b_tail = state->b_tail->next;
+		(*blks_added)++;
 	}
+
+out:
+	return rc;
+}
+
+/**
+ * Generate the BPF instruction blocks for a given filter/architecture
+ * @param state the BPF state
+ * @param db the filter DB
+ * @param db_secondary the secondary DB
+ *
+ * Generate the BPF instruction block for the given filter DB(s)/architecture(s)
+ * and return a pointer to the block on succes, NULL on failure.  The resulting
+ * block assumes that the architecture token has already been loaded into the
+ * BPF accumulator.
+ *
+ */
+static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
+				     const struct db_filter *db,
+				     const struct db_filter *db_secondary)
+{
+	int rc;
+	unsigned int blk_cnt = 0, blks_added = 0;
+	struct bpf_instr instr;
+	struct bpf_blk *b_iter;
+
+	state->arch = db->arch;
+
+	/* create the syscall filters and add them to block list group */
+	rc = _gen_bpf_syscalls(state, db, db_secondary, &blks_added);
+	if (rc < 0)
+		goto arch_failure;
+	blk_cnt += blks_added;
 
 	/* additional ABI filtering */
 	if ((state->arch->token == SCMP_ARCH_X86_64 ||
 	     state->arch->token == SCMP_ARCH_X32) && (db_secondary == NULL)) {
 		_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
 			   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_SYSCALL(state->arch));
-		b_new = _blk_append(state, NULL, &instr);
-		if (b_new == NULL)
+		state->b_new = _blk_append(state, NULL, &instr);
+		if (state->b_new == NULL)
 			goto arch_failure;
-		b_new->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
+		state->b_new->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_SYSCALL);
 		if (state->arch->token == SCMP_ARCH_X86_64) {
 			/* filter out x32 */
 			_BPF_INSTR(instr,
@@ -1347,12 +1381,12 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 				   _BPF_JMP_NO,
 				   _BPF_JMP_NO,
 				   _BPF_K(state->arch, X32_SYSCALL_BIT));
-			if (b_head != NULL)
-				instr.jf = _BPF_JMP_HSH(b_head->hash);
+			if (state->b_head != NULL)
+				instr.jf = _BPF_JMP_HSH(state->b_head->hash);
 			else
 				instr.jf = _BPF_JMP_HSH(state->def_hsh);
-			b_new = _blk_append(state, b_new, &instr);
-			if (b_new == NULL)
+			state->b_new = _blk_append(state, state->b_new, &instr);
+			if (state->b_new == NULL)
 				goto arch_failure;
 			/* NOTE: starting with Linux v4.8 the seccomp filters
 			 *	 are processed both when the syscall is
@@ -1366,8 +1400,8 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 				   _BPF_JMP_NO,
 				   _BPF_JMP_HSH(state->bad_arch_hsh),
 				   _BPF_K(state->arch, -1));
-			if (b_head != NULL)
-				instr.jt = _BPF_JMP_HSH(b_head->hash);
+			if (state->b_head != NULL)
+				instr.jt = _BPF_JMP_HSH(state->b_head->hash);
 			else
 				instr.jt = _BPF_JMP_HSH(state->def_hsh);
 			blk_cnt++;
@@ -1378,22 +1412,22 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 				   _BPF_JMP_NO,
 				   _BPF_JMP_HSH(state->bad_arch_hsh),
 				   _BPF_K(state->arch, X32_SYSCALL_BIT));
-			if (b_head != NULL)
-				instr.jt = _BPF_JMP_HSH(b_head->hash);
+			if (state->b_head != NULL)
+				instr.jt = _BPF_JMP_HSH(state->b_head->hash);
 			else
 				instr.jt = _BPF_JMP_HSH(state->def_hsh);
 			blk_cnt++;
 		} else
 			/* we should never get here */
 			goto arch_failure;
-		b_new = _blk_append(state, b_new, &instr);
-		if (b_new == NULL)
+		state->b_new = _blk_append(state, state->b_new, &instr);
+		if (state->b_new == NULL)
 			goto arch_failure;
-		b_new->next = b_head;
-		if (b_head != NULL)
-			b_head->prev = b_new;
-		b_head = b_new;
-		rc = _hsh_add(state, &b_head, 1);
+		state->b_new->next = state->b_head;
+		if (state->b_head != NULL)
+			state->b_head->prev = state->b_new;
+		state->b_head = state->b_new;
+		rc = _hsh_add(state, &state->b_head, 1);
 		if (rc < 0)
 			goto arch_failure;
 	}
@@ -1402,34 +1436,34 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_JMP + BPF_JEQ),
 		   _BPF_JMP_NO, _BPF_JMP_NXT(blk_cnt++),
 		   _BPF_K(state->arch, state->arch->token_bpf));
-	if (b_head != NULL)
-		instr.jt = _BPF_JMP_HSH(b_head->hash);
+	if (state->b_head != NULL)
+		instr.jt = _BPF_JMP_HSH(state->b_head->hash);
 	else
 		instr.jt = _BPF_JMP_HSH(state->def_hsh);
-	b_new = _blk_append(state, NULL, &instr);
-	if (b_new == NULL)
+	state->b_new = _blk_append(state, NULL, &instr);
+	if (state->b_new == NULL)
 		goto arch_failure;
-	b_new->next = b_head;
-	if (b_head != NULL)
-		b_head->prev = b_new;
-	b_head = b_new;
-	rc = _hsh_add(state, &b_head, 1);
+	state->b_new->next = state->b_head;
+	if (state->b_head != NULL)
+		state->b_head->prev = state->b_new;
+	state->b_head = state->b_new;
+	rc = _hsh_add(state, &state->b_head, 1);
 	if (rc < 0)
 		goto arch_failure;
 
 	state->arch = NULL;
-	return b_head;
+	return state->b_head;
 
 arch_failure:
 	/* NOTE: we do the cleanup here and not just return an error as all of
 	 * the instruction blocks may not be added to the hash table when we
 	 * hit an error */
 	state->arch = NULL;
-	b_iter = b_head;
+	b_iter = state->b_head;
 	while (b_iter != NULL) {
-		b_new = b_iter->next;
+		state->b_new = b_iter->next;
 		_blk_free(state, b_iter);
-		b_iter = b_new;
+		b_iter = state->b_new;
 	}
 	return NULL;
 }
