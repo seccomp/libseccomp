@@ -243,21 +243,135 @@ static void _gen_pfc_chain(const struct arch_def *arch,
  *
  */
 static void _gen_pfc_syscall(const struct arch_def *arch,
-			     const struct db_sys_list *sys, FILE *fds)
+			     const struct db_sys_list *sys, FILE *fds,
+			     int lvl)
 {
 	unsigned int sys_num = sys->num;
 	const char *sys_name = arch_syscall_resolve_num(arch, sys_num);
 
-	_indent(fds, 1);
+	_indent(fds, lvl);
 	fprintf(fds, "# filter for syscall \"%s\" (%u) [priority: %d]\n",
 		(sys_name ? sys_name : "UNKNOWN"), sys_num, sys->priority);
-	_indent(fds, 1);
+	_indent(fds, lvl);
 	fprintf(fds, "if ($syscall == %u)\n", sys_num);
 	if (sys->chains == NULL) {
-		_indent(fds, 2);
+		_indent(fds, lvl + 1);
 		_pfc_action(fds, sys->action);
 	} else
-		_gen_pfc_chain(arch, sys->chains, 2, fds);
+		_gen_pfc_chain(arch, sys->chains, lvl + 1, fds);
+}
+
+#define SYSCALLS_PER_NODE		(4)
+static int _get_bintree_levels(unsigned int syscall_cnt,
+			       uint32_t optimize)
+{
+	unsigned int i = 0, max_level;
+
+	if (optimize != 2)
+		/* Only use a binary tree if requested */
+		return 0;
+
+	do {
+		max_level = SYSCALLS_PER_NODE << i;
+		i++;
+	} while(max_level < syscall_cnt);
+
+	return i;
+}
+
+static int _get_bintree_syscall_num(const struct pfc_sys_list *cur,
+				    int lookahead_cnt,
+				    int *const num)
+{
+	while (lookahead_cnt > 0 && cur != NULL) {
+		cur = cur->next;
+		lookahead_cnt--;
+	}
+
+	if (cur == NULL)
+		return -EINVAL;
+
+	*num = cur->sys->num;
+	return 0;
+}
+
+static int _sys_num_sort(struct db_sys_list *syscalls,
+			 struct pfc_sys_list **p_head)
+{
+	struct pfc_sys_list *p_iter = NULL, *p_new, *p_prev;
+	struct db_sys_list *s_iter;
+
+	db_list_foreach(s_iter, syscalls) {
+		p_new = zmalloc(sizeof(*p_new));
+		if (p_new == NULL) {
+			return -ENOMEM;
+		}
+		p_new->sys = s_iter;
+
+		p_prev = NULL;
+		p_iter = *p_head;
+		while (p_iter != NULL &&
+		       s_iter->num < p_iter->sys->num) {
+			p_prev = p_iter;
+			p_iter = p_iter->next;
+		}
+		if (*p_head == NULL)
+			*p_head = p_new;
+		else if (p_prev == NULL) {
+			p_new->next = *p_head;
+			*p_head = p_new;
+		} else {
+			p_new->next = p_iter;
+			p_prev->next = p_new;
+		}
+	}
+
+	return 0;
+}
+
+static int _sys_priority_sort(struct db_sys_list *syscalls,
+			      struct pfc_sys_list **p_head)
+{
+	struct pfc_sys_list *p_iter = NULL, *p_new, *p_prev;
+	struct db_sys_list *s_iter;
+
+	db_list_foreach(s_iter, syscalls) {
+		p_new = zmalloc(sizeof(*p_new));
+		if (p_new == NULL) {
+			return -ENOMEM;
+		}
+		p_new->sys = s_iter;
+
+		p_prev = NULL;
+		p_iter = *p_head;
+		while (p_iter != NULL &&
+		       s_iter->priority < p_iter->sys->priority) {
+			p_prev = p_iter;
+			p_iter = p_iter->next;
+		}
+		if (*p_head == NULL)
+			*p_head = p_new;
+		else if (p_prev == NULL) {
+			p_new->next = *p_head;
+			*p_head = p_new;
+		} else {
+			p_new->next = p_iter;
+			p_prev->next = p_new;
+		}
+	}
+
+	return 0;
+}
+
+static int _sys_sort(struct db_sys_list *syscalls,
+		     struct pfc_sys_list **p_head,
+		     uint32_t optimize)
+{
+	if (optimize != 2)
+		return _sys_priority_sort(syscalls, p_head);
+	else
+		/* sort by number for the binary tree */
+		return _sys_num_sort(syscalls, p_head);
 }
 
 /**
@@ -272,38 +386,19 @@ static void _gen_pfc_syscall(const struct arch_def *arch,
  *
  */
 static int _gen_pfc_arch(const struct db_filter_col *col,
-			 const struct db_filter *db, FILE *fds)
+			 const struct db_filter *db, FILE *fds,
+			 uint32_t optimize)
 {
-	int rc = 0;
-	struct db_sys_list *s_iter;
-	struct pfc_sys_list *p_iter = NULL, *p_new, *p_head = NULL, *p_prev;
+	int rc = 0, i = 0, lookahead_num;
+	unsigned int syscall_cnt = 0, bintree_levels, level, indent = 1;
+	struct pfc_sys_list *p_iter = NULL, *p_head = NULL;
 
 	/* sort the syscall list */
-	db_list_foreach(s_iter, db->syscalls) {
-		p_new = zmalloc(sizeof(*p_new));
-		if (p_new == NULL) {
-			rc = -ENOMEM;
-			goto arch_return;
-		}
-		p_new->sys = s_iter;
+	rc = _sys_sort(db->syscalls, &p_head, optimize);
+	if (rc < 0)
+		goto arch_return;
 
-		p_prev = NULL;
-		p_iter = p_head;
-		while (p_iter != NULL &&
-		       s_iter->priority < p_iter->sys->priority) {
-			p_prev = p_iter;
-			p_iter = p_iter->next;
-		}
-		if (p_head == NULL)
-			p_head = p_new;
-		else if (p_prev == NULL) {
-			p_new->next = p_head;
-			p_head = p_new;
-		} else {
-			p_new->next = p_iter;
-			p_prev->next = p_new;
-		}
-	}
+	bintree_levels = _get_bintree_levels(db->syscall_cnt, optimize);
 
 	fprintf(fds, "# filter for arch %s (%u)\n",
 		_pfc_arch(db->arch), db->arch->token_bpf);
@@ -314,8 +409,40 @@ static int _gen_pfc_arch(const struct db_filter_col *col,
 			p_iter = p_iter->next;
 			continue;
 		}
-		_gen_pfc_syscall(db->arch, p_iter->sys, fds);
+
+		for (i = bintree_levels - 1; i > 0; i--) {
+			level = SYSCALLS_PER_NODE << i;
+
+			if (syscall_cnt == 0 || (syscall_cnt % level) == 0) {
+				rc = _get_bintree_syscall_num(p_iter, level / 2,
+							      &lookahead_num);
+				if (rc < 0)
+					/* We have reached the end of the bintree.
+					 * There aren't enough syscalls to construct
+					 * any more if-elses.
+					 */
+					continue;
+				_indent(fds, indent);
+				fprintf(fds, "if ($syscall > %u)\n", lookahead_num);
+				indent++;
+			} else if ((syscall_cnt % (level / 2)) == 0) {
+				lookahead_num = p_iter->sys->num;
+				_indent(fds, indent - 1);
+				fprintf(fds, "else # ($syscall <= %u)\n",
+					p_iter->sys->num);
+			}
+
+		}
+
+		_gen_pfc_syscall(db->arch, p_iter->sys, fds, indent);
+		syscall_cnt++;
 		p_iter = p_iter->next;
+
+		/* undo the indentations as the else statements complete */
+		for (i = 0; i < bintree_levels; i++) {
+			if (syscall_cnt % ((SYSCALLS_PER_NODE * 2) << i) == 0)
+				indent--;
+		}
 	}
 	_indent(fds, 1);
 	fprintf(fds, "# default action\n");
@@ -330,7 +457,6 @@ arch_return:
 	}
 	return rc;
 }
-
 /**
  * Generate a pseudo filter code string representation
  * @param col the seccomp filter collection
@@ -363,7 +489,8 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 	fprintf(fds, "#\n");
 
 	for (iter = 0; iter < col->filter_cnt; iter++)
-		_gen_pfc_arch(col, col->filters[iter], fds);
+		_gen_pfc_arch(col, col->filters[iter], fds,
+			      col->attr.optimize);
 
 	fprintf(fds, "# invalid architecture action\n");
 	_pfc_action(fds, col->attr.act_badarch);
