@@ -1191,6 +1191,36 @@ static void _sys_priority_sort(struct db_sys_list *syscalls,
 }
 
 /**
+ * Insert an instruction into the BPF state and connect the linked list
+ * @param state the BPF state
+ * @param instr the instruction to insert
+ * @param insert the BPF blk that represents the instruction
+ * @param next the next BPF instruction in the linked list
+ * @param existing_blk insert will be added to the end of this blk if non-NULL
+ *
+ * Insert a set of instructions into the BPF state and associate those
+ * instructions with the bpf_blk called insert.  The "next" field in the
+ * newly inserted block will be linked with the "next" bpf_blk parameter.
+ */
+static int _gen_bpf_insert(struct bpf_state *state, struct bpf_instr *instr,
+			   struct bpf_blk **insert, struct bpf_blk **next,
+			   struct bpf_blk *existing_blk)
+{
+	int rc;
+
+	*insert = _blk_append(state, existing_blk, instr);
+	if (*insert == NULL)
+		return -EINVAL;
+	(*insert)->next = (*next);
+	if (*next != NULL)
+		(*next)->prev = (*insert);
+	*next = *insert;
+
+	rc = _hsh_add(state, insert, 1);
+	return rc;
+}
+
+/**
  * Generate the BPF instruction blocks for a given syscall
  * @param state the BPF state
  * @param sys the syscall filter DB entry
@@ -1421,14 +1451,9 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		} else
 			/* we should never get here */
 			goto arch_failure;
-		state->b_new = _blk_append(state, state->b_new, &instr);
-		if (state->b_new == NULL)
-			goto arch_failure;
-		state->b_new->next = state->b_head;
-		if (state->b_head != NULL)
-			state->b_head->prev = state->b_new;
-		state->b_head = state->b_new;
-		rc = _hsh_add(state, &state->b_head, 1);
+
+		rc = _gen_bpf_insert(state, &instr, &state->b_new,
+				     &state->b_head, state->b_new);
 		if (rc < 0)
 			goto arch_failure;
 	}
@@ -1441,14 +1466,9 @@ static struct bpf_blk *_gen_bpf_arch(struct bpf_state *state,
 		instr.jt = _BPF_JMP_HSH(state->b_head->hash);
 	else
 		instr.jt = _BPF_JMP_HSH(state->def_hsh);
-	state->b_new = _blk_append(state, NULL, &instr);
-	if (state->b_new == NULL)
-		goto arch_failure;
-	state->b_new->next = state->b_head;
-	if (state->b_head != NULL)
-		state->b_head->prev = state->b_new;
-	state->b_head = state->b_new;
-	rc = _hsh_add(state, &state->b_head, 1);
+
+	rc = _gen_bpf_insert(state, &instr, &state->b_new, &state->b_head,
+			     NULL);
 	if (rc < 0)
 		goto arch_failure;
 
