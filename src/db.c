@@ -841,6 +841,7 @@ static void _db_reset(struct db_filter *db)
 		}
 		db->syscalls = NULL;
 	}
+	db->syscall_cnt = 0;
 
 	/* free any rules */
 	if (db->rules != NULL) {
@@ -1069,6 +1070,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.api_tskip = 0;
 	col->attr.log_enable = 0;
 	col->attr.spec_allow = 0;
+	col->attr.optimize = 1;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -1311,6 +1313,9 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_SSB:
 		*value = col->attr.spec_allow;
 		break;
+	case SCMP_FLTATR_CTL_OPTIMIZE:
+		*value = col->attr.optimize;
+		break;
 	default:
 		rc = -EEXIST;
 		break;
@@ -1384,6 +1389,17 @@ int db_col_attr_set(struct db_filter_col *col,
 		} else if (rc == 0) {
 			/* unsupported */
 			rc = -EOPNOTSUPP;
+		}
+		break;
+	case SCMP_FLTATR_CTL_OPTIMIZE:
+		switch (value) {
+		case 1:
+		case 2:
+			col->attr.optimize = value;
+			break;
+		default:
+			rc = -EOPNOTSUPP;
+			break;
 		}
 		break;
 	default:
@@ -2052,6 +2068,7 @@ add_reset:
 			s_new->next = db->syscalls;
 			db->syscalls = s_new;
 		}
+		db->syscall_cnt++;
 		return 0;
 	} else if (s_iter->chains == NULL) {
 		if (rm_flag || !s_iter->valid) {

@@ -118,6 +118,8 @@ struct db_filter_attr {
 	uint32_t log_enable;
 	/* SPEC_ALLOW related attributes */
 	uint32_t spec_allow;
+	/* SCMP_FLTATR_CTL_OPTIMIZE related attributes */
+	uint32_t optimize;
 };
 
 struct db_filter {
@@ -126,6 +128,7 @@ struct db_filter {
 
 	/* syscall filters, kept as a sorted single-linked list */
 	struct db_sys_list *syscalls;
+	unsigned int syscall_cnt;
 
 	/* list of rules used to build the filters, kept in order */
 	struct db_api_rule_list *rules;
