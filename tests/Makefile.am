@@ -91,7 +91,10 @@ check_PROGRAMS = \
 	49-sim-64b_comparisons \
 	50-sim-hash_collision \
 	51-live-user_notification \
-	52-basic-load
+	52-basic-load \
+	53-sim-binary_tree \
+	54-live-binary_tree \
+	55-basic-pfc_binary_tree
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -145,7 +148,9 @@ EXTRA_DIST_TESTPYTHON = \
 	49-sim-64b_comparisons.py \
 	50-sim-hash_collision.py \
 	51-live-user_notification.py \
-	52-basic-load.py
+	52-basic-load.py \
+	53-sim-binary_tree.py \
+	54-live-binary_tree.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -199,10 +204,14 @@ EXTRA_DIST_TESTCFGS = \
 	49-sim-64b_comparisons.tests \
 	50-sim-hash_collision.tests \
 	51-live-user_notification.tests \
-	52-basic-load.tests
+	52-basic-load.tests \
+	53-sim-binary_tree.tests \
+	54-live-binary_tree.tests \
+	55-basic-pfc_binary_tree.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
-	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc
+	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \
+	55-basic-pfc_binary_tree.sh 55-basic-pfc_binary_tree.pfc
 
 EXTRA_DIST_TESTTOOLS = regression testdiff testgen
 

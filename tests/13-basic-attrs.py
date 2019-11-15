@@ -55,6 +55,9 @@ def test():
     f.set_attr(Attr.CTL_SSB, 1)
     if f.get_attr(Attr.CTL_SSB) != 1:
         raise RuntimeError("Failed getting Attr.CTL_SSB")
+    f.set_attr(Attr.CTL_OPTIMIZE, 2)
+    if f.get_attr(Attr.CTL_OPTIMIZE) != 2:
+        raise RuntimeError("Failed getting Attr.CTL_OPTIMIZE")
 
 test()
 

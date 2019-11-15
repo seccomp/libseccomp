@@ -1,0 +1,1174 @@
+#
+# pseudo filter code start
+#
+# filter for arch x86_64 (3221225534)
+if ($arch == 3221225534)
+  if ($syscall > 73)
+    if ($syscall > 201)
+      if ($syscall > 265)
+        if ($syscall > 297)
+          if ($syscall > 313)
+            if ($syscall > 321)
+              if ($syscall > 325)
+                # filter for syscall "pkey_mprotect" (329) [priority: 65535]
+                if ($syscall == 329)
+                  action ERRNO(329);
+                # filter for syscall "pwritev2" (328) [priority: 65535]
+                if ($syscall == 328)
+                  action ERRNO(328);
+                # filter for syscall "preadv2" (327) [priority: 65535]
+                if ($syscall == 327)
+                  action ERRNO(327);
+                # filter for syscall "copy_file_range" (326) [priority: 65535]
+                if ($syscall == 326)
+                  action ERRNO(326);
+              else # ($syscall <= 325)
+                # filter for syscall "mlock2" (325) [priority: 65535]
+                if ($syscall == 325)
+                  action ERRNO(325);
+                # filter for syscall "membarrier" (324) [priority: 65535]
+                if ($syscall == 324)
+                  action ERRNO(324);
+                # filter for syscall "userfaultfd" (323) [priority: 65535]
+                if ($syscall == 323)
+                  action ERRNO(323);
+                # filter for syscall "execveat" (322) [priority: 65535]
+                if ($syscall == 322)
+                  action ERRNO(322);
+            else # ($syscall <= 321)
+              if ($syscall > 317)
+                # filter for syscall "bpf" (321) [priority: 65535]
+                if ($syscall == 321)
+                  action ERRNO(321);
+                # filter for syscall "kexec_file_load" (320) [priority: 65535]
+                if ($syscall == 320)
+                  action ERRNO(320);
+                # filter for syscall "memfd_create" (319) [priority: 65535]
+                if ($syscall == 319)
+                  action ERRNO(319);
+                # filter for syscall "getrandom" (318) [priority: 65535]
+                if ($syscall == 318)
+                  action ERRNO(318);
+              else # ($syscall <= 317)
+                # filter for syscall "seccomp" (317) [priority: 65535]
+                if ($syscall == 317)
+                  action ERRNO(317);
+                # filter for syscall "renameat2" (316) [priority: 65535]
+                if ($syscall == 316)
+                  action ERRNO(316);
+                # filter for syscall "sched_getattr" (315) [priority: 65535]
+                if ($syscall == 315)
+                  action ERRNO(315);
+                # filter for syscall "sched_setattr" (314) [priority: 65535]
+                if ($syscall == 314)
+                  action ERRNO(314);
+          else # ($syscall <= 313)
+            if ($syscall > 305)
+              if ($syscall > 309)
+                # filter for syscall "finit_module" (313) [priority: 65535]
+                if ($syscall == 313)
+                  action ERRNO(313);
+                # filter for syscall "kcmp" (312) [priority: 65535]
+                if ($syscall == 312)
+                  action ERRNO(312);
+                # filter for syscall "process_vm_writev" (311) [priority: 65535]
+                if ($syscall == 311)
+                  action ERRNO(311);
+                # filter for syscall "process_vm_readv" (310) [priority: 65535]
+                if ($syscall == 310)
+                  action ERRNO(310);
+              else # ($syscall <= 309)
+                # filter for syscall "getcpu" (309) [priority: 65535]
+                if ($syscall == 309)
+                  action ERRNO(309);
+                # filter for syscall "setns" (308) [priority: 65535]
+                if ($syscall == 308)
+                  action ERRNO(308);
+                # filter for syscall "sendmmsg" (307) [priority: 65535]
+                if ($syscall == 307)
+                  action ERRNO(307);
+                # filter for syscall "syncfs" (306) [priority: 65535]
+                if ($syscall == 306)
+                  action ERRNO(306);
+            else # ($syscall <= 305)
+              if ($syscall > 301)
+                # filter for syscall "clock_adjtime" (305) [priority: 65535]
+                if ($syscall == 305)
+                  action ERRNO(305);
+                # filter for syscall "open_by_handle_at" (304) [priority: 65535]
+                if ($syscall == 304)
+                  action ERRNO(304);
+                # filter for syscall "name_to_handle_at" (303) [priority: 65535]
+                if ($syscall == 303)
+                  action ERRNO(303);
+                # filter for syscall "prlimit64" (302) [priority: 65535]
+                if ($syscall == 302)
+                  action ERRNO(302);
+              else # ($syscall <= 301)
+                # filter for syscall "fanotify_mark" (301) [priority: 65535]
+                if ($syscall == 301)
+                  action ERRNO(301);
+                # filter for syscall "fanotify_init" (300) [priority: 65535]
+                if ($syscall == 300)
+                  action ERRNO(300);
+                # filter for syscall "recvmmsg" (299) [priority: 65535]
+                if ($syscall == 299)
+                  action ERRNO(299);
+                # filter for syscall "perf_event_open" (298) [priority: 65535]
+                if ($syscall == 298)
+                  action ERRNO(298);
+        else # ($syscall <= 297)
+          if ($syscall > 281)
+            if ($syscall > 289)
+              if ($syscall > 293)
+                # filter for syscall "rt_tgsigqueueinfo" (297) [priority: 65535]
+                if ($syscall == 297)
+                  action ERRNO(297);
+                # filter for syscall "pwritev" (296) [priority: 65535]
+                if ($syscall == 296)
+                  action ERRNO(296);
+                # filter for syscall "preadv" (295) [priority: 65535]
+                if ($syscall == 295)
+                  action ERRNO(295);
+                # filter for syscall "inotify_init1" (294) [priority: 65535]
+                if ($syscall == 294)
+                  action ERRNO(294);
+              else # ($syscall <= 293)
+                # filter for syscall "pipe2" (293) [priority: 65535]
+                if ($syscall == 293)
+                  action ERRNO(293);
+                # filter for syscall "dup3" (292) [priority: 65535]
+                if ($syscall == 292)
+                  action ERRNO(292);
+                # filter for syscall "epoll_create1" (291) [priority: 65535]
+                if ($syscall == 291)
+                  action ERRNO(291);
+                # filter for syscall "eventfd2" (290) [priority: 65535]
+                if ($syscall == 290)
+                  action ERRNO(290);
+            else # ($syscall <= 289)
+              if ($syscall > 285)
+                # filter for syscall "signalfd4" (289) [priority: 65535]
+                if ($syscall == 289)
+                  action ERRNO(289);
+                # filter for syscall "accept4" (288) [priority: 65535]
+                if ($syscall == 288)
+                  action ERRNO(288);
+                # filter for syscall "timerfd_gettime" (287) [priority: 65535]
+                if ($syscall == 287)
+                  action ERRNO(287);
+                # filter for syscall "timerfd_settime" (286) [priority: 65535]
+                if ($syscall == 286)
+                  action ERRNO(286);
+              else # ($syscall <= 285)
+                # filter for syscall "fallocate" (285) [priority: 65535]
+                if ($syscall == 285)
+                  action ERRNO(285);
+                # filter for syscall "eventfd" (284) [priority: 65535]
+                if ($syscall == 284)
+                  action ERRNO(284);
+                # filter for syscall "timerfd_create" (283) [priority: 65535]
+                if ($syscall == 283)
+                  action ERRNO(283);
+                # filter for syscall "signalfd" (282) [priority: 65535]
+                if ($syscall == 282)
+                  action ERRNO(282);
+          else # ($syscall <= 281)
+            if ($syscall > 273)
+              if ($syscall > 277)
+                # filter for syscall "epoll_pwait" (281) [priority: 65535]
+                if ($syscall == 281)
+                  action ERRNO(281);
+                # filter for syscall "utimensat" (280) [priority: 65535]
+                if ($syscall == 280)
+                  action ERRNO(280);
+                # filter for syscall "move_pages" (279) [priority: 65535]
+                if ($syscall == 279)
+                  action ERRNO(279);
+                # filter for syscall "vmsplice" (278) [priority: 65535]
+                if ($syscall == 278)
+                  action ERRNO(278);
+              else # ($syscall <= 277)
+                # filter for syscall "sync_file_range" (277) [priority: 65535]
+                if ($syscall == 277)
+                  action ERRNO(277);
+                # filter for syscall "tee" (276) [priority: 65535]
+                if ($syscall == 276)
+                  action ERRNO(276);
+                # filter for syscall "splice" (275) [priority: 65535]
+                if ($syscall == 275)
+                  action ERRNO(275);
+                # filter for syscall "get_robust_list" (274) [priority: 65535]
+                if ($syscall == 274)
+                  action ERRNO(274);
+            else # ($syscall <= 273)
+              if ($syscall > 269)
+                # filter for syscall "set_robust_list" (273) [priority: 65535]
+                if ($syscall == 273)
+                  action ERRNO(273);
+                # filter for syscall "unshare" (272) [priority: 65535]
+                if ($syscall == 272)
+                  action ERRNO(272);
+                # filter for syscall "ppoll" (271) [priority: 65535]
+                if ($syscall == 271)
+                  action ERRNO(271);
+                # filter for syscall "pselect6" (270) [priority: 65535]
+                if ($syscall == 270)
+                  action ERRNO(270);
+              else # ($syscall <= 269)
+                # filter for syscall "faccessat" (269) [priority: 65535]
+                if ($syscall == 269)
+                  action ERRNO(269);
+                # filter for syscall "fchmodat" (268) [priority: 65535]
+                if ($syscall == 268)
+                  action ERRNO(268);
+                # filter for syscall "readlinkat" (267) [priority: 65535]
+                if ($syscall == 267)
+                  action ERRNO(267);
+                # filter for syscall "symlinkat" (266) [priority: 65535]
+                if ($syscall == 266)
+                  action ERRNO(266);
+      else # ($syscall <= 265)
+        if ($syscall > 233)
+          if ($syscall > 249)
+            if ($syscall > 257)
+              if ($syscall > 261)
+                # filter for syscall "linkat" (265) [priority: 65535]
+                if ($syscall == 265)
+                  action ERRNO(265);
+                # filter for syscall "renameat" (264) [priority: 65535]
+                if ($syscall == 264)
+                  action ERRNO(264);
+                # filter for syscall "unlinkat" (263) [priority: 65535]
+                if ($syscall == 263)
+                  action ERRNO(263);
+                # filter for syscall "newfstatat" (262) [priority: 65535]
+                if ($syscall == 262)
+                  action ERRNO(262);
+              else # ($syscall <= 261)
+                # filter for syscall "futimesat" (261) [priority: 65535]
+                if ($syscall == 261)
+                  action ERRNO(261);
+                # filter for syscall "fchownat" (260) [priority: 65535]
+                if ($syscall == 260)
+                  action ERRNO(260);
+                # filter for syscall "mknodat" (259) [priority: 65535]
+                if ($syscall == 259)
+                  action ERRNO(259);
+                # filter for syscall "mkdirat" (258) [priority: 65535]
+                if ($syscall == 258)
+                  action ERRNO(258);
+            else # ($syscall <= 257)
+              if ($syscall > 253)
+                # filter for syscall "openat" (257) [priority: 65535]
+                if ($syscall == 257)
+                  action ERRNO(257);
+                # filter for syscall "migrate_pages" (256) [priority: 65535]
+                if ($syscall == 256)
+                  action ERRNO(256);
+                # filter for syscall "inotify_rm_watch" (255) [priority: 65533]
+                if ($syscall == 255)
+                  if ($a0.hi32 == 0)
+                    if ($a0.lo32 == 255)
+                      action ERRNO(255);
+                # filter for syscall "inotify_add_watch" (254) [priority: 65535]
+                if ($syscall == 254)
+                  action ERRNO(254);
+              else # ($syscall <= 253)
+                # filter for syscall "inotify_init" (253) [priority: 65535]
+                if ($syscall == 253)
+                  action ERRNO(253);
+                # filter for syscall "ioprio_get" (252) [priority: 65535]
+                if ($syscall == 252)
+                  action ERRNO(252);
+                # filter for syscall "ioprio_set" (251) [priority: 65535]
+                if ($syscall == 251)
+                  action ERRNO(251);
+                # filter for syscall "keyctl" (250) [priority: 65535]
+                if ($syscall == 250)
+                  action ERRNO(250);
+          else # ($syscall <= 249)
+            if ($syscall > 241)
+              if ($syscall > 245)
+                # filter for syscall "request_key" (249) [priority: 65535]
+                if ($syscall == 249)
+                  action ERRNO(249);
+                # filter for syscall "add_key" (248) [priority: 65535]
+                if ($syscall == 248)
+                  action ERRNO(248);
+                # filter for syscall "waitid" (247) [priority: 65535]
+                if ($syscall == 247)
+                  action ERRNO(247);
+                # filter for syscall "kexec_load" (246) [priority: 65535]
+                if ($syscall == 246)
+                  action ERRNO(246);
+              else # ($syscall <= 245)
+                # filter for syscall "mq_getsetattr" (245) [priority: 65535]
+                if ($syscall == 245)
+                  action ERRNO(245);
+                # filter for syscall "mq_notify" (244) [priority: 65535]
+                if ($syscall == 244)
+                  action ERRNO(244);
+                # filter for syscall "mq_timedreceive" (243) [priority: 65535]
+                if ($syscall == 243)
+                  action ERRNO(243);
+                # filter for syscall "mq_timedsend" (242) [priority: 65535]
+                if ($syscall == 242)
+                  action ERRNO(242);
+            else # ($syscall <= 241)
+              if ($syscall > 237)
+                # filter for syscall "mq_unlink" (241) [priority: 65535]
+                if ($syscall == 241)
+                  action ERRNO(241);
+                # filter for syscall "mq_open" (240) [priority: 65535]
+                if ($syscall == 240)
+                  action ERRNO(240);
+                # filter for syscall "get_mempolicy" (239) [priority: 65535]
+                if ($syscall == 239)
+                  action ERRNO(239);
+                # filter for syscall "set_mempolicy" (238) [priority: 65535]
+                if ($syscall == 238)
+                  action ERRNO(238);
+              else # ($syscall <= 237)
+                # filter for syscall "mbind" (237) [priority: 65535]
+                if ($syscall == 237)
+                  action ERRNO(237);
+                # filter for syscall "vserver" (236) [priority: 65535]
+                if ($syscall == 236)
+                  action ERRNO(236);
+                # filter for syscall "utimes" (235) [priority: 65535]
+                if ($syscall == 235)
+                  action ERRNO(235);
+                # filter for syscall "tgkill" (234) [priority: 65535]
+                if ($syscall == 234)
+                  action ERRNO(234);
+        else # ($syscall <= 233)
+          if ($syscall > 217)
+            if ($syscall > 225)
+              if ($syscall > 229)
+                # filter for syscall "epoll_ctl" (233) [priority: 65535]
+                if ($syscall == 233)
+                  action ERRNO(233);
+                # filter for syscall "epoll_wait" (232) [priority: 65535]
+                if ($syscall == 232)
+                  action ERRNO(232);
+                # filter for syscall "exit_group" (231) [priority: 65535]
+                if ($syscall == 231)
+                  action ERRNO(231);
+                # filter for syscall "clock_nanosleep" (230) [priority: 65535]
+                if ($syscall == 230)
+                  action ERRNO(230);
+              else # ($syscall <= 229)
+                # filter for syscall "clock_getres" (229) [priority: 65535]
+                if ($syscall == 229)
+                  action ERRNO(229);
+                # filter for syscall "clock_gettime" (228) [priority: 65535]
+                if ($syscall == 228)
+                  action ERRNO(228);
+                # filter for syscall "clock_settime" (227) [priority: 65535]
+                if ($syscall == 227)
+                  action ERRNO(227);
+                # filter for syscall "timer_delete" (226) [priority: 65535]
+                if ($syscall == 226)
+                  action ERRNO(226);
+            else # ($syscall <= 225)
+              if ($syscall > 221)
+                # filter for syscall "timer_getoverrun" (225) [priority: 65535]
+                if ($syscall == 225)
+                  action ERRNO(225);
+                # filter for syscall "timer_gettime" (224) [priority: 65535]
+                if ($syscall == 224)
+                  action ERRNO(224);
+                # filter for syscall "timer_settime" (223) [priority: 65535]
+                if ($syscall == 223)
+                  action ERRNO(223);
+                # filter for syscall "timer_create" (222) [priority: 65535]
+                if ($syscall == 222)
+                  action ERRNO(222);
+              else # ($syscall <= 221)
+                # filter for syscall "fadvise64" (221) [priority: 65535]
+                if ($syscall == 221)
+                  action ERRNO(221);
+                # filter for syscall "semtimedop" (220) [priority: 65535]
+                if ($syscall == 220)
+                  action ERRNO(220);
+                # filter for syscall "restart_syscall" (219) [priority: 65535]
+                if ($syscall == 219)
+                  action ERRNO(219);
+                # filter for syscall "set_tid_address" (218) [priority: 65535]
+                if ($syscall == 218)
+                  action ERRNO(218);
+          else # ($syscall <= 217)
+            if ($syscall > 209)
+              if ($syscall > 213)
+                # filter for syscall "getdents64" (217) [priority: 65535]
+                if ($syscall == 217)
+                  action ERRNO(217);
+                # filter for syscall "remap_file_pages" (216) [priority: 65535]
+                if ($syscall == 216)
+                  action ERRNO(216);
+                # filter for syscall "epoll_wait_old" (215) [priority: 65535]
+                if ($syscall == 215)
+                  action ERRNO(215);
+                # filter for syscall "epoll_ctl_old" (214) [priority: 65535]
+                if ($syscall == 214)
+                  action ERRNO(214);
+              else # ($syscall <= 213)
+                # filter for syscall "epoll_create" (213) [priority: 65535]
+                if ($syscall == 213)
+                  action ERRNO(213);
+                # filter for syscall "lookup_dcookie" (212) [priority: 65535]
+                if ($syscall == 212)
+                  action ERRNO(212);
+                # filter for syscall "get_thread_area" (211) [priority: 65535]
+                if ($syscall == 211)
+                  action ERRNO(211);
+                # filter for syscall "io_cancel" (210) [priority: 65535]
+                if ($syscall == 210)
+                  action ERRNO(210);
+            else # ($syscall <= 209)
+              if ($syscall > 205)
+                # filter for syscall "io_submit" (209) [priority: 65535]
+                if ($syscall == 209)
+                  action ERRNO(209);
+                # filter for syscall "io_getevents" (208) [priority: 65535]
+                if ($syscall == 208)
+                  action ERRNO(208);
+                # filter for syscall "io_destroy" (207) [priority: 65535]
+                if ($syscall == 207)
+                  action ERRNO(207);
+                # filter for syscall "io_setup" (206) [priority: 65535]
+                if ($syscall == 206)
+                  action ERRNO(206);
+              else # ($syscall <= 205)
+                # filter for syscall "set_thread_area" (205) [priority: 65535]
+                if ($syscall == 205)
+                  action ERRNO(205);
+                # filter for syscall "sched_getaffinity" (204) [priority: 65535]
+                if ($syscall == 204)
+                  action ERRNO(204);
+                # filter for syscall "sched_setaffinity" (203) [priority: 65535]
+                if ($syscall == 203)
+                  action ERRNO(203);
+                # filter for syscall "futex" (202) [priority: 65535]
+                if ($syscall == 202)
+                  action ERRNO(202);
+    else # ($syscall <= 201)
+      if ($syscall > 137)
+        if ($syscall > 169)
+          if ($syscall > 185)
+            if ($syscall > 193)
+              if ($syscall > 197)
+                # filter for syscall "time" (201) [priority: 65535]
+                if ($syscall == 201)
+                  action ERRNO(201);
+                # filter for syscall "tkill" (200) [priority: 65535]
+                if ($syscall == 200)
+                  action ERRNO(200);
+                # filter for syscall "fremovexattr" (199) [priority: 65535]
+                if ($syscall == 199)
+                  action ERRNO(199);
+                # filter for syscall "lremovexattr" (198) [priority: 65535]
+                if ($syscall == 198)
+                  action ERRNO(198);
+              else # ($syscall <= 197)
+                # filter for syscall "removexattr" (197) [priority: 65535]
+                if ($syscall == 197)
+                  action ERRNO(197);
+                # filter for syscall "flistxattr" (196) [priority: 65535]
+                if ($syscall == 196)
+                  action ERRNO(196);
+                # filter for syscall "llistxattr" (195) [priority: 65535]
+                if ($syscall == 195)
+                  action ERRNO(195);
+                # filter for syscall "listxattr" (194) [priority: 65535]
+                if ($syscall == 194)
+                  action ERRNO(194);
+            else # ($syscall <= 193)
+              if ($syscall > 189)
+                # filter for syscall "fgetxattr" (193) [priority: 65535]
+                if ($syscall == 193)
+                  action ERRNO(193);
+                # filter for syscall "lgetxattr" (192) [priority: 65535]
+                if ($syscall == 192)
+                  action ERRNO(192);
+                # filter for syscall "getxattr" (191) [priority: 65535]
+                if ($syscall == 191)
+                  action ERRNO(191);
+                # filter for syscall "fsetxattr" (190) [priority: 65535]
+                if ($syscall == 190)
+                  action ERRNO(190);
+              else # ($syscall <= 189)
+                # filter for syscall "lsetxattr" (189) [priority: 65535]
+                if ($syscall == 189)
+                  action ERRNO(189);
+                # filter for syscall "setxattr" (188) [priority: 65535]
+                if ($syscall == 188)
+                  action ERRNO(188);
+                # filter for syscall "readahead" (187) [priority: 65535]
+                if ($syscall == 187)
+                  action ERRNO(187);
+                # filter for syscall "gettid" (186) [priority: 65535]
+                if ($syscall == 186)
+                  action ERRNO(186);
+          else # ($syscall <= 185)
+            if ($syscall > 177)
+              if ($syscall > 181)
+                # filter for syscall "security" (185) [priority: 65535]
+                if ($syscall == 185)
+                  action ERRNO(185);
+                # filter for syscall "tuxcall" (184) [priority: 65535]
+                if ($syscall == 184)
+                  action ERRNO(184);
+                # filter for syscall "afs_syscall" (183) [priority: 65535]
+                if ($syscall == 183)
+                  action ERRNO(183);
+                # filter for syscall "putpmsg" (182) [priority: 65535]
+                if ($syscall == 182)
+                  action ERRNO(182);
+              else # ($syscall <= 181)
+                # filter for syscall "getpmsg" (181) [priority: 65535]
+                if ($syscall == 181)
+                  action ERRNO(181);
+                # filter for syscall "nfsservctl" (180) [priority: 65535]
+                if ($syscall == 180)
+                  action ERRNO(180);
+                # filter for syscall "quotactl" (179) [priority: 65535]
+                if ($syscall == 179)
+                  action ERRNO(179);
+                # filter for syscall "query_module" (178) [priority: 65535]
+                if ($syscall == 178)
+                  action ERRNO(178);
+            else # ($syscall <= 177)
+              if ($syscall > 173)
+                # filter for syscall "get_kernel_syms" (177) [priority: 65535]
+                if ($syscall == 177)
+                  action ERRNO(177);
+                # filter for syscall "delete_module" (176) [priority: 65535]
+                if ($syscall == 176)
+                  action ERRNO(176);
+                # filter for syscall "init_module" (175) [priority: 65535]
+                if ($syscall == 175)
+                  action ERRNO(175);
+                # filter for syscall "create_module" (174) [priority: 65535]
+                if ($syscall == 174)
+                  action ERRNO(174);
+              else # ($syscall <= 173)
+                # filter for syscall "ioperm" (173) [priority: 65535]
+                if ($syscall == 173)
+                  action ERRNO(173);
+                # filter for syscall "iopl" (172) [priority: 65535]
+                if ($syscall == 172)
+                  action ERRNO(172);
+                # filter for syscall "setdomainname" (171) [priority: 65535]
+                if ($syscall == 171)
+                  action ERRNO(171);
+                # filter for syscall "sethostname" (170) [priority: 65535]
+                if ($syscall == 170)
+                  action ERRNO(170);
+        else # ($syscall <= 169)
+          if ($syscall > 153)
+            if ($syscall > 161)
+              if ($syscall > 165)
+                # filter for syscall "reboot" (169) [priority: 65535]
+                if ($syscall == 169)
+                  action ERRNO(169);
+                # filter for syscall "swapoff" (168) [priority: 65535]
+                if ($syscall == 168)
+                  action ERRNO(168);
+                # filter for syscall "swapon" (167) [priority: 65535]
+                if ($syscall == 167)
+                  action ERRNO(167);
+                # filter for syscall "umount2" (166) [priority: 65535]
+                if ($syscall == 166)
+                  action ERRNO(166);
+              else # ($syscall <= 165)
+                # filter for syscall "mount" (165) [priority: 65535]
+                if ($syscall == 165)
+                  action ERRNO(165);
+                # filter for syscall "settimeofday" (164) [priority: 65535]
+                if ($syscall == 164)
+                  action ERRNO(164);
+                # filter for syscall "acct" (163) [priority: 65535]
+                if ($syscall == 163)
+                  action ERRNO(163);
+                # filter for syscall "sync" (162) [priority: 65535]
+                if ($syscall == 162)
+                  action ERRNO(162);
+            else # ($syscall <= 161)
+              if ($syscall > 157)
+                # filter for syscall "chroot" (161) [priority: 65535]
+                if ($syscall == 161)
+                  action ERRNO(161);
+                # filter for syscall "setrlimit" (160) [priority: 65535]
+                if ($syscall == 160)
+                  action ERRNO(160);
+                # filter for syscall "adjtimex" (159) [priority: 65535]
+                if ($syscall == 159)
+                  action ERRNO(159);
+                # filter for syscall "arch_prctl" (158) [priority: 65535]
+                if ($syscall == 158)
+                  action ERRNO(158);
+              else # ($syscall <= 157)
+                # filter for syscall "prctl" (157) [priority: 65535]
+                if ($syscall == 157)
+                  action ERRNO(157);
+                # filter for syscall "_sysctl" (156) [priority: 65535]
+                if ($syscall == 156)
+                  action ERRNO(156);
+                # filter for syscall "pivot_root" (155) [priority: 65535]
+                if ($syscall == 155)
+                  action ERRNO(155);
+                # filter for syscall "modify_ldt" (154) [priority: 65535]
+                if ($syscall == 154)
+                  action ERRNO(154);
+          else # ($syscall <= 153)
+            if ($syscall > 145)
+              if ($syscall > 149)
+                # filter for syscall "vhangup" (153) [priority: 65535]
+                if ($syscall == 153)
+                  action ERRNO(153);
+                # filter for syscall "munlockall" (152) [priority: 65535]
+                if ($syscall == 152)
+                  action ERRNO(152);
+                # filter for syscall "mlockall" (151) [priority: 65535]
+                if ($syscall == 151)
+                  action ERRNO(151);
+                # filter for syscall "munlock" (150) [priority: 65535]
+                if ($syscall == 150)
+                  action ERRNO(150);
+              else # ($syscall <= 149)
+                # filter for syscall "mlock" (149) [priority: 65535]
+                if ($syscall == 149)
+                  action ERRNO(149);
+                # filter for syscall "sched_rr_get_interval" (148) [priority: 65535]
+                if ($syscall == 148)
+                  action ERRNO(148);
+                # filter for syscall "sched_get_priority_min" (147) [priority: 65535]
+                if ($syscall == 147)
+                  action ERRNO(147);
+                # filter for syscall "sched_get_priority_max" (146) [priority: 65535]
+                if ($syscall == 146)
+                  action ERRNO(146);
+            else # ($syscall <= 145)
+              if ($syscall > 141)
+                # filter for syscall "sched_getscheduler" (145) [priority: 65535]
+                if ($syscall == 145)
+                  action ERRNO(145);
+                # filter for syscall "sched_setscheduler" (144) [priority: 65535]
+                if ($syscall == 144)
+                  action ERRNO(144);
+                # filter for syscall "sched_getparam" (143) [priority: 65535]
+                if ($syscall == 143)
+                  action ERRNO(143);
+                # filter for syscall "sched_setparam" (142) [priority: 65535]
+                if ($syscall == 142)
+                  action ERRNO(142);
+              else # ($syscall <= 141)
+                # filter for syscall "setpriority" (141) [priority: 65535]
+                if ($syscall == 141)
+                  action ERRNO(141);
+                # filter for syscall "getpriority" (140) [priority: 65535]
+                if ($syscall == 140)
+                  action ERRNO(140);
+                # filter for syscall "sysfs" (139) [priority: 65535]
+                if ($syscall == 139)
+                  action ERRNO(139);
+                # filter for syscall "fstatfs" (138) [priority: 65535]
+                if ($syscall == 138)
+                  action ERRNO(138);
+      else # ($syscall <= 137)
+        if ($syscall > 105)
+          if ($syscall > 121)
+            if ($syscall > 129)
+              if ($syscall > 133)
+                # filter for syscall "statfs" (137) [priority: 65535]
+                if ($syscall == 137)
+                  action ERRNO(137);
+                # filter for syscall "ustat" (136) [priority: 65535]
+                if ($syscall == 136)
+                  action ERRNO(136);
+                # filter for syscall "personality" (135) [priority: 65535]
+                if ($syscall == 135)
+                  action ERRNO(135);
+                # filter for syscall "uselib" (134) [priority: 65535]
+                if ($syscall == 134)
+                  action ERRNO(134);
+              else # ($syscall <= 133)
+                # filter for syscall "mknod" (133) [priority: 65535]
+                if ($syscall == 133)
+                  action ERRNO(133);
+                # filter for syscall "utime" (132) [priority: 65535]
+                if ($syscall == 132)
+                  action ERRNO(132);
+                # filter for syscall "sigaltstack" (131) [priority: 65535]
+                if ($syscall == 131)
+                  action ERRNO(131);
+                # filter for syscall "rt_sigsuspend" (130) [priority: 65535]
+                if ($syscall == 130)
+                  action ERRNO(130);
+            else # ($syscall <= 129)
+              if ($syscall > 125)
+                # filter for syscall "rt_sigqueueinfo" (129) [priority: 65535]
+                if ($syscall == 129)
+                  action ERRNO(129);
+                # filter for syscall "rt_sigtimedwait" (128) [priority: 65535]
+                if ($syscall == 128)
+                  action ERRNO(128);
+                # filter for syscall "rt_sigpending" (127) [priority: 65535]
+                if ($syscall == 127)
+                  action ERRNO(127);
+                # filter for syscall "capset" (126) [priority: 65535]
+                if ($syscall == 126)
+                  action ERRNO(126);
+              else # ($syscall <= 125)
+                # filter for syscall "capget" (125) [priority: 65535]
+                if ($syscall == 125)
+                  action ERRNO(125);
+                # filter for syscall "getsid" (124) [priority: 65535]
+                if ($syscall == 124)
+                  action ERRNO(124);
+                # filter for syscall "setfsgid" (123) [priority: 65535]
+                if ($syscall == 123)
+                  action ERRNO(123);
+                # filter for syscall "setfsuid" (122) [priority: 65535]
+                if ($syscall == 122)
+                  action ERRNO(122);
+          else # ($syscall <= 121)
+            if ($syscall > 113)
+              if ($syscall > 117)
+                # filter for syscall "getpgid" (121) [priority: 65535]
+                if ($syscall == 121)
+                  action ERRNO(121);
+                # filter for syscall "getresgid" (120) [priority: 65535]
+                if ($syscall == 120)
+                  action ERRNO(120);
+                # filter for syscall "setresgid" (119) [priority: 65535]
+                if ($syscall == 119)
+                  action ERRNO(119);
+                # filter for syscall "getresuid" (118) [priority: 65535]
+                if ($syscall == 118)
+                  action ERRNO(118);
+              else # ($syscall <= 117)
+                # filter for syscall "setresuid" (117) [priority: 65535]
+                if ($syscall == 117)
+                  action ERRNO(117);
+                # filter for syscall "setgroups" (116) [priority: 65535]
+                if ($syscall == 116)
+                  action ERRNO(116);
+                # filter for syscall "getgroups" (115) [priority: 65535]
+                if ($syscall == 115)
+                  action ERRNO(115);
+                # filter for syscall "setregid" (114) [priority: 65535]
+                if ($syscall == 114)
+                  action ERRNO(114);
+            else # ($syscall <= 113)
+              if ($syscall > 109)
+                # filter for syscall "setreuid" (113) [priority: 65535]
+                if ($syscall == 113)
+                  action ERRNO(113);
+                # filter for syscall "setsid" (112) [priority: 65535]
+                if ($syscall == 112)
+                  action ERRNO(112);
+                # filter for syscall "getpgrp" (111) [priority: 65535]
+                if ($syscall == 111)
+                  action ERRNO(111);
+                # filter for syscall "getppid" (110) [priority: 65535]
+                if ($syscall == 110)
+                  action ERRNO(110);
+              else # ($syscall <= 109)
+                # filter for syscall "setpgid" (109) [priority: 65535]
+                if ($syscall == 109)
+                  action ERRNO(109);
+                # filter for syscall "getegid" (108) [priority: 65535]
+                if ($syscall == 108)
+                  action ERRNO(108);
+                # filter for syscall "geteuid" (107) [priority: 65535]
+                if ($syscall == 107)
+                  action ERRNO(107);
+                # filter for syscall "setgid" (106) [priority: 65535]
+                if ($syscall == 106)
+                  action ERRNO(106);
+        else # ($syscall <= 105)
+          if ($syscall > 89)
+            if ($syscall > 97)
+              if ($syscall > 101)
+                # filter for syscall "setuid" (105) [priority: 65535]
+                if ($syscall == 105)
+                  action ERRNO(105);
+                # filter for syscall "getgid" (104) [priority: 65535]
+                if ($syscall == 104)
+                  action ERRNO(104);
+                # filter for syscall "syslog" (103) [priority: 65535]
+                if ($syscall == 103)
+                  action ERRNO(103);
+                # filter for syscall "getuid" (102) [priority: 65535]
+                if ($syscall == 102)
+                  action ERRNO(102);
+              else # ($syscall <= 101)
+                # filter for syscall "ptrace" (101) [priority: 65535]
+                if ($syscall == 101)
+                  action ERRNO(101);
+                # filter for syscall "times" (100) [priority: 65535]
+                if ($syscall == 100)
+                  action ERRNO(100);
+                # filter for syscall "sysinfo" (99) [priority: 65535]
+                if ($syscall == 99)
+                  action ERRNO(99);
+                # filter for syscall "getrusage" (98) [priority: 65535]
+                if ($syscall == 98)
+                  action ERRNO(98);
+            else # ($syscall <= 97)
+              if ($syscall > 93)
+                # filter for syscall "getrlimit" (97) [priority: 65535]
+                if ($syscall == 97)
+                  action ERRNO(97);
+                # filter for syscall "gettimeofday" (96) [priority: 65535]
+                if ($syscall == 96)
+                  action ERRNO(96);
+                # filter for syscall "umask" (95) [priority: 65535]
+                if ($syscall == 95)
+                  action ERRNO(95);
+                # filter for syscall "lchown" (94) [priority: 65535]
+                if ($syscall == 94)
+                  action ERRNO(94);
+              else # ($syscall <= 93)
+                # filter for syscall "fchown" (93) [priority: 65535]
+                if ($syscall == 93)
+                  action ERRNO(93);
+                # filter for syscall "chown" (92) [priority: 65535]
+                if ($syscall == 92)
+                  action ERRNO(92);
+                # filter for syscall "fchmod" (91) [priority: 65535]
+                if ($syscall == 91)
+                  action ERRNO(91);
+                # filter for syscall "chmod" (90) [priority: 65535]
+                if ($syscall == 90)
+                  action ERRNO(90);
+          else # ($syscall <= 89)
+            if ($syscall > 81)
+              if ($syscall > 85)
+                # filter for syscall "readlink" (89) [priority: 65535]
+                if ($syscall == 89)
+                  action ERRNO(89);
+                # filter for syscall "symlink" (88) [priority: 65535]
+                if ($syscall == 88)
+                  action ERRNO(88);
+                # filter for syscall "unlink" (87) [priority: 65535]
+                if ($syscall == 87)
+                  action ERRNO(87);
+                # filter for syscall "link" (86) [priority: 65535]
+                if ($syscall == 86)
+                  action ERRNO(86);
+              else # ($syscall <= 85)
+                # filter for syscall "creat" (85) [priority: 65535]
+                if ($syscall == 85)
+                  action ERRNO(85);
+                # filter for syscall "rmdir" (84) [priority: 65535]
+                if ($syscall == 84)
+                  action ERRNO(84);
+                # filter for syscall "mkdir" (83) [priority: 65535]
+                if ($syscall == 83)
+                  action ERRNO(83);
+                # filter for syscall "rename" (82) [priority: 65535]
+                if ($syscall == 82)
+                  action ERRNO(82);
+            else # ($syscall <= 81)
+              if ($syscall > 77)
+                # filter for syscall "fchdir" (81) [priority: 65535]
+                if ($syscall == 81)
+                  action ERRNO(81);
+                # filter for syscall "chdir" (80) [priority: 65535]
+                if ($syscall == 80)
+                  action ERRNO(80);
+                # filter for syscall "getcwd" (79) [priority: 65535]
+                if ($syscall == 79)
+                  action ERRNO(79);
+                # filter for syscall "getdents" (78) [priority: 65535]
+                if ($syscall == 78)
+                  action ERRNO(78);
+              else # ($syscall <= 77)
+                # filter for syscall "ftruncate" (77) [priority: 65535]
+                if ($syscall == 77)
+                  action ERRNO(77);
+                # filter for syscall "truncate" (76) [priority: 65535]
+                if ($syscall == 76)
+                  action ERRNO(76);
+                # filter for syscall "fdatasync" (75) [priority: 65535]
+                if ($syscall == 75)
+                  action ERRNO(75);
+                # filter for syscall "fsync" (74) [priority: 65535]
+                if ($syscall == 74)
+                  action ERRNO(74);
+  else # ($syscall <= 73)
+    if ($syscall > 9)
+      if ($syscall > 41)
+        if ($syscall > 57)
+          if ($syscall > 65)
+            if ($syscall > 69)
+              # filter for syscall "flock" (73) [priority: 65535]
+              if ($syscall == 73)
+                action ERRNO(73);
+              # filter for syscall "fcntl" (72) [priority: 65535]
+              if ($syscall == 72)
+                action ERRNO(72);
+              # filter for syscall "msgctl" (71) [priority: 65535]
+              if ($syscall == 71)
+                action ERRNO(71);
+              # filter for syscall "msgrcv" (70) [priority: 65535]
+              if ($syscall == 70)
+                action ERRNO(70);
+            else # ($syscall <= 69)
+              # filter for syscall "msgsnd" (69) [priority: 65535]
+              if ($syscall == 69)
+                action ERRNO(69);
+              # filter for syscall "msgget" (68) [priority: 65535]
+              if ($syscall == 68)
+                action ERRNO(68);
+              # filter for syscall "shmdt" (67) [priority: 65535]
+              if ($syscall == 67)
+                action ERRNO(67);
+              # filter for syscall "semctl" (66) [priority: 65535]
+              if ($syscall == 66)
+                action ERRNO(66);
+          else # ($syscall <= 65)
+            if ($syscall > 61)
+              # filter for syscall "semop" (65) [priority: 65535]
+              if ($syscall == 65)
+                action ERRNO(65);
+              # filter for syscall "semget" (64) [priority: 65535]
+              if ($syscall == 64)
+                action ERRNO(64);
+              # filter for syscall "uname" (63) [priority: 65535]
+              if ($syscall == 63)
+                action ERRNO(63);
+              # filter for syscall "kill" (62) [priority: 65535]
+              if ($syscall == 62)
+                action ERRNO(62);
+            else # ($syscall <= 61)
+              # filter for syscall "wait4" (61) [priority: 65533]
+              if ($syscall == 61)
+                if ($a0.hi32 == 0)
+                  if ($a0.lo32 == 61)
+                    action ERRNO(61);
+              # filter for syscall "exit" (60) [priority: 65535]
+              if ($syscall == 60)
+                action ERRNO(60);
+              # filter for syscall "execve" (59) [priority: 65535]
+              if ($syscall == 59)
+                action ERRNO(59);
+              # filter for syscall "vfork" (58) [priority: 65535]
+              if ($syscall == 58)
+                action ERRNO(58);
+        else # ($syscall <= 57)
+          if ($syscall > 49)
+            if ($syscall > 53)
+              # filter for syscall "fork" (57) [priority: 65535]
+              if ($syscall == 57)
+                action ERRNO(57);
+              # filter for syscall "clone" (56) [priority: 65535]
+              if ($syscall == 56)
+                action ERRNO(56);
+              # filter for syscall "getsockopt" (55) [priority: 65535]
+              if ($syscall == 55)
+                action ERRNO(55);
+              # filter for syscall "setsockopt" (54) [priority: 65535]
+              if ($syscall == 54)
+                action ERRNO(54);
+            else # ($syscall <= 53)
+              # filter for syscall "socketpair" (53) [priority: 65533]
+              if ($syscall == 53)
+                if ($a0.hi32 == 0)
+                  if ($a0.lo32 == 53)
+                    action ERRNO(53);
+              # filter for syscall "getpeername" (52) [priority: 65535]
+              if ($syscall == 52)
+                action ERRNO(52);
+              # filter for syscall "getsockname" (51) [priority: 65535]
+              if ($syscall == 51)
+                action ERRNO(51);
+              # filter for syscall "listen" (50) [priority: 65535]
+              if ($syscall == 50)
+                action ERRNO(50);
+          else # ($syscall <= 49)
+            if ($syscall > 45)
+              # filter for syscall "bind" (49) [priority: 65535]
+              if ($syscall == 49)
+                action ERRNO(49);
+              # filter for syscall "shutdown" (48) [priority: 65535]
+              if ($syscall == 48)
+                action ERRNO(48);
+              # filter for syscall "recvmsg" (47) [priority: 65535]
+              if ($syscall == 47)
+                action ERRNO(47);
+              # filter for syscall "sendmsg" (46) [priority: 65535]
+              if ($syscall == 46)
+                action ERRNO(46);
+            else # ($syscall <= 45)
+              # filter for syscall "recvfrom" (45) [priority: 65535]
+              if ($syscall == 45)
+                action ERRNO(45);
+              # filter for syscall "sendto" (44) [priority: 65535]
+              if ($syscall == 44)
+                action ERRNO(44);
+              # filter for syscall "accept" (43) [priority: 65535]
+              if ($syscall == 43)
+                action ERRNO(43);
+              # filter for syscall "connect" (42) [priority: 65535]
+              if ($syscall == 42)
+                action ERRNO(42);
+      else # ($syscall <= 41)
+        if ($syscall > 25)
+          if ($syscall > 33)
+            if ($syscall > 37)
+              # filter for syscall "socket" (41) [priority: 65535]
+              if ($syscall == 41)
+                action ERRNO(41);
+              # filter for syscall "sendfile" (40) [priority: 65535]
+              if ($syscall == 40)
+                action ERRNO(40);
+              # filter for syscall "getpid" (39) [priority: 65535]
+              if ($syscall == 39)
+                action ERRNO(39);
+              # filter for syscall "setitimer" (38) [priority: 65535]
+              if ($syscall == 38)
+                action ERRNO(38);
+            else # ($syscall <= 37)
+              # filter for syscall "alarm" (37) [priority: 65535]
+              if ($syscall == 37)
+                action ERRNO(37);
+              # filter for syscall "getitimer" (36) [priority: 65535]
+              if ($syscall == 36)
+                action ERRNO(36);
+              # filter for syscall "nanosleep" (35) [priority: 65535]
+              if ($syscall == 35)
+                action ERRNO(35);
+              # filter for syscall "pause" (34) [priority: 65535]
+              if ($syscall == 34)
+                action ERRNO(34);
+          else # ($syscall <= 33)
+            if ($syscall > 29)
+              # filter for syscall "dup2" (33) [priority: 65535]
+              if ($syscall == 33)
+                action ERRNO(33);
+              # filter for syscall "dup" (32) [priority: 65535]
+              if ($syscall == 32)
+                action ERRNO(32);
+              # filter for syscall "shmctl" (31) [priority: 65535]
+              if ($syscall == 31)
+                action ERRNO(31);
+              # filter for syscall "shmat" (30) [priority: 65535]
+              if ($syscall == 30)
+                action ERRNO(30);
+            else # ($syscall <= 29)
+              # filter for syscall "shmget" (29) [priority: 65535]
+              if ($syscall == 29)
+                action ERRNO(29);
+              # filter for syscall "madvise" (28) [priority: 65535]
+              if ($syscall == 28)
+                action ERRNO(28);
+              # filter for syscall "mincore" (27) [priority: 65535]
+              if ($syscall == 27)
+                action ERRNO(27);
+              # filter for syscall "msync" (26) [priority: 65535]
+              if ($syscall == 26)
+                action ERRNO(26);
+        else # ($syscall <= 25)
+          if ($syscall > 17)
+            if ($syscall > 21)
+              # filter for syscall "mremap" (25) [priority: 65535]
+              if ($syscall == 25)
+                action ERRNO(25);
+              # filter for syscall "sched_yield" (24) [priority: 65535]
+              if ($syscall == 24)
+                action ERRNO(24);
+              # filter for syscall "select" (23) [priority: 65535]
+              if ($syscall == 23)
+                action ERRNO(23);
+              # filter for syscall "pipe" (22) [priority: 65535]
+              if ($syscall == 22)
+                action ERRNO(22);
+            else # ($syscall <= 21)
+              # filter for syscall "access" (21) [priority: 65535]
+              if ($syscall == 21)
+                action ERRNO(21);
+              # filter for syscall "writev" (20) [priority: 65535]
+              if ($syscall == 20)
+                action ERRNO(20);
+              # filter for syscall "readv" (19) [priority: 65535]
+              if ($syscall == 19)
+                action ERRNO(19);
+              # filter for syscall "pwrite64" (18) [priority: 65535]
+              if ($syscall == 18)
+                action ERRNO(18);
+          else # ($syscall <= 17)
+            if ($syscall > 13)
+              # filter for syscall "pread64" (17) [priority: 65535]
+              if ($syscall == 17)
+                action ERRNO(17);
+              # filter for syscall "ioctl" (16) [priority: 65535]
+              if ($syscall == 16)
+                action ERRNO(16);
+              # filter for syscall "rt_sigreturn" (15) [priority: 65535]
+              if ($syscall == 15)
+                action ERRNO(15);
+              # filter for syscall "rt_sigprocmask" (14) [priority: 65535]
+              if ($syscall == 14)
+                action ERRNO(14);
+            else # ($syscall <= 13)
+              # filter for syscall "rt_sigaction" (13) [priority: 65535]
+              if ($syscall == 13)
+                action ERRNO(13);
+              # filter for syscall "brk" (12) [priority: 65535]
+              if ($syscall == 12)
+                action ERRNO(12);
+              # filter for syscall "munmap" (11) [priority: 65535]
+              if ($syscall == 11)
+                action ERRNO(11);
+              # filter for syscall "mprotect" (10) [priority: 65533]
+              if ($syscall == 10)
+                if ($a0.hi32 == 0)
+                  if ($a0.lo32 == 10)
+                    action ERRNO(10);
+    else # ($syscall <= 9)
+      if ($syscall > 1)
+        if ($syscall > 5)
+          # filter for syscall "mmap" (9) [priority: 65535]
+          if ($syscall == 9)
+            action ERRNO(9);
+          # filter for syscall "lseek" (8) [priority: 65535]
+          if ($syscall == 8)
+            action ERRNO(8);
+          # filter for syscall "poll" (7) [priority: 65535]
+          if ($syscall == 7)
+            action ERRNO(7);
+          # filter for syscall "lstat" (6) [priority: 65535]
+          if ($syscall == 6)
+            action ERRNO(6);
+        else # ($syscall <= 5)
+          # filter for syscall "fstat" (5) [priority: 65535]
+          if ($syscall == 5)
+            action ERRNO(5);
+          # filter for syscall "stat" (4) [priority: 65535]
+          if ($syscall == 4)
+            action ERRNO(4);
+          # filter for syscall "close" (3) [priority: 65535]
+          if ($syscall == 3)
+            action ERRNO(3);
+          # filter for syscall "open" (2) [priority: 65535]
+          if ($syscall == 2)
+            action ERRNO(2);
+      else # ($syscall <= 1)
+        # filter for syscall "write" (1) [priority: 65535]
+        if ($syscall == 1)
+          action ERRNO(1);
+        # filter for syscall "read" (0) [priority: 65535]
+        if ($syscall == 0)
+          action ERRNO(0);
+  # default action
+  action ALLOW;
+# invalid architecture action
+action KILL;
+#
+# pseudo filter code end
+#
