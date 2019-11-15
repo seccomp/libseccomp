@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2019 Oracle and/or its affiliates.  All rights reserved.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+test type: basic
+
+# Test command
+55-basic-pfc_binary_tree.sh
