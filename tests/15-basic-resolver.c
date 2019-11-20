@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	unsigned int arch;
 	char *name = NULL;
 
-	if (seccomp_syscall_resolve_name("open") != __NR_open)
+	if (seccomp_syscall_resolve_name("openat") != __NR_openat)
 		goto fail;
 	if (seccomp_syscall_resolve_name("read") != __NR_read)
 		goto fail;
