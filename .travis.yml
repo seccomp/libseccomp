@@ -5,7 +5,8 @@
 
 dist: trusty
 sudo: false
-
+arch: s390x
+os: linux
 notifications:
   email:
     on_success: always
