@@ -15,6 +15,15 @@ language: c
 compiler:
   - gcc
 
+matrix:
+  include: 
+  - name: x86_64
+    os: linux
+    arch: x86_64
+  - name: s390x
+    os: linux
+    arch: s390x
+
 language: python
 python:
   - "nightly"
@@ -34,6 +43,7 @@ addons:
       - valgrind
       - clang
       - lcov
+      - clang-tools-7
 
 env:
   global:
@@ -43,6 +53,7 @@ env:
 
 # resolve any remaining dependency issues
 before_install:
+  - export PATH=$PATH:/usr/share/clang/scan-build-7/bin
   # assume the distro has an old version of cython
   - pip install cython
   # see https://github.com/eddyxu/cpp-coveralls
