@@ -285,6 +285,8 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_S390;
 			else if (strcmp(optarg, "s390x") == 0)
 				arch = AUDIT_ARCH_S390X;
+			else if (strcmp(optarg, "riscv64") == 0)
+				arch = AUDIT_ARCH_RISCV64;
 			else
 				exit_fault(EINVAL);
 			break;

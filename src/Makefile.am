@@ -42,6 +42,7 @@ SOURCES_ALL = \
 	arch-parisc.h arch-parisc.c arch-parisc64.c arch-parisc-syscalls.c \
 	arch-ppc.h arch-ppc.c arch-ppc-syscalls.c \
 	arch-ppc64.h arch-ppc64.c arch-ppc64-syscalls.c \
+	arch-riscv64.h arch-riscv64.c arch-riscv64-syscalls.c \
 	arch-s390.h arch-s390.c arch-s390-syscalls.c \
 	arch-s390x.h arch-s390x.c arch-s390x-syscalls.c
 

@@ -273,6 +273,7 @@
 #define __PNR_timerfd_settime64			-10239
 #define __PNR_utimensat_time64			-10240
 #define __PNR_ppoll				-10241
+#define __PNR_renameat				-10242
 
 /*
  * libseccomp syscall definitions
@@ -1494,7 +1495,11 @@
 #define __SNR_rename			__PNR_rename
 #endif
 
+#ifdef __NR_renameat
 #define __SNR_renameat			__NR_renameat
+#else
+#define __SNR_renameat			__PNR_renameat
+#endif
 
 #define __SNR_renameat2			__NR_renameat2
 

@@ -92,6 +92,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_PPC64LE);
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_RISCV64);
+	if (rc != 0)
+		goto out;
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));
@@ -154,6 +157,9 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 	rc = seccomp_arch_remove(ctx, SCMP_ARCH_PPC64LE);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_RISCV64);
 	if (rc != 0)
 		goto out;
 
