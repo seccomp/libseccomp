@@ -63,6 +63,24 @@ CHANGELOG files.
 Those who are interested in contributing to the the project are encouraged to
 read the CONTRIBUTING in the top level directory.
 
+## Verifying Release Tarballs
+
+Before use you should verify the downloaded release tarballs and checksums
+using the detached signatures supplied as part of the release; the detached
+signature files are the "*.asc" files.  If you have GnuPG installed you can
+verify detached signatures using the following command:
+
+	# gpg --verify file.asc file
+
+At present, only the following keys are authorized to sign official libseccomp
+releases:
+
+	Paul Moore <paul@paul-moore.com>
+	7100 AADF AE6E 6E94 0D2E  0AD6 55E4 5A5A E8CA 7C8A
+
+	Tom Hromatka <tom.hromatka@oracle.com>
+	47A6 8FCE 37C7 D702 4FD6  5E11 356C E62C 2B52 4099
+
 ## Building and Installing the Library
 
 If you are building the libseccomp library from an official release tarball,
