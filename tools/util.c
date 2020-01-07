@@ -78,6 +78,8 @@
 #define ARCH_NATIVE		AUDIT_ARCH_S390X
 #elif __s390__
 #define ARCH_NATIVE		AUDIT_ARCH_S390
+#elif __riscv && __riscv_xlen == 64
+#define ARCH_NATIVE		AUDIT_ARCH_RISCV64
 #else
 #error the simulator code needs to know about your machine type
 #endif

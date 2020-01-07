@@ -197,6 +197,18 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_PARISC64	AUDIT_ARCH_PARISC64
 
 /**
+ * The RISC-V architecture tokens
+ */
+#define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
+/* RISC-V support for audit was merged in 5.0-rc1 */
+#ifndef AUDIT_ARCH_RISCV64
+#ifndef EM_RISCV
+#define EM_RISCV		243
+#endif /* EM_RISCV */
+#define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_RISCV64 */
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */

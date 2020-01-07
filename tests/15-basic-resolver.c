@@ -45,6 +45,7 @@ unsigned int arch_list[] = {
 	SCMP_ARCH_S390X,
 	SCMP_ARCH_PARISC,
 	SCMP_ARCH_PARISC64,
+	SCMP_ARCH_RISCV64,
 	-1
 };
 
