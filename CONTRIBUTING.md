@@ -8,6 +8,11 @@ to the rules described here, but by following the instructions below you
 should have a much easier time getting your work merged with the upstream
 project.
 
+libseccomp accepts both GitHub pull requests and patches sent via the mailing
+list. GitHub pull requests are preferred. This guide contains steps that
+explain how to contribute via either method. Please read each step and perform
+all steps that apply to your chosen contriubtion method.
+
 ## Test Your Code
 
 There are three possible tests you can run to verify your code.  The first
@@ -50,7 +55,9 @@ base, and can be enabled via the "--enable-code-coverage" configure flag and
 the "check-code-coverage" make target.  Additional details on generating code
 coverage information can be found in the .travis.yml file.
 
-## Generate the Patch(es)
+## [Mailing List Only] Generate the Patch(es)
+
+You can skip this if you're submitting a pull request on GitHub.
 
 Depending on how you decided to work with the libseccomp code base and what
 tools you are using there are different ways to generate your patch(es).
@@ -120,7 +127,9 @@ your real name, saying:
 
 	Signed-off-by: Random J Developer <random@developer.example.org>
 
-## Email Your Patch(es)
+You can add this to your commit description in `git` with `git commit -s`
+
+## [Mailing List Only] Email Your Patch(es)
 
 Finally, you will need to email your patches to the mailing list so they can
 be reviewed and potentially merged into the main libseccomp repository.  When
@@ -132,3 +141,7 @@ a problem with your email client.  When in doubt try a test first by sending
 yourself an email with your patch and attempting to apply the emailed patch to
 the libseccomp repository; if it fails for you, it will fail for the rest of
 us trying to test your patch and include it in the main libseccomp repository.
+
+## [GitHub Only] Submit Your Pull Request
+
+See [this guide](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) if you've never done this before.
