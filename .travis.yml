@@ -17,7 +17,7 @@ compiler:
 
 language: python
 python:
-  - "nightly"
+  - "3.8"
 
 addons:
   coverity_scan:
