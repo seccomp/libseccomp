@@ -59,7 +59,7 @@ script:
   - ./configure --enable-python
   - make check-build
   - LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
-  - LIBSECCOMP_TSTCFG_TYPE=live make -C tests check
+  - LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
   # ubuntu 14.04 (trusty) clang has problems with the cython generated code
   - make clean && ./configure && scan-build --status-bugs make
 
