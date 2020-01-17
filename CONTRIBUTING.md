@@ -8,12 +8,7 @@ to the rules described here, but by following the instructions below you
 should have a much easier time getting your work merged with the upstream
 project.
 
-libseccomp accepts both GitHub pull requests and patches sent via the mailing
-list. GitHub pull requests are preferred. This guide contains steps that
-explain how to contribute via either method. Please read each step and perform
-all steps that apply to your chosen contriubtion method.
-
-## Test Your Code
+## Test Your Code Using Existing Tests
 
 There are three possible tests you can run to verify your code.  The first
 test is used to check the formatting and coding style of your changes, you
@@ -43,7 +38,7 @@ command:
 
 ... if there are any faults or errors they will be displayed.
 
-## Make Sure Your Code is Tested
+## Add New Tests for New Functionality
 
 The libseccomp code includes a fairly extensive test suite and any submissions
 which add functionality, or significantly change the existing code, should
@@ -54,31 +49,6 @@ Code coverage analysis tools have been integrated into the libseccomp code
 base, and can be enabled via the "--enable-code-coverage" configure flag and
 the "check-code-coverage" make target.  Additional details on generating code
 coverage information can be found in the .travis.yml file.
-
-## [Mailing List Only] Generate the Patch(es)
-
-You can skip this if you're submitting a pull request on GitHub.
-
-Depending on how you decided to work with the libseccomp code base and what
-tools you are using there are different ways to generate your patch(es).
-However, regardless of what tools you use, you should always generate your
-patches using the "unified" diff/patch format and the patches should always
-apply to the libseccomp source tree using the following command from the top
-directory of the libseccomp sources:
-
-	# patch -p1 < changes.patch
-
-If you are not using git, stacked git (stgit), or some other tool which can
-generate patch files for you automatically, you may find the following command
-helpful in generating patches, where "libseccomp.orig/" is the unmodified
-source code directory and "libseccomp/" is the source code directory with your
-changes:
-
-	# diff -purN libseccomp.orig/ libseccomp/
-
-When in doubt please generate your patch and try applying it to an unmodified
-copy of the libseccomp sources; if it fails for you, it will fail for the rest
-of us.
 
 ## Explain Your Work
 
@@ -129,7 +99,35 @@ your real name, saying:
 
 You can add this to your commit description in `git` with `git commit -s`
 
-## [Mailing List Only] Email Your Patch(es)
+## Post Your Patches Upstream
+
+The libseccomp project accepts both GitHub pull requests and patches sent via
+the mailing list.  GitHub pull requests are preferred.  This sections below
+explain how to contribute via either method. Please read each step and perform
+all steps that apply to your chosen contribution method.
+
+### Submitting via Email
+
+Depending on how you decided to work with the libseccomp code base and what
+tools you are using there are different ways to generate your patch(es).
+However, regardless of what tools you use, you should always generate your
+patches using the "unified" diff/patch format and the patches should always
+apply to the libseccomp source tree using the following command from the top
+directory of the libseccomp sources:
+
+	# patch -p1 < changes.patch
+
+If you are not using git, stacked git (stgit), or some other tool which can
+generate patch files for you automatically, you may find the following command
+helpful in generating patches, where "libseccomp.orig/" is the unmodified
+source code directory and "libseccomp/" is the source code directory with your
+changes:
+
+	# diff -purN libseccomp.orig/ libseccomp/
+
+When in doubt please generate your patch and try applying it to an unmodified
+copy of the libseccomp sources; if it fails for you, it will fail for the rest
+of us.
 
 Finally, you will need to email your patches to the mailing list so they can
 be reviewed and potentially merged into the main libseccomp repository.  When
@@ -142,6 +140,6 @@ yourself an email with your patch and attempting to apply the emailed patch to
 the libseccomp repository; if it fails for you, it will fail for the rest of
 us trying to test your patch and include it in the main libseccomp repository.
 
-## [GitHub Only] Submit Your Pull Request
+### Submitting via GitHub
 
 See [this guide](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) if you've never done this before.
