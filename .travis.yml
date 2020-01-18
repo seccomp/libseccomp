@@ -16,8 +16,6 @@ compiler:
   - gcc
 
 language: python
-python:
-  - "nightly"
 
 addons:
   coverity_scan:
