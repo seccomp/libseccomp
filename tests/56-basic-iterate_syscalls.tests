@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2020 Red Hat <gscrivan@redhat.com>
+# Author: Giuseppe Scrivano <gscrivan@redhat.com>
+#
+
+test type: basic
+
+# Test command
+56-basic-iterate_syscalls

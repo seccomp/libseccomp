@@ -766,7 +766,7 @@ function gen_csv() {
 
 	# abi list
 	# NOTE: the ordering here is dependent on the layout of the
-	#       arch_syscall_def_internal struct in syscalls.h - BEWARE!
+	#       arch_syscall_table struct in syscalls.h - BEWARE!
 	abi_list=""
 	abi_list+=" x86 x86_64 x32"
 	abi_list+=" arm aarch64"

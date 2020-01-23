@@ -1,0 +1,82 @@
+%{
+/**
+ * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2020 Red Hat <gscrivan@redhat.com>
+ * Authors: Paul Moore <paul@paul-moore.com>
+ *          Giuseppe Scrivano <gscrivan@redhat.com>
+ */
+
+/*
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of version 2.1 of the GNU Lesser General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, see <http://www.gnu.org/licenses>.
+ */
+
+#include <seccomp.h>
+#include <string.h>
+#include "syscalls.h"
+
+%}
+struct arch_syscall_table;
+
+%%
+@@SYSCALLS_TABLE@@
+%%
+
+static int syscall_get_offset_value(const struct arch_syscall_table *s,
+				    int offset)
+{
+	return *(int *)((char *)s + offset);
+}
+
+int syscall_resolve_name(const char *name, int offset)
+{
+	const struct arch_syscall_table *s;
+
+	s = in_word_set(name, strlen(name));
+	if (s == NULL)
+		return __NR_SCMP_ERROR;
+
+	return syscall_get_offset_value(s, offset);
+}
+
+const char *syscall_resolve_num(int num, int offset)
+{
+	unsigned int iter;
+
+	for (iter = 0; iter < sizeof(wordlist)/sizeof(wordlist[0]); iter++) {
+		if (syscall_get_offset_value(&wordlist[iter], offset) == num)
+			return (stringpool + wordlist[iter].name);
+	}
+
+	return NULL;
+}
+
+const struct arch_syscall_def *syscall_iterate(unsigned int spot, int offset)
+{
+	unsigned int iter;
+        /* this is thread-unsafe, only use for testing */
+	static struct arch_syscall_def arch_def;
+
+	arch_def.name = NULL;
+	arch_def.num = __NR_SCMP_ERROR;
+
+	for (iter = 0; iter < sizeof(wordlist)/sizeof(wordlist[0]); iter++) {
+		if (wordlist[iter].index == spot) {
+			arch_def.name = stringpool + wordlist[iter].name;
+			arch_def.num = syscall_get_offset_value(&wordlist[iter],
+								offset);
+			return &arch_def;
+		}
+	}
+
+	return &arch_def;
+}

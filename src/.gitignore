@@ -1,3 +1,5 @@
 libseccomp.a
 arch-syscall-check
 arch-syscall-dump
+syscalls.perf
+syscalls.perf.c

@@ -26,14 +26,48 @@
 #include "arch.h"
 #include "arch-x32.h"
 
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int x32_syscall_resolve_name_munge(const char *name)
+{
+	int sys;
+
+	sys = x32_syscall_resolve_name(name);
+	if (sys == __NR_SCMP_ERROR)
+		return sys;
+
+	return sys + X32_SYSCALL_BIT;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *x32_syscall_resolve_num_munge(int num)
+{
+	return x32_syscall_resolve_num(num - X32_SYSCALL_BIT);
+}
+
 const struct arch_def arch_def_x32 = {
 	.token = SCMP_ARCH_X32,
 	/* NOTE: this seems odd but the kernel treats x32 like x86_64 here */
 	.token_bpf = AUDIT_ARCH_X86_64,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
-	.syscall_resolve_name = x32_syscall_resolve_name,
-	.syscall_resolve_num = x32_syscall_resolve_num,
+	.syscall_resolve_name = x32_syscall_resolve_name_munge,
+	.syscall_resolve_num = x32_syscall_resolve_num_munge,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };

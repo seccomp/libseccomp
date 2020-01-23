@@ -23,16 +23,8 @@
 #ifndef _ARCH_PPC_H
 #define _ARCH_PPC_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_ppc;
-
-int ppc_syscall_resolve_name(const char *name);
-const char *ppc_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *ppc_syscall_iterate(unsigned int spot);
+ARCH_DECL(ppc)
 
 #endif

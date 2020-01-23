@@ -22,21 +22,8 @@
 #ifndef _ARCH_X86_H
 #define _ARCH_X86_H
 
-#include <stdbool.h>
-
 #include "arch.h"
-#include "db.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_x86;
-
-int x86_syscall_resolve_name(const char *name);
-const char *x86_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *x86_syscall_iterate(unsigned int spot);
-
-int x86_syscall_rewrite(int *syscall);
-
-int x86_rule_add(struct db_filter *db, struct db_api_rule_list *rule);
+ARCH_DECL(x86)
 
 #endif
