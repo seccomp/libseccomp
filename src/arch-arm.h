@@ -22,16 +22,8 @@
 #ifndef _ARCH_ARM_H
 #define _ARCH_ARM_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_arm;
-
-int arm_syscall_resolve_name(const char *name);
-const char *arm_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *arm_syscall_iterate(unsigned int spot);
+ARCH_DECL(arm)
 
 #endif

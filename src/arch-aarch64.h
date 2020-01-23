@@ -22,16 +22,8 @@
 #ifndef _ARCH_AARCH64_H
 #define _ARCH_AARCH64_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_aarch64;
-
-int aarch64_syscall_resolve_name(const char *name);
-const char *aarch64_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *aarch64_syscall_iterate(unsigned int spot);
+ARCH_DECL(aarch64)
 
 #endif

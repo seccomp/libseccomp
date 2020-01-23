@@ -27,13 +27,50 @@
 #include "arch.h"
 #include "arch-mips.h"
 
+/* O32 ABI */
+#define __SCMP_NR_BASE			4000
+
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int mips_syscall_resolve_name_munge(const char *name)
+{
+	int sys;
+
+	sys = mips_syscall_resolve_name(name);
+	if (sys == __NR_SCMP_ERROR)
+		return sys;
+
+	return sys + __SCMP_NR_BASE;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *mips_syscall_resolve_num_munge(int num)
+{
+	return mips_syscall_resolve_num(num - __SCMP_NR_BASE);
+}
+
 const struct arch_def arch_def_mips = {
 	.token = SCMP_ARCH_MIPS,
 	.token_bpf = AUDIT_ARCH_MIPS,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_BIG,
-	.syscall_resolve_name = mips_syscall_resolve_name,
-	.syscall_resolve_num = mips_syscall_resolve_num,
+	.syscall_resolve_name = mips_syscall_resolve_name_munge,
+	.syscall_resolve_num = mips_syscall_resolve_num_munge,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };
@@ -43,8 +80,8 @@ const struct arch_def arch_def_mipsel = {
 	.token_bpf = AUDIT_ARCH_MIPSEL,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
-	.syscall_resolve_name = mips_syscall_resolve_name,
-	.syscall_resolve_num = mips_syscall_resolve_num,
+	.syscall_resolve_name = mips_syscall_resolve_name_munge,
+	.syscall_resolve_num = mips_syscall_resolve_num_munge,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };

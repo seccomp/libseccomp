@@ -24,6 +24,8 @@
 #include <string.h>
 #include <linux/audit.h>
 
+#include "db.h"
+#include "syscalls.h"
 #include "arch.h"
 #include "arch-x86.h"
 
@@ -31,16 +33,165 @@
 #define __x86_NR_socketcall		102
 #define __x86_NR_ipc			117
 
-const struct arch_def arch_def_x86 = {
-	.token = SCMP_ARCH_X86,
-	.token_bpf = AUDIT_ARCH_I386,
-	.size = ARCH_SIZE_32,
-	.endian = ARCH_ENDIAN_LITTLE,
-	.syscall_resolve_name = x86_syscall_resolve_name,
-	.syscall_resolve_num = x86_syscall_resolve_num,
-	.syscall_rewrite = x86_syscall_rewrite,
-	.rule_add = x86_rule_add,
-};
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int x86_syscall_resolve_name_munge(const char *name)
+{
+	if (strcmp(name, "accept") == 0)
+		return __PNR_accept;
+	else if (strcmp(name, "accept4") == 0)
+		return __PNR_accept4;
+	else if (strcmp(name, "bind") == 0)
+		return __PNR_bind;
+	else if (strcmp(name, "connect") == 0)
+		return __PNR_connect;
+	else if (strcmp(name, "getpeername") == 0)
+		return __PNR_getpeername;
+	else if (strcmp(name, "getsockname") == 0)
+		return __PNR_getsockname;
+	else if (strcmp(name, "getsockopt") == 0)
+		return __PNR_getsockopt;
+	else if (strcmp(name, "listen") == 0)
+		return __PNR_listen;
+	else if (strcmp(name, "recv") == 0)
+		return __PNR_recv;
+	else if (strcmp(name, "recvfrom") == 0)
+		return __PNR_recvfrom;
+	else if (strcmp(name, "recvmsg") == 0)
+		return __PNR_recvmsg;
+	else if (strcmp(name, "recvmmsg") == 0)
+		return __PNR_recvmmsg;
+	else if (strcmp(name, "send") == 0)
+		return __PNR_send;
+	else if (strcmp(name, "sendmsg") == 0)
+		return __PNR_sendmsg;
+	else if (strcmp(name, "sendmmsg") == 0)
+		return __PNR_sendmmsg;
+	else if (strcmp(name, "sendto") == 0)
+		return __PNR_sendto;
+	else if (strcmp(name, "setsockopt") == 0)
+		return __PNR_setsockopt;
+	else if (strcmp(name, "shutdown") == 0)
+		return __PNR_shutdown;
+	else if (strcmp(name, "socket") == 0)
+		return __PNR_socket;
+	else if (strcmp(name, "socketpair") == 0)
+		return __PNR_socketpair;
+
+	if (strcmp(name, "semop") == 0)
+		return __PNR_semop;
+	else if (strcmp(name, "semget") == 0)
+		return __PNR_semget;
+	else if (strcmp(name, "semctl") == 0)
+		return __PNR_semctl;
+	else if (strcmp(name, "semtimedop") == 0)
+		return __PNR_semtimedop;
+	else if (strcmp(name, "msgsnd") == 0)
+		return __PNR_msgsnd;
+	else if (strcmp(name, "msgrcv") == 0)
+		return __PNR_msgrcv;
+	else if (strcmp(name, "msgget") == 0)
+		return __PNR_msgget;
+	else if (strcmp(name, "msgctl") == 0)
+		return __PNR_msgctl;
+	else if (strcmp(name, "shmat") == 0)
+		return __PNR_shmat;
+	else if (strcmp(name, "shmdt") == 0)
+		return __PNR_shmdt;
+	else if (strcmp(name, "shmget") == 0)
+		return __PNR_shmget;
+	else if (strcmp(name, "shmctl") == 0)
+		return __PNR_shmctl;
+
+	return x86_syscall_resolve_name(name);
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *x86_syscall_resolve_num_munge(int num)
+{
+	if (num == __PNR_accept)
+		return "accept";
+	else if (num == __PNR_accept4)
+		return "accept4";
+	else if (num == __PNR_bind)
+		return "bind";
+	else if (num == __PNR_connect)
+		return "connect";
+	else if (num == __PNR_getpeername)
+		return "getpeername";
+	else if (num == __PNR_getsockname)
+		return "getsockname";
+	else if (num == __PNR_getsockopt)
+		return "getsockopt";
+	else if (num == __PNR_listen)
+		return "listen";
+	else if (num == __PNR_recv)
+		return "recv";
+	else if (num == __PNR_recvfrom)
+		return "recvfrom";
+	else if (num == __PNR_recvmsg)
+		return "recvmsg";
+	else if (num == __PNR_recvmmsg)
+		return "recvmmsg";
+	else if (num == __PNR_send)
+		return "send";
+	else if (num == __PNR_sendmsg)
+		return "sendmsg";
+	else if (num == __PNR_sendmmsg)
+		return "sendmmsg";
+	else if (num == __PNR_sendto)
+		return "sendto";
+	else if (num == __PNR_setsockopt)
+		return "setsockopt";
+	else if (num == __PNR_shutdown)
+		return "shutdown";
+	else if (num == __PNR_socket)
+		return "socket";
+	else if (num == __PNR_socketpair)
+		return "socketpair";
+
+	if (num == __PNR_semop)
+		return "semop";
+	else if (num == __PNR_semget)
+		return "semget";
+	else if (num == __PNR_semctl)
+		return "semctl";
+	else if (num == __PNR_semtimedop)
+		return "semtimedop";
+	else if (num == __PNR_msgsnd)
+		return "msgsnd";
+	else if (num == __PNR_msgrcv)
+		return "msgrcv";
+	else if (num == __PNR_msgget)
+		return "msgget";
+	else if (num == __PNR_msgctl)
+		return "msgctl";
+	else if (num == __PNR_shmat)
+		return "shmat";
+	else if (num == __PNR_shmdt)
+		return "shmdt";
+	else if (num == __PNR_shmget)
+		return "shmget";
+	else if (num == __PNR_shmctl)
+		return "shmctl";
+
+	return x86_syscall_resolve_num(num);
+}
 
 /**
  * Convert a multiplexed pseudo syscall into a direct syscall
@@ -461,3 +612,14 @@ add_return:
 		free(rule_dup);
 	return rc;
 }
+
+const struct arch_def arch_def_x86 = {
+	.token = SCMP_ARCH_X86,
+	.token_bpf = AUDIT_ARCH_I386,
+	.size = ARCH_SIZE_32,
+	.endian = ARCH_ENDIAN_LITTLE,
+	.syscall_resolve_name = x86_syscall_resolve_name_munge,
+	.syscall_resolve_num = x86_syscall_resolve_num_munge,
+	.syscall_rewrite = x86_syscall_rewrite,
+	.rule_add = x86_rule_add,
+};

@@ -22,16 +22,8 @@
 #ifndef _ARCH_x86_64_H
 #define _ARCH_x86_64_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_x86_64;
-
-int x86_64_syscall_resolve_name(const char *name);
-const char *x86_64_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *x86_64_syscall_iterate(unsigned int spot);
+ARCH_DECL(x86_64)
 
 #endif

@@ -59,6 +59,13 @@ struct arch_def {
 /* arch_def for the current architecture */
 extern const struct arch_def *arch_def_native;
 
+/* macro to declare the arch specific structures and functions */
+#define ARCH_DECL(NAME) \
+	extern const struct arch_def arch_def_##NAME; \
+	int NAME##_syscall_resolve_name(const char *name); \
+	const char *NAME##_syscall_resolve_num(int num); \
+	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot);
+
 /* syscall name/num mapping */
 struct arch_syscall_def {
 	const char *name;

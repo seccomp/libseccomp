@@ -26,13 +26,58 @@
 #include "arch.h"
 #include "arch-arm.h"
 
+#define __SCMP_NR_OABI_SYSCALL_BASE     0x900000
+#define __SCMP_ARM_NR_BASE              0x0f0000
+
+/* NOTE: we currently only support the ARM EABI, more info at the URL below:
+ *       -> http://wiki.embeddedarm.com/wiki/EABI_vs_OABI */
+#if 1
+#define __SCMP_NR_BASE                  0
+#else
+#define __SCMP_NR_BASE                  __SCMP_NR_OABI_SYSCALL_BASE
+#endif
+
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int arm_syscall_resolve_name_munge(const char *name)
+{
+	int sys;
+
+	sys = arm_syscall_resolve_name(name);
+	if (sys == __NR_SCMP_ERROR)
+		return sys;
+
+	return sys + __SCMP_NR_BASE;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *arm_syscall_resolve_num_munge(int num)
+{
+	return arm_syscall_resolve_num(num - __SCMP_NR_BASE);
+}
+
 const struct arch_def arch_def_arm = {
 	.token = SCMP_ARCH_ARM,
 	.token_bpf = AUDIT_ARCH_ARM,
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
-	.syscall_resolve_name = arm_syscall_resolve_name,
-	.syscall_resolve_num = arm_syscall_resolve_num,
+	.syscall_resolve_name = arm_syscall_resolve_name_munge,
+	.syscall_resolve_num = arm_syscall_resolve_num_munge,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };

@@ -31,22 +31,25 @@ SOURCES_ALL = \
 	hash.h hash.c \
 	db.h db.c \
 	arch.c arch.h \
-	arch-x86.h arch-x86.c arch-x86-syscalls.c \
-	arch-x86_64.h arch-x86_64.c arch-x86_64-syscalls.c \
-	arch-x32.h arch-x32.c arch-x32-syscalls.c \
-	arch-arm.h arch-arm.c arch-arm-syscalls.c \
-	arch-aarch64.h arch-aarch64.c arch-aarch64-syscalls.c \
-	arch-mips.h arch-mips.c arch-mips-syscalls.c \
-	arch-mips64.h arch-mips64.c arch-mips64-syscalls.c \
-	arch-mips64n32.h arch-mips64n32.c arch-mips64n32-syscalls.c \
-	arch-parisc.h arch-parisc.c arch-parisc64.c arch-parisc-syscalls.c \
-	arch-ppc.h arch-ppc.c arch-ppc-syscalls.c \
-	arch-ppc64.h arch-ppc64.c arch-ppc64-syscalls.c \
-	arch-riscv64.h arch-riscv64.c arch-riscv64-syscalls.c \
-	arch-s390.h arch-s390.c arch-s390-syscalls.c \
-	arch-s390x.h arch-s390x.c arch-s390x-syscalls.c
+	arch-x86.h arch-x86.c \
+	arch-x86_64.h arch-x86_64.c \
+	arch-x32.h arch-x32.c \
+	arch-arm.h arch-arm.c \
+	arch-aarch64.h arch-aarch64.c \
+	arch-mips.h arch-mips.c \
+	arch-mips64.h arch-mips64.c \
+	arch-mips64n32.h arch-mips64n32.c \
+	arch-parisc.h arch-parisc.c arch-parisc64.c \
+	arch-ppc.h arch-ppc.c \
+	arch-ppc64.h arch-ppc64.c \
+	arch-riscv64.h arch-riscv64.c \
+	arch-s390.h arch-s390.c \
+	arch-s390x.h arch-s390x.c \
+	syscalls.h syscalls.c syscalls.perf.c
 
-EXTRA_DIST = arch-syscall-validate syscalls.csv
+EXTRA_DIST = \
+	arch-syscall-validate arch-gperf-generate \
+	syscalls.csv syscalls.perf.template
 
 TESTS = arch-syscall-check
 
@@ -66,6 +69,16 @@ libseccomp_la_CFLAGS = ${AM_CFLAGS} ${CODE_COVERAGE_CFLAGS} ${CFLAGS} \
 	-fPIC -DPIC -fvisibility=hidden
 libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${CODE_COVERAGE_LDFLAGS} ${LDFLAGS} \
 	-version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
+
+EXTRA_DIST += syscalls.perf.c syscalls.perf
+CLEANFILES = syscalls.perf.c syscalls.perf
+
+syscalls.perf: syscalls.csv syscalls.perf.template
+	${AM_V_GEN} ${srcdir}/arch-gperf-generate \
+		${srcdir}/syscalls.csv ${srcdir}/syscalls.perf.template
+
+syscalls.perf.c: syscalls.perf
+	${GPERF} -m 100 --null-strings --pic -tCEG -T -S1 $< > $@
 
 check-build:
 	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}

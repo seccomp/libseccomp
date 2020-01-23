@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# NOTE: changes to the arch_syscall_table struct in syscalls.h will affect
+#       this script/gperf - BEWARE!
+
+###
+# helper functions
+
+function exit_usage() {
+	echo "usage: $0 <syscall_csv_file> <gperf_template>"
+	exit 1
+}
+
+###
+# main
+
+# sanity check
+[[ ! -r "$1" || ! -r "$2" ]] && exit_usage
+sys_csv=$1
+gperf_tmpl=$2
+
+sys_csv_tmp=$(mktemp -t generate_syscalls_XXXXXX)
+
+# filter and prepare the syscall csv file
+cat $sys_csv | grep -v '^#' | nl -ba -s, -v0 | \
+    sed -e 's/^[[:space:]]\+\([0-9]\+\),\([^,]\+\),\(.*\)/\2,\1,\3/' \
+        -e ':repeat; {s|\([^,]\+\)\(.*\)[^_]PNR|\1\2,__PNR_\1|g;}; t repeat' \
+         > $sys_csv_tmp
+[[ $? -ne 0 ]] && exit 1
+
+# create the gperf file
+sed -e "/@@SYSCALLS_TABLE@@/r $sys_csv_tmp" \
+    -e '/@@SYSCALLS_TABLE@@/d' \
+    $gperf_tmpl > syscalls.perf
+[[ $? -ne 0 ]] && exit 1
+
+# cleanup
+rm -f $sys_csv_tmp
+
+exit 0

@@ -274,6 +274,7 @@
 #define __PNR_utimensat_time64			-10240
 #define __PNR_ppoll				-10241
 #define __PNR_renameat				-10242
+#define __PNR_riscv_flush_icache		-10243
 
 /*
  * libseccomp syscall definitions
@@ -1506,6 +1507,12 @@
 #define __SNR_request_key		__NR_request_key
 
 #define __SNR_restart_syscall		__NR_restart_syscall
+
+#ifdef __NR_riscv_flush_icache
+#define __SNR_riscv_flush_icache	__NR_riscv_flush_icache
+#else
+#define __SNR_riscv_flush_icache	__PNR_riscv_flush_icache
+#endif
 
 #ifdef __NR_rmdir
 #define __SNR_rmdir			__NR_rmdir

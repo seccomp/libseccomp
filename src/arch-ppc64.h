@@ -23,17 +23,9 @@
 #ifndef _ARCH_PPC64_H
 #define _ARCH_PPC64_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_ppc64;
-extern const struct arch_def arch_def_ppc64le;
-
-int ppc64_syscall_resolve_name(const char *name);
-const char *ppc64_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *ppc64_syscall_iterate(unsigned int spot);
+ARCH_DECL(ppc64)
+ARCH_DECL(ppc64le)
 
 #endif

@@ -23,17 +23,9 @@
 #ifndef _ARCH_MIPS64_H
 #define _ARCH_MIPS64_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-extern const struct arch_def arch_def_mips64;
-extern const struct arch_def arch_def_mipsel64;
-
-int mips64_syscall_resolve_name(const char *name);
-const char *mips64_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *mips64_syscall_iterate(unsigned int spot);
+ARCH_DECL(mips64)
+ARCH_DECL(mipsel64)
 
 #endif

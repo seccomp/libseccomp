@@ -22,18 +22,10 @@
 #ifndef _ARCH_X32_H
 #define _ARCH_X32_H
 
-#include <inttypes.h>
-
 #include "arch.h"
-#include "system.h"
 
-#define X32_SYSCALL_BIT			0x40000000
+#define X32_SYSCALL_BIT                 0x40000000
 
-extern const struct arch_def arch_def_x32;
-
-int x32_syscall_resolve_name(const char *name);
-const char *x32_syscall_resolve_num(int num);
-
-const struct arch_syscall_def *x32_syscall_iterate(unsigned int spot);
+ARCH_DECL(x32)
 
 #endif
