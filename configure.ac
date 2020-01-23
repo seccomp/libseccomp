@@ -119,6 +119,11 @@ AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
 	[$(test "$enable_python" = yes && echo 1 || echo 0)],
 	[Python bindings build flag.])
 
+AC_CHECK_TOOL(GPERF, gperf)
+if test -z "$GPERF"; then
+	AC_MSG_ERROR([please install gperf])
+fi
+
 dnl ####
 dnl coverity checks
 dnl ####

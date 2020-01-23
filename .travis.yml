@@ -32,6 +32,7 @@ addons:
       - valgrind
       - clang
       - lcov
+      - gperf
 
 env:
   global:
