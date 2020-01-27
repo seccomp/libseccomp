@@ -531,6 +531,14 @@ int s390_syscall_resolve_name(const char *name)
 		return __PNR_sendto;
 	else if (strcmp(name, "setsockopt") == 0)
 		return __PNR_setsockopt;
+	else if (strcmp(name, "shmat") == 0)
+		return __PNR_shmat;
+	else if (strcmp(name, "shmdt") == 0)
+		return __PNR_shmdt;
+	else if (strcmp(name, "shmget") == 0)
+		return __PNR_shmget;
+	else if (strcmp(name, "shmctl") == 0)
+		return __PNR_shmctl;
 	else if (strcmp(name, "shutdown") == 0)
 		return __PNR_shutdown;
 	else if (strcmp(name, "socket") == 0)
@@ -596,6 +604,14 @@ const char *s390_syscall_resolve_num(int num)
 		return "sendto";
 	else if (num == __PNR_setsockopt)
 		return "setsockopt";
+	else if (num == __PNR_shmat)
+		return "shmat";
+	else if (num == __PNR_shmdt)
+		return "shmdt";
+	else if (num == __PNR_shmget)
+		return "shmget";
+	else if (num == __PNR_shmctl)
+		return "shmctl";
 	else if (num == __PNR_shutdown)
 		return "shutdown";
 	else if (num == __PNR_socket)
