@@ -56,3 +56,4 @@ util.pyc
 48-sim-32b_args
 49-sim-64b_comparisons
 50-sim-hash_collision
+52-basic-load
