@@ -61,8 +61,7 @@ arch_syscall_check_CFLAGS = ${CODE_COVERAGE_CFLAGS}
 arch_syscall_check_LDFLAGS = ${CODE_COVERAGE_LDFLAGS}
 
 libseccomp_la_SOURCES = ${SOURCES_ALL}
-libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} ${CODE_COVERAGE_CPPFLAGS} \
-	-I${top_builddir}/include
+libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} ${CODE_COVERAGE_CPPFLAGS}
 libseccomp_la_CFLAGS = ${AM_CFLAGS} ${CODE_COVERAGE_CFLAGS} ${CFLAGS} \
 	-fPIC -DPIC -fvisibility=hidden
 libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${CODE_COVERAGE_LDFLAGS} ${LDFLAGS} \
