@@ -66,7 +66,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 dnl ####
 dnl build flags
 dnl ####
-AM_CPPFLAGS="-I\${top_srcdir}/include"
+AM_CPPFLAGS="-I\${top_srcdir}/include -I\${top_builddir}/include"
 AM_CFLAGS="-Wall"
 AM_LDFLAGS="-Wl,-z -Wl,relro"
 AC_SUBST([AM_CPPFLAGS])
