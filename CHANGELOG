@@ -2,6 +2,16 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.4.3 - March 4, 2020
+- Add list of authorized release signatures to README.md
+- Fix multiplexing issue with s390/s390x shm* syscalls
+- Remove the static flag from libseccomp tools compilation
+- Add define for __SNR_ppoll
+- Update our Travis CI configuration to use Ubuntu 18.04
+- Disable live python tests in Travis CI
+- Use default python, rather than nightly python, in TravisCI
+- Fix potential memory leak identified by clang in the scmp_bpf_sim tool
+
 * Version 2.4.2 - November 7, 2019
 - Update the syscall table for Linux v5.4-rc4
 - Stop defining __NR_x values for syscalls that don't exist.  Libseccomp
