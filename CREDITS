@@ -7,11 +7,13 @@ Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
 Bogdan Purcareata <bogdan.purcareata@freescale.com>
 Brian Cain <brian.cain@gmail.com>
+Chris Waldon <chris.waldon@ibm.com>
 Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
 David Drysdale <drysdale@google.com>
 Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
+Fabrice Fontaine <fontaine.fabrice@gmail.com>
 Felix Abecassis <fabecassis@nvidia.com>
 Heiko Carstens <heiko.carstens@de.ibm.com>
 Helge Deller <deller@gmx.de>
@@ -33,6 +35,7 @@ Mathias Krause <minipli@googlemail.com>
 Michael Forney <mforney@mforney.org>
 Mike Frysinger <vapier@gentoo.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
+Miroslav Lichvar <mlichvar@redhat.com>
 Paul Moore <paul@paul-moore.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
