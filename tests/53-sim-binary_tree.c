@@ -1,7 +1,7 @@
 /**
  * Seccomp Library test program
  *
- * Copyright (c) 2018 Oracle and/or its affiliates.  All rights reserved.
+ * Copyright (c) 2018-2020 Oracle and/or its affiliates.
  * Author: Tom Hromatka <tom.hromatka@oracle.com>
  */
 
@@ -29,9 +29,61 @@
 
 #include "util.h"
 
-#define MAX_SYSCALL		(330)
+#define ARG_COUNT_MAX 2
 
-#include <stdio.h>
+struct syscall_errno {
+	int syscall;
+	int error;
+	int arg_cnt;
+	/* To make the test more interesting, arguments are added to several
+	 * syscalls.  To keep the test simple, the arguments always use
+	 * SCMP_CMP_EQ.
+	 */
+	int args[ARG_COUNT_MAX];
+};
+
+struct syscall_errno table[] = {
+	{ SCMP_SYS(read), 0, 0, { 0, 0 } },
+	{ SCMP_SYS(write), 1, 0, { 0, 0 } },
+	{ SCMP_SYS(open), 2, 0, { 0, 0 } },
+	{ SCMP_SYS(close), 3, 2, { 100, 101 } },
+	{ SCMP_SYS(stat), 4, 0, { 0, 0 } },
+	{ SCMP_SYS(fstat), 5, 0, { 0, 0 } },
+	{ SCMP_SYS(lstat), 6, 0, { 0, 0 } },
+	{ SCMP_SYS(poll), 7, 1, { 102, 0 } },
+	{ SCMP_SYS(lseek), 8, 2, { 103, 104 } },
+	{ SCMP_SYS(mmap), 9, 0, { 0, 0 } },
+	{ SCMP_SYS(mprotect), 10, 0, { 0, 0 } },
+	{ SCMP_SYS(munmap), 11, 0, { 0, 0 } },
+	{ SCMP_SYS(brk), 12, 0, { 0, 0 } },
+	{ SCMP_SYS(rt_sigaction), 13, 0, { 0, 0 } },
+	{ SCMP_SYS(rt_sigprocmask), 14, 0, { 0, 0 } },
+	{ SCMP_SYS(rt_sigreturn), 15, 0, { 0, 0 } },
+	{ SCMP_SYS(ioctl), 16, 0, { 0, 0 } },
+	{ SCMP_SYS(pread64), 17, 1, { 105, 0 } },
+	{ SCMP_SYS(pwrite64), 18, 0, { 0, 0 } },
+	{ SCMP_SYS(readv), 19, 0, { 0, 0 } },
+	{ SCMP_SYS(writev), 20, 0, { 0, 0 } },
+	{ SCMP_SYS(access), 21, 0, { 0, 0 } },
+	{ SCMP_SYS(pipe), 22, 0, { 0, 0 } },
+	{ SCMP_SYS(select), 23, 2, { 106, 107 } },
+	{ SCMP_SYS(sched_yield), 24, 0, { 0, 0 } },
+	{ SCMP_SYS(mremap), 25, 2, { 108, 109 } },
+	{ SCMP_SYS(msync), 26, 0, { 0, 0 } },
+	{ SCMP_SYS(mincore), 27, 0, { 0, 0 } },
+	{ SCMP_SYS(madvise), 28, 0, { 0, 0 } },
+	{ SCMP_SYS(shmget), 29, 0, { 0, 0 } },
+	{ SCMP_SYS(shmat), 30, 1, { 110, 0 } },
+	{ SCMP_SYS(shmctl), 31, 1, { 111, 0 } },
+	{ SCMP_SYS(dup), 32, 1, { 112, 0 } },
+	{ SCMP_SYS(dup2), 33, 0, { 0, 0 } },
+	{ SCMP_SYS(pause), 34, 0, { 0, 0 } },
+	{ SCMP_SYS(nanosleep), 35, 0, { 0, 0 } },
+	{ SCMP_SYS(getitimer), 36, 0, { 0, 0 } },
+	{ SCMP_SYS(alarm), 37, 0, { 0, 0 } },
+};
+
+const int table_size = sizeof(table) / sizeof(table[0]);
 
 int main(int argc, char *argv[])
 {
@@ -49,38 +101,36 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
-	if (rc < 0)
-		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86_64);
-	if (rc < 0)
-		goto out;
-	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
-	if (rc < 0)
-		goto out;
 	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_OPTIMIZE, 2);
 	if (rc < 0)
 		goto out;
 
-	/* NOTE: this test is entirely fabricated and should not be
-	 * 	 replicated in the real world.
-	 *
-	 *	 The MAX_SYSCALL number (330) was chosen to force seccomp to
-	 *	 build an unbalanced binary tree - and it happens to be less
-	 *	 than the current syscall max.  The syscall numbers are
-	 *	 hardcoded to simplify the test.  A few syscalls have
-	 *	 argument chains to further complicate the filter.
-	 */
+	for (i = 0; i < table_size; i++) {
+		switch (table[i].arg_cnt) {
+		case 2:
+			rc = seccomp_rule_add(ctx,
+					      SCMP_ACT_ERRNO(table[i].error),
+					      table[i].syscall, 2,
+					      SCMP_A0(SCMP_CMP_EQ,
+						      table[i].args[0]),
+					      SCMP_A1(SCMP_CMP_EQ,
+						      table[i].args[1]));
+			break;
+		case 1:
+			rc = seccomp_rule_add(ctx,
+					      SCMP_ACT_ERRNO(table[i].error),
+					      table[i].syscall, 1,
+					      SCMP_A0(SCMP_CMP_EQ,
+						      table[i].args[0]));
+			break;
+		case 0:
+		default:
+			rc = seccomp_rule_add(ctx,
+					      SCMP_ACT_ERRNO(table[i].error),
+					      table[i].syscall, 0);
+			break;
+		}
 
-	for (i = 0; i < MAX_SYSCALL; i++) {
-		/* arbitrarily make the filter more complex by filtering
-		 * on arguments for a few syscalls
-		 */
-		if (i == 10 || i == 53 || i == 61 || i == 255)
-			rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(i), i, 1,
-					      SCMP_A0(SCMP_CMP_EQ, i));
-		else
-			rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(i), i, 0);
 		if (rc < 0)
 			goto out;
 	}
