@@ -72,13 +72,7 @@ table = [
 def test(args):
     f = SyscallFilter(ALLOW)
 
-    f.remove_arch(Arch())
-    f.add_arch(Arch("x86_64"))
-    f.add_arch(Arch("x86"))
-    f.set_attr(Attr.CTL_OPTIMIZE, 2)
-
     for entry in table:
-        print(entry)
         if entry["arg_cnt"] == 2:
             f.add_rule(ERRNO(entry["error"]), entry["syscall"],
                        Arg(0, EQ, entry["arg1"]),
