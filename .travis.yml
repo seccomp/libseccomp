@@ -11,6 +11,13 @@ notifications:
     on_success: always
     on_failure: always
 
+arch:
+  - amd64
+  - arm64
+
+os:
+  - linux
+
 language: c
 compiler:
   - gcc
@@ -58,12 +65,15 @@ script:
   - make check-build
   - LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
   - LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
-  # ubuntu 14.04 (trusty) clang has problems with the cython generated code
-  - make clean && ./configure && scan-build --status-bugs make
+  - |
+    if [ $TRAVIS_CPU_ARCH == "x86_64" -o -x scan-build ]; then
+      make clean && ./configure && scan-build --status-bugs make
+    fi
 
 after_success:
   # limit the code coverage tests to the 'test-code-coverage' target
-  - make clean && ./configure --enable-code-coverage && make test-code-coverage
   # https://github.com/eddyxu/cpp-coveralls/blob/master/README.md
-  - coveralls --gcov-options '\-lp'
-    --exclude tests --exclude tools --exclude src/arch-syscall-check.c
+  - |
+    if [ $TRAVIS_CPU_ARCH == "x86_64" ]; then
+      make clean && ./configure --enable-code-coverage && make test-code-coverage && coveralls --gcov-options '\-lp' --exclude tests --exclude tools --exclude src/arch-syscall-check.c
+    fi
