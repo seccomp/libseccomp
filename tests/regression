@@ -272,7 +272,8 @@ function generate_random_data() {
 	else
 		rcount=$[ ($RANDOM % 8) + 1 ]
 	fi
-	rdata=$(echo $(</dev/urandom tr -dc A-Za-z0-9 | head -c"$rcount"))
+	rdata=$(dd if=/dev/urandom bs=64 count=1 status=none | \
+		md5sum | awk '{ print $1 }' | head -c"$rcount")
 	echo "$rdata"
 }
 
