@@ -374,10 +374,10 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 	if (sys >= -1) {
 		/* we shouldn't be here - no rewrite needed */
 		return 0;
-	} else if (sys < -1 && sys > -100) {
-		/* reserved values */
+	} else if (sys > -100) {
+		/* -2 to -99 are reserved values */
 		return -EINVAL;
-	} else if (sys <= -100 && sys > -10000) {
+	} else if (sys > -10000) {
 		/* rewritable syscalls */
 		if (arch->syscall_rewrite)
 			(*arch->syscall_rewrite)(syscall);

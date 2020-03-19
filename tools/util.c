@@ -89,15 +89,15 @@ uint32_t arch = ARCH_NATIVE;
 
 /**
  * Convert a 16-bit target integer into the host's endianess
- * @param arch the architecture token
+ * @param arch_token the architecture token
  * @param val the 16-bit integer
  *
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint16_t ttoh16(uint32_t arch, uint16_t val)
+uint16_t ttoh16(uint32_t arch_token, uint16_t val)
 {
-	if (arch & __AUDIT_ARCH_LE)
+	if (arch_token & __AUDIT_ARCH_LE)
 		return le16toh(val);
 	else
 		return be16toh(val);
@@ -105,15 +105,15 @@ uint16_t ttoh16(uint32_t arch, uint16_t val)
 
 /**
  * Convert a 32-bit target integer into the host's endianess
- * @param arch the architecture token
+ * @param arch_token the architecture token
  * @param val the 32-bit integer
  *
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint32_t ttoh32(uint32_t arch, uint32_t val)
+uint32_t ttoh32(uint32_t arch_token, uint32_t val)
 {
-	if (arch & __AUDIT_ARCH_LE)
+	if (arch_token & __AUDIT_ARCH_LE)
 		return le32toh(val);
 	else
 		return be32toh(val);
@@ -121,15 +121,15 @@ uint32_t ttoh32(uint32_t arch, uint32_t val)
 
 /**
  * Convert a 32-bit host integer into the target's endianess
- * @param arch the architecture token
+ * @param arch_token the architecture token
  * @param val the 32-bit integer
  *
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint32_t htot32(uint32_t arch, uint32_t val)
+uint32_t htot32(uint32_t arch_token, uint32_t val)
 {
-	if (arch & __AUDIT_ARCH_LE)
+	if (arch_token & __AUDIT_ARCH_LE)
 		return htole32(val);
 	else
 		return htobe32(val);
@@ -137,15 +137,15 @@ uint32_t htot32(uint32_t arch, uint32_t val)
 
 /**
  * Convert a 64-bit host integer into the target's endianess
- * @param arch the architecture token
+ * @param arch_token the architecture token
  * @param val the 64-bit integer
  *
  * Convert the endianess of the supplied value and return it to the caller.
  *
  */
-uint64_t htot64(uint32_t arch, uint64_t val)
+uint64_t htot64(uint32_t arch_token, uint64_t val)
 {
-	if (arch & __AUDIT_ARCH_LE)
+	if (arch_token & __AUDIT_ARCH_LE)
 		return htole64(val);
 	else
 		return htobe64(val);
