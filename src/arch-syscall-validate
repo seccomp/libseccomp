@@ -424,6 +424,31 @@ function dump_lib_mips64n32() {
 }
 
 #
+# Dump the parisc system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_parisc() {
+	cat $1/arch/parisc/kernel/syscalls/syscall.tbl | \
+		grep -v "^#" | \
+		sed -n "/[0-9]\+[ \t]\+\(common\|32\)/p" | \
+		awk '{ print $3","$1 }' | \
+		sort
+}
+
+#
+# Dump the parisc library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_parisc() {
+	dump_lib_arch parisc | mangle_lib_syscall parisc
+}
+
+#
 # Dump the ppc system syscall table
 #
 # Arguments:
@@ -605,6 +630,12 @@ function dump_sys() {
 	mips64n32)
 		dump_sys_mips64n32 "$2"
 		;;
+	parisc)
+		dump_sys_parisc "$2"
+		;;
+	parisc64)
+		dump_sys_parisc64 "$2"
+		;;
 	ppc)
 		dump_sys_ppc "$2"
 		;;
@@ -663,20 +694,26 @@ function dump_lib() {
 	mips64n32)
 		dump_lib_mips64n32
 		;;
+	parisc)
+		dump_lib_parisc
+		;;
+	parisc64)
+		dump_lib_parisc64
+		;;
 	ppc)
-		dump_lib_ppc "$2"
+		dump_lib_ppc
 		;;
 	ppc64)
-		dump_lib_ppc64 "$2"
+		dump_lib_ppc64
 		;;
 	riscv64)
-		dump_lib_riscv64 "$2"
+		dump_lib_riscv64
 		;;
 	s390)
-		dump_lib_s390 "$2"
+		dump_lib_s390
 		;;
 	s390x)
-		dump_lib_s390x "$2"
+		dump_lib_s390x
 		;;
 	*)
 		echo ""
@@ -703,10 +740,13 @@ function gen_csv() {
 	[[ $2 != "sys" && $2 != "lib" ]] && return
 
 	# abi list
+	# NOTE: the ordering here is dependent on the layout of the
+	#       arch_syscall_def_internal struct in syscalls.h - BEWARE!
 	abi_list=""
 	abi_list+=" x86 x86_64 x32"
 	abi_list+=" arm aarch64"
 	abi_list+=" mips mips64 mips64n32"
+	abi_list+=" parisc parisc64"
 	abi_list+=" ppc ppc64"
 	abi_list+=" riscv64"
 	abi_list+=" s390 s390x"
@@ -799,6 +839,7 @@ if [[ $opt_arches == "" ]]; then
 		x86 x86_64 x32 \
 		arm aarch64 \
 		mips mips64 mips64n32 \
+		parisc parisc64 \
 		ppc ppc64 \
 		s390 s390x"
 fi
