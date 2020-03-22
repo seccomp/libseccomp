@@ -46,7 +46,7 @@ SOURCES_ALL = \
 	arch-s390.h arch-s390.c arch-s390-syscalls.c \
 	arch-s390x.h arch-s390x.c arch-s390x-syscalls.c
 
-EXTRA_DIST = arch-syscall-validate
+EXTRA_DIST = arch-syscall-validate syscalls.csv
 
 TESTS = arch-syscall-check
 
