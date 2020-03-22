@@ -449,6 +449,31 @@ function dump_lib_parisc() {
 }
 
 #
+# Dump the parisc64 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_parisc64() {
+	cat $1/arch/parisc/kernel/syscalls/syscall.tbl | \
+		grep -v "^#" | \
+		sed -n "/[0-9]\+[ \t]\+\(common\|64\)/p" | \
+		awk '{ print $3","$1 }' | \
+		sort
+}
+
+#
+# Dump the parisc64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_parisc64() {
+	dump_lib_arch parisc64 | mangle_lib_syscall parisc64
+}
+
+#
 # Dump the ppc system syscall table
 #
 # Arguments:
