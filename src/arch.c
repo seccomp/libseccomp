@@ -39,6 +39,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-parisc.h"
+#include "arch-parisc64.h"
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
 #include "arch-riscv64.h"

@@ -19,11 +19,11 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-#ifndef _ARCH_PARISC_H
-#define _ARCH_PARISC_H
+#ifndef _ARCH_PARISC64_H
+#define _ARCH_PARISC64_H
 
 #include "arch.h"
 
-ARCH_DECL(parisc)
+ARCH_DECL(parisc64)
 
 #endif

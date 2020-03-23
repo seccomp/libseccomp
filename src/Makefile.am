@@ -39,7 +39,8 @@ SOURCES_ALL = \
 	arch-mips.h arch-mips.c \
 	arch-mips64.h arch-mips64.c \
 	arch-mips64n32.h arch-mips64n32.c \
-	arch-parisc.h arch-parisc.c arch-parisc64.c \
+	arch-parisc.h arch-parisc.c \
+	arch-parisc64.h arch-parisc64.c \
 	arch-ppc.h arch-ppc.c \
 	arch-ppc64.h arch-ppc64.c \
 	arch-riscv64.h arch-riscv64.c \
