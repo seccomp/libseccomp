@@ -4,7 +4,6 @@
 # https://wiki.ubuntu.com/Releases
 
 dist: bionic
-sudo: false
 
 notifications:
   email:
