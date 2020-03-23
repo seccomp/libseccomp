@@ -41,9 +41,6 @@ test type: bpf-sim
 53-sim-binary_tree	all	msync		N	N	N	N	N	N	ERRNO(26)
 53-sim-binary_tree	all	mincore		N	N	N	N	N	N	ERRNO(27)
 53-sim-binary_tree	all	madvise		N	N	N	N	N	N	ERRNO(28)
-53-sim-binary_tree	all	shmget		N	N	N	N	N	N	ERRNO(29)
-53-sim-binary_tree	all	shmat		110	N	N	N	N	N	ERRNO(30)
-53-sim-binary_tree	all	shmctl		111	N	N	N	N	N	ERRNO(31)
 53-sim-binary_tree	all	dup		112	N	N	N	N	N	ERRNO(32)
 53-sim-binary_tree	all	dup		5678	N	N	N	N	N	ALLOW
 53-sim-binary_tree	all	dup2		N	N	N	N	N	N	ERRNO(33)
