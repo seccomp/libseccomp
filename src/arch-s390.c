@@ -44,12 +44,26 @@ int s390_syscall_resolve_name_munge(const char *name)
 		return __PNR_getsockopt;
 	else if (strcmp(name, "listen") == 0)
 		return __PNR_listen;
+	else if (strcmp(name, "msgctl") == 0)
+		return __PNR_msgctl;
+	else if (strcmp(name, "msgget") == 0)
+		return __PNR_msgget;
+	else if (strcmp(name, "msgrcv") == 0)
+		return __PNR_msgrcv;
+	else if (strcmp(name, "msgsnd") == 0)
+		return __PNR_msgsnd;
 	else if (strcmp(name, "recv") == 0)
 		return __PNR_recv;
 	else if (strcmp(name, "recvfrom") == 0)
 		return __PNR_recvfrom;
 	else if (strcmp(name, "recvmsg") == 0)
 		return __PNR_recvmsg;
+	else if (strcmp(name, "semctl") == 0)
+		return __PNR_semctl;
+	else if (strcmp(name, "semget") == 0)
+		return __PNR_semget;
+	else if (strcmp(name, "semtimedop") == 0)
+		return __PNR_semtimedop;
 	else if (strcmp(name, "recvmmsg") == 0)
 		return __PNR_recvmmsg;
 	else if (strcmp(name, "send") == 0)
@@ -107,6 +121,14 @@ const char *s390_syscall_resolve_num_munge(int num)
 		return "getsockopt";
 	else if (num == __PNR_listen)
 		return "listen";
+	else if (num == __PNR_msgctl)
+		return "msgctl";
+	else if (num == __PNR_msgget)
+		return "msgget";
+	else if (num == __PNR_msgrcv)
+		return "msgrcv";
+	else if (num == __PNR_msgsnd)
+		return "msgsnd";
 	else if (num == __PNR_recv)
 		return "recv";
 	else if (num == __PNR_recvfrom)
@@ -115,6 +137,12 @@ const char *s390_syscall_resolve_num_munge(int num)
 		return "recvmsg";
 	else if (num == __PNR_recvmmsg)
 		return "recvmmsg";
+	else if (num == __PNR_semctl)
+		return "semctl";
+	else if (num == __PNR_semget)
+		return "semget";
+	else if (num == __PNR_semtimedop)
+		return "semtimedop";
 	else if (num == __PNR_send)
 		return "send";
 	else if (num == __PNR_sendmsg)
