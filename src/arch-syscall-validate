@@ -227,8 +227,7 @@ function dump_sys_x32() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_x32() {
-	# 1073741824 == 0x40000000
-	dump_lib_arch x32 1073741824 | mangle_lib_syscall x32
+	dump_lib_arch x32 | mangle_lib_syscall x32
 }
 
 #
@@ -342,7 +341,7 @@ function dump_sys_mips() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips() {
-	dump_lib_arch mips 4000 | mangle_lib_syscall mips
+	dump_lib_arch mips | mangle_lib_syscall mips
 }
 
 #
@@ -381,7 +380,7 @@ function dump_sys_mips64() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips64() {
-	dump_lib_arch mips64 5000 | mangle_lib_syscall mips64
+	dump_lib_arch mips64 | mangle_lib_syscall mips64
 }
 
 #
@@ -420,7 +419,7 @@ function dump_sys_mips64n32() {
 #  Dump the library's syscall table to stdout.
 #
 function dump_lib_mips64n32() {
-	dump_lib_arch mips64n32 6000 | mangle_lib_syscall mips64n32
+	dump_lib_arch mips64n32 | mangle_lib_syscall mips64n32
 }
 
 #
