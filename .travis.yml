@@ -67,7 +67,7 @@ script:
   - LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
   - LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
   - |
-    if [ $TRAVIS_CPU_ARCH == "x86_64" -o -x scan-build ]; then
+    if [ $TRAVIS_CPU_ARCH == "amd64" -o -x scan-build ]; then
       make clean && ./configure && scan-build --status-bugs make
     fi
 
@@ -75,6 +75,6 @@ after_success:
   # limit the code coverage tests to the 'test-code-coverage' target
   # https://github.com/eddyxu/cpp-coveralls/blob/master/README.md
   - |
-    if [ $TRAVIS_CPU_ARCH == "x86_64" ]; then
+    if [ $TRAVIS_CPU_ARCH == "amd64" ]; then
       make clean && ./configure --enable-code-coverage && make test-code-coverage && coveralls --gcov-options '\-lp' --exclude tests --exclude tools --exclude src/arch-syscall-check.c
     fi
