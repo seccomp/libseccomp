@@ -23,6 +23,16 @@ Loads the seccomp filter provided by
 .I ctx
 into the kernel; if the function
 succeeds the new seccomp filter will be active when the function returns.
+.P
+As it is possible to have multiple stacked seccomp filters for a given task
+(defined as either a process or a thread), it is important to remember that
+each of the filters loaded for a given task are executed when a syscall is
+made and the "strictest" rule is the rule that is applied.  In the case of
+seccomp, "strictest" is defined as the action with the lowest value (e.g.
+.I SCMP_ACT_KILL
+is "stricter" than
+.I SCMP_ACT_ALLOW
+).
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
