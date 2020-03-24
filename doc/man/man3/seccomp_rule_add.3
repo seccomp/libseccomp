@@ -87,6 +87,17 @@ do guarantee the same behavior regardless of the architecture.
 The newly added filter rule does not take effect until the entire filter is
 loaded into the kernel using
 .BR seccomp_load (3).
+When adding rules to a filter, it is important to consider the impact of
+previously loaded filters; see the
+.BR seccomp_load (3)
+documentation for more information.
+.P
+All of the filter rules supplied by the calling application are combined into
+a union, with additional logic to eliminate redundant syscall filters.  For
+example, if a rule is added which allows a given syscall with a specific set of
+argument values and later a rule is added which allows the same syscall
+regardless the argument values then the first, more specific rule, is
+effectively dropped from the filter by the second more generic rule.
 .P
 The
 .BR SCMP_CMP (),
@@ -119,6 +130,15 @@ and
 macros and use the variants which are explicitly 32 or 64-bit.  This should
 help eliminate problems caused by an unwanted sign extension of negative datum
 values.
+.P
+If syscall argument comparisons are included in the filter rule, all of the
+comparisons must be true for the rule to match.
+.P
+When adding syscall argument comparisons to the filter it is important to
+remember that while it is possible to have multiple comparisons in a single
+rule, you can only compare each argument once in a single rule.  In other words,
+you can not have multiple comparisons of the 3rd syscall argument in a single
+rule.
 .P
 While it is possible to specify the
 .I syscall
