@@ -314,25 +314,11 @@ function dump_lib_aarch64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips() {
-	pushd $1 2>&1 > /dev/null
-	make ARCH=mips archheaders
-	popd 2>&1 > /dev/null
-	# _MIPS_SIM values:
-	#   _MIPS_SIM_ABI32 == 1
-	#   _MIPS_SIM_NABI32 == 2
-	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi \
-			-I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=1 \
-			$1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | \
-		grep -v "^#define __NR_O32_" | \
-		grep -v "^#define __NR_N32_" | \
-		grep -v "^#define __NR_64_" | \
-		grep -v "^#define __NR_Linux" | \
-		grep -v "^#define __NR_unused" | \
-		grep -v "^#define __NR_reserved" | \
-		sed 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1,\2/' | \
-		sort
+	cat $1/arch/mips/kernel/syscalls/syscall_o32.tbl | \
+		grep -v "^#" | \
+		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
+		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
+		awk '{ print $3","$1 }' | sort
 }
 
 #
@@ -353,25 +339,11 @@ function dump_lib_mips() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64() {
-	pushd $1 2>&1 > /dev/null
-	make ARCH=mips archheaders
-	popd 2>&1 > /dev/null
-	# _MIPS_SIM values:
-	#   _MIPS_SIM_ABI32 == 1
-	#   _MIPS_SIM_NABI32 == 2
-	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi \
-			-I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=3 \
-			$1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | \
-		grep -v "^#define __NR_O32_" | \
-		grep -v "^#define __NR_N32_" | \
-		grep -v "^#define __NR_64_" | \
-		grep -v "^#define __NR_Linux" | \
-		grep -v "^#define __NR_unused" | \
-		grep -v "^#define __NR_reserved" | \
-		sed 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1,\2/' | \
-		sort
+	cat $1/arch/mips/kernel/syscalls/syscall_n64.tbl | \
+		grep -v "^#" | \
+		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
+		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
+		awk '{ print $3","$1 }' | sort
 }
 
 #
@@ -392,25 +364,11 @@ function dump_lib_mips64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64n32() {
-	pushd $1 2>&1 > /dev/null
-	make ARCH=mips archheaders
-	popd 2>&1 > /dev/null
-	# _MIPS_SIM values:
-	#   _MIPS_SIM_ABI32 == 1
-	#   _MIPS_SIM_NABI32 == 2
-	#   _MIPS_SIM_ABI64 == 3
-	gcc -E -dM -I$1/arch/mips/include/uapi \
-			-I$1/arch/mips/include/generated/uapi -D_MIPS_SIM=2 \
-			$1/arch/mips/include/uapi/asm/unistd.h | \
-		grep "^#define __NR_" | \
-		grep -v "^#define __NR_O32_" | \
-		grep -v "^#define __NR_N32_" | \
-		grep -v "^#define __NR_64_" | \
-		grep -v "^#define __NR_Linux" | \
-		grep -v "^#define __NR_unused" | \
-		grep -v "^#define __NR_reserved" | \
-		sed 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+(__NR_Linux[ \t]*+[ \t]*\([0-9]\+\)).*/\1,\2/' | \
-		sort
+	cat $1/arch/mips/kernel/syscalls/syscall_n32.tbl | \
+		grep -v "^#" | \
+		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
+		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
+		awk '{ print $3","$1 }' | sort
 }
 
 #
