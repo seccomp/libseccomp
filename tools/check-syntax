@@ -26,7 +26,7 @@ CHK_C_LIST="include/seccomp.h.in \
 	    src/*.c src/*.h \
 	    tests/*.c tests/*.h \
 	    tools/*.c tools/*.h"
-CHK_C_EXCLUDE=""
+CHK_C_EXCLUDE="src/syscalls.perf.c"
 
 ####
 # functions
