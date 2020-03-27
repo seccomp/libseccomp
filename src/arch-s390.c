@@ -252,8 +252,8 @@ static int _s390_syscall_demux(int syscall)
 		/* semctl */
 		return 394;
 	case -204:
-		/* semtimedop - not defined */
-		return __NR_SCMP_UNDEF;
+		/* semtimedop */
+		return 392;
 	case -211:
 		/* msgsnd */
 		return 400;
@@ -376,6 +376,9 @@ static int _s390_syscall_mux(int syscall)
 	case 396:
 		/* shmctl */
 		return -224;
+	case 392:
+		/* semtimedop */
+		return -204;
 	}
 
 	return __NR_SCMP_ERROR;
