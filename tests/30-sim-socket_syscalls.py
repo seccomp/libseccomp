@@ -34,6 +34,7 @@ def test(args):
     f.add_arch(Arch("x86"))
     f.add_arch(Arch("x86_64"))
     f.add_arch(Arch("x32"))
+    f.add_arch(Arch("ppc64le"))
     f.add_rule(ALLOW, "socket")
     f.add_rule(ALLOW, "connect")
     f.add_rule(ALLOW, "accept")
