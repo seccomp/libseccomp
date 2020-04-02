@@ -215,8 +215,7 @@ API void seccomp_release(scmp_filter_ctx ctx)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-API int seccomp_merge(scmp_filter_ctx ctx_dst,
-		      scmp_filter_ctx ctx_src)
+API int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
 {
 	struct db_filter_col *col_dst = (struct db_filter_col *)ctx_dst;
 	struct db_filter_col *col_src = (struct db_filter_col *)ctx_src;
@@ -255,8 +254,7 @@ API uint32_t seccomp_arch_native(void)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
-API int seccomp_arch_exist(const scmp_filter_ctx ctx,
-			   uint32_t arch_token)
+API int seccomp_arch_exist(const scmp_filter_ctx ctx, uint32_t arch_token)
 {
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
