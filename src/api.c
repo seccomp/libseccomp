@@ -610,7 +610,7 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
 	gen_bpf_release(program);
 	if (rc < 0)
-		return -errno;
+		return -ECANCELED;
 
 	return 0;
 }

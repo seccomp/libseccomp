@@ -328,7 +328,7 @@ int sys_filter_load(struct db_filter_col *col)
 		rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flgs, prgm);
 		if (rc > 0 && col->attr.tsync_enable)
 			/* always return -ESRCH if we fail to sync threads */
-			errno = ESRCH;
+			rc = -ESRCH;
 		if (rc > 0 && _support_seccomp_user_notif > 0) {
 			/* return 0 on NEW_LISTENER success, but save the fd */
 			col->notify_fd = rc;
@@ -340,8 +340,10 @@ int sys_filter_load(struct db_filter_col *col)
 filter_load_out:
 	/* cleanup and return */
 	gen_bpf_release(prgm);
+	if (rc == -ESRCH)
+		return -ESRCH;
 	if (rc < 0)
-		return -errno;
+		return -ECANCELED;
 	return rc;
 }
 
@@ -357,7 +359,7 @@ int sys_notify_alloc(struct seccomp_notif **req,
 	if (sizes.seccomp_notif == 0 && sizes.seccomp_notif_resp == 0) {
 		rc = syscall(__NR_seccomp, SECCOMP_GET_NOTIF_SIZES, 0, &sizes);
 		if (rc < 0)
-			return -errno;
+			return -ECANCELED;
 	}
 	if (sizes.seccomp_notif == 0 || sizes.seccomp_notif_resp == 0)
 		return -EFAULT;
@@ -386,7 +388,7 @@ int sys_notify_receive(int fd, struct seccomp_notif *req)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_RECV, req) < 0)
-		return -errno;
+		return -ECANCELED;
 
 	return 0;
 }
@@ -397,7 +399,7 @@ int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_SEND, resp) < 0)
-		return -errno;
+		return -ECANCELED;
 	return 0;
 }
 
@@ -407,6 +409,6 @@ int sys_notify_id_valid(int fd, uint64_t id)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID, &id) < 0)
-		return -errno;
+		return -ENOENT;
 	return 0;
 }

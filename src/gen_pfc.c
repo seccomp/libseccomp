@@ -469,18 +469,17 @@ arch_return:
  */
 int gen_pfc_generate(const struct db_filter_col *col, int fd)
 {
-	int rc = 0;
 	int newfd;
 	unsigned int iter;
 	FILE *fds;
 
 	newfd = dup(fd);
 	if (newfd < 0)
-		return errno;
+		return -ECANCELED;
 	fds = fdopen(newfd, "a");
 	if (fds == NULL) {
 		close(newfd);
-		return errno;
+		return -ECANCELED;
 	}
 
 	/* generate the pfc */
@@ -501,5 +500,5 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 	fflush(fds);
 	fclose(fds);
 
-	return rc;
+	return 0;
 }

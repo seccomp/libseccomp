@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 		return -1;
 	else {
 		rc = seccomp_export_pfc(ctx, sysconf(_SC_OPEN_MAX) - 1);
-		if (rc != EBADF)
+		if (rc != -ECANCELED)
 			return -1;
 	}
 	seccomp_release(ctx);
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 		return -1;
 	else {
 		rc = seccomp_export_bpf(ctx, sysconf(_SC_OPEN_MAX) - 1);
-		if (rc != -EBADF)
+		if (rc != -ECANCELED)
 			return -1;
 	}
 	seccomp_release(ctx);
