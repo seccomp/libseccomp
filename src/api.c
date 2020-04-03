@@ -449,7 +449,7 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 	if (rc < 0)
 		return rc;
 	if (action == col->attr.act_default)
-		return -EPERM;
+		return -EACCES;
 
 	return db_col_rule_add(col, 0, action, syscall, arg_cnt, arg_array);
 }
@@ -498,7 +498,7 @@ API int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 	if (rc < 0)
 		return rc;
 	if (action == col->attr.act_default)
-		return -EPERM;
+		return -EACCES;
 
 	if (col->filter_cnt > 1)
 		return -EOPNOTSUPP;
