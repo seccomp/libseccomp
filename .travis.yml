@@ -51,7 +51,10 @@ before_install:
   # assume the distro has an old version of cython
   - pip install cython
   # see https://github.com/eddyxu/cpp-coveralls
-  - pip install cpp-coveralls
+  - |
+    if [ $TRAVIS_CPU_ARCH == "amd64" ]; then
+      pip install cpp-coveralls
+    fi
 
 # perform the build and fail immediately on error
 install:
