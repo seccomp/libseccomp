@@ -1,0 +1,10 @@
+site_name: libseccomp
+site_author: Lucas Ramage
+
+theme:
+  name: readthedocs
+
+docs_dir: doc
+
+repo_url: https://github.com/seccomp/libseccomp.git
+
