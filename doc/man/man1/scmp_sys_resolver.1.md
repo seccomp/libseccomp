@@ -1,0 +1,62 @@
+NAME
+====
+
+scmp\_sys\_resolver - Resolve system calls
+
+SYNOPSIS
+========
+
+**scmp\_sys\_resolver** \[-h\] \[-a *ARCH* \] \[-t\] *SYSCALL\_NAME* \|
+*SYSCALL\_NUMBER*
+
+DESCRIPTION
+===========
+
+This command resolves both system call names and numbers with respect to
+the given architecture supplied in the optional *ARCH* argument. If the
+architecture is not supplied on the command line then the native
+architecture is used. If the \"-t\" argument is specified along with a
+system call name, then the system call will be translated as necessary
+for the given architecture. The \"-t\" argument has no effect if a
+system call number is specified.
+
+In some combinations of architecture and system call, a negative system
+call number will be displayed. A negative system call number indicates
+that the system call is not defined for the given architecture and is
+treated in a special manner by libseccomp depending on the operation.
+
+**-a *ARCH***
+
+:   The architecture to use for resolving the system call. Valid *ARCH*
+    values are \"x86\", \"x86\_64\", \"x32\", \"arm\", \"aarch64\",
+    \"mips\", \"mipsel\", \"mips64\", \"mipsel64\", \"mips64n32\",
+    \"mipsel64n32\", \"parisc\", \"parisc64\", \"ppc\", \"ppc64\",
+    \"ppc64le\", \"s390\" and \"s390x\".
+
+**-t**
+
+:   If necessary, translate the system call name to the proper system
+    call number, even if the system call name is different, e.g.
+    socket(2) on x86.
+
+**-h**
+
+:   A simple one-line usage display.
+
+EXIT STATUS
+===========
+
+Returns zero on success, errno values on failure.
+
+NOTES
+=====
+
+The libseccomp project site, with more information and the source code
+repository, can be found at https://github.com/seccomp/libseccomp. This
+tool, as well as the libseccomp library, is currently under development,
+please report any bugs at the project site or directly to the author.
+
+AUTHOR
+======
+
+Paul Moore \<paul\@paul-moore.com\>
