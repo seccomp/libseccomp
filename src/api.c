@@ -115,7 +115,8 @@ static unsigned int _seccomp_api_update(void)
 		level = 4;
 
 	if (level == 4 &&
-	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER) == 1)
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER) == 1 &&
+	    sys_chk_seccomp_action(SCMP_ACT_NOTIFY) == 1)
 		level = 5;
 
 	/* update the stored api level and return */
