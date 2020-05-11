@@ -288,7 +288,7 @@ function dump_sys_aarch64() {
 	gcc -E -dM -I$1/include/uapi \
 		-D__BITS_PER_LONG=64 -D__ARCH_WANT_RENAMEAT \
 		-D__ARCH_WANT_NEW_STAT \
-		$1/include/uapi/asm-generic/unistd.h | \
+		$1/arch/arm64/include/uapi/asm/unistd.h | \
 		grep "^#define __NR_" | \
 		sed '/__NR_syscalls/d' | \
 		sed '/__NR_arch_specific_syscall/d' | \
