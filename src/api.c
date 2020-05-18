@@ -107,7 +107,8 @@ static unsigned int _seccomp_api_update(void)
 	/* level 3 */
 	if (level == 2 &&
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_LOG) == 1 &&
-	    sys_chk_seccomp_action(SCMP_ACT_LOG) == 1)
+	    sys_chk_seccomp_action(SCMP_ACT_LOG) == 1 &&
+	    sys_chk_seccomp_action(SCMP_ACT_KILL_PROCESS) == 1)
 		level = 3;
 
 	if (level == 3 &&
