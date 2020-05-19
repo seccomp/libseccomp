@@ -289,7 +289,7 @@ static int _get_bintree_syscall_num(const struct pfc_sys_list *cur,
 	}
 
 	if (cur == NULL)
-		return -EINVAL;
+		return -EFAULT;
 
 	*num = cur->sys->num;
 	return 0;

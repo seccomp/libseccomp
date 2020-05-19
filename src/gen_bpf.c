@@ -1281,7 +1281,7 @@ static int _gen_bpf_insert(struct bpf_state *state, struct bpf_instr *instr,
 
 	*insert = _blk_append(state, existing_blk, instr);
 	if (*insert == NULL)
-		return -EINVAL;
+		return -ENOMEM;
 	(*insert)->next = (*next);
 	if (*next != NULL)
 		(*next)->prev = (*insert);
@@ -1949,9 +1949,6 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	struct db_filter *db_secondary = NULL;
 	struct arch_def pseudo_arch;
 
-	if (col->filter_cnt == 0)
-		return -EINVAL;
-
 	/* create a fake architecture definition for use in the early stages */
 	memset(&pseudo_arch, 0, sizeof(pseudo_arch));
 	pseudo_arch.endian = col->endian;
@@ -2253,6 +2250,9 @@ struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 	int rc;
 	struct bpf_state state;
 	struct bpf_program *prgm;
+
+	if (col->filter_cnt == 0)
+		return NULL;
 
 	memset(&state, 0, sizeof(state));
 	state.attr = &col->attr;

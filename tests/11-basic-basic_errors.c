@@ -178,10 +178,10 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return -1;
 	rc = seccomp_attr_get(ctx, 1000, &attr);
-	if (rc != -EEXIST)
+	if (rc != -EINVAL)
 		return -1;
 	rc = seccomp_attr_set(ctx, 1000, 1);
-	if (rc != -EEXIST)
+	if (rc != -EINVAL)
 		return -1;
 
 	return 0;

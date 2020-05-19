@@ -1317,7 +1317,7 @@ int db_col_attr_get(const struct db_filter_col *col,
 		*value = col->attr.optimize;
 		break;
 	default:
-		rc = -EEXIST;
+		rc = -EINVAL;
 		break;
 	}
 
@@ -1403,7 +1403,7 @@ int db_col_attr_set(struct db_filter_col *col,
 		}
 		break;
 	default:
-		rc = -EEXIST;
+		rc = -EINVAL;
 		break;
 	}
 
