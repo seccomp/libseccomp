@@ -1,4 +1,4 @@
-.TH "seccomp_merge" 3 "28 September 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_merge" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,21 @@ attribute values and no overlapping architectures.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
-Returns zero on success and negative values on failure.
+Returns zero on success or one of the following error codes on
+failure:
+.TP
+.B -EDOM
+Unable to merge the filters due to architecture issues, e.g. byte endian
+mismatches.
+.TP
+.B -EEXIST
+The architecture already exists in the filter.
+.TP
+.B -EINVAL
+One of the filters is invalid.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

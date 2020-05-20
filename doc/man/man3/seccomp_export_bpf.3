@@ -1,4 +1,4 @@
-.TH "seccomp_export_bpf" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_export_bpf" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,17 @@ ordering, are not guaranteed to be the same in both the BPF and PFC formats.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
-Returns zero on success, negative errno values on failure.
+Return zero on success or one of the following error codes on
+failure:
+.TP
+.B -ECANCELED
+There was a kernel failure beyond the control of the library.
+.TP
+.B -EINVAL
+Invalid input, either the context or architecture token is invalid.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

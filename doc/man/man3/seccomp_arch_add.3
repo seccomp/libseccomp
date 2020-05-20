@@ -86,13 +86,28 @@ new architecture will be added to all of the architectures in the filter.
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
 The
-.BR seccomp_arch_add ()
+.BR seccomp_arch_add (),
+.BR seccomp_arch_remove (),
 and
-.BR seccomp_arch_remove ()
-functions return zero on success, negative errno values on failure.  The
 .BR seccomp_arch_exist ()
-function returns zero if the architecture exists, \-EEXIST if it does not, and
-other negative errno values on failure.
+functions return zero on success or one of the following error codes on
+failure:
+.TP
+.B -EDOM
+Architecture specific failure.
+.TP
+.B -EEXIST
+In the case of
+.BR seccomp_arch_add ()
+the architecture already exists and in the case of
+.BR seccomp_arch_remove ()
+the architecture does not exist.
+.TP
+.B -EINVAL
+Invalid input, either the context or architecture token is invalid.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

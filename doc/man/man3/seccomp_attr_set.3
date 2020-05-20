@@ -1,4 +1,4 @@
-.TH "seccomp_attr_set" 3 "21 August 2014" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_attr_set" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,20 @@ Defaults to off (
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
-Returns zero on success, negative errno values on failure.
+Returns zero on success or one of the following error codes on
+failure:
+.TP
+.B -EACCES
+Setting the attribute with the given value is not allowed.
+.TP
+.B -EEXIST
+The attribute does not exist.
+.TP
+.B -EINVAL
+Invalid input, either the context or architecture token is invalid.
+.TP
+.B -EOPNOTSUPP
+The library doesn't support the particular operation.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-.TH "seccomp_rule_add" 3 "17 February 2019" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_rule_add" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -279,12 +279,47 @@ SCMP_CMP(
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
 The
+.BR SCMP_SYS ()
+macro returns a value suitable for use as the
+.I syscall
+value in the
+.BR seccomp_rule_add* ()
+functions.  In a similar manner, the
+.BR SCMP_CMP ()
+and
+.BR SCMP_A* ()
+macros return values suitable for use as argument comparisons in the
+.BR seccomp_rule_add ()
+and
+.BR seccomp_rule_add_exact ()
+functions.
+.P
+The
 .BR seccomp_rule_add (),
 .BR seccomp_rule_add_array (),
 .BR seccomp_rule_add_exact (),
 and
 .BR seccomp_rule_add_exact_array ()
-functions return zero on success, negative errno values on failure.
+functions return zero on success or one of the following error codes on
+failure:
+.TP
+.B -EDOM
+Architecture specific failure.
+.TP
+.B -EEXIST
+The rule already exists.
+.TP
+.B -EFAULT
+Internal libseccomp failure.
+.TP
+.B -EINVAL
+Invalid input, either the context or architecture token is invalid.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
+.TP
+.B -EOPNOTSUPP
+The library doesn't support the particular operation.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

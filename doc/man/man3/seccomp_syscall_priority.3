@@ -1,4 +1,4 @@
-.TH "seccomp_syscall_priority" 3 "25 July 2012" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_syscall_priority" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -53,13 +53,28 @@ is the value returned by the call to
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
 The
-.BR seccomp_syscall_priority ()
-function returns zero on success, negative errno values on failure.  The
 .BR SCMP_SYS ()
 macro returns a value suitable for use as the
 .I syscall
 value in
 .BR seccomp_syscall_priority ().
+.P
+The
+.BR seccomp_syscall_priority ()
+function returns zero on success or one of the following error codes on
+failure:
+.TP
+.B -EDOM
+Architecture specific failure.
+.TP
+.B -EFAULT
+Internal libseccomp failure.
+.TP
+.B -EINVAL
+Invalid input, either the context or architecture token is invalid.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

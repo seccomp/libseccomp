@@ -1,4 +1,4 @@
-.TH "seccomp_notify_alloc" 3 "24 April 2019" "tycho@tycho.ws" "libseccomp Documentation"
+.TH "seccomp_notify_alloc" 3 "30 May 2020" "tycho@tycho.ws" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -57,21 +57,33 @@ returns the notification fd of a filter after it has been loaded.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
-.P
 The
-.BR seccomp_notify_alloc (),
-.BR seccomp_notify_receive (),
-and
-.BR seccomp_notify_respond ()
-functions all return 0 on success, -1 on failure.
+.BR seccomp_notify_fd ()
+returns the notification fd of the loaded filter.
 .P
 The
 .BR seccomp_notify_id_valid ()
 returns 0 if the id is valid, and -ENOENT if it is not.
 .P
 The
-.BR seccomp_notify_fd ()
-returns the notification fd of the loaded filter.
+.BR seccomp_notify_alloc (),
+.BR seccomp_notify_receive (),
+and
+.BR seccomp_notify_respond ()
+functions return zero on success or one of the following error codes on
+failure:
+.TP
+.B -ECANCELED
+There was a kernel failure beyond the control of the library.
+.TP
+.B -EFAULT
+Internal libseccomp failure.
+.TP
+.B -ENOMEM
+The library was unable to allocate enough memory.
+.TP
+.B -EOPNOTSUPP
+The library doesn't support the particular operation.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NOTES
 .\" //////////////////////////////////////////////////////////////////////////
