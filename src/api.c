@@ -192,6 +192,9 @@ API int seccomp_api_set(unsigned int level)
 /* NOTE - function header comment in include/seccomp.h */
 API scmp_filter_ctx seccomp_init(uint32_t def_action)
 {
+	/* force a runtime api level detection */
+	_seccomp_api_update();
+
 	if (db_col_action_valid(NULL, def_action) < 0)
 		return NULL;
 
@@ -531,6 +534,9 @@ API int seccomp_rule_add_exact(scmp_filter_ctx ctx,
 API int seccomp_notify_alloc(struct seccomp_notif **req,
 			     struct seccomp_notif_resp **resp)
 {
+	/* force a runtime api level detection */
+	_seccomp_api_update();
+
 	return sys_notify_alloc(req, resp);
 }
 
@@ -559,6 +565,9 @@ API int seccomp_notify_respond(int fd, struct seccomp_notif_resp *resp)
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_notify_id_valid(int fd, uint64_t id)
 {
+	/* force a runtime api level detection */
+	_seccomp_api_update();
+
 	return sys_notify_id_valid(fd, id);
 }
 
@@ -566,6 +575,9 @@ API int seccomp_notify_id_valid(int fd, uint64_t id)
 API int seccomp_notify_fd(const scmp_filter_ctx ctx)
 {
 	struct db_filter_col *col;
+
+	/* force a runtime api level detection */
+	_seccomp_api_update();
 
 	if (_ctx_valid(ctx))
 		return -EINVAL;
