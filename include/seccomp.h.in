@@ -69,10 +69,12 @@ enum scmp_filter_attr {
 	SCMP_FLTATR_API_TSKIP = 5,	/**< allow rules with a -1 syscall */
 	SCMP_FLTATR_CTL_LOG = 6,	/**< log not-allowed actions */
 	SCMP_FLTATR_CTL_SSB = 7,	/**< disable SSB mitigation */
-	SCMP_FLTATR_CTL_OPTIMIZE = 8,	/**< filter optimization level: (DEFAULT = 1)
+	SCMP_FLTATR_CTL_OPTIMIZE = 8,	/**< filter optimization level:
 					 * 0 - currently unused
-					 * 1 - rules weighted by priority and complexity
-					 * 2 - binary tree sorted by syscall number
+					 * 1 - rules weighted by priority and
+					 *     complexity (DEFAULT)
+					 * 2 - binary tree sorted by syscall
+					 *     number
 					 */
 	_SCMP_FLTATR_MAX,
 };
