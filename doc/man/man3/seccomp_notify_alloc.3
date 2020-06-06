@@ -47,7 +47,7 @@ this response corresponds to.
 .P
 The
 .BR seccomp_notify_id_valid ()
-function checks to see if the syscall from a particualr notification request is
+function checks to see if the syscall from a particular notification request is
 still valid, i.e. if the task is still alive. See NOTES below for details on
 race conditions.
 .P
@@ -70,11 +70,12 @@ The
 .BR seccomp_notify_receive (),
 and
 .BR seccomp_notify_respond ()
-functions return zero on success or one of the following error codes on
+functions return zero on success,  or one of the following error codes on
 failure:
 .TP
 .B -ECANCELED
-There was a kernel failure beyond the control of the library.
+There was a system failure beyond the control of the library, check the
+\fIerrno\fP value for more information.
 .TP
 .B -EFAULT
 Internal libseccomp failure.

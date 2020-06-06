@@ -188,7 +188,7 @@ void sys_set_seccomp_action(uint32_t action, bool enable);
 int sys_chk_seccomp_flag(int flag);
 void sys_set_seccomp_flag(int flag, bool enable);
 
-int sys_filter_load(struct db_filter_col *col);
+int sys_filter_load(struct db_filter_col *col, bool rawrc);
 
 int sys_notify_alloc(struct seccomp_notif **req,
 		     struct seccomp_notif_resp **resp);

@@ -95,7 +95,8 @@ check_PROGRAMS = \
 	53-sim-binary_tree \
 	54-live-binary_tree \
 	55-basic-pfc_binary_tree \
-	56-basic-iterate_syscalls
+	56-basic-iterate_syscalls \
+	57-basic-rawsysrc
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -210,7 +211,8 @@ EXTRA_DIST_TESTCFGS = \
 	53-sim-binary_tree.tests \
 	54-live-binary_tree.tests \
 	55-basic-pfc_binary_tree.tests \
-	56-basic-iterate_syscalls.tests
+	56-basic-iterate_syscalls.tests \
+	57-basic-rawsysrc.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \

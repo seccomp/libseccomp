@@ -291,6 +291,7 @@ void sys_set_seccomp_flag(int flag, bool enable)
 /**
  * Loads the filter into the kernel
  * @param col the filter collection
+ * @param rawrc pass the raw return code if true
  *
  * This function loads the given seccomp filter context into the kernel.  If
  * the filter was loaded correctly, the kernel will be enforcing the filter
@@ -298,7 +299,7 @@ void sys_set_seccomp_flag(int flag, bool enable)
  * error.
  *
  */
-int sys_filter_load(struct db_filter_col *col)
+int sys_filter_load(struct db_filter_col *col, bool rawrc)
 {
 	int rc;
 	struct bpf_program *prgm = NULL;
@@ -343,7 +344,7 @@ filter_load_out:
 	if (rc == -ESRCH)
 		return -ESRCH;
 	if (rc < 0)
-		return -ECANCELED;
+		return (rawrc ? -errno : -ECANCELED);
 	return rc;
 }
 

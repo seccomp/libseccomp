@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2020 Cisco Systems, Inc. <pmoore2@cisco.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: basic
+
+# Test command
+57-basic-rawsysrc

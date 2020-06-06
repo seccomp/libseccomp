@@ -1071,6 +1071,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.log_enable = 0;
 	col->attr.spec_allow = 0;
 	col->attr.optimize = 1;
+	col->attr.api_sysrawrc = 0;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -1316,12 +1317,34 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_OPTIMIZE:
 		*value = col->attr.optimize;
 		break;
+	case SCMP_FLTATR_API_SYSRAWRC:
+		*value = col->attr.api_sysrawrc;
+		break;
 	default:
 		rc = -EINVAL;
 		break;
 	}
 
 	return rc;
+}
+
+/**
+ * Get a filter attribute
+ * @param col the seccomp filter collection
+ * @param attr the filter attribute
+ *
+ * Returns the requested filter attribute value with zero on any error.
+ * Special care must be given with this function as error conditions can be
+ * hidden from the caller.
+ *
+ */
+uint32_t db_col_attr_read(const struct db_filter_col *col,
+			  enum scmp_filter_attr attr)
+{
+	uint32_t value = 0;
+
+	db_col_attr_get(col, attr, &value);
+	return value;
 }
 
 /**
@@ -1401,6 +1424,9 @@ int db_col_attr_set(struct db_filter_col *col,
 			rc = -EOPNOTSUPP;
 			break;
 		}
+		break;
+	case SCMP_FLTATR_API_SYSRAWRC:
+		col->attr.api_sysrawrc = (value ? 1 : 0);
 		break;
 	default:
 		rc = -EINVAL;

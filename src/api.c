@@ -94,6 +94,27 @@ static int _rc_filter(int err)
 }
 
 /**
+ * Filter the system error codes we send back to callers
+ * @param col the filter collection
+ * @param err the error code
+ *
+ * This is similar to _rc_filter(), but it first checks the filter attribute
+ * to determine if we should be filtering the return codes.
+ *
+ */
+static int _rc_filter_sys(struct db_filter_col *col, int err)
+{
+	/* pass through success values */
+	if (err >= 0)
+		return err;
+
+	/* pass the return code if the SCMP_FLTATR_API_SYSRAWRC is true */
+	if (db_col_attr_read(col, SCMP_FLTATR_API_SYSRAWRC))
+		return err;
+	return -ECANCELED;
+}
+
+/**
  * Validate a filter context
  * @param ctx the filter context
  *
@@ -355,12 +376,14 @@ API int seccomp_arch_remove(scmp_filter_ctx ctx, uint32_t arch_token)
 API int seccomp_load(const scmp_filter_ctx ctx)
 {
 	struct db_filter_col *col;
+	bool rawrc;
 
 	if (_ctx_valid(ctx))
 		return _rc_filter(-EINVAL);
 	col = (struct db_filter_col *)ctx;
 
-	return _rc_filter(sys_filter_load(col));
+	rawrc = db_col_attr_read(col, SCMP_FLTATR_API_SYSRAWRC);
+	return _rc_filter(sys_filter_load(col, rawrc));
 }
 
 /* NOTE - function header comment in include/seccomp.h */
@@ -638,28 +661,35 @@ API int seccomp_notify_fd(const scmp_filter_ctx ctx)
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 {
+	int rc;
+	struct db_filter_col *col;
+
 	if (_ctx_valid(ctx))
 		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
 
-	return _rc_filter(gen_pfc_generate((struct db_filter_col *)ctx, fd));
+	rc = gen_pfc_generate(col, fd);
+	return _rc_filter_sys(col, rc);
 }
 
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 {
 	int rc;
+	struct db_filter_col *col;
 	struct bpf_program *program;
 
 	if (_ctx_valid(ctx))
 		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
 
-	rc = gen_bpf_generate((struct db_filter_col *)ctx, &program);
+	rc = gen_bpf_generate(col, &program);
 	if (rc < 0)
 		return _rc_filter(rc);
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
 	gen_bpf_release(program);
 	if (rc < 0)
-		return _rc_filter(-ECANCELED);
+		return _rc_filter_sys(col, -errno);
 
-	return _rc_filter(0);
+	return 0;
 }

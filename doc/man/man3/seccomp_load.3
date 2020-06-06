@@ -39,7 +39,7 @@ is "stricter" than
 Returns zero on success or one of the following error codes on failure:
 .TP
 .B -ECANCELED
-There was a kernel failure beyond the control of the library.
+There was a system failure beyond the control of the library.
 .TP
 .B -EFAULT
 Internal libseccomp failure.
@@ -52,6 +52,11 @@ The library was unable to allocate enough memory.
 .TP
 .B -ESRCH
 Unable to load the filter due to thread issues.
+.P
+If the \fISCMP_FLTATR_API_SYSRAWRC\fP filter attribute is non-zero then
+additional error codes may be returned to the caller; these additional error
+codes are the negative \fIerrno\fP values returned by the system.  Unfortunately
+libseccomp can make no guarantees about these return values.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

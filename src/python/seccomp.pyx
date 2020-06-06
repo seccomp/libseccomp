@@ -318,6 +318,11 @@ cdef class Attr:
     CTL_TSKIP - allow rules with a -1 syscall number
     CTL_LOG - log not-allowed actions
     CTL_SSB - disable SSB mitigations
+    CTL_OPTIMIZE - the filter's optimization level:
+                   0: currently unused
+                   1: rules weighted by priority and complexity (DEFAULT)
+                   2: binary tree sorted by syscall number
+    API_SYSRAWRC - return the raw syscall codes
     """
     ACT_DEFAULT = libseccomp.SCMP_FLTATR_ACT_DEFAULT
     ACT_BADARCH = libseccomp.SCMP_FLTATR_ACT_BADARCH
@@ -327,6 +332,7 @@ cdef class Attr:
     CTL_LOG = libseccomp.SCMP_FLTATR_CTL_LOG
     CTL_SSB = libseccomp.SCMP_FLTATR_CTL_SSB
     CTL_OPTIMIZE = libseccomp.SCMP_FLTATR_CTL_OPTIMIZE
+    API_SYSRAWRC = libseccomp.SCMP_FLTATR_API_SYSRAWRC
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.

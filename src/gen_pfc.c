@@ -464,7 +464,7 @@ arch_return:
  *
  * This function generates a pseudo filter code representation of the given
  * filter collection and writes it to the given fd.  Returns zero on success,
- * negative values on failure.
+ * negative errno values on failure.
  *
  */
 int gen_pfc_generate(const struct db_filter_col *col, int fd)
@@ -475,11 +475,11 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 
 	newfd = dup(fd);
 	if (newfd < 0)
-		return -ECANCELED;
+		return -errno;
 	fds = fdopen(newfd, "a");
 	if (fds == NULL) {
 		close(newfd);
-		return -ECANCELED;
+		return -errno;
 	}
 
 	/* generate the pfc */

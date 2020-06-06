@@ -120,6 +120,8 @@ struct db_filter_attr {
 	uint32_t spec_allow;
 	/* SCMP_FLTATR_CTL_OPTIMIZE related attributes */
 	uint32_t optimize;
+	/* return the raw system return codes */
+	uint32_t api_sysrawrc;
 };
 
 struct db_filter {
@@ -191,6 +193,8 @@ int db_col_arch_exist(struct db_filter_col *col, uint32_t arch_token);
 
 int db_col_attr_get(const struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t *value);
+uint32_t db_col_attr_read(const struct db_filter_col *col,
+			  enum scmp_filter_attr attr);
 int db_col_attr_set(struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t value);
 

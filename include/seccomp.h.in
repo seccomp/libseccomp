@@ -76,6 +76,7 @@ enum scmp_filter_attr {
 					 * 2 - binary tree sorted by syscall
 					 *     number
 					 */
+	SCMP_FLTATR_API_SYSRAWRC = 9,	/**< return the system return codes */
 	_SCMP_FLTATR_MAX,
 };
 
