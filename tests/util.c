@@ -200,14 +200,14 @@ int util_file_write(const char *path)
 
 	fd = open(path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	if (fd < 0)
-		return errno;
+		return -errno;
 	if (write(fd, buf, buf_len) < buf_len) {
-		int rc = errno;
+		int rc = -errno;
 		close(fd);
 		return rc;
 	}
 	if (close(fd) < 0)
-		return errno;
+		return -errno;
 
 	return 0;
 }

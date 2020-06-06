@@ -288,7 +288,7 @@ static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
  * @param file the BPF program
  *
  * Read the BPF program and display the instructions.  Returns zero on success,
- * negative values on failure.
+ * non-zero values on failure.
  *
  */
 static int bpf_decode(FILE *file)
@@ -424,7 +424,7 @@ static void bpf_dot_decode_args(const bpf_instr_raw *bpf, unsigned int line)
  * @param file the BPF program
  *
  * Read the BPF program and display the instructions.  Returns zero on success,
- * negative values on failure.
+ * non-zero values on failure.
  *
  */
 static int bpf_dot_decode(FILE *file)
