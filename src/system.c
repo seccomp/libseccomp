@@ -303,9 +303,9 @@ int sys_filter_load(struct db_filter_col *col)
 	int rc;
 	struct bpf_program *prgm = NULL;
 
-	prgm = gen_bpf_generate(col);
-	if (prgm == NULL)
-		return -ENOMEM;
+	rc = gen_bpf_generate(col, &prgm);
+	if (rc < 0)
+		return rc;
 
 	/* attempt to set NO_NEW_PRIVS */
 	if (col->attr.nnp_enable) {

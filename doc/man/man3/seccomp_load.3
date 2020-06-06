@@ -41,6 +41,9 @@ Returns zero on success or one of the following error codes on failure:
 .B -ECANCELED
 There was a kernel failure beyond the control of the library.
 .TP
+.B -EFAULT
+Internal libseccomp failure.
+.TP
 .B -EINVAL
 Invalid input, either the context or architecture token is invalid.
 .TP

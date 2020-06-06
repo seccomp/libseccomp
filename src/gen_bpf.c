@@ -2240,34 +2240,37 @@ build_bpf_free_blks:
 /**
  * Generate a BPF representation of the filter DB
  * @param col the seccomp filter collection
+ * @param prgm_ptr the bpf program pointer
  *
  * This function generates a BPF representation of the given filter collection.
- * Returns a pointer to a valid bpf_program on success, NULL on failure.
+ * Returns zero on success, negative values on failure.
  *
  */
-struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
+int gen_bpf_generate(const struct db_filter_col *col,
+		     struct bpf_program **prgm_ptr)
 {
 	int rc;
 	struct bpf_state state;
 	struct bpf_program *prgm;
 
 	if (col->filter_cnt == 0)
-		return NULL;
+		return -EINVAL;
 
 	memset(&state, 0, sizeof(state));
 	state.attr = &col->attr;
 
-	prgm = zmalloc(sizeof(*(prgm)));
-	if (prgm == NULL)
-		return NULL;
-	state.bpf = prgm;
+	state.bpf = zmalloc(sizeof(*(prgm)));
+	if (state.bpf == NULL)
+		return -ENOMEM;
 
 	rc = _gen_bpf_build_bpf(&state, col);
-	if (rc == 0)
+	if (rc == 0) {
+		*prgm_ptr = state.bpf;
 		state.bpf = NULL;
+	}
 	_state_release(&state);
 
-	return prgm;
+	return rc;
 }
 
 /**

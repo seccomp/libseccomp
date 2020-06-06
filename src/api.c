@@ -653,9 +653,9 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 	if (_ctx_valid(ctx))
 		return _rc_filter(-EINVAL);
 
-	program = gen_bpf_generate((struct db_filter_col *)ctx);
-	if (program == NULL)
-		return _rc_filter(-ENOMEM);
+	rc = gen_bpf_generate((struct db_filter_col *)ctx, &program);
+	if (rc < 0)
+		return _rc_filter(rc);
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
 	gen_bpf_release(program);
 	if (rc < 0)
