@@ -347,6 +347,16 @@ filter_load_out:
 	return rc;
 }
 
+/**
+ * Allocate a pair of notification request/response structures
+ * @param req the request location
+ * @param resp the response location
+ *
+ * This function allocates a pair of request/response structure by computing
+ * the correct sized based on the currently running kernel. It returns zero on
+ * success, and negative values on failure.
+ *
+ */
 int sys_notify_alloc(struct seccomp_notif **req,
 		     struct seccomp_notif_resp **resp)
 {
@@ -382,6 +392,16 @@ int sys_notify_alloc(struct seccomp_notif **req,
 	return 0;
 }
 
+/**
+ * Receive a notification from a seccomp notification fd
+ * @param fd the notification fd
+ * @param req the request buffer to save into
+ *
+ * Blocks waiting for a notification on this fd. This function is thread safe
+ * (synchronization is performed in the kernel). Returns zero on success,
+ * negative values on error.
+ *
+ */
 int sys_notify_receive(int fd, struct seccomp_notif *req)
 {
 	if (_support_seccomp_user_notif <= 0)
@@ -393,6 +413,16 @@ int sys_notify_receive(int fd, struct seccomp_notif *req)
 	return 0;
 }
 
+/**
+ * Send a notification response to a seccomp notification fd
+ * @param fd the notification fd
+ * @param resp the response buffer to use
+ *
+ * Sends a notification response on this fd. This function is thread safe
+ * (synchronization is performed in the kernel). Returns zero on success,
+ * negative values on error.
+ *
+ */
 int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
 {
 	if (_support_seccomp_user_notif <= 0)
@@ -403,6 +433,15 @@ int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
 	return 0;
 }
 
+/**
+ * Check if a notification id is still valid
+ * @param fd the notification fd
+ * @param id the id to test
+ *
+ * Checks to see if a notification id is still valid. Returns 0 on success, and
+ * negative values on failure.
+ *
+ */
 int sys_notify_id_valid(int fd, uint64_t id)
 {
 	if (_support_seccomp_user_notif <= 0)

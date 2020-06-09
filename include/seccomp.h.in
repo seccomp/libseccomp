@@ -723,7 +723,7 @@ int seccomp_rule_add_exact_array(scmp_filter_ctx ctx,
 				 const struct scmp_arg_cmp *arg_array);
 
 /**
- * Allocate a pair of notification request/response structures.
+ * Allocate a pair of notification request/response structures
  * @param req the request location
  * @param resp the response location
  *
@@ -744,7 +744,7 @@ void seccomp_notify_free(struct seccomp_notif *req,
 			 struct seccomp_notif_resp *resp);
 
 /**
- * Receive a notification from a seccomp notification fd.
+ * Receive a notification from a seccomp notification fd
  * @param fd the notification fd
  * @param req the request buffer to save into
  *
@@ -756,7 +756,7 @@ void seccomp_notify_free(struct seccomp_notif *req,
 int seccomp_notify_receive(int fd, struct seccomp_notif *req);
 
 /**
- * Send a notification response to a seccomp notification fd.
+ * Send a notification response to a seccomp notification fd
  * @param fd the notification fd
  * @param resp the response buffer to use
  *
@@ -768,7 +768,7 @@ int seccomp_notify_receive(int fd, struct seccomp_notif *req);
 int seccomp_notify_respond(int fd, struct seccomp_notif_resp *resp);
 
 /**
- * Check if a notification id is still valid.
+ * Check if a notification id is still valid
  * @param fd the notification fd
  * @param id the id to test
  *
@@ -779,7 +779,7 @@ int seccomp_notify_respond(int fd, struct seccomp_notif_resp *resp);
 int seccomp_notify_id_valid(int fd, uint64_t id);
 
 /**
- * Return the notification fd from a filter that has already been loaded.
+ * Return the notification fd from a filter that has already been loaded
  * @param ctx the filter context
  *
  * This returns the listener fd that was generated when the seccomp policy was
