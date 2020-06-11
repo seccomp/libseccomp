@@ -35,10 +35,10 @@
 #include "gen_bpf.h"
 #include "helper.h"
 
-/* NOTE: the seccomp syscall whitelist is currently disabled for testing
+/* NOTE: the seccomp syscall allowlist is currently disabled for testing
  *       purposes, but unless we can verify all of the supported ABIs before
- *       our next release we may have to enable the whitelist */
-#define SYSCALL_WHITELIST_ENABLE	0
+ *       our next release we may have to enable the allowlist */
+#define SYSCALL_ALLOWLIST_ENABLE	0
 
 static int _nr_seccomp = -1;
 static int _support_seccomp_syscall = -1;
@@ -70,8 +70,8 @@ int sys_chk_seccomp_syscall(void)
 	if (_support_seccomp_syscall >= 0)
 		return _support_seccomp_syscall;
 
-#if SYSCALL_WHITELIST_ENABLE
-	/* architecture whitelist */
+#if SYSCALL_ALLOWLIST_ENABLE
+	/* architecture allowlist */
 	switch (arch_def_native->token) {
 	case SCMP_ARCH_X86_64:
 	case SCMP_ARCH_ARM:

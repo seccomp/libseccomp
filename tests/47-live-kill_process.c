@@ -31,7 +31,7 @@
 #include "util.h"
 
 
-static const unsigned int whitelist[] = {
+static const unsigned int allowlist[] = {
 	SCMP_SYS(clone),
 	SCMP_SYS(exit),
 	SCMP_SYS(exit_group),
@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	for (i = 0; i < sizeof(whitelist) / sizeof(whitelist[0]); i++) {
-		rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, whitelist[i], 0);
+	for (i = 0; i < sizeof(allowlist) / sizeof(allowlist[0]); i++) {
+		rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, allowlist[i], 0);
 		if (rc != 0)
 			goto out;
 	}

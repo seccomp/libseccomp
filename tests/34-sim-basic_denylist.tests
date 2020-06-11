@@ -1,0 +1,32 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2013 Red Hat <pmoore@redhat.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+34-sim-basic_denylist	all	read		0		0x856B008	10	N	N	N	KILL
+34-sim-basic_denylist	all	read		1-10		0x856B008	10	N	N	N	ALLOW
+34-sim-basic_denylist	all	write		1-2		0x856B008	10	N	N	N	KILL
+34-sim-basic_denylist	all	write		3-10		0x856B008	10	N	N	N	ALLOW
+34-sim-basic_denylist	all	close		N		N		N	N	N	N	KILL
+34-sim-basic_denylist	all	rt_sigreturn	N		N		N	N	N	N	KILL
+34-sim-basic_denylist	all	open		0x856B008	4		N	N	N	N	ALLOW
+34-sim-basic_denylist	x86	0-2		N		N		N	N	N	N	ALLOW
+34-sim-basic_denylist	x86	7-172		N		N		N	N	N	N	ALLOW
+34-sim-basic_denylist	x86	174-350		N		N		N	N	N	N	ALLOW
+34-sim-basic_denylist	x86_64	4-14		N		N		N	N	N	N	ALLOW
+34-sim-basic_denylist	x86_64	16-350		N		N		N	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+34-sim-basic_denylist	50
+
+test type: bpf-valgrind
+
+# Testname
+34-sim-basic_denylist

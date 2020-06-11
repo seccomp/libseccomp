@@ -31,7 +31,7 @@
 #include "util.h"
 
 /* arbitrary list of syscalls to force seccomp to generate a binary tree */
-static const int blacklist[] = {
+static const int denylist[] = {
 	SCMP_SYS(times),
 	SCMP_SYS(ptrace),
 	SCMP_SYS(getuid),
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	for (i = 0; i < (sizeof(blacklist) / sizeof(blacklist[0])); i++) {
-		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, blacklist[i], 0);
+	for (i = 0; i < (sizeof(denylist) / sizeof(denylist[0])); i++) {
+		rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, denylist[i], 0);
 		if (rc != 0)
 			goto out;
 	}
