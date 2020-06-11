@@ -23,7 +23,7 @@ util.pyc
 15-basic-resolver
 16-sim-arch_basic
 17-sim-arch_merge
-18-sim-basic_whitelist
+18-sim-basic_allowlist
 19-sim-missing_syscalls
 20-live-basic_die
 21-live-basic_allow
@@ -39,7 +39,7 @@ util.pyc
 31-basic-version_check
 32-live-tsync_allow
 33-sim-socket_syscalls_be
-34-sim-basic_blacklist
+34-sim-basic_denylist
 35-sim-negative_one
 36-sim-ipc_syscalls
 37-sim-ipc_syscalls_be

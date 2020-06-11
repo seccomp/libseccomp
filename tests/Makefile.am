@@ -57,7 +57,7 @@ check_PROGRAMS = \
 	15-basic-resolver \
 	16-sim-arch_basic \
 	17-sim-arch_merge \
-	18-sim-basic_whitelist \
+	18-sim-basic_allowlist \
 	19-sim-missing_syscalls \
 	20-live-basic_die \
 	21-live-basic_allow \
@@ -73,7 +73,7 @@ check_PROGRAMS = \
 	31-basic-version_check \
 	32-live-tsync_allow \
 	33-sim-socket_syscalls_be \
-	34-sim-basic_blacklist \
+	34-sim-basic_denylist \
 	35-sim-negative_one \
 	36-sim-ipc_syscalls \
 	37-sim-ipc_syscalls_be \
@@ -116,7 +116,7 @@ EXTRA_DIST_TESTPYTHON = \
 	15-basic-resolver.py \
 	16-sim-arch_basic.py \
 	17-sim-arch_merge.py \
-	18-sim-basic_whitelist.py \
+	18-sim-basic_allowlist.py \
 	19-sim-missing_syscalls.py \
 	20-live-basic_die.py \
 	21-live-basic_allow.py \
@@ -132,7 +132,7 @@ EXTRA_DIST_TESTPYTHON = \
 	31-basic-version_check.py \
 	32-live-tsync_allow.py \
 	33-sim-socket_syscalls_be.py \
-	34-sim-basic_blacklist.py \
+	34-sim-basic_denylist.py \
 	35-sim-negative_one.py \
 	36-sim-ipc_syscalls.py \
 	37-sim-ipc_syscalls_be.py \
@@ -172,7 +172,7 @@ EXTRA_DIST_TESTCFGS = \
 	15-basic-resolver.tests \
 	16-sim-arch_basic.tests \
 	17-sim-arch_merge.tests \
-	18-sim-basic_whitelist.tests \
+	18-sim-basic_allowlist.tests \
 	19-sim-missing_syscalls.tests \
 	20-live-basic_die.tests \
 	21-live-basic_allow.tests \
@@ -188,7 +188,7 @@ EXTRA_DIST_TESTCFGS = \
 	31-basic-version_check.tests \
 	32-live-tsync_allow.tests \
 	33-sim-socket_syscalls_be.tests \
-	34-sim-basic_blacklist.tests \
+	34-sim-basic_denylist.tests \
 	35-sim-negative_one.tests \
 	36-sim-ipc_syscalls.tests \
 	37-sim-ipc_syscalls_be.tests \

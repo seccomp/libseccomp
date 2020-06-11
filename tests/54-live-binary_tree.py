@@ -28,7 +28,7 @@ import util
 
 from seccomp import *
 
-blacklist = [
+denylist = [
     "times",
     "ptrace",
     "getuid",
@@ -79,7 +79,7 @@ def test():
     f.add_rule(ALLOW, "brk")
     f.add_rule(ALLOW, "exit_group")
 
-    for syscall in blacklist:
+    for syscall in denylist:
         f.add_rule(KILL, syscall)
 
     f.load()
