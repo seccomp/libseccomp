@@ -578,10 +578,10 @@ static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
 		return -ENOMEM;
 
 	/* generate the hash */
-	h_val_tmp[0] = hash(blk->blks, _BLK_MSZE(blk));
-	h_val_tmp[1] = hash(&blk->acc_start, sizeof(blk->acc_start));
-	h_val_tmp[2] = hash(&blk->acc_end, sizeof(blk->acc_end));
-	h_val = hash(h_val_tmp, sizeof(h_val_tmp));
+	h_val_tmp[0] = seccomp_hash(blk->blks, _BLK_MSZE(blk));
+	h_val_tmp[1] = seccomp_hash(&blk->acc_start, sizeof(blk->acc_start));
+	h_val_tmp[2] = seccomp_hash(&blk->acc_end, sizeof(blk->acc_end));
+	h_val = seccomp_hash(h_val_tmp, sizeof(h_val_tmp));
 	blk->hash = h_val;
 	blk->flag_hash = true;
 	blk->node = NULL;

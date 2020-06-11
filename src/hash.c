@@ -38,7 +38,7 @@ static inline uint32_t fmix32(uint32_t h)
 }
 
 /* NOTE: this is an implementation of MurmurHash3_x86_32 */
-uint32_t hash(const void *key, size_t length)
+uint32_t seccomp_hash(const void *key, size_t length)
 {
 	const uint8_t *data = (const uint8_t *)key;
 	const uint32_t *blocks;

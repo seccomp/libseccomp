@@ -10,7 +10,7 @@
 
 #include <inttypes.h>
 
-uint32_t hash(const void *key, size_t length);
+uint32_t seccomp_hash(const void *key, size_t length);
 
 #endif
 
