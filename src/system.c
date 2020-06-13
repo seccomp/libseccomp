@@ -49,6 +49,7 @@ static int _support_seccomp_kill_process = -1;
 static int _support_seccomp_flag_spec_allow = -1;
 static int _support_seccomp_flag_new_listener = -1;
 static int _support_seccomp_user_notif = -1;
+static int _support_seccomp_flag_tsync_esrch = -1;
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -256,6 +257,10 @@ int sys_chk_seccomp_flag(int flag)
 			_support_seccomp_flag_new_listener = _sys_chk_seccomp_flag_kernel(flag);
 
 		return _support_seccomp_flag_new_listener;
+	case SECCOMP_FILTER_FLAG_TSYNC_ESRCH:
+		if (_support_seccomp_flag_tsync_esrch < 0)
+			_support_seccomp_flag_tsync_esrch = _sys_chk_seccomp_flag_kernel(flag);
+		return _support_seccomp_flag_tsync_esrch;
 	}
 
 	return -EOPNOTSUPP;
@@ -285,6 +290,9 @@ void sys_set_seccomp_flag(int flag, bool enable)
 	case SECCOMP_FILTER_FLAG_NEW_LISTENER:
 		_support_seccomp_flag_new_listener = (enable ? 1 : 0);
 		break;
+	case SECCOMP_FILTER_FLAG_TSYNC_ESRCH:
+		_support_seccomp_flag_tsync_esrch = (enable ? 1 : 0);
+		break;
 	}
 }
 
@@ -302,6 +310,7 @@ void sys_set_seccomp_flag(int flag, bool enable)
 int sys_filter_load(struct db_filter_col *col, bool rawrc)
 {
 	int rc;
+	bool tsync_notify;
 	struct bpf_program *prgm = NULL;
 
 	rc = gen_bpf_generate(col, &prgm);
@@ -315,10 +324,18 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			goto filter_load_out;
 	}
 
+	tsync_notify = (_support_seccomp_flag_tsync_esrch > 0);
+
 	/* load the filter into the kernel */
 	if (sys_chk_seccomp_syscall() == 1) {
 		int flgs = 0;
-		if (col->attr.tsync_enable)
+		if (tsync_notify) {
+			if (col->attr.tsync_enable)
+				flgs |= SECCOMP_FILTER_FLAG_TSYNC | \
+					SECCOMP_FILTER_FLAG_TSYNC_ESRCH;
+			if (_support_seccomp_user_notif > 0)
+				flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
+		} else if (col->attr.tsync_enable)
 			flgs |= SECCOMP_FILTER_FLAG_TSYNC;
 		else if (_support_seccomp_user_notif > 0)
 			flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
@@ -327,10 +344,15 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 		if (col->attr.spec_allow)
 			flgs |= SECCOMP_FILTER_FLAG_SPEC_ALLOW;
 		rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flgs, prgm);
-		if (rc > 0 && col->attr.tsync_enable)
+		if (tsync_notify && rc > 0) {
+			/* return 0 on NEW_LISTENER success, but save the fd */
+			col->notify_fd = rc;
+			rc = 0;
+		} else if (rc > 0 && col->attr.tsync_enable) {
 			/* always return -ESRCH if we fail to sync threads */
-			rc = -ESRCH;
-		if (rc > 0 && _support_seccomp_user_notif > 0) {
+			errno = ESRCH;
+			rc = -errno;
+		} else if (rc > 0 && _support_seccomp_user_notif > 0) {
 			/* return 0 on NEW_LISTENER success, but save the fd */
 			col->notify_fd = rc;
 			rc = 0;

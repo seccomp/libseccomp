@@ -1196,8 +1196,10 @@ int db_col_action_valid(const struct db_filter_col *col, uint32_t action)
 		/* NOTE: in some cases we don't have a filter collection yet,
 		 *       but when we do we need to do the following checks */
 
-		/* kernel disallows TSYNC and NOTIFY in one filter */
-		if (col->attr.tsync_enable && action == SCMP_ACT_NOTIFY)
+		/* kernel disallows TSYNC and NOTIFY in one filter unless we
+		 * have the TSYNC_ESRCH flag */
+		if (sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH) < 1 &&
+		    col->attr.tsync_enable && action == SCMP_ACT_NOTIFY)
 			return -EINVAL;
 	}
 
@@ -1381,8 +1383,10 @@ int db_col_attr_set(struct db_filter_col *col,
 		if (rc == 1) {
 			/* supported */
 			rc = 0;
-			/* kernel disallows TSYNC and NOTIFY in one filter */
-			if (value && col->notify_used)
+			/* kernel disallows TSYNC and NOTIFY in one filter
+			 * unless we have TSYNC_ESRCH */
+			if (sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH) < 1 &&
+			    value && col->notify_used)
 				return -EINVAL;
 			col->attr.tsync_enable = (value ? 1 : 0);
 		} else if (rc == 0)

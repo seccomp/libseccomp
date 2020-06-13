@@ -165,12 +165,10 @@ static unsigned int _seccomp_api_update(void)
 
 	/* NOTE: level 1 is the base level, start checking at 2 */
 
-	/* level 2 */
 	if (sys_chk_seccomp_syscall() &&
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC) == 1)
 		level = 2;
 
-	/* level 3 */
 	if (level == 2 &&
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_LOG) == 1 &&
 	    sys_chk_seccomp_action(SCMP_ACT_LOG) == 1 &&
@@ -185,6 +183,10 @@ static unsigned int _seccomp_api_update(void)
 	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER) == 1 &&
 	    sys_chk_seccomp_action(SCMP_ACT_NOTIFY) == 1)
 		level = 5;
+
+	if (level == 5 &&
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH) == 1)
+		level = 6;
 
 	/* update the stored api level and return */
 	seccomp_api_level = level;
@@ -214,6 +216,10 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, false);
+		sys_set_seccomp_action(SCMP_ACT_NOTIFY, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, false);
 		break;
 	case 2:
 		sys_set_seccomp_syscall(true);
@@ -221,6 +227,10 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_LOG, false);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, false);
+		sys_set_seccomp_action(SCMP_ACT_NOTIFY, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, false);
 		break;
 	case 3:
 		sys_set_seccomp_syscall(true);
@@ -228,6 +238,10 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, false);
+		sys_set_seccomp_action(SCMP_ACT_NOTIFY, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, false);
 		break;
 	case 4:
 		sys_set_seccomp_syscall(true);
@@ -236,6 +250,9 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_action(SCMP_ACT_LOG, true);
 		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, false);
+		sys_set_seccomp_action(SCMP_ACT_NOTIFY, false);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, false);
 		break;
 	case 5:
 		sys_set_seccomp_syscall(true);
@@ -246,6 +263,18 @@ API int seccomp_api_set(unsigned int level)
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, true);
 		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, true);
 		sys_set_seccomp_action(SCMP_ACT_NOTIFY, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, false);
+		break;
+	case 6:
+		sys_set_seccomp_syscall(true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_LOG, true);
+		sys_set_seccomp_action(SCMP_ACT_LOG, true);
+		sys_set_seccomp_action(SCMP_ACT_KILL_PROCESS, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_SPEC_ALLOW, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER, true);
+		sys_set_seccomp_action(SCMP_ACT_NOTIFY, true);
+		sys_set_seccomp_flag(SECCOMP_FILTER_FLAG_TSYNC_ESRCH, true);
 		break;
 	default:
 		return _rc_filter(-EINVAL);

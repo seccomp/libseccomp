@@ -415,10 +415,8 @@ const struct scmp_version *seccomp_version(void);
  *      support for the SCMP_ACT_LOG action
  *      support for the SCMP_ACT_KILL_PROCESS action
  *  4 : support for the SCMP_FLTATR_CTL_SSB filter attrbute
- *  5 : support for the SCMP_ACT_NOTIFY action
- *      support for using seccomp_notify_receive()
- *      support for using seccomp_notify_respond()
- *      support for using seccomp_notify_id_valid()
+ *  5 : support for the SCMP_ACT_NOTIFY action and notify APIs
+ *  6 : support the simultaneous use of SCMP_FLTATR_CTL_TSYNC and notify APIs
  *
  */
 unsigned int seccomp_api_get(void);

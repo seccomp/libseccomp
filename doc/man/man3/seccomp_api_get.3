@@ -1,4 +1,4 @@
-.TH "seccomp_api_get" 3 "8 October 2017" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_api_get" 3 "13 June 2020" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -49,13 +49,17 @@ the
 syscall to load the seccomp filter into the kernel.
 .TP
 .B 3
-The SCMP_FLTATR_CTL_LOG filter attribute and the SCMP_ACT_LOG action are supported.
+The SCMP_FLTATR_CTL_LOG filter attribute and the SCMP_ACT_LOG action are
+supported.
 .TP
 .B 4
 The SCMP_FLTATR_CTL_SSB filter attribute is supported.
 .TP
 .B 5
-The SCMP_ACT_NOTIFY action is supported.
+The SCMP_ACT_NOTIFY action and the notify APIs are supported.
+.TP
+.B 5
+The simultaneous use of SCMP_FLTATR_CTL_TSYNC and the notify APIs are supported.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////

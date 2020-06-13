@@ -116,16 +116,19 @@ typedef struct sock_filter bpf_instr_raw;
 
 /* flags for the seccomp() syscall */
 #ifndef SECCOMP_FILTER_FLAG_TSYNC
-#define SECCOMP_FILTER_FLAG_TSYNC	(1UL << 0)
+#define SECCOMP_FILTER_FLAG_TSYNC		(1UL << 0)
 #endif
 #ifndef SECCOMP_FILTER_FLAG_LOG
-#define SECCOMP_FILTER_FLAG_LOG		(1UL << 1)
+#define SECCOMP_FILTER_FLAG_LOG			(1UL << 1)
 #endif
 #ifndef SECCOMP_FILTER_FLAG_SPEC_ALLOW
-#define SECCOMP_FILTER_FLAG_SPEC_ALLOW	(1UL << 2)
+#define SECCOMP_FILTER_FLAG_SPEC_ALLOW		(1UL << 2)
 #endif
 #ifndef SECCOMP_FILTER_FLAG_NEW_LISTENER
 #define SECCOMP_FILTER_FLAG_NEW_LISTENER	(1UL << 3)
+#endif
+#ifndef SECCOMP_FILTER_FLAG_TSYNC_ESRCH
+#define SECCOMP_FILTER_FLAG_TSYNC_ESRCH		(1UL << 4)
 #endif
 
 #ifndef SECCOMP_RET_LOG

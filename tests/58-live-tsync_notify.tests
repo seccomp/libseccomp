@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2019 Cisco Systems, Inc. <pmoore2@cisco.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: live
+
+# Testname		API	Result
+58-live-tsync_notify	6	ALLOW
