@@ -733,12 +733,8 @@ function gen_csv() {
 		   done) | awk -F "," '{ print $1 }' | sort -u)
 
 	# output a simple header
-	printf "# libseccomp syscall table\n"
-	printf "#\n"
-	printf "# kernel: %s (%s)\n" \
-		"$(kernel_version "$1")" "$(TZ=UTC date -R)"
-	printf "#\n"
-	printf "#syscall"
+	printf "#syscall (v%s %s)" \
+		"$(kernel_version "$1")" "$(TZ=UTC date "+%Y-%m-%d")"
 	for abi in $abi_list; do
 		printf ",%s" $abi
 	done
