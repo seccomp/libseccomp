@@ -1968,6 +1968,8 @@ struct bpf_program *gen_bpf_generate(const struct db_filter_col *col)
 	rc = _gen_bpf_build_bpf(&state, col);
 	if (rc == 0)
 		state.bpf = NULL;
+	else
+		prgm = NULL;
 	_state_release(&state);
 
 	return prgm;
