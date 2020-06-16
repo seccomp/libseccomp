@@ -1,4 +1,4 @@
-![Enhanced Seccomp Helper Library](https://github.com/seccomp/libseccomp-artwork/blob/master/logo/libseccomp-color_text.png)
+![Enhanced Seccomp Helper Library](https://github.com/seccomp/libseccomp-artwork/blob/main/logo/libseccomp-color_text.png)
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
