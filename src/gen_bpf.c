@@ -2144,6 +2144,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				break;
 			default:
 				/* fatal error */
+				rc = -EFAULT;
 				goto build_bpf_free_blks;
 			}
 			switch (i_iter->jf.type) {
@@ -2161,6 +2162,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				break;
 			default:
 				/* fatal error */
+				rc = -EFAULT;
 				goto build_bpf_free_blks;
 			}
 		}
@@ -2182,8 +2184,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					jmp_len += b_jmp->blk_cnt;
 					b_jmp = b_jmp->next;
 				}
-				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX)
+				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX) {
+					rc = -EFAULT;
 					goto build_bpf_free_blks;
+				}
 				i_iter->jt = _BPF_JMP_IMM(jmp_len);
 			}
 			if (i_iter->jf.type == TGT_PTR_HSH) {
@@ -2194,8 +2198,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					jmp_len += b_jmp->blk_cnt;
 					b_jmp = b_jmp->next;
 				}
-				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX)
+				if (b_jmp == NULL || jmp_len > _BPF_JMP_MAX) {
+					rc = -EFAULT;
 					goto build_bpf_free_blks;
+				}
 				i_iter->jf = _BPF_JMP_IMM(jmp_len);
 			}
 			if (i_iter->k.type == TGT_PTR_HSH) {
@@ -2209,14 +2215,17 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 					jmp_len += b_jmp->blk_cnt;
 					b_jmp = b_jmp->prev;
 				}
-				if (b_jmp == NULL)
+				if (b_jmp == NULL) {
+					rc = -EFAULT;
 					goto build_bpf_free_blks;
+				}
 				i_iter->k = _BPF_K(state->arch, jmp_len);
 			}
 		}
 
 		/* build the bpf program */
-		if (_bpf_append_blk(state->bpf, b_iter) < 0)
+		rc = _bpf_append_blk(state->bpf, b_iter);
+		if (rc < 0)
 			goto build_bpf_free_blks;
 
 		/* we're done with the block, free it */
@@ -2234,7 +2243,7 @@ build_bpf_free_blks:
 		__blk_free(state, b_iter);
 		b_iter = b_jmp;
 	}
-	return -EFAULT;
+	return rc;
 }
 
 /**
