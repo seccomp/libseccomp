@@ -93,7 +93,7 @@ int sys_chk_seccomp_syscall(void)
 
 	/* this is an invalid call because the second argument is non-zero, but
 	 * depending on the errno value of ENOSYS or EINVAL we can guess if the
-	 * seccomp() syscal is supported or not */
+	 * seccomp() syscall is supported or not */
 	rc = syscall(nr_seccomp, SECCOMP_SET_MODE_STRICT, 1, NULL);
 	if (rc < 0 && errno == EINVAL)
 		goto supported;
