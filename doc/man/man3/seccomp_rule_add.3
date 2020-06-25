@@ -147,7 +147,10 @@ value directly using the standard
 values, in order to ensure proper operation across multiple architectures it
 is highly recommended to use the
 .BR SCMP_SYS ()
-macro instead.  See the EXAMPLES section below.
+macro instead.  See the EXAMPLES section below.  It is also important to
+remember that regardless of the architectures present in the filter, the
+syscall numbers used in filter rules are interpreted in the context of the
+native architecture.
 .P
 Starting with Linux v4.8, there may be a need to create a rule with a syscall
 value of -1 to allow tracing programs to skip a syscall invocation; in order
