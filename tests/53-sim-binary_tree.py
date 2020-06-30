@@ -69,6 +69,11 @@ table = [
 def test(args):
     f = SyscallFilter(ALLOW)
 
+    f.remove_arch(Arch())
+    f.add_arch(Arch("aarch64"))
+    f.add_arch(Arch("ppc64le"))
+    f.add_arch(Arch("x86_64"))
+
     for entry in table:
         if entry["arg_cnt"] == 2:
             f.add_rule(ERRNO(entry["error"]), entry["syscall"],
