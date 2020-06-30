@@ -1292,6 +1292,49 @@ static int _gen_bpf_insert(struct bpf_state *state, struct bpf_instr *instr,
 }
 
 /**
+ * Decide if we need to omit the syscall from the BPF filter
+ * @param state the BPF state
+ * @param syscall syscall being tested
+ * @return true if syscall is to be skipped, false otherwise
+ */
+static inline bool _skip_syscall(struct bpf_state *state,
+				 struct db_sys_list *syscall)
+{
+	if (!syscall->valid)
+		return true;
+
+	/* psuedo-syscalls should not be added to the filter unless explicity
+	 * requested via SCMP_FLTATR_API_TSKIP
+	 */
+	if (((int)syscall->num < 0) &&
+	    (state->attr->api_tskip == 0 || syscall->num != -1))
+		return true;
+
+	return false;
+}
+
+/**
+ * Calculate the number of syscalls that will be in the BPF filter
+ * @param state the BPF state
+ * @param s_tail the last syscall in the syscall linked list
+ */
+static unsigned int _get_syscall_cnt(struct bpf_state *state,
+				     struct db_sys_list *s_tail)
+{
+	struct db_sys_list *s_iter;
+	unsigned int syscall_cnt = 0;
+
+	for (s_iter = s_tail; s_iter != NULL; s_iter = s_iter->pri_prv) {
+		if (_skip_syscall(state, s_iter))
+			continue;
+
+		syscall_cnt++;
+	}
+
+	return syscall_cnt;
+}
+
+/**
  * Calculate the number of levels in the binary tree
  * @param syscall_cnt the number of syscalls in this seccomp filter
  */
@@ -1513,7 +1556,7 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 			     unsigned int *bintree_levels)
 {
 	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter;
-	unsigned int syscall_cnt = 0, empty_cnt = 0;
+	unsigned int syscall_cnt, empty_cnt = 0;
 	uint64_t *bintree_hashes = NULL, nxt_hsh;
 	unsigned int *bintree_syscalls = NULL;
 	bool acc_reset;
@@ -1532,8 +1575,9 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 		_sys_sort(db_secondary->syscalls, &s_head, &s_tail, optimize);
 
 	if (optimize == 2) {
+		syscall_cnt = _get_syscall_cnt(state, s_tail);
 		rc = _gen_bpf_init_bintree(&bintree_hashes, &bintree_syscalls,
-					   bintree_levels, db->syscall_cnt,
+					   bintree_levels, syscall_cnt,
 					   &empty_cnt);
 		if (rc < 0)
 			goto out;
@@ -1551,9 +1595,11 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 		 */
 		acc_reset = false;
 
+	syscall_cnt = 0;
+
 	/* create the syscall filters and add them to block list group */
 	for (s_iter = s_tail; s_iter != NULL; s_iter = s_iter->pri_prv) {
-		if (!s_iter->valid)
+		if (_skip_syscall(state, s_iter))
 			continue;
 
 		if (*bintree_levels > 0 &&
