@@ -98,6 +98,20 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_NATIVE);
+	if (rc != 0)
+		goto out;
+
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_AARCH64);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_PPC64LE);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86_64);
+	if (rc != 0)
+		goto out;
+
 	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_OPTIMIZE, 2);
 	if (rc < 0)
 		goto out;
