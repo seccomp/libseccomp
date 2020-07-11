@@ -140,6 +140,9 @@ rule, you can only compare each argument once in a single rule.  In other words,
 you can not have multiple comparisons of the 3rd syscall argument in a single
 rule.
 .P
+In a filter containing multiple architectures, it is an error to add a filter
+rule for a syscall that does not exist in all of the filter's architectures.
+.P
 While it is possible to specify the
 .I syscall
 value directly using the standard
