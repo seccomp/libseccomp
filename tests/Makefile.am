@@ -155,6 +155,7 @@ EXTRA_DIST_TESTPYTHON = \
 	53-sim-binary_tree.py \
 	54-live-binary_tree.py \
 	56-basic-iterate_syscalls.py \
+	57-basic-rawsysrc.py \
 	58-live-tsync_notify.py
 
 EXTRA_DIST_TESTCFGS = \
