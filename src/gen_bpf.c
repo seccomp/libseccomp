@@ -1374,12 +1374,12 @@ static int _gen_bpf_init_bintree(uint64_t **bintree_hashes,
 			      ((*bintree_levels) - 1)) - syscall_cnt;
 		*bintree_hashes = zmalloc(sizeof(uint64_t) *
 					  (*bintree_levels));
-		if (bintree_hashes == NULL)
+		if (*bintree_hashes == NULL)
 			return -ENOMEM;
 
 		*bintree_syscalls = zmalloc(sizeof(unsigned int) *
 					    (*bintree_levels));
-		if (bintree_syscalls == NULL)
+		if (*bintree_syscalls == NULL)
 			return -ENOMEM;
 
 		for (i = 0; i < *bintree_levels; i++) {
