@@ -2,11 +2,14 @@ libseccomp: Contributors
 ========================================================================
 https://github.com/seccomp/libseccomp
 
+Alex Murray <alex.murray@canonical.com>
+Andreas Schwab <schwab@suse.de>
 Andrew Jones <drjones@redhat.com>
 Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
 Bogdan Purcareata <bogdan.purcareata@freescale.com>
 Brian Cain <brian.cain@gmail.com>
+Christopher Waldon <christopher.waldon.dev@gmail.com>
 Chris Waldon <chris.waldon@ibm.com>
 Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
@@ -15,6 +18,8 @@ Eduardo Otubo <otubo@linux.vnet.ibm.com>
 Eric Paris <eparis@redhat.com>
 Fabrice Fontaine <fontaine.fabrice@gmail.com>
 Felix Abecassis <fabecassis@nvidia.com>
+Felix Geyer <debfx@fobos.de>
+Giuseppe Scrivano <gscrivan@redhat.com>
 Heiko Carstens <heiko.carstens@de.ibm.com>
 Helge Deller <deller@gmx.de>
 Jake Edge <jake@lwn.net>
@@ -24,9 +29,11 @@ Jan Willeke <willeke@linux.vnet.ibm.com>
 Jay Guo <guojiannan@cn.ibm.com>
 Jiannan Guo <guojiannan1101@gmail.com>
 Joe MacDonald <joe@deserted.net>
+Jonah Petri <jonah@petri.us>
 Justin Cormack <justin.cormack@docker.com>
 Kees Cook <keescook@chromium.org>
 Kyle R. Conway <kyle.r.conway@gmail.com>
+Kenta Tada <Kenta.Tada@sony.com>
 Luca Bruno <lucab@debian.org>
 Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
 Marcus Meissner <meissner@suse.de>
@@ -37,10 +44,14 @@ Mike Frysinger <vapier@gentoo.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
 Miroslav Lichvar <mlichvar@redhat.com>
 Paul Moore <paul@paul-moore.com>
+Rolf Eike Beer <eb@emlix.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
+Stéphane Graber <stgraber@ubuntu.com>
+Stephen Coleman <omegacoleman@gmail.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
 Tobias Klauser <tklauser@distanz.ch>
 Tom Hromatka <tom.hromatka@oracle.com>
+Tudor Brindus <me@tbrindus.ca>
 Tycho Andersen <tycho@tycho.ws>
 Tyler Hicks <tyhicks@canonical.com>
 valoq <valoq@mailbox.org>
