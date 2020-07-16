@@ -19,7 +19,7 @@ dnl #
 dnl ####
 dnl libseccomp defines
 dnl ####
-AC_INIT([libseccomp], [0.0.0])
+AC_INIT([libseccomp], [2.5.0])
 
 dnl ####
 dnl autoconf configuration

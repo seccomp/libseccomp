@@ -2,6 +2,28 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.5.0 - XXX XX, XXXX
+- Add support for the seccomp user notifications, see the
+  seccomp_notify_alloc(3), seccomp_notify_receive(3), seccomp_notify_respond(3)
+  manpages for more information
+- Add support for new filter optimization approaches, including a balanced tree
+  optimization, see the SCMP_FLTATR_CTL_OPTIMIZE filter attribute for more
+  information
+- Add support for the 64-bit RISC-V architecture
+- Performance improvements when adding new rules to a filter thanks to the use
+  of internal shadow transactions and improved syscall lookup tables
+- Properly document the libseccomp API return values and include them in the
+  stable API promise
+- Improvements to the s390 and s390x multiplexed syscall handling
+- Multiple fixes and improvements to the libseccomp manpages
+- Moved from manually maintained syscall tables to an automatically generated
+  syscall table in CSV format
+- Update the syscall tables to Linux v5.8.0-rc5
+- Python bindings and build now default to Python 3.x
+- Improvements to the tests have boosted code coverage to over 93%
+- Enable Travis CI testing on the aarch64 and ppc64le architectures
+- Add code inspection via lgtm.com
+
 * Version 2.4.3 - March 4, 2020
 - Add list of authorized release signatures to README.md
 - Fix multiplexing issue with s390/s390x shm* syscalls
