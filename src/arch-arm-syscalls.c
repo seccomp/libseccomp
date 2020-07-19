@@ -278,6 +278,7 @@ const struct arch_syscall_def arm_syscall_table[] = { \
 	{ "open_by_handle_at", (__SCMP_NR_BASE + 371) },
 	{ "open_tree", (__SCMP_NR_BASE + 428) },
 	{ "openat", (__SCMP_NR_BASE + 322) },
+	{ "openat2", (__SCMP_NR_BASE + 437) },
 	{ "pause", (__SCMP_NR_BASE + 29) },
 	{ "pciconfig_iobase", (__SCMP_NR_BASE + 271) },
 	{ "pciconfig_read", (__SCMP_NR_BASE + 272) },

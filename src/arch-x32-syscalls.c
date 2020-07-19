@@ -266,6 +266,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "open_by_handle_at", (X32_SYSCALL_BIT + 304) },
 	{ "open_tree", (X32_SYSCALL_BIT + 428) },
 	{ "openat", (X32_SYSCALL_BIT + 257) },
+	{ "openat2", (X32_SYSCALL_BIT + 437) },
 	{ "pause", (X32_SYSCALL_BIT + 34) },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },

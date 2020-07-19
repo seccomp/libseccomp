@@ -250,6 +250,7 @@ const struct arch_syscall_def parisc_syscall_table[] = { \
 	{ "open_by_handle_at",	326 },
 	{ "open_tree", __PNR_open_tree },
 	{ "openat",	275 },
+	{ "openat2", 437 },
 	{ "pause",	29 },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },

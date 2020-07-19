@@ -267,6 +267,7 @@ const struct arch_syscall_def ppc64_syscall_table[] = { \
 	{ "open_by_handle_at", 346 },
 	{ "open_tree", 428 },
 	{ "openat", 286 },
+	{ "openat2", 437 },
 	{ "pause", 29 },
 	{ "pciconfig_iobase", 200 },
 	{ "pciconfig_read", 198 },

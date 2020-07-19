@@ -273,6 +273,7 @@
 #define __PNR_timerfd_settime64			-10239
 #define __PNR_utimensat_time64			-10240
 #define __PNR_ppoll				-10241
+#define __PNR_openat2				-10242
 
 /*
  * libseccomp syscall definitions
@@ -1285,6 +1286,12 @@
 #endif
 
 #define __SNR_openat			__NR_openat
+
+#ifdef __NR_openat2
+#define __SNR_openat2			__NR_openat2
+#else
+#define __SNR_openat2			__PNR_openat2
+#endif
 
 #ifdef __NR_pause
 #define __SNR_pause			__NR_pause

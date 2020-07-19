@@ -270,6 +270,7 @@ const struct arch_syscall_def mips64n32_syscall_table[] = { \
 	{ "open_by_handle_at", (__SCMP_NR_BASE + 304) },
 	{ "open_tree", (__SCMP_NR_BASE + 428) },
 	{ "openat", (__SCMP_NR_BASE + 251) },
+	{ "openat2", (__SCMP_NR_BASE + 437) },
 	{ "pause", (__SCMP_NR_BASE + 33) },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },
