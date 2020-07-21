@@ -70,6 +70,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("s390x"));
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("sheb"));
+	if (rc != 0)
+		goto out;
 
 	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 1,
 			      SCMP_A0(SCMP_CMP_EQ, STDIN_FILENO));

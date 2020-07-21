@@ -45,6 +45,7 @@
 #include "arch-riscv64.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "arch-sh.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -139,6 +140,10 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_S390X:
 			sys = s390x_syscall_iterate(iter);
+			break;
+		case SCMP_ARCH_SH:
+		case SCMP_ARCH_SHEB:
+			sys = sh_syscall_iterate(iter);
 			break;
 		default:
 			/* invalid arch */

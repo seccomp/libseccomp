@@ -123,6 +123,12 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_RISCV64:
 			printf("riscv64\n");
 			break;
+		case SCMP_ARCH_SHEB:
+			printf("sheb\n");
+			break;
+		case SCMP_ARCH_SH:
+			printf("sh\n");
+			break;
 		default:
 			printf("unknown\n");
 		}

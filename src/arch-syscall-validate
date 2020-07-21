@@ -568,6 +568,31 @@ function dump_lib_s390x() {
 }
 
 #
+# Dump the sh system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_sh() {
+	cat $1/arch/sh/kernel/syscalls/syscall.tbl | \
+		grep -v "^#" | \
+		sed -n "/[0-9]\+[ \t]\+\(common\)/p" | \
+		awk '{ print $3","$1 }' | \
+		sort
+}
+
+#
+# Dump the parisc library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_sh() {
+	dump_lib_arch sh | mangle_lib_syscall sh
+}
+
+#
 # Dump the system syscall table
 #
 # Arguments:
@@ -622,6 +647,9 @@ function dump_sys() {
 		;;
 	s390x)
 		dump_sys_s390x "$2"
+		;;
+	sh)
+		dump_sys_sh "$2"
 		;;
 	*)
 		echo ""
@@ -686,6 +714,8 @@ function dump_lib() {
 		;;
 	s390x)
 		dump_lib_s390x
+	sh)
+		dump_lib_sh
 		;;
 	*)
 		echo ""
@@ -722,6 +752,7 @@ function gen_csv() {
 	abi_list+=" ppc ppc64"
 	abi_list+=" riscv64"
 	abi_list+=" s390 s390x"
+	abi_list+=" sh"
 
 	# get the full syscall list
 	for abi in $abi_list; do
@@ -809,7 +840,8 @@ if [[ $opt_arches == "" ]]; then
 		mips mips64 mips64n32 \
 		parisc parisc64 \
 		ppc ppc64 \
-		s390 s390x"
+		s390 s390x \
+		sh"
 fi
 
 # sanity checks

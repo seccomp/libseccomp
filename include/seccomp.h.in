@@ -217,6 +217,12 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
 
 /**
+ * The SuperH SH architecture tokens
+ */
+#define SCMP_ARCH_SHEB		AUDIT_ARCH_SH
+#define SCMP_ARCH_SH		AUDIT_ARCH_SHEL /* Little-endian SH is more common than big */
+
+/**
  * Convert a syscall name into the associated syscall number
  * @param x the syscall name
  */
