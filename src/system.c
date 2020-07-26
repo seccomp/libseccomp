@@ -40,16 +40,61 @@
  *       our next release we may have to enable the allowlist */
 #define SYSCALL_ALLOWLIST_ENABLE	0
 
-static int _nr_seccomp = -1;
-static int _support_seccomp_syscall = -1;
-static int _support_seccomp_flag_tsync = -1;
-static int _support_seccomp_flag_log = -1;
-static int _support_seccomp_action_log = -1;
-static int _support_seccomp_kill_process = -1;
-static int _support_seccomp_flag_spec_allow = -1;
-static int _support_seccomp_flag_new_listener = -1;
-static int _support_seccomp_user_notif = -1;
-static int _support_seccomp_flag_tsync_esrch = -1;
+/* task global state */
+struct task_state {
+	/* seccomp(2) syscall */
+	int nr_seccomp;
+
+	/* userspace notification fd */
+	int notify_fd;
+
+	/* runtime support flags */
+	int sup_syscall;
+	int sup_flag_tsync;
+	int sup_flag_log;
+	int sup_action_log;
+	int sup_kill_process;
+	int sup_flag_spec_allow;
+	int sup_flag_new_listener;
+	int sup_user_notif;
+	int sup_flag_tsync_esrch;
+};
+static struct task_state state = {
+	.nr_seccomp = -1,
+
+	.notify_fd = -1,
+
+	.sup_syscall = -1,
+	.sup_flag_tsync = -1,
+	.sup_flag_log = -1,
+	.sup_action_log = -1,
+	.sup_kill_process = -1,
+	.sup_flag_spec_allow = -1,
+	.sup_flag_new_listener = -1,
+	.sup_user_notif = -1,
+	.sup_flag_tsync_esrch = -1,
+};
+
+/**
+ * Reset the task state
+ *
+ * This function fully resets the library's global "system task state".
+ *
+ */
+void sys_reset_state(void)
+{
+	state.nr_seccomp = -1;
+	state.notify_fd = -1;
+	state.sup_syscall = -1;
+	state.sup_flag_tsync = -1;
+	state.sup_flag_log = -1;
+	state.sup_action_log = -1;
+	state.sup_kill_process = -1;
+	state.sup_flag_spec_allow = -1;
+	state.sup_flag_new_listener = -1;
+	state.sup_user_notif = -1;
+	state.sup_flag_tsync_esrch = -1;
+}
 
 /**
  * Check to see if the seccomp() syscall is supported
@@ -68,8 +113,8 @@ int sys_chk_seccomp_syscall(void)
 	/* NOTE: it is reasonably safe to assume that we should be able to call
 	 *       seccomp() when the caller first starts, but we can't rely on
 	 *       it later so we need to cache our findings for use later */
-	if (_support_seccomp_syscall >= 0)
-		return _support_seccomp_syscall;
+	if (state.sup_syscall >= 0)
+		return state.sup_syscall;
 
 #if SYSCALL_ALLOWLIST_ENABLE
 	/* architecture allowlist */
@@ -100,11 +145,11 @@ int sys_chk_seccomp_syscall(void)
 		goto supported;
 
 unsupported:
-	_support_seccomp_syscall = 0;
+	state.sup_syscall = 0;
 	return 0;
 supported:
-	_nr_seccomp = nr_seccomp;
-	_support_seccomp_syscall = 1;
+	state.nr_seccomp = nr_seccomp;
+	state.sup_syscall = 1;
 	return 1;
 }
 
@@ -118,7 +163,7 @@ supported:
  */
 void sys_set_seccomp_syscall(bool enable)
 {
-	_support_seccomp_syscall = (enable ? 1 : 0);
+	state.sup_syscall = (enable ? 1 : 0);
 }
 
 /**
@@ -132,16 +177,16 @@ void sys_set_seccomp_syscall(bool enable)
 int sys_chk_seccomp_action(uint32_t action)
 {
 	if (action == SCMP_ACT_KILL_PROCESS) {
-		if (_support_seccomp_kill_process < 0) {
+		if (state.sup_kill_process < 0) {
 			if (sys_chk_seccomp_syscall() == 1 &&
-			    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
-				    &action) == 0)
-				_support_seccomp_kill_process = 1;
+			    syscall(state.nr_seccomp,
+				    SECCOMP_GET_ACTION_AVAIL, 0, &action) == 0)
+				state.sup_kill_process = 1;
 			else
-				_support_seccomp_kill_process = 0;
+				state.sup_kill_process = 0;
 		}
 
-		return _support_seccomp_kill_process;
+		return state.sup_kill_process;
 	} else if (action == SCMP_ACT_KILL_THREAD) {
 		return 1;
 	} else if (action == SCMP_ACT_TRAP) {
@@ -152,30 +197,30 @@ int sys_chk_seccomp_action(uint32_t action)
 	} else if (action == SCMP_ACT_TRACE(action & 0x0000ffff)) {
 		return 1;
 	} else if (action == SCMP_ACT_LOG) {
-		if (_support_seccomp_action_log < 0) {
+		if (state.sup_action_log < 0) {
 			if (sys_chk_seccomp_syscall() == 1 &&
-			    syscall(_nr_seccomp, SECCOMP_GET_ACTION_AVAIL, 0,
-				    &action) == 0)
-				_support_seccomp_action_log = 1;
+			    syscall(state.nr_seccomp,
+				    SECCOMP_GET_ACTION_AVAIL, 0, &action) == 0)
+				state.sup_action_log = 1;
 			else
-				_support_seccomp_action_log = 0;
+				state.sup_action_log = 0;
 		}
 
-		return _support_seccomp_action_log;
+		return state.sup_action_log;
 	} else if (action == SCMP_ACT_ALLOW) {
 		return 1;
 	} else if (action == SCMP_ACT_NOTIFY) {
-		if (_support_seccomp_user_notif < 0) {
+		if (state.sup_user_notif < 0) {
 			struct seccomp_notif_sizes sizes;
 			if (sys_chk_seccomp_syscall() == 1 &&
-			    syscall(_nr_seccomp, SECCOMP_GET_NOTIF_SIZES, 0,
-				    &sizes) == 0)
-				_support_seccomp_user_notif = 1;
+			    syscall(state.nr_seccomp,
+				    SECCOMP_GET_NOTIF_SIZES, 0, &sizes) == 0)
+				state.sup_user_notif = 1;
 			else
-				_support_seccomp_user_notif = 0;
+				state.sup_user_notif = 0;
 		}
 
-		return _support_seccomp_user_notif;
+		return state.sup_user_notif;
 	}
 
 	return 0;
@@ -193,13 +238,13 @@ void sys_set_seccomp_action(uint32_t action, bool enable)
 {
 	switch (action) {
 	case SCMP_ACT_LOG:
-		_support_seccomp_action_log = (enable ? 1 : 0);
+		state.sup_action_log = (enable ? 1 : 0);
 		break;
 	case SCMP_ACT_KILL_PROCESS:
-		_support_seccomp_kill_process = (enable ? 1 : 0);
+		state.sup_kill_process = (enable ? 1 : 0);
 		break;
 	case SCMP_ACT_NOTIFY:
-		_support_seccomp_user_notif = (enable ? 1 : 0);
+		state.sup_user_notif = (enable ? 1 : 0);
 		break;
 	}
 }
@@ -212,13 +257,14 @@ void sys_set_seccomp_action(uint32_t action, bool enable)
  * Return one if the flag is supported, zero otherwise.
  *
  */
-static int _sys_chk_seccomp_flag_kernel(int flag)
+static int _sys_chk_flag_kernel(int flag)
 {
 	/* this is an invalid seccomp(2) call because the last argument
 	 * is NULL, but depending on the errno value of EFAULT we can
 	 * guess if the filter flag is supported or not */
 	if (sys_chk_seccomp_syscall() == 1 &&
-	    syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flag, NULL) == -1 &&
+	    syscall(state.nr_seccomp,
+		    SECCOMP_SET_MODE_FILTER, flag, NULL) == -1 &&
 	    errno == EFAULT)
 		return 1;
 
@@ -238,29 +284,25 @@ int sys_chk_seccomp_flag(int flag)
 {
 	switch (flag) {
 	case SECCOMP_FILTER_FLAG_TSYNC:
-		if (_support_seccomp_flag_tsync < 0)
-			_support_seccomp_flag_tsync = _sys_chk_seccomp_flag_kernel(flag);
-
-		return _support_seccomp_flag_tsync;
+		if (state.sup_flag_tsync < 0)
+			state.sup_flag_tsync = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_tsync;
 	case SECCOMP_FILTER_FLAG_LOG:
-		if (_support_seccomp_flag_log < 0)
-			_support_seccomp_flag_log = _sys_chk_seccomp_flag_kernel(flag);
-
-		return _support_seccomp_flag_log;
+		if (state.sup_flag_log < 0)
+			state.sup_flag_log = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_log;
 	case SECCOMP_FILTER_FLAG_SPEC_ALLOW:
-		if (_support_seccomp_flag_spec_allow < 0)
-			_support_seccomp_flag_spec_allow = _sys_chk_seccomp_flag_kernel(flag);
-
-		return _support_seccomp_flag_spec_allow;
+		if (state.sup_flag_spec_allow < 0)
+			state.sup_flag_spec_allow = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_spec_allow;
 	case SECCOMP_FILTER_FLAG_NEW_LISTENER:
-		if (_support_seccomp_flag_new_listener < 0)
-			_support_seccomp_flag_new_listener = _sys_chk_seccomp_flag_kernel(flag);
-
-		return _support_seccomp_flag_new_listener;
+		if (state.sup_flag_new_listener < 0)
+			state.sup_flag_new_listener = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_new_listener;
 	case SECCOMP_FILTER_FLAG_TSYNC_ESRCH:
-		if (_support_seccomp_flag_tsync_esrch < 0)
-			_support_seccomp_flag_tsync_esrch = _sys_chk_seccomp_flag_kernel(flag);
-		return _support_seccomp_flag_tsync_esrch;
+		if (state.sup_flag_tsync_esrch < 0)
+			state.sup_flag_tsync_esrch = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_tsync_esrch;
 	}
 
 	return -EOPNOTSUPP;
@@ -279,19 +321,19 @@ void sys_set_seccomp_flag(int flag, bool enable)
 {
 	switch (flag) {
 	case SECCOMP_FILTER_FLAG_TSYNC:
-		_support_seccomp_flag_tsync = (enable ? 1 : 0);
+		state.sup_flag_tsync = (enable ? 1 : 0);
 		break;
 	case SECCOMP_FILTER_FLAG_LOG:
-		_support_seccomp_flag_log = (enable ? 1 : 0);
+		state.sup_flag_log = (enable ? 1 : 0);
 		break;
 	case SECCOMP_FILTER_FLAG_SPEC_ALLOW:
-		_support_seccomp_flag_spec_allow = (enable ? 1 : 0);
+		state.sup_flag_spec_allow = (enable ? 1 : 0);
 		break;
 	case SECCOMP_FILTER_FLAG_NEW_LISTENER:
-		_support_seccomp_flag_new_listener = (enable ? 1 : 0);
+		state.sup_flag_new_listener = (enable ? 1 : 0);
 		break;
 	case SECCOMP_FILTER_FLAG_TSYNC_ESRCH:
-		_support_seccomp_flag_tsync_esrch = (enable ? 1 : 0);
+		state.sup_flag_tsync_esrch = (enable ? 1 : 0);
 		break;
 	}
 }
@@ -324,7 +366,7 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			goto filter_load_out;
 	}
 
-	tsync_notify = (_support_seccomp_flag_tsync_esrch > 0);
+	tsync_notify = state.sup_flag_tsync_esrch > 0 && state.notify_fd == -1;
 
 	/* load the filter into the kernel */
 	if (sys_chk_seccomp_syscall() == 1) {
@@ -333,28 +375,29 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			if (col->attr.tsync_enable)
 				flgs |= SECCOMP_FILTER_FLAG_TSYNC | \
 					SECCOMP_FILTER_FLAG_TSYNC_ESRCH;
-			if (_support_seccomp_user_notif > 0)
+			if (state.sup_user_notif > 0)
 				flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
 		} else if (col->attr.tsync_enable)
 			flgs |= SECCOMP_FILTER_FLAG_TSYNC;
-		else if (_support_seccomp_user_notif > 0)
+		else if (state.sup_user_notif > 0 && state.notify_fd == -1)
 			flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
 		if (col->attr.log_enable)
 			flgs |= SECCOMP_FILTER_FLAG_LOG;
 		if (col->attr.spec_allow)
 			flgs |= SECCOMP_FILTER_FLAG_SPEC_ALLOW;
-		rc = syscall(_nr_seccomp, SECCOMP_SET_MODE_FILTER, flgs, prgm);
+		rc = syscall(state.nr_seccomp,
+			     SECCOMP_SET_MODE_FILTER, flgs, prgm);
 		if (tsync_notify && rc > 0) {
 			/* return 0 on NEW_LISTENER success, but save the fd */
-			col->notify_fd = rc;
+			state.notify_fd = rc;
 			rc = 0;
 		} else if (rc > 0 && col->attr.tsync_enable) {
 			/* always return -ESRCH if we fail to sync threads */
 			errno = ESRCH;
 			rc = -errno;
-		} else if (rc > 0 && _support_seccomp_user_notif > 0) {
+		} else if (rc > 0 && state.sup_user_notif > 0) {
 			/* return 0 on NEW_LISTENER success, but save the fd */
-			col->notify_fd = rc;
+			state.notify_fd = rc;
 			rc = 0;
 		}
 	} else
@@ -368,6 +411,19 @@ filter_load_out:
 	if (rc < 0)
 		return (rawrc ? -errno : -ECANCELED);
 	return rc;
+}
+
+/**
+ * Return the userspace notification fd
+ *
+ * This function returns the userspace notification fd from
+ * SECCOMP_FILTER_FLAG_NEW_LISTENER.  If the notification fd has not yet been
+ * set, or an error has occurred, -1 is returned.
+ *
+ */
+int sys_notify_fd(void)
+{
+	return state.notify_fd;
 }
 
 /**
@@ -386,7 +442,7 @@ int sys_notify_alloc(struct seccomp_notif **req,
 	int rc;
 	static struct seccomp_notif_sizes sizes = { 0, 0, 0 };
 
-	if (_support_seccomp_syscall <= 0)
+	if (state.sup_syscall <= 0)
 		return -EOPNOTSUPP;
 
 	if (sizes.seccomp_notif == 0 && sizes.seccomp_notif_resp == 0) {
@@ -427,7 +483,7 @@ int sys_notify_alloc(struct seccomp_notif **req,
  */
 int sys_notify_receive(int fd, struct seccomp_notif *req)
 {
-	if (_support_seccomp_user_notif <= 0)
+	if (state.sup_user_notif <= 0)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_RECV, req) < 0)
@@ -448,7 +504,7 @@ int sys_notify_receive(int fd, struct seccomp_notif *req)
  */
 int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
 {
-	if (_support_seccomp_user_notif <= 0)
+	if (state.sup_user_notif <= 0)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_SEND, resp) < 0)
@@ -467,7 +523,7 @@ int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
  */
 int sys_notify_id_valid(int fd, uint64_t id)
 {
-	if (_support_seccomp_user_notif <= 0)
+	if (state.sup_user_notif <= 0)
 		return -EOPNOTSUPP;
 
 	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID, &id) < 0)

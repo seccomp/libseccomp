@@ -59,7 +59,8 @@ returns the notification fd of a filter after it has been loaded.
 .\" //////////////////////////////////////////////////////////////////////////
 The
 .BR seccomp_notify_fd ()
-returns the notification fd of the loaded filter.
+returns the notification fd of the loaded filter, -1 if a notification fd has
+not yet been created, and -EINVAL if the filter context is invalid.
 .P
 The
 .BR seccomp_notify_id_valid ()

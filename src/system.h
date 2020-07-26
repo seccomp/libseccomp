@@ -182,6 +182,8 @@ struct seccomp_notif_resp {
 #define SECCOMP_IOCTL_NOTIF_ID_VALID    SECCOMP_IOR(2, __u64)
 #endif /* SECCOMP_RET_USER_NOTIF */
 
+void sys_reset_state(void);
+
 int sys_chk_seccomp_syscall(void);
 void sys_set_seccomp_syscall(bool enable);
 
@@ -193,6 +195,7 @@ void sys_set_seccomp_flag(int flag, bool enable);
 
 int sys_filter_load(struct db_filter_col *col, bool rawrc);
 
+int sys_notify_fd(void);
 int sys_notify_alloc(struct seccomp_notif **req,
 		     struct seccomp_notif_resp **resp);
 int sys_notify_receive(int fd, struct seccomp_notif *req);

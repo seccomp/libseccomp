@@ -301,10 +301,18 @@ API int seccomp_reset(scmp_filter_ctx ctx, uint32_t def_action)
 {
 	struct db_filter_col *col = (struct db_filter_col *)ctx;
 
-	/* use a NULL filter collection here since we are resetting it */
-	if (ctx == NULL || db_col_action_valid(NULL, def_action) < 0)
+	/* a NULL filter context indicates we are resetting the global state */
+	if (ctx == NULL) {
+		/* reset the global state and redetermine the api level */
+		sys_reset_state();
+		_seccomp_api_update();
+		return _rc_filter(0);
+	}
+	/* ensure the default action is valid */
+	if (db_col_action_valid(NULL, def_action) < 0)
 		return _rc_filter(-EINVAL);
 
+	/* reset the filter */
 	return _rc_filter(db_col_reset(col, def_action));
 }
 
@@ -675,16 +683,17 @@ API int seccomp_notify_id_valid(int fd, uint64_t id)
 /* NOTE - function header comment in include/seccomp.h */
 API int seccomp_notify_fd(const scmp_filter_ctx ctx)
 {
-	struct db_filter_col *col;
+	/* NOTE: for historical reasons, and possibly future use, we require a
+	 * valid filter context even though we don't actual use it here; the
+	 * api update is also not strictly necessary, but keep it for now */
 
 	/* force a runtime api level detection */
 	_seccomp_api_update();
 
 	if (_ctx_valid(ctx))
 		return _rc_filter(-EINVAL);
-	col = (struct db_filter_col *)ctx;
 
-	return _rc_filter(col->notify_fd);
+	return _rc_filter(sys_notify_fd());
 }
 
 /* NOTE - function header comment in include/seccomp.h */

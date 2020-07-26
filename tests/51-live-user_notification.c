@@ -99,6 +99,27 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
+	rc = seccomp_reset(ctx, SCMP_ACT_ALLOW);
+	if (rc < 0)
+		goto out;
+
+	rc = seccomp_rule_add(ctx, SCMP_ACT_NOTIFY, SCMP_SYS(getppid), 0, NULL);
+	if (rc)
+		goto out;
+
+	rc  = seccomp_load(ctx);
+	if (rc < 0)
+		goto out;
+
+	rc = seccomp_notify_fd(ctx);
+	if (rc < 0)
+		goto out;
+	if (rc != fd) {
+		rc = -EFAULT;
+		goto out;
+	} else
+		rc = 0;
+
 out:
 	if (fd >= 0)
 		close(fd);

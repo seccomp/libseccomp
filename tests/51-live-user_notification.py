@@ -52,6 +52,10 @@ def test():
             raise RuntimeError("Child process error")
         if os.WEXITSTATUS(rc) != 0:
             raise RuntimeError("Child process error")
+        f.reset(ALLOW)
+        f.add_rule(NOTIFY, "getppid")
+        f.load()
+        # no easy way to check the notification fd here
         quit(160)
 
 test()
