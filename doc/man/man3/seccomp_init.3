@@ -36,7 +36,15 @@ The
 function releases the existing filter context state before reinitializing it
 and can only be called after a call to
 .BR seccomp_init ()
-has succeeded.
+has succeeded.  If
+.BR seccomp_reset ()
+is called with a NULL filter, it resets the library's global task state;
+normally this is not needed, but it may be required to continue using the
+library after a
+.BR fork ()
+or
+.BR clone ()
+call to ensure the API level and user notification state is properly reset.
 .P
 When the caller is finished configuring the seccomp filter and has loaded it
 into the kernel, the caller should call

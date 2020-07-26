@@ -41,12 +41,9 @@ int main(int argc, char *argv[])
 	seccomp_release(ctx);
 	ctx = NULL;
 
-	/* seccomp_reset error */
-	rc = seccomp_reset(ctx, SCMP_ACT_KILL + 1);
-	if (rc != -EINVAL)
-		return -1;
-	rc = seccomp_reset(ctx, SCMP_ACT_KILL);
-	if (rc != -EINVAL)
+	/* ensure that seccomp_reset(NULL, ...) is accepted */
+	rc = seccomp_reset(NULL, SCMP_ACT_ALLOW);
+	if (rc != 0)
 		return -1;
 
 	/* seccomp_load error */
