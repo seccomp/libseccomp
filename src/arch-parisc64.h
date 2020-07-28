@@ -1,7 +1,8 @@
 /**
- * Enhanced Seccomp PARISC Specific Code
+ * Enhanced Seccomp PARISC64 Specific Code
  *
- * Copyright (c) 2016 Helge Deller <deller@gmx.de>
+ * Copyright (c) 2020 Oracle and/or its affiliates.
+ * Author: Tom Hromatka <tom.hromatka@oracle.com>
  *
  */
 
@@ -19,19 +20,19 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
-#ifndef _ARCH_PARISC_H
-#define _ARCH_PARISC_H
+#ifndef _ARCH_PARISC64_H
+#define _ARCH_PARISC64_H
 
 #include <inttypes.h>
 
 #include "arch.h"
 #include "system.h"
 
-extern const struct arch_def arch_def_parisc;
+extern const struct arch_def arch_def_parisc64;
 
-int parisc_syscall_resolve_name(const char *name);
-const char *parisc_syscall_resolve_num(int num);
+int parisc64_syscall_resolve_name(const char *name);
+const char *parisc64_syscall_resolve_num(int num);
 
-const struct arch_syscall_def *parisc_syscall_iterate(unsigned int spot);
+const struct arch_syscall_def *parisc64_syscall_iterate(unsigned int spot);
 
 #endif
