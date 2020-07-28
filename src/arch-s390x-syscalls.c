@@ -10,7 +10,7 @@
 #include "arch.h"
 #include "arch-s390x.h"
 
-/* NOTE: based on Linux v5.4-rc4 */
+/* NOTE: based on Linux v5.8-rc7 */
 const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -76,6 +76,7 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "exit", 1 },
 	{ "exit_group", 248 },
 	{ "faccessat", 300 },
+	{ "faccessat2", 439 },
 	{ "fadvise64", 253 },
 	{ "fadvise64_64", __PNR_fadvise64_64 },
 	{ "fallocate", 314 },
@@ -250,12 +251,14 @@ const struct arch_syscall_def s390x_syscall_table[] = { \
 	{ "open_by_handle_at", 336 },
 	{ "open_tree", 428 },
 	{ "openat", 288 },
+	{ "openat2", 437 },
 	{ "pause", 29 },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },
 	{ "pciconfig_write", __PNR_pciconfig_write },
 	{ "perf_event_open", 331 },
 	{ "personality", 136 },
+	{ "pidfd_getfd", 438 },
 	{ "pidfd_open", 434 },
 	{ "pidfd_send_signal", 424 },
 	{ "pipe", 42 },

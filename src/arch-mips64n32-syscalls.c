@@ -30,7 +30,7 @@
 /* N32 ABI */
 #define __SCMP_NR_BASE	6000
 
-/* NOTE: based on Linux v5.4-rc4 */
+/* NOTE: based on Linux v5.8-rc7 */
 const struct arch_syscall_def mips64n32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", (__SCMP_NR_BASE + 22) },
@@ -96,6 +96,7 @@ const struct arch_syscall_def mips64n32_syscall_table[] = { \
 	{ "exit", (__SCMP_NR_BASE + 58) },
 	{ "exit_group", (__SCMP_NR_BASE + 205) },
 	{ "faccessat", (__SCMP_NR_BASE + 263) },
+	{ "faccessat2", (__SCMP_NR_BASE + 439) },
 	{ "fadvise64", (__SCMP_NR_BASE + 216) },
 	{ "fadvise64_64", __PNR_fadvise64_64 },
 	{ "fallocate", (__SCMP_NR_BASE + 283) },
@@ -270,12 +271,14 @@ const struct arch_syscall_def mips64n32_syscall_table[] = { \
 	{ "open_by_handle_at", (__SCMP_NR_BASE + 304) },
 	{ "open_tree", (__SCMP_NR_BASE + 428) },
 	{ "openat", (__SCMP_NR_BASE + 251) },
+	{ "openat2", (__SCMP_NR_BASE + 437) },
 	{ "pause", (__SCMP_NR_BASE + 33) },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },
 	{ "pciconfig_write", __PNR_pciconfig_write },
 	{ "perf_event_open", (__SCMP_NR_BASE + 296) },
 	{ "personality", (__SCMP_NR_BASE + 132) },
+	{ "pidfd_getfd", (__SCMP_NR_BASE + 438) },
 	{ "pidfd_open", (__SCMP_NR_BASE + 434) },
 	{ "pidfd_send_signal", (__SCMP_NR_BASE + 424) },
 	{ "pipe", (__SCMP_NR_BASE + 21) },
