@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x86_64.h"
 
-/* NOTE: based on Linux v5.4-rc4 */
+/* NOTE: based on Linux v5.8-rc7 */
 const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -92,6 +92,7 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "exit", 60 },
 	{ "exit_group", 231 },
 	{ "faccessat", 269 },
+	{ "faccessat2", 439 },
 	{ "fadvise64", 221 },
 	{ "fadvise64_64", __PNR_fadvise64_64 },
 	{ "fallocate", 285 },
@@ -266,12 +267,14 @@ const struct arch_syscall_def x86_64_syscall_table[] = { \
 	{ "open_by_handle_at", 304 },
 	{ "open_tree", 428 },
 	{ "openat", 257 },
+	{ "openat2", 437 },
 	{ "pause", 34 },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },
 	{ "pciconfig_write", __PNR_pciconfig_write },
 	{ "perf_event_open", 298 },
 	{ "personality", 135 },
+	{ "pidfd_getfd", 438 },
 	{ "pidfd_open", 434 },
 	{ "pidfd_send_signal", 424 },
 	{ "pipe", 22 },

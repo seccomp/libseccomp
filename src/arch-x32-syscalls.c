@@ -26,7 +26,7 @@
 #include "arch.h"
 #include "arch-x32.h"
 
-/* NOTE: based on Linux v5.4-rc4 */
+/* NOTE: based on Linux v5.8-rc7 */
 const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "_llseek", __PNR__llseek },
 	{ "_newselect", __PNR__newselect },
@@ -92,6 +92,7 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "exit", (X32_SYSCALL_BIT + 60) },
 	{ "exit_group", (X32_SYSCALL_BIT + 231) },
 	{ "faccessat", (X32_SYSCALL_BIT + 269) },
+	{ "faccessat2", (X32_SYSCALL_BIT + 439) },
 	{ "fadvise64", (X32_SYSCALL_BIT + 221) },
 	{ "fadvise64_64", __PNR_fadvise64_64 },
 	{ "fallocate", (X32_SYSCALL_BIT + 285) },
@@ -266,12 +267,14 @@ const struct arch_syscall_def x32_syscall_table[] = { \
 	{ "open_by_handle_at", (X32_SYSCALL_BIT + 304) },
 	{ "open_tree", (X32_SYSCALL_BIT + 428) },
 	{ "openat", (X32_SYSCALL_BIT + 257) },
+	{ "openat2", (X32_SYSCALL_BIT + 437) },
 	{ "pause", (X32_SYSCALL_BIT + 34) },
 	{ "pciconfig_iobase", __PNR_pciconfig_iobase },
 	{ "pciconfig_read", __PNR_pciconfig_read },
 	{ "pciconfig_write", __PNR_pciconfig_write },
 	{ "perf_event_open", (X32_SYSCALL_BIT + 298) },
 	{ "personality", (X32_SYSCALL_BIT + 135) },
+	{ "pidfd_getfd", (X32_SYSCALL_BIT + 438) },
 	{ "pidfd_open", (X32_SYSCALL_BIT + 434) },
 	{ "pidfd_send_signal", (X32_SYSCALL_BIT + 424) },
 	{ "pipe", (X32_SYSCALL_BIT + 22) },
