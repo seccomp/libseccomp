@@ -65,9 +65,11 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl ####
 dnl build flags
+dnl NOTE: the '-Umips' is here because MIPS GCC compilers "helpfully" define it
+dnl       for us which wreaks havoc on the build
 dnl ####
 AM_CPPFLAGS="-I\${top_srcdir}/include -I\${top_builddir}/include"
-AM_CFLAGS="-Wall"
+AM_CFLAGS="-Wall -Umips"
 AM_LDFLAGS="-Wl,-z -Wl,relro"
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_CFLAGS])

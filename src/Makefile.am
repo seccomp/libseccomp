@@ -61,7 +61,7 @@ lib_LTLIBRARIES = libseccomp.la
 arch_syscall_dump_SOURCES = arch-syscall-dump.c ${SOURCES_ALL}
 
 arch_syscall_check_SOURCES = arch-syscall-check.c ${SOURCES_ALL}
-arch_syscall_check_CFLAGS = ${CODE_COVERAGE_CFLAGS}
+arch_syscall_check_CFLAGS = ${AM_CFLAGS} ${CODE_COVERAGE_CFLAGS}
 arch_syscall_check_LDFLAGS = ${CODE_COVERAGE_LDFLAGS}
 
 libseccomp_la_SOURCES = ${SOURCES_ALL}
