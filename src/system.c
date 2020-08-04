@@ -84,7 +84,11 @@ static struct task_state state = {
 void sys_reset_state(void)
 {
 	state.nr_seccomp = -1;
+
+	if (state.notify_fd > 0)
+		close(state.notify_fd);
 	state.notify_fd = -1;
+
 	state.sup_syscall = -1;
 	state.sup_flag_tsync = -1;
 	state.sup_flag_log = -1;
@@ -353,6 +357,7 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 {
 	int rc;
 	bool tsync_notify;
+	bool listener_req;
 	struct bpf_program *prgm = NULL;
 
 	rc = gen_bpf_generate(col, &prgm);
@@ -367,6 +372,8 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 	}
 
 	tsync_notify = state.sup_flag_tsync_esrch > 0 && state.notify_fd == -1;
+	listener_req = state.sup_user_notif > 0 && \
+		       col->notify_used && state.notify_fd == -1;
 
 	/* load the filter into the kernel */
 	if (sys_chk_seccomp_syscall() == 1) {
@@ -375,11 +382,16 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			if (col->attr.tsync_enable)
 				flgs |= SECCOMP_FILTER_FLAG_TSYNC | \
 					SECCOMP_FILTER_FLAG_TSYNC_ESRCH;
-			if (state.sup_user_notif > 0)
+			if (listener_req)
 				flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
-		} else if (col->attr.tsync_enable)
+		} else if (col->attr.tsync_enable) {
+			if (listener_req) {
+				/* NOTE: we _should_ catch this in db.c */
+				rc = -EFAULT;
+				goto filter_load_out;
+			}
 			flgs |= SECCOMP_FILTER_FLAG_TSYNC;
-		else if (state.sup_user_notif > 0 && state.notify_fd == -1)
+		} else if (listener_req)
 			flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
 		if (col->attr.log_enable)
 			flgs |= SECCOMP_FILTER_FLAG_LOG;
