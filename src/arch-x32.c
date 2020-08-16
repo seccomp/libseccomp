@@ -39,8 +39,9 @@ int x32_syscall_resolve_name_munge(const char *name)
 {
 	int sys;
 
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
 	sys = x32_syscall_resolve_name(name);
-	if (sys == __NR_SCMP_ERROR)
+	if (sys == __NR_SCMP_ERROR || sys < 0)
 		return sys;
 
 	return (sys | X32_SYSCALL_BIT);
@@ -57,7 +58,10 @@ int x32_syscall_resolve_name_munge(const char *name)
  */
 const char *x32_syscall_resolve_num_munge(int num)
 {
-	return x32_syscall_resolve_num(num & (~X32_SYSCALL_BIT));
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
+	if (num >= 0)
+		num &= ~X32_SYSCALL_BIT;
+	return x32_syscall_resolve_num(num);
 }
 
 const struct arch_def arch_def_x32 = {
