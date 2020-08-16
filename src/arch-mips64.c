@@ -41,8 +41,9 @@ int mips64_syscall_resolve_name_munge(const char *name)
 {
 	int sys;
 
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
 	sys = mips64_syscall_resolve_name(name);
-	if (sys == __NR_SCMP_ERROR)
+	if (sys == __NR_SCMP_ERROR || sys < 0)
 		return sys;
 
 	return sys + __SCMP_NR_BASE;
@@ -59,7 +60,10 @@ int mips64_syscall_resolve_name_munge(const char *name)
  */
 const char *mips64_syscall_resolve_num_munge(int num)
 {
-	return mips64_syscall_resolve_num(num - __SCMP_NR_BASE);
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
+	if (num >= __SCMP_NR_BASE)
+		num -= __SCMP_NR_BASE;
+	return mips64_syscall_resolve_num(num);
 }
 
 const struct arch_def arch_def_mips64 = {

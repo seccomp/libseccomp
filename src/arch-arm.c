@@ -50,8 +50,9 @@ int arm_syscall_resolve_name_munge(const char *name)
 {
 	int sys;
 
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
 	sys = arm_syscall_resolve_name(name);
-	if (sys == __NR_SCMP_ERROR)
+	if (sys == __NR_SCMP_ERROR || sys < 0)
 		return sys;
 
 	return (sys | __SCMP_NR_BASE);
@@ -68,7 +69,10 @@ int arm_syscall_resolve_name_munge(const char *name)
  */
 const char *arm_syscall_resolve_num_munge(int num)
 {
-	return arm_syscall_resolve_num(num & (~__SCMP_NR_BASE));
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
+	if (num >= 0)
+		num &= ~__SCMP_NR_BASE;
+	return arm_syscall_resolve_num(num);
 }
 
 const struct arch_def arch_def_arm = {
