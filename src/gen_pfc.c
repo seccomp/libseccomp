@@ -89,6 +89,10 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "s390";
 	case SCMP_ARCH_RISCV64:
 		return "riscv64";
+	case SCMP_ARCH_SHEB:
+		return "sheb";
+	case SCMP_ARCH_SH:
+		return "sh";
 	default:
 		return "UNKNOWN";
 	}

@@ -54,6 +54,8 @@ The libseccomp library currently supports the architectures listed below:
 * 32-bit s390 (s390)
 * 64-bit s390x (s390x)
 * 64-bit RISC-V (riscv64)
+* 32-bit SuperH big endian (sheb)
+* 32-bit SuperH (sh)
 
 ## Documentation
 

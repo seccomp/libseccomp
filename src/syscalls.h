@@ -22,6 +22,7 @@
 #include "arch-ppc.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "arch-sh.h"
 #include "arch-x32.h"
 #include "arch-x86_64.h"
 #include "arch-x86.h"
@@ -51,6 +52,7 @@ struct arch_syscall_table {
 	int riscv64;
 	int s390;
 	int s390x;
+	int sh;
 };
 #define OFFSET_ARCH(NAME) offsetof(struct arch_syscall_table, NAME)
 

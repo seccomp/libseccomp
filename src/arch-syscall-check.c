@@ -38,6 +38,7 @@
 #include "arch-ppc64.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "arch-sh.h"
 
 /**
  * compare the syscall values
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 	int i_ppc64 = 0;
 	int i_s390 = 0;
 	int i_s390x = 0;
+	int i_sh = 0;
 	char str_miss[256];
 	const char *sys_name;
 	const struct arch_syscall_def *sys;
@@ -115,6 +117,8 @@ int main(int argc, char *argv[])
 			      s390_syscall_iterate(i_s390));
 		syscall_check(str_miss, sys_name, "s390x",
 			      s390x_syscall_iterate(i_s390x));
+		syscall_check(str_miss, sys_name, "sh",
+			      sh_syscall_iterate(i_sh));
 
 		/* output the results */
 		printf("%s: ", sys_name);
@@ -151,12 +155,14 @@ int main(int argc, char *argv[])
 			i_s390 = -1;
 		if (!s390x_syscall_iterate(++i_s390x)->name)
 			i_s390x = -1;
+		if (!sh_syscall_iterate(++i_sh)->name)
+			i_sh = -1;
 	} while (i_x86_64 >= 0 && i_x32 >= 0 &&
 		 i_arm >= 0 && i_aarch64 >= 0 &&
 		 i_mips >= 0 && i_mips64 >= 0 && i_mips64n32 >= 0 &&
 		 i_parisc >= 0 &&
 		 i_ppc >= 0 && i_ppc64 >= 0 &&
-		 i_s390 >= 0 && i_s390x >= 0);
+		 i_s390 >= 0 && i_s390x >= 0 && i_sh >= 0);
 
 	/* check for any leftovers */
 	sys = x86_syscall_iterate(i_x86 + 1);
@@ -210,6 +216,10 @@ int main(int argc, char *argv[])
 	}
 	if (i_s390x >= 0) {
 		printf("ERROR, s390x has additional syscalls\n");
+		return 1;
+	}
+	if (i_sh >= 0) {
+		printf("ERROR, sh has additional syscalls\n");
 		return 1;
 	}
 
