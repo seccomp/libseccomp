@@ -60,11 +60,11 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1234), SCMP_SYS(open), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_TRACE(1234), SCMP_SYS(openat), 0);
 	if (rc != 0)
 		goto out;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(stat), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(fstat), 0);
 	if (rc != 0)
 		goto out;
 

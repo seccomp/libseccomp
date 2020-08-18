@@ -8,7 +8,7 @@
 test type: bpf-sim
 
 # Testname			Arch		Syscall		Arg0		Arg1		Arg2			Arg3	Arg4	Arg5	Result
-04-sim-multilevel_chains	all,-aarch64	open		0x856B008	4		N			N	N	N	ALLOW
+04-sim-multilevel_chains	all		openat		0		0x856B008	4			N	N	N	ALLOW
 04-sim-multilevel_chains	all		close		4		N		N			N	N	N	ALLOW
 04-sim-multilevel_chains	x86		read		0		0x856B008	0x7FFFFFFE		N	N	N	ALLOW
 04-sim-multilevel_chains	x86_64		read		0		0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
@@ -27,9 +27,11 @@ test type: bpf-sim
 04-sim-multilevel_chains	all		rt_sigreturn	N		N		N			N	N	N	ALLOW
 04-sim-multilevel_chains	x86		0-2		N		N		N			N	N	N	KILL
 04-sim-multilevel_chains	x86		7-172		N		N		N			N	N	N	KILL
-04-sim-multilevel_chains	x86		174-350		N		N		N			N	N	N	KILL
+04-sim-multilevel_chains	x86		174-294		N		N		N			N	N	N	KILL
+04-sim-multilevel_chains	x86		296-350		N		N		N			N	N	N	KILL
 04-sim-multilevel_chains	x86_64		4-14		N		N		N			N	N	N	KILL
-04-sim-multilevel_chains	x86_64		16-350		N		N		N			N	N	N	KILL
+04-sim-multilevel_chains	x86_64		16-256		N		N		N			N	N	N	KILL
+04-sim-multilevel_chains	x86_64		258-350		N		N		N			N	N	N	KILL
 
 test type: bpf-sim-fuzz
 
