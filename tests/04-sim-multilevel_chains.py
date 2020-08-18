@@ -30,7 +30,7 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    f.add_rule(ALLOW, "open")
+    f.add_rule(ALLOW, "openat")
     f.add_rule(ALLOW, "close")
     f.add_rule(ALLOW, "read",
                Arg(0, EQ, sys.stdin.fileno()),

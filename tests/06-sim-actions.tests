@@ -11,15 +11,17 @@ test type: bpf-sim
 06-sim-actions	all		read		4		0x856B008	80	N	N	N	ALLOW
 06-sim-actions	all		write		1		0x856B008	N	N	N	N	ERRNO(1)
 06-sim-actions	all		close		4		N		N	N	N	N	TRAP
-06-sim-actions	all,-aarch64	open		0x856B008	4		N	N	N	N	TRACE(1234)
-06-sim-actions	all,-aarch64	stat		N		N		N	N	N	N	KILL_PROCESS
+06-sim-actions	all		openat		0		0x856B008	4	N	N	N	TRACE(1234)
+06-sim-actions	all		fstat		N		N		N	N	N	N	KILL_PROCESS
 06-sim-actions	all		rt_sigreturn	N		N		N	N	N	N	LOG
 06-sim-actions	x86		0-2		N		N		N	N	N	N	KILL
-06-sim-actions	x86		7-105		N		N		N	N	N	N	KILL
-06-sim-actions	x86		107-172		N		N		N	N	N	N	KILL
-06-sim-actions	x86		174-350		N		N		N	N	N	N	KILL
-06-sim-actions	x86_64		5-14		N		N		N	N	N	N	KILL
-06-sim-actions	x86_64		16-350		N		N		N	N	N	N	KILL
+06-sim-actions	x86		7-107		N		N		N	N	N	N	KILL
+06-sim-actions	x86		109-172		N		N		N	N	N	N	KILL
+06-sim-actions	x86		174-294		N		N		N	N	N	N	KILL
+06-sim-actions	x86		296-350		N		N		N	N	N	N	KILL
+06-sim-actions	x86_64		6-14		N		N		N	N	N	N	KILL
+06-sim-actions	x86_64		16-256		N		N		N	N	N	N	KILL
+06-sim-actions	x86_64		258-350		N		N		N	N	N	N	KILL
 
 test type: bpf-sim-fuzz
 
