@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 0);
 	if (rc != 0)
 		goto out;
 
