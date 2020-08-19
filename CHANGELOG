@@ -2,6 +2,11 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.4.4 - August 21, 2020
+- Update the syscall table for Linux v5.8-rc7
+- Fix double free when BPF generation fails
+- Add aarch64 support for clone3, getrlimit, and setrlimit
+
 * Version 2.4.3 - March 4, 2020
 - Add list of authorized release signatures to README.md
 - Fix multiplexing issue with s390/s390x shm* syscalls
