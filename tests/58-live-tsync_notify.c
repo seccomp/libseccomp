@@ -21,6 +21,7 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <asm/unistd.h>
 #include <unistd.h>
 #include <seccomp.h>
 #include <signal.h>
@@ -30,15 +31,15 @@
 
 #include "util.h"
 
-#define MAGIC 0x1122334455667788UL
-
 int main(int argc, char *argv[])
 {
 	int rc, fd = -1, status;
 	struct seccomp_notif *req = NULL;
 	struct seccomp_notif_resp *resp = NULL;
 	scmp_filter_ctx ctx = NULL;
-	pid_t pid = 0;
+	pid_t pid = 0, magic;
+
+	magic = getpid();
 
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 
 	pid = fork();
 	if (pid == 0)
-		exit(syscall(SCMP_SYS(getpid)) != MAGIC);
+		exit(syscall(__NR_getpid) != magic);
 
 	rc = seccomp_notify_alloc(&req, &resp);
 	if (rc)
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
 	rc = seccomp_notify_receive(fd, req);
 	if (rc)
 		goto out;
-	if (req->data.nr != SCMP_SYS(getpid)) {
+	if (req->data.nr != __NR_getpid) {
 		rc = -EFAULT;
 		goto out;
 	}
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
 		goto out;
 
 	resp->id = req->id;
-	resp->val = MAGIC;
+	resp->val = magic;
 	resp->error = 0;
 	resp->flags = 0;
 	rc = seccomp_notify_respond(fd, resp);
