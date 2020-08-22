@@ -116,7 +116,7 @@ int arch_valid(uint32_t arch)
 
 /**
  * Lookup the architecture definition
- * @param token the architecure token
+ * @param token the architecture token
  *
  * Return the matching architecture definition, returns NULL on failure.
  *
@@ -169,7 +169,7 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 
 /**
  * Lookup the architecture definition by name
- * @param arch_name the architecure name
+ * @param arch_name the architecture name
  *
  * Return the matching architecture definition, returns NULL on failure.
  *
@@ -328,8 +328,8 @@ const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
  * @param arch the architecture definition
  * @param syscall the syscall number
  *
- * Translate the syscall number, in the context of the native architecure, to
- * the provided architecure.  Returns zero on success, negative values on
+ * Translate the syscall number, in the context of the native architecture, to
+ * the provided architecture.  Returns zero on success, negative values on
  * failure.
  *
  */

@@ -24,7 +24,7 @@
 #endif
 
 /*
- * psuedo syscall definitions
+ * pseudo syscall definitions
  */
 
 /* socket syscalls */

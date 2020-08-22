@@ -1058,7 +1058,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 		free(col->filters);
 	col->filters = NULL;
 
-	/* set the endianess to undefined */
+	/* set the endianness to undefined */
 	col->endian = 0;
 
 	/* set the default attribute values */
@@ -1222,7 +1222,7 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 	unsigned int iter_a, iter_b;
 	struct db_filter **dbs;
 
-	/* verify that the endianess is a match */
+	/* verify that the endianness is a match */
 	if (col_dst->endian != col_src->endian)
 		return -EDOM;
 

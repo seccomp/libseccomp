@@ -91,7 +91,7 @@ struct seccomp_data {
 /* rename some of the socket filter types to make more sense */
 typedef struct sock_filter bpf_instr_raw;
 
-/* no new privs defintions */
+/* no new privs definitions */
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS		38
 #endif

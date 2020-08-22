@@ -800,11 +800,11 @@ int seccomp_notify_fd(const scmp_filter_ctx ctx);
 int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd);
 
 /**
- * Generate seccomp Berkley Packet Filter (BPF) code and export it to a file
+ * Generate seccomp Berkeley Packet Filter (BPF) code and export it to a file
  * @param ctx the filter context
  * @param fd the destination fd
  *
- * This function generates seccomp Berkley Packer Filter (BPF) code and writes
+ * This function generates seccomp Berkeley Packer Filter (BPF) code and writes
  * it to the given fd.  Returns zero on success, negative values on failure.
  *
  */

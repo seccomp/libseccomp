@@ -205,11 +205,11 @@ static struct bpf_blk *_hsh_remove(struct bpf_state *state, uint64_t h_val);
 static struct bpf_blk *_hsh_find(const struct bpf_state *state, uint64_t h_val);
 
 /**
- * Convert a 16-bit host integer into the target's endianess
+ * Convert a 16-bit host integer into the target's endianness
  * @param arch the architecture definition
  * @param val the 16-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 static uint16_t _htot16(const struct arch_def *arch, uint16_t val)
@@ -221,11 +221,11 @@ static uint16_t _htot16(const struct arch_def *arch, uint16_t val)
 }
 
 /**
- * Convert a 32-bit host integer into the target's endianess
+ * Convert a 32-bit host integer into the target's endianness
  * @param arch the architecture definition
  * @param val the 32-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 static uint32_t _htot32(const struct arch_def *arch, uint32_t val)
@@ -1303,7 +1303,7 @@ static inline bool _skip_syscall(struct bpf_state *state,
 	if (!syscall->valid)
 		return true;
 
-	/* psuedo-syscalls should not be added to the filter unless explicity
+	/* psuedo-syscalls should not be added to the filter unless explicitly
 	 * requested via SCMP_FLTATR_API_TSKIP
 	 */
 	if (((int)syscall->num < 0) &&
@@ -1662,7 +1662,7 @@ out:
  * @param db_secondary the secondary DB
  *
  * Generate the BPF instruction block for the given filter DB(s)/architecture(s)
- * and return a pointer to the block on succes, NULL on failure.  The resulting
+ * and return a pointer to the block on success, NULL on failure.  The resulting
  * block assumes that the architecture token has already been loaded into the
  * BPF accumulator.
  *

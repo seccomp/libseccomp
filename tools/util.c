@@ -88,11 +88,11 @@
 uint32_t arch = ARCH_NATIVE;
 
 /**
- * Convert a 16-bit target integer into the host's endianess
+ * Convert a 16-bit target integer into the host's endianness
  * @param arch_token the architecture token
  * @param val the 16-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 uint16_t ttoh16(uint32_t arch_token, uint16_t val)
@@ -104,11 +104,11 @@ uint16_t ttoh16(uint32_t arch_token, uint16_t val)
 }
 
 /**
- * Convert a 32-bit target integer into the host's endianess
+ * Convert a 32-bit target integer into the host's endianness
  * @param arch_token the architecture token
  * @param val the 32-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 uint32_t ttoh32(uint32_t arch_token, uint32_t val)
@@ -120,11 +120,11 @@ uint32_t ttoh32(uint32_t arch_token, uint32_t val)
 }
 
 /**
- * Convert a 32-bit host integer into the target's endianess
+ * Convert a 32-bit host integer into the target's endianness
  * @param arch_token the architecture token
  * @param val the 32-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 uint32_t htot32(uint32_t arch_token, uint32_t val)
@@ -136,11 +136,11 @@ uint32_t htot32(uint32_t arch_token, uint32_t val)
 }
 
 /**
- * Convert a 64-bit host integer into the target's endianess
+ * Convert a 64-bit host integer into the target's endianness
  * @param arch_token the architecture token
  * @param val the 64-bit integer
  *
- * Convert the endianess of the supplied value and return it to the caller.
+ * Convert the endianness of the supplied value and return it to the caller.
  *
  */
 uint64_t htot64(uint32_t arch_token, uint64_t val)

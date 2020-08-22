@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* adjust the endianess of sys_data to match the target */
+	/* adjust the endianness of sys_data to match the target */
 	sys_data.nr = htot32(arch, sys_data.nr);
 	sys_data.arch = htot32(arch, arch);
 	sys_data.instruction_pointer = htot64(arch,
