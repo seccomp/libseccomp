@@ -28,6 +28,8 @@ CHK_C_LIST="include/seccomp.h.in \
 	    tools/*.c tools/*.h"
 CHK_C_EXCLUDE="src/syscalls.perf.c"
 
+CHK_SPELL_EXCLUDE_WORDS=""
+
 ####
 # functions
 
@@ -60,13 +62,23 @@ EOF
 }
 
 #
+# Spellcheck source code
+#
+function tool_spell_check() {
+	local tfile
+
+	tfile=$(mktemp -t check-syntax-XXXXXX)
+	cat - > $tfile
+	codespell -q 16 -d -w -L "$CHK_SPELL_EXCLUDE_WORDS" $tfile
+	cat $tfile
+	rm -f $tfile
+}
+
+#
 # Generate a properly formatted C source/header file
 #
-# Arguments:
-#     1    Source file
-#
 function tool_c_style() {
-	astyle --options=none --lineend=linux --mode=c \
+	cat - | astyle --options=none --lineend=linux --mode=c \
 		--style=linux \
 		--indent=force-tab=8 \
 		--indent-preprocessor \
@@ -77,7 +89,17 @@ function tool_c_style() {
 		--align-pointer=name \
 		--align-reference=name \
 		--max-code-length=80 \
-		--break-after-logical < "$1"
+		--break-after-logical
+}
+
+#
+# Generate a properly formatted and spellchecked C source/header file
+#
+# Arguments:
+#     1    Source file
+#
+function tool_c_ideal() {
+	cat "$1" | tool_spell_check | tool_c_style
 }
 
 #
@@ -89,7 +111,7 @@ function tool_c_style() {
 function tool_c_style_check() {
 	[[ -z "$1" || ! -r "$1" ]] && return
 
-	tool_c_style "$1" | diff -pu --label="$1.orig" "$1" --label="$1" -
+	tool_c_ideal "$1" | diff -pu --label="$1.orig" "$1" --label="$1" -
 }
 
 #
@@ -102,7 +124,7 @@ function tool_c_style_fix() {
 	[[ -z "$1" || ! -r "$1" ]] && return
 
 	tmp="$(mktemp --tmpdir=$(dirname "$1"))"
-	tool_c_style "$1" > "$tmp"
+	tool_c_ideal "$1" > "$tmp"
 	mv "$tmp" "$1"
 }
 
@@ -132,6 +154,7 @@ function fix_c() {
 # main
 
 verify_deps astyle
+verify_deps codespell
 
 opt_fix=0
 
