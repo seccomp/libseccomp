@@ -40,6 +40,8 @@ addons:
       - clang
       - lcov
       - gperf
+      - astyle
+      - codespell
 
 env:
   global:
