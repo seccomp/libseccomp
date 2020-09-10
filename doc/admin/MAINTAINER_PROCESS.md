@@ -89,6 +89,24 @@ there is no requirement to do so.
 Despite the term "moderator" the list is currently unmoderated and should
 remain the way.
 
+### Handling Inappropriate Community Behavior
+
+The libseccomp project community is relatively small, and almost always
+respectful and considerate.  However, there have been some limited cases of
+inappropriate behavior and it is the responsibility of the maintainers to deal
+with it accordingly.
+
+As mentioned above, the maintainers are encouraged to communicate with each
+other, and this communication is very important in this case.  When
+inappropriate behavior is identified in the project (e.g. mailing list, GitHub,
+etc.) the maintainers should talk with each other as well as the responsible
+individual to try and correct the behavior.  If the individual continues to act
+inappropriately the maintainers can block the individual from the project using
+whatever means are available.  This should only be done as a last resort, and
+with the agreement of all the maintainers.  In cases where a quick response is
+necessary, a maintainer can unilaterally block an individual, but the block
+should be reviewed by all the other maintainers soon afterwards.
+
 ### New Project Releases
 
 The libseccomp release process is documented in the RELEASE_PROCESS.md

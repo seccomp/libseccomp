@@ -1,4 +1,4 @@
-How to Submit Patches to the libseccomp Project
+How to Contribute to the libseccomp Project
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
@@ -7,6 +7,20 @@ libseccomp project.  It is not perfect, and there will always be exceptions
 to the rules described here, but by following the instructions below you
 should have a much easier time getting your work merged with the upstream
 project.
+
+## Interacting with the Community
+
+> "Be excellent to each other." - *Bill S. Preston, Esq.*
+
+The libseccomp project aims to be a welcoming place and we ask that anyone who
+interacts with the project, and the greater community, treat each other with
+dignity and respect.  Individuals who do not behave in such a manner will be
+warned and asked to adjust their behavior; in extreme cases the individual
+may be blocked from the project.
+
+Examples of inappropriate behavior includes: profane, abusive, or prejudicial
+language directed at another person, vandalism (e.g. GitHub issue/PR "litter"),
+or spam.
 
 ## Test Your Code Using Existing Tests
 
