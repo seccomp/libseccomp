@@ -1023,7 +1023,7 @@ cdef class SyscallFilter:
         file - the output file
 
         Description:
-        Output the filter in Berkley Packet Filter (BPF) to the given
+        Output the filter in Berkeley Packet Filter (BPF) to the given
         file.  The output is identical to what is loaded into the
         Linux Kernel.
         """
