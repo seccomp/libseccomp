@@ -74,14 +74,16 @@ verify detached signatures using the following command:
 
 	# gpg --verify file.asc file
 
-At present, only the following keys are authorized to sign official libseccomp
-releases:
+At present, only the following keys, specified via the fingerprints below, are
+authorized to sign official libseccomp releases:
 
 	Paul Moore <paul@paul-moore.com>
 	7100 AADF AE6E 6E94 0D2E  0AD6 55E4 5A5A E8CA 7C8A
 
 	Tom Hromatka <tom.hromatka@oracle.com>
 	47A6 8FCE 37C7 D702 4FD6  5E11 356C E62C 2B52 4099
+
+More information on GnuPG can be found at their website, https://gnupg.org.
 
 ## Building and Installing the Library
 
