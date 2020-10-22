@@ -209,6 +209,22 @@ matches the filter rule but the syscall will be logged.
 .B SCMP_ACT_ALLOW
 The seccomp filter will have no effect on the thread calling the syscall if it
 matches the filter rule.
+.TP
+.B SCMP_ACT_NOTIFY
+A monitoring process will be notified when a process running the seccomp
+filter calls a syscall that matches the filter rule.  The process that invokes
+the syscall waits in the kernel until the monitoring process has responded via
+.B seccomp_notify_respond(3)
+\&.
+
+When a filter utilizing
+.B SCMP_ACT_NOTIFY
+is loaded into the kernel, the kernel generates a notification fd that must be
+used to communicate between the monitoring process and the process(es) being
+filtered.  See
+.B seccomp_notif_fd(3)
+for more information.
+
 .P
 Valid comparison
 .I op
