@@ -2,6 +2,13 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.5.1 - November 20, 2020
+- Fix a bug where seccomp_load() could only be called once
+- Change the notification fd handling to only request a notification fd if
+  the filter has a _NOTIFY action
+- Add documentation about SCMP_ACT_NOTIFY to the seccomp_add_rule(3) manpage
+- Clarify the maintainers' GPG keys
+
 * Version 2.5.0 - July 20, 2020
 - Add support for the seccomp user notifications, see the
   seccomp_notify_alloc(3), seccomp_notify_receive(3), seccomp_notify_respond(3)
