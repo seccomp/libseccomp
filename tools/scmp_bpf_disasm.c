@@ -294,14 +294,13 @@ static void bpf_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 static int bpf_decode(FILE *file)
 {
 	unsigned int line = 0;
-	size_t len;
 	bpf_instr_raw bpf;
 
 	/* header */
 	printf(" line  OP   JT   JF   K\n");
 	printf("=================================\n");
 
-	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
+	while (fread(&bpf, sizeof(bpf), 1, file)) {
 		/* convert the bpf statement */
 		bpf.code = ttoh16(arch, bpf.code);
 		bpf.k = ttoh32(arch, bpf.k);
@@ -430,7 +429,6 @@ static void bpf_dot_decode_args(const bpf_instr_raw *bpf, unsigned int line)
 static int bpf_dot_decode(FILE *file)
 {
 	unsigned int line = 0;
-	size_t len;
 	bpf_instr_raw bpf;
 	int prev_class = 0;
 
@@ -438,7 +436,7 @@ static int bpf_dot_decode(FILE *file)
 	printf("digraph {\n");
 	printf("\tstart[shape=\"box\", style=rounded];\n");
 
-	while ((len = fread(&bpf, sizeof(bpf), 1, file))) {
+	while (fread(&bpf, sizeof(bpf), 1, file)) {
 		/* convert the bpf statement */
 		bpf.code = ttoh16(arch, bpf.code);
 		bpf.k = ttoh32(arch, bpf.k);
