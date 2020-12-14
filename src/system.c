@@ -535,10 +535,20 @@ int sys_notify_respond(int fd, struct seccomp_notif_resp *resp)
  */
 int sys_notify_id_valid(int fd, uint64_t id)
 {
+	int rc;
 	if (state.sup_user_notif <= 0)
 		return -EOPNOTSUPP;
 
-	if (ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID, &id) < 0)
+	rc = ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID, &id);
+	if (rc < 0 && errno == EINVAL)
+		/* It is possible that libseccomp was built against newer kernel
+		 * headers than the kernel it is running on. If so, the older
+		 * runtime kernel may not support the "fixed"
+		 * SECCOMP_IOCTL_NOTIF_ID_VALID ioctl number which was introduced in
+		 * kernel commit 47e33c05f9f0 ("seccomp: Fix ioctl number for
+		 * SECCOMP_IOCTL_NOTIF_ID_VALID"). Try the old value. */
+		rc = ioctl(fd, SECCOMP_IOCTL_NOTIF_ID_VALID_WRONG_DIR, &id);
+	if (rc < 0)
 		return -ENOENT;
 	return 0;
 }
