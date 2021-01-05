@@ -89,12 +89,13 @@ function verify_deps() {
 #
 function usage() {
 cat << EOF
-usage: regression [-h] [-v] [-m MODE] [-a] [-b BATCH_NAME] [-l <LOG>]
-                  [-s SINGLE_TEST] [-t <TEMP_DIR>] [-T <TEST_TYPE>]
+usage: regression [-h] [-v] [-j JOBS] [-m MODE] [-a] [-b BATCH_NAME]
+                  [-l <LOG>] [-s SINGLE_TEST] [-t <TEMP_DIR>] [-T <TEST_TYPE>]
 
 libseccomp regression test automation script
 optional arguments:
   -h             show this help message and exit
+  -j JOBS        run up to JOBS test jobs in parallel
   -m MODE        specified the test mode [c (default), python]
                   can also be set via LIBSECCOMP_TSTCFG_MODE_LIST env variable
   -a             specifies all tests are to be run
@@ -881,12 +882,114 @@ function run_test() {
 }
 
 #
+# Run the requested test batch
+#
+# Arguments:
+#     1    Batch name
+#
+function run_test_batch() {
+	local testnum=1
+	local batch_name=$1
+
+	# open temporary file
+	if [[ -n $tmpdir ]]; then
+		tmpfile=$(mktemp -t regression_XXXXXX --tmpdir=$tmpdir)
+	else
+		tmpfile=$(mktemp -t regression_XXXXXX)
+	fi
+
+	# reset the stats
+	stats_all=0
+	stats_skipped=0
+	stats_success=0
+	stats_failure=0
+	stats_error=0
+
+	# print a test batch header
+	echo " batch name: $batch_name" >&$logfd
+
+	# loop through each line and run the requested tests
+	while read line; do
+		# strip whitespace, comments, and blank lines
+		line=$(echo "$line" | \
+			sed -e 's/^[\t ]*//;s/[\t ]*$//;' | \
+			sed -e '/^[#].*$/d;/^$/d')
+		if [[ -z $line ]]; then
+			continue
+		fi
+
+		if [[ $line =~ ^"test type": ]]; then
+			test_type=$(echo "$line" | \
+					sed -e 's/^test type: //;')
+			# print a test mode and type header
+			echo " test mode:  $mode" >&$logfd
+			echo " test type:  $test_type" >&$logfd
+			continue
+		fi
+
+		if [[ ${single_list[@]} ]]; then
+			for i in ${single_list[@]}; do
+				if [ $i -eq $testnum ]; then
+					# we're running a single test
+					run_test "$batch_name" \
+							$testnum "$line" \
+							"$test_type"
+				fi
+			done
+		else
+			# we're running a test from a batch
+			run_test "$batch_name" \
+					$testnum "$line" "$test_type"
+		fi
+		testnum=$(($testnum+1))
+	done < "$file"
+
+
+	# dump our stats
+	local stats=$batch_name.$mode.stats
+	> $stats
+	echo -n "$stats_all $stats_skipped $stats_success " >> $stats
+	echo -n "$stats_failure $stats_error " >> $stats
+	echo "" >> $stats
+
+	# cleanup the temporary file we created
+	rm -f $tmpfile
+}
+
+#
+# Run the requested test batch
+#
+# Arguments:
+#     1    Log file
+#     2    PID to watch
+#
+function tail_log() {
+	local log=$1
+	local pid=$2
+
+	# dump the output
+	tail -n +0 --pid=$pid -f $log
+
+	# accumulate the stats
+	local stats=$(echo $log | sed 's/\.log$/.stats/')
+	stats_all=$(( $stats_all + $(awk '{ print $1 }' $stats) ))
+	stats_skipped=$(( $stats_skipped + $(awk '{ print $2 }' $stats) ))
+	stats_success=$(( $stats_success + $(awk '{ print $3 }' $stats) ))
+	stats_failure=$(( $stats_failure + $(awk '{ print $4 }' $stats) ))
+	stats_error=$(( $stats_error + $(awk '{ print $5 }' $stats) ))
+}
+
+#
 # Run the requested tests
 #
 function run_tests() {
+	local job_cnt=0
+	local tail_cnt=0
+	local -a job_pids
+	local -a job_logs
+
 	# loop through all test files
 	for file in $basedir/*.tests; do
-		local testnum=1
 		local batch_requested=false
 		local batch_name=""
 
@@ -906,44 +1009,22 @@ function run_tests() {
 			fi
 		fi
 
-		# print a test batch header
-		echo " batch name: $batch_name" >&$logfd
+		# run the test batch
+		run_test_batch $batch_name >& $batch_name.$mode.log &
+		job_pids[job_cnt]=$!
+		job_logs[job_cnt]=$batch_name.$mode.log
+		job_cnt=$(( $job_cnt + 1 ))
 
-		# loop through each line and run the requested tests
-		while read line; do
-			# strip whitespace, comments, and blank lines
-			line=$(echo "$line" | \
-			       sed -e 's/^[\t ]*//;s/[\t ]*$//;' | \
-			       sed -e '/^[#].*$/d;/^$/d')
-			if [[ -z $line ]]; then
-				continue
-			fi
+		# output the next log if the job queue is full
+		if [[ $(jobs | wc -l) -ge $jobs ]]; then
+			tail_log ${job_logs[$tail_cnt]} ${job_pids[$tail_cnt]}
+			tail_cnt=$(( $tail_cnt + 1 ))
+		fi
+	done
 
-			if [[ $line =~ ^"test type": ]]; then
-				test_type=$(echo "$line" | \
-					    sed -e 's/^test type: //;')
-				# print a test mode and type header
-				echo " test mode:  $mode" >&$logfd
-				echo " test type:  $test_type" >&$logfd
-				continue
-			fi
-
-			if [[ ${single_list[@]} ]]; then
-				for i in ${single_list[@]}; do
-					if [ $i -eq $testnum ]; then
-						# we're running a single test
-						run_test "$batch_name" \
-							 $testnum "$line" \
-							 "$test_type"
-					fi
-				done
-			else
-				# we're running a test from a batch
-				run_test "$batch_name" \
-					 $testnum "$line" "$test_type"
-			fi
-			testnum=$(($testnum+1))
-		done < "$file"
+	# output any leftovers
+	for i in $(seq $tail_cnt $(( $job_cnt - 1 ))); do
+		tail_log ${job_logs[$i]} ${job_pids[$i]}
 	done
 }
 
@@ -970,6 +1051,7 @@ tmpfile=""
 tmpdir=""
 type=
 verbose=
+jobs=1
 stats_all=0
 stats_skipped=0
 stats_success=0
@@ -983,7 +1065,7 @@ basedir=$(dirname $0)
 pid=$$
 
 # parse the command line
-while getopts "ab:gl:m:s:t:T:vh" opt; do
+while getopts "ab:gj:l:m:s:t:T:vh" opt; do
 	case $opt in
 	a)
 		runall=1
@@ -991,6 +1073,13 @@ while getopts "ab:gl:m:s:t:T:vh" opt; do
 	b)
 		batch_list[batch_count]="$OPTARG"
 		batch_count=$(($batch_count+1))
+		;;
+	j)
+		if [[ $OPTARG -lt 1 ]]; then
+			jobs=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
+		else
+			jobs=$OPTARG
+		fi
 		;;
 	l)
 		logfile="$OPTARG"
@@ -1062,17 +1151,13 @@ fi
 
 # open log file for append (default to stdout)
 if [[ -n $logfile ]]; then
+	# force single threaded to preserve the output
+	jobs=1
+
 	logfd=3
 	exec 3>>"$logfile"
 else
 	logfd=1
-fi
-
-# open temporary file
-if [[ -n $tmpdir ]]; then
-	tmpfile=$(mktemp -t regression_XXXXXX --tmpdir=$tmpdir)
-else
-	tmpfile=$(mktemp -t regression_XXXXXX)
 fi
 
 # determine the current system's architecture
@@ -1093,7 +1178,6 @@ echo " tests errored: $stats_error" >&$logfd
 echo "============================================================" >&$logfd
 
 # cleanup and exit
-rm -f $tmpfile
 rc=0
 [[ $stats_failure -gt 0 ]] && rc=$(($rc + 2))
 [[ $stats_error -gt 0 ]] && rc=$(($rc + 4))
