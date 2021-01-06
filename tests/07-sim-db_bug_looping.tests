@@ -15,7 +15,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-07-sim-db_bug_looping	50
+07-sim-db_bug_looping	5
 
 test type: bpf-valgrind
 

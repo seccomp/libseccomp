@@ -40,7 +40,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-12-sim-basic_masked_ops	50
+12-sim-basic_masked_ops	5
 
 test type: bpf-valgrind
 

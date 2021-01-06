@@ -22,7 +22,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname			StressCount
-25-sim-multilevel_chains_adv	50
+25-sim-multilevel_chains_adv	5
 
 test type: bpf-valgrind
 

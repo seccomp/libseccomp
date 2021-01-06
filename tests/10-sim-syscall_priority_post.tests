@@ -18,7 +18,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname			StressCount
-10-sim-syscall_priority_post	50
+10-sim-syscall_priority_post	5
 
 test type: bpf-valgrind
 

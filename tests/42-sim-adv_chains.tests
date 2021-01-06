@@ -45,8 +45,8 @@ test type: bpf-sim
 
 test type: bpf-sim-fuzz
 
-# Testname			StressCount
-42-sim-adv_chains	50
+# Testname		StressCount
+42-sim-adv_chains	5
 
 test type: bpf-valgrind
 

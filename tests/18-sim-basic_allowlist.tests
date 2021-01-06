@@ -24,7 +24,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-18-sim-basic_allowlist	50
+18-sim-basic_allowlist	5
 
 test type: bpf-valgrind
 

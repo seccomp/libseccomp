@@ -16,7 +16,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname		StressCount
-27-sim-bpf_blk_state	50
+27-sim-bpf_blk_state	5
 
 test type: bpf-valgrind
 

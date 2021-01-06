@@ -21,7 +21,7 @@ test type: bpf-sim
 test type: bpf-sim-fuzz
 
 # Testname	StressCount
-14-sim-reset	50
+14-sim-reset	5
 
 test type: bpf-valgrind
 

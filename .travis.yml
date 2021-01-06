@@ -69,7 +69,7 @@ install:
 script:
   - ./configure --enable-python
   - make check-build
-  - LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
+  - make check
   - LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
   - |
     if [ $TRAVIS_CPU_ARCH == "amd64" -o -x scan-build ]; then
