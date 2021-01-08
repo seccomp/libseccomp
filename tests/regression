@@ -96,6 +96,7 @@ libseccomp regression test automation script
 optional arguments:
   -h             show this help message and exit
   -j JOBS        run up to JOBS test jobs in parallel
+                  can also be set via LIBSECCOMP_TSTCFG_JOBS env variable
   -m MODE        specified the test mode [c (default), python]
                   can also be set via LIBSECCOMP_TSTCFG_MODE_LIST env variable
   -a             specifies all tests are to be run
@@ -1075,11 +1076,7 @@ while getopts "ab:gj:l:m:s:t:T:vh" opt; do
 		batch_count=$(($batch_count+1))
 		;;
 	j)
-		if [[ $OPTARG -lt 1 ]]; then
-			jobs=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
-		else
-			jobs=$OPTARG
-		fi
+		jobs=$OPTARG
 		;;
 	l)
 		logfile="$OPTARG"
@@ -1120,6 +1117,12 @@ done
 
 # use mode list from environment if provided
 [[ -z $mode_list && -n $LIBSECCOMP_TSTCFG_MODE_LIST ]] && mode_list=$LIBSECCOMP_TSTCFG_MODE_LIST
+
+# use job count from environment if provided and do some sanity checking
+[[ -n $LIBSECCOMP_TSTCFG_JOBS ]] && jobs=$LIBSECCOMP_TSTCFG_JOBS
+if [[ $jobs -lt 1 ]]; then
+	jobs=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
+fi
 
 # determine the mode test automatically
 if [[ -z $mode_list ]]; then
