@@ -35,6 +35,7 @@
 #include "arch-x32.h"
 #include "arch-arm.h"
 #include "arch-aarch64.h"
+#include "arch-loongarch64.h"
 #include "arch-mips.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
@@ -63,6 +64,8 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 const struct arch_def *arch_def_native = &arch_def_arm;
 #elif __aarch64__
 const struct arch_def *arch_def_native = &arch_def_aarch64;
+#elif __loongarch64
+const struct arch_def *arch_def_native = &arch_def_loongarch64;
 #elif __mips__ && _MIPS_SIM == _MIPS_SIM_ABI32
 #if __MIPSEB__
 const struct arch_def *arch_def_native = &arch_def_mips;
@@ -141,6 +144,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_arm;
 	case SCMP_ARCH_AARCH64:
 		return &arch_def_aarch64;
+	case SCMP_ARCH_LOONGARCH64:
+		return &arch_def_loongarch64;
 	case SCMP_ARCH_MIPS:
 		return &arch_def_mips;
 	case SCMP_ARCH_MIPSEL:
@@ -197,6 +202,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_arm;
 	else if (strcmp(arch_name, "aarch64") == 0)
 		return &arch_def_aarch64;
+	else if (strcmp(arch_name, "loongarch64") == 0)
+		return &arch_def_loongarch64;
 	else if (strcmp(arch_name, "mips") == 0)
 		return &arch_def_mips;
 	else if (strcmp(arch_name, "mipsel") == 0)

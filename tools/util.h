@@ -38,6 +38,17 @@
 #endif /* AUDIT_ARCH_AARCH64 */
 
 /**
+ * The 64-bit LoongArch architecture tokens
+ */
+/* 64-bit LoongArch audit support is upstream as of 5.19-rc1 */
+#ifndef AUDIT_ARCH_LOONGARCH64
+#ifndef EM_LOONGARCH
+#define EM_LOONGARCH		258
+#endif /* EM_LOONGARCH */
+#define AUDIT_ARCH_LOONGARCH64	(EM_LOONGARCH|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_LOONGARCH64 */
+
+/**
  * The MIPS architecture tokens
  */
 #ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32

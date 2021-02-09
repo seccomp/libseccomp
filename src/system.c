@@ -128,6 +128,7 @@ int sys_chk_seccomp_syscall(void)
 	case SCMP_ARCH_X86_64:
 	case SCMP_ARCH_ARM:
 	case SCMP_ARCH_AARCH64:
+	case SCMP_ARCH_LOONGARCH64:
 	case SCMP_ARCH_PPC64:
 	case SCMP_ARCH_PPC64LE:
 	case SCMP_ARCH_S390:

@@ -15,6 +15,7 @@
 #include "arch-aarch64.h"
 #include "arch-arm.h"
 #include "arch.h"
+#include "arch-loongarch64.h"
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-mips.h"
@@ -50,6 +51,9 @@ struct arch_syscall_table {
 	enum scmp_kver arm_kver;
 	int aarch64;
 	enum scmp_kver aarch64_kver;
+
+	int loongarch64;
+	enum scmp_kver loongarch64_kver;
 
 	int mips;
 	enum scmp_kver mips_kver;
