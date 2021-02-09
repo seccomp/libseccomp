@@ -89,6 +89,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_AARCH64);
 	if (rc < 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_LOONGARCH64);
+	if (rc < 0)
+		goto out;
 	rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_OPTIMIZE, 2);
 	if (rc < 0)
 		goto out;

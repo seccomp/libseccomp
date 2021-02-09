@@ -38,7 +38,7 @@ def test(args):
     f.add_rule(ERRNO(errno.EPERM), "write")
     f.add_rule(TRAP, "close")
     f.add_rule(TRACE(1234), "openat")
-    f.add_rule(KILL_PROCESS, "fstat")
+    f.add_rule(KILL_PROCESS, "fstatfs")
     return f
 
 args = util.get_opt()

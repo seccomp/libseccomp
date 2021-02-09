@@ -300,6 +300,103 @@ if ($arch == 3221225655)
                         action KILL;
   # default action
   action ALLOW;
+# filter for arch loongarch64 (3221225730)
+if ($arch == 3221225730)
+  # filter for syscall "open" (4294957130) [priority: 65535]
+  if ($syscall == 4294957130)
+    action KILL;
+  # filter for syscall "fstat" (4294957051) [priority: 65535]
+  if ($syscall == 4294957051)
+    action KILL_PROCESS;
+  # filter for syscall "exit_group" (94) [priority: 65535]
+  if ($syscall == 94)
+    action LOG;
+  # filter for syscall "exit" (93) [priority: 65535]
+  if ($syscall == 93)
+    action TRACE(1);
+  # filter for syscall "close" (57) [priority: 65535]
+  if ($syscall == 57)
+    action ERRNO(1);
+  # filter for syscall "write" (64) [priority: 65527]
+  if ($syscall == 64)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+      else
+        if ($a1.hi32 > 0)
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 > 1)
+            else
+              if ($a2.hi32 > 0)
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 >= 2)
+                  else
+                    action TRAP;
+                else
+                  action TRAP;
+          else
+            if ($a2.hi32 > 0)
+            else
+              if ($a2.hi32 == 0)
+                if ($a2.lo32 >= 2)
+                else
+                  action TRAP;
+              else
+                action TRAP;
+    else
+      if ($a1.hi32 > 0)
+      else
+        if ($a1.hi32 == 0)
+          if ($a1.lo32 > 1)
+          else
+            if ($a2.hi32 > 0)
+            else
+              if ($a2.hi32 == 0)
+                if ($a2.lo32 >= 2)
+                else
+                  action TRAP;
+              else
+                action TRAP;
+        else
+          if ($a2.hi32 > 0)
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 >= 2)
+              else
+                action TRAP;
+            else
+              action TRAP;
+  # filter for syscall "read" (63) [priority: 65525]
+  if ($syscall == 63)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # default action
+  action ALLOW;
 # filter for arch mipsel (1073741832)
 if ($arch == 1073741832)
   # filter for syscall "exit_group" (4246) [priority: 65535]

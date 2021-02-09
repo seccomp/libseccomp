@@ -15,12 +15,13 @@ test type: bpf-sim
 06-sim-actions	all		fstatfs		4		0x856B008	N	N	N	N	KILL_PROCESS
 06-sim-actions	all		rt_sigreturn	N		N		N	N	N	N	LOG
 06-sim-actions	x86		0-2		N		N		N	N	N	N	KILL
-06-sim-actions	x86		7-107		N		N		N	N	N	N	KILL
-06-sim-actions	x86		109-172		N		N		N	N	N	N	KILL
+06-sim-actions	x86		7-99		N		N		N	N	N	N	KILL
+06-sim-actions	x86		101-172		N		N		N	N	N	N	KILL
 06-sim-actions	x86		174-294		N		N		N	N	N	N	KILL
 06-sim-actions	x86		296-350		N		N		N	N	N	N	KILL
 06-sim-actions	x86_64		6-14		N		N		N	N	N	N	KILL
-06-sim-actions	x86_64		16-256		N		N		N	N	N	N	KILL
+06-sim-actions	x86_64		16-137		N		N		N	N	N	N	KILL
+06-sim-actions	x86_64		139-256		N		N		N	N	N	N	KILL
 06-sim-actions	x86_64		258-350		N		N		N	N	N	N	KILL
 
 test type: bpf-sim-fuzz

@@ -36,6 +36,7 @@ def test(args):
     f.add_arch(Arch("x32"))
     f.add_arch(Arch("arm"))
     f.add_arch(Arch("aarch64"))
+    f.add_arch(Arch("loongarch64"))
     f.add_arch(Arch("mipsel"))
     f.add_arch(Arch("mipsel64"))
     f.add_arch(Arch("mipsel64n32"))
