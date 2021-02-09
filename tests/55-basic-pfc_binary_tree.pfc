@@ -175,6 +175,93 @@ if ($arch == 3221225655)
       action ERRNO(16);
   # default action
   action ALLOW;
+# filter for arch loongarch64 (3221225730)
+if ($arch == 3221225730)
+  if ($syscall > 62)
+    if ($syscall > 214)
+      if ($syscall > 4294957051)
+        # filter for syscall "lstat" (4294957133) [priority: 65535]
+        if ($syscall == 4294957133)
+          action ERRNO(6);
+        # filter for syscall "open" (4294957130) [priority: 65535]
+        if ($syscall == 4294957130)
+          action ERRNO(2);
+        # filter for syscall "poll" (4294957127) [priority: 65535]
+        if ($syscall == 4294957127)
+          action ERRNO(7);
+        # filter for syscall "stat" (4294957122) [priority: 65535]
+        if ($syscall == 4294957122)
+          action ERRNO(4);
+      else # ($syscall <= 4294957051)
+        # filter for syscall "fstat" (4294957051) [priority: 65533]
+        if ($syscall == 4294957051)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 103)
+              action ERRNO(5);
+        # filter for syscall "mprotect" (226) [priority: 65533]
+        if ($syscall == 226)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 105)
+              action ERRNO(10);
+        # filter for syscall "mmap" (222) [priority: 65535]
+        if ($syscall == 222)
+          action ERRNO(9);
+        # filter for syscall "munmap" (215) [priority: 65535]
+        if ($syscall == 215)
+          action ERRNO(11);
+    else # ($syscall <= 214)
+      if ($syscall > 68)
+        # filter for syscall "brk" (214) [priority: 65535]
+        if ($syscall == 214)
+          action ERRNO(12);
+        # filter for syscall "rt_sigreturn" (139) [priority: 65535]
+        if ($syscall == 139)
+          action ERRNO(15);
+        # filter for syscall "rt_sigprocmask" (135) [priority: 65535]
+        if ($syscall == 135)
+          action ERRNO(14);
+        # filter for syscall "rt_sigaction" (134) [priority: 65535]
+        if ($syscall == 134)
+          action ERRNO(13);
+      else # ($syscall <= 68)
+        # filter for syscall "pwrite64" (68) [priority: 65531]
+        if ($syscall == 68)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 107)
+              if ($a1.hi32 == 0)
+                if ($a1.lo32 == 108)
+                  action ERRNO(18);
+        # filter for syscall "pread64" (67) [priority: 65533]
+        if ($syscall == 67)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 106)
+              action ERRNO(17);
+        # filter for syscall "write" (64) [priority: 65533]
+        if ($syscall == 64)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 102)
+              action ERRNO(1);
+        # filter for syscall "read" (63) [priority: 65531]
+        if ($syscall == 63)
+          if ($a0.hi32 == 0)
+            if ($a0.lo32 == 100)
+              if ($a1.hi32 == 0)
+                if ($a1.lo32 == 101)
+                  action ERRNO(0);
+  else # ($syscall <= 62)
+    # filter for syscall "lseek" (62) [priority: 65533]
+    if ($syscall == 62)
+      if ($a0.hi32 == 0)
+        if ($a0.lo32 == 104)
+          action ERRNO(8);
+    # filter for syscall "close" (57) [priority: 65535]
+    if ($syscall == 57)
+      action ERRNO(3);
+    # filter for syscall "ioctl" (29) [priority: 65535]
+    if ($syscall == 29)
+      action ERRNO(16);
+  # default action
+  action ALLOW;
 # invalid architecture action
 action KILL;
 #

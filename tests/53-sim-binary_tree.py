@@ -72,6 +72,7 @@ def test(args):
 
     f.remove_arch(Arch())
     f.add_arch(Arch("aarch64"))
+    f.add_arch(Arch("loongarch64"))
     f.add_arch(Arch("ppc64le"))
     f.add_arch(Arch("x86_64"))
 
