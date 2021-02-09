@@ -33,6 +33,7 @@ The libseccomp library currently supports the architectures listed below:
 * 64-bit x86 x32 ABI (x32)
 * 32-bit ARM EABI (arm)
 * 64-bit ARM (aarch64)
+* 64-bit LoongArch (loongarch64)
 * 32-bit MIPS (mips)
 * 32-bit MIPS little endian (mipsel)
 * 64-bit MIPS (mips64)
