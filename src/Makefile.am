@@ -32,6 +32,7 @@ SOURCES_ALL = \
 	arch-x32.h arch-x32.c \
 	arch-arm.h arch-arm.c \
 	arch-aarch64.h arch-aarch64.c \
+	arch-loongarch64.h arch-loongarch64.c \
 	arch-mips.h arch-mips.c \
 	arch-mips64.h arch-mips64.c \
 	arch-mips64n32.h arch-mips64n32.c \

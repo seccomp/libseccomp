@@ -307,6 +307,48 @@ function dump_lib_aarch64() {
 }
 
 #
+# Dump the loongarch64 syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_loongarch64() {
+	local sed_filter=""
+
+	sed_filter+='s/__NR3264_fadvise64/223/;'
+	sed_filter+='s/__NR3264_fcntl/25/;'
+	sed_filter+='s/__NR3264_fstatfs/44/;'
+	sed_filter+='s/__NR3264_ftruncate/46/;'
+	sed_filter+='s/__NR3264_lseek/62/;'
+	sed_filter+='s/__NR3264_mmap/222/;'
+	sed_filter+='s/__NR3264_sendfile/71/;'
+	sed_filter+='s/__NR3264_statfs/43/;'
+	sed_filter+='s/__NR3264_truncate/45/;'
+
+	gcc -E -dM -I$1/include/uapi \
+		-D__BITS_PER_LONG=64 \
+		-D__ARCH_WANT_SYS_CLONE \
+		-D__ARCH_WANT_SYS_CLONE3 \
+		$1/arch/loongarch/include/uapi/asm/unistd.h | \
+		grep "^#define __NR_" | \
+		sed '/__NR_syscalls/d' | \
+		sed '/__NR_arch_specific_syscall/d' | \
+		sed 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+\(.*\)/\1,\2/' | \
+		sed $sed_filter | sort
+}
+
+#
+# Dump the loongarch64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_loongarch64() {
+	dump_lib_arch loongarch64 | mangle_lib_syscall loongarch64
+}
+
+#
 # Dump the mips system syscall table
 #
 # Arguments:
@@ -619,6 +661,9 @@ function dump_sys() {
 	aarch64)
 		dump_sys_aarch64 "$2"
 		;;
+	loongarch64)
+		dump_sys_loongarch64 "$2"
+		;;
 	mips)
 		dump_sys_mips "$2"
 		;;
@@ -686,6 +731,9 @@ function dump_lib() {
 	aarch64)
 		dump_lib_aarch64
 		;;
+	loongarch64)
+		dump_lib_loongarch64
+		;;
 	mips)
 		dump_lib_mips
 		;;
@@ -750,6 +798,7 @@ function gen_csv() {
 	abi_list=""
 	abi_list+=" x86 x86_64 x32"
 	abi_list+=" arm aarch64"
+	abi_list+=" loongarch64"
 	abi_list+=" mips mips64 mips64n32"
 	abi_list+=" parisc parisc64"
 	abi_list+=" ppc ppc64"
@@ -861,6 +910,7 @@ if [[ $opt_arches == "" ]]; then
 	opt_arches=" \
 		x86 x86_64 x32 \
 		arm aarch64 \
+		loongarch64 \
 		mips mips64 mips64n32 \
 		parisc parisc64 \
 		ppc ppc64 \
