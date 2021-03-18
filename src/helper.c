@@ -34,18 +34,11 @@
  */
 void *zmalloc(size_t size)
 {
-	void *ptr;
-
 	/* NOTE: unlike malloc() zero size allocations always return NULL */
 	if (size == 0)
 		return NULL;
 
-	ptr = malloc(size);
-	if (!ptr)
-		return NULL;
-	memset(ptr, 0, size);
-
-	return ptr;
+	return calloc(1, size);
 }
 
 /**
