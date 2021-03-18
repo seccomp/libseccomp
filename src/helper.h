@@ -23,5 +23,6 @@
 #define _FILTER_HELPER_H
 
 void *zmalloc(size_t size);
+void *zrealloc(void *ptr, size_t old_size, size_t size);
 
 #endif

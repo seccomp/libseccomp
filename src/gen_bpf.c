@@ -351,6 +351,7 @@ static struct bpf_blk *_blk_resize(struct bpf_state *state,
 {
 	unsigned int size_adj = (AINC_BLK > size_add ? AINC_BLK : size_add);
 	struct bpf_instr *new;
+	size_t old_size, new_size;
 
 	if (blk == NULL)
 		return NULL;
@@ -358,8 +359,10 @@ static struct bpf_blk *_blk_resize(struct bpf_state *state,
 	if ((blk->blk_cnt + size_adj) <= blk->blk_alloc)
 		return blk;
 
+	old_size = blk->blk_alloc * sizeof(*new);
 	blk->blk_alloc += size_adj;
-	new = realloc(blk->blks, blk->blk_alloc * sizeof(*(blk->blks)));
+	new_size = blk->blk_alloc * sizeof(*new);
+	new = zrealloc(blk->blks, old_size, new_size);
 	if (new == NULL) {
 		_blk_free(state, blk);
 		return NULL;
@@ -443,10 +446,13 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 	bpf_instr_raw *i_iter;
 	unsigned int old_cnt = prg->blk_cnt;
 	unsigned int iter;
+	size_t old_size, new_size;
 
 	/* (re)allocate the program memory */
+	old_size = BPF_PGM_SIZE(prg);
 	prg->blk_cnt += blk->blk_cnt;
-	i_new = realloc(prg->blks, BPF_PGM_SIZE(prg));
+	new_size = BPF_PGM_SIZE(prg);
+	i_new = zrealloc(prg->blks, old_size, new_size);
 	if (i_new == NULL) {
 		rc = -ENOMEM;
 		goto bpf_append_blk_failure;
