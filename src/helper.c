@@ -34,16 +34,34 @@
  */
 void *zmalloc(size_t size)
 {
-	void *ptr;
-
 	/* NOTE: unlike malloc() zero size allocations always return NULL */
 	if (size == 0)
 		return NULL;
 
-	ptr = malloc(size);
+	return calloc(1, size);
+}
+
+/**
+ * Change the size of an allocated buffer
+ * @param ptr pointer to the allocated buffer.  If NULL it is equivalent to zmalloc.
+ * @param old_size the current size of the allocated buffer
+ * @param size the new size of the buffer
+ *
+ * This function changes the size of an allocated memory buffer and return a pointer
+ * to the buffer on success, the new buffer portion is initialized to zero.  NULL is
+ * returned on failure.  The returned buffer could be different than the specified
+ * ptr param.
+ *
+ */
+void *zrealloc(void *ptr, size_t old_size, size_t size)
+{
+	/* NOTE: unlike malloc() zero size allocations always return NULL */
+	if (size == 0)
+		return NULL;
+
+	ptr = realloc(ptr, size);
 	if (!ptr)
 		return NULL;
-	memset(ptr, 0, size);
-
+	memset(ptr + old_size, 0, size - old_size);
 	return ptr;
 }
