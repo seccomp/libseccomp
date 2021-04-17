@@ -564,6 +564,8 @@
 
 #define __SNR_faccessat			__NR_faccessat
 
+#define __SNR_faccessat2		__NR_faccessat2
+
 #ifdef __NR_fadvise64
 #define __SNR_fadvise64			__NR_fadvise64
 #else
