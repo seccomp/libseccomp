@@ -62,10 +62,9 @@ release.
 
 #### 11. Update the version number in configure.ac AC_INIT(...) macro
 
-#### 12. Tag the release in the repository with a signed tag
+#### 12. Tag the release in the local repository with a signed tag
 
 	# git tag -s -m "version X.Y.Z" vX.Y.Z
-	# git push <repo> vX.Y.Z
 
 #### 13. Build final release tarball
 
@@ -89,14 +88,18 @@ release.
 	# gpg --armor --detach-sign libseccomp-X.Y.Z.tar.gz
 	# gpg --clearsign libseccomp-X.Y.Z.tar.gz.SHA256SUM
 
-#### 17. Create a new GitHub release using the associated tag; added the relevant section from the CHANGELOG file, and upload the following files
+#### 17. Push the release tag to the main GitHub repository
+
+	# git push <repo> vX.Y.Z
+
+#### 18. Create a new GitHub release using the associated tag; added the relevant section from the CHANGELOG file, and upload the following files
 
   * libseccomp-X.Y.Z.tar.gz
   * libseccomp-X.Y.Z.tar.gz.asc
   * libseccomp-X.Y.Z.tar.gz.SHA256SUM
   * libseccomp-X.Y.Z.tar.gz.SHA256SUM.asc
 
-#### 18. Update the GitHub release notes for older releases which are now unsupported
+#### 19. Update the GitHub release notes for older releases which are now unsupported
 
 The following Markdown text is suggested at the top of the release note, see old GitHub releases for examples.
 
