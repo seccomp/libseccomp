@@ -30,7 +30,24 @@ attribute values and no overlapping architectures.
 RETURN VALUE
 ============
 
-Returns zero on success and negative values on failure.
+Returns zero on success or one of the following error codes on failure:
+
+**-EDOM**
+
+:   Unable to merge the filters due to architecture issues, e.g. byte
+    endian mismatches.
+
+**-EEXIST**
+
+:   The architecture already exists in the filter.
+
+**-EINVAL**
+
+:   One of the filters is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
 
 EXAMPLES
 ========

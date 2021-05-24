@@ -14,6 +14,23 @@ SYNOPSIS
     #define SCMP_ARCH_NATIVE
     #define SCMP_ARCH_X86
     #define SCMP_ARCH_X86_64
+    #define SCMP_ARCH_X32
+    #define SCMP_ARCH_ARM
+    #define SCMP_ARCH_AARCH64
+    #define SCMP_ARCH_MIPS
+    #define SCMP_ARCH_MIPS64
+    #define SCMP_ARCH_MIPS64N32
+    #define SCMP_ARCH_MIPSEL
+    #define SCMP_ARCH_MIPSEL64
+    #define SCMP_ARCH_MIPSEL64N32
+    #define SCMP_ARCH_PPC
+    #define SCMP_ARCH_PPC64
+    #define SCMP_ARCH_PPC64LE
+    #define SCMP_ARCH_S390
+    #define SCMP_ARCH_S390X
+    #define SCMP_ARCH_PARISC
+    #define SCMP_ARCH_PARISC64
+    #define SCMP_ARCH_RISCV64
 
     uint32_t seccomp_arch_resolve_name(const char *arch_name);
     uint32_t seccomp_arch_native();
@@ -55,11 +72,27 @@ the filter.
 RETURN VALUE
 ============
 
-The **seccomp_arch_add**() and **seccomp_arch_remove**() functions
-return zero on success, negative errno values on failure. The
-**seccomp_arch_exist**() function returns zero if the architecture
-exists, -EEXIST if it does not, and other negative errno values on
-failure.
+The **seccomp_arch_add**(), **seccomp_arch_remove**(), and
+**seccomp_arch_exist**() functions return zero on success or one of
+the following error codes on failure:
+
+**-EDOM**
+
+:   Architecture specific failure.
+
+**-EEXIST**
+
+:   In the case of **seccomp_arch_add**() the architecture already
+    exists and in the case of **seccomp_arch_remove**() the
+    architecture does not exist.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
 
 EXAMPLES
 ========

@@ -55,7 +55,7 @@ EXAMPLES
     	return 0;
 
     err:
-    	return -1;
+    	return 1;
     }
 
 NOTES

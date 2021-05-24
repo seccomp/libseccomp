@@ -84,10 +84,58 @@ Valid *attr* values are as follows:
 :   A flag to disable Speculative Store Bypass mitigations for this
     filter. Defaults to off ( *value* == 0).
 
+**SCMP_FLTATR_CTL_OPTIMIZE**
+
+:   A flag to specify the optimization level of the seccomp filter. By
+    default libseccomp generates a set of sequential 'if' statements
+    for each rule in the filter. **seccomp_syscall_priority(3)** can
+    be used to prioritize the order for the default cause. The binary
+    tree optimization sorts by syscall numbers and generates consistent
+    **O(log n)** filter traversal for every rule in the filter. The
+    binary tree may be advantageous for large filters. Note that
+    **seccomp_syscall_priority(3)** is ignored when
+    SCMP_FLTATR_CTL_OPTIMIZE == 2.
+
+    The different optimization levels are described below:
+
+    **0**
+
+    :   Reserved value, not currently used.
+
+    **1**
+
+    :   Rules sorted by priority and complexity (DEFAULT).
+
+    **2**
+
+    :   Binary tree sorted by syscall number.
+
+**SCMP_FLTATR_API_SYSRAWRC**
+
+:   A flag to specify if libseccomp should pass system error codes back
+    to the caller instead of the default -ECANCELED. Defaults to off (
+    *value* == 0).
+
 RETURN VALUE
 ============
 
-Returns zero on success, negative errno values on failure.
+Returns zero on success or one of the following error codes on failure:
+
+**-EACCES**
+
+:   Setting the attribute with the given value is not allowed.
+
+**-EEXIST**
+
+:   The attribute does not exist.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-EOPNOTSUPP**
+
+:   The library doesn't support the particular operation.
 
 EXAMPLES
 ========

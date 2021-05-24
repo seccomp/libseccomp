@@ -113,10 +113,17 @@ single rule, you can only compare each argument once in a single rule.
 In other words, you can not have multiple comparisons of the 3rd syscall
 argument in a single rule.
 
+In a filter containing multiple architectures, it is an error to add a
+filter rule for a syscall that does not exist in all of the filter's
+architectures.
+
 While it is possible to specify the *syscall* value directly using the
 standard **__NR_syscall** values, in order to ensure proper operation
 across multiple architectures it is highly recommended to use the
-**SCMP_SYS**() macro instead. See the EXAMPLES section below.
+**SCMP_SYS**() macro instead. See the EXAMPLES section below. It is
+also important to remember that regardless of the architectures present
+in the filter, the syscall numbers used in filter rules are interpreted
+in the context of the native architecture.
 
 Starting with Linux v4.8, there may be a need to create a rule with a
 syscall value of -1 to allow tracing programs to skip a syscall
@@ -167,6 +174,19 @@ Valid *action* values are as follows:
 
 :   The seccomp filter will have no effect on the thread calling the
     syscall if it matches the filter rule.
+
+**SCMP_ACT_NOTIFY**
+
+:   A monitoring process will be notified when a process running the
+    seccomp filter calls a syscall that matches the filter rule. The
+    process that invokes the syscall waits in the kernel until the
+    monitoring process has responded via **seccomp_notify_respond(3)**
+    .
+
+When a filter utilizing **SCMP_ACT_NOTIFY** is loaded into the kernel,
+the kernel generates a notification fd that must be used to communicate
+between the monitoring process and the process(es) being filtered. See
+**seccomp_notif_fd(3)** for more information.
 
 Valid comparison *op* values are as follows:
 
@@ -222,10 +242,40 @@ SCMP_CMP( *arg* , SCMP_CMP_MASKED_EQ , *mask* , *datum* )
 RETURN VALUE
 ============
 
+The **SCMP_SYS**() macro returns a value suitable for use as the
+*syscall* value in the **seccomp_rule_add***() functions. In a
+similar manner, the **SCMP_CMP**() and **SCMP_A***() macros return
+values suitable for use as argument comparisons in the
+**seccomp_rule_add**() and **seccomp_rule_add_exact**() functions.
+
 The **seccomp_rule_add**(), **seccomp_rule_add_array**(),
 **seccomp_rule_add_exact**(), and
-**seccomp_rule_add_exact_array**() functions return zero on success,
-negative errno values on failure.
+**seccomp_rule_add_exact_array**() functions return zero on success
+or one of the following error codes on failure:
+
+**-EDOM**
+
+:   Architecture specific failure.
+
+**-EEXIST**
+
+:   The rule already exists.
+
+**-EFAULT**
+
+:   Internal libseccomp failure.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
+
+**-EOPNOTSUPP**
+
+:   The library doesn't support the particular operation.
 
 EXAMPLES
 ========

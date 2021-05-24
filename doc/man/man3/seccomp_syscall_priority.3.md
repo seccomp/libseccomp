@@ -43,10 +43,27 @@ The filter context *ctx* is the value returned by the call to
 RETURN VALUE
 ============
 
-The **seccomp_syscall_priority**() function returns zero on success,
-negative errno values on failure. The **SCMP_SYS**() macro returns a
-value suitable for use as the *syscall* value in
-**seccomp_syscall_priority**().
+The **SCMP_SYS**() macro returns a value suitable for use as the
+*syscall* value in **seccomp_syscall_priority**().
+
+The **seccomp_syscall_priority**() function returns zero on success or
+one of the following error codes on failure:
+
+**-EDOM**
+
+:   Architecture specific failure.
+
+**-EFAULT**
+
+:   Internal libseccomp failure.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
 
 EXAMPLES
 ========

@@ -31,7 +31,7 @@ treated in a special manner by libseccomp depending on the operation.
     values are "x86", "x86_64", "x32", "arm", "aarch64",
     "mips", "mipsel", "mips64", "mipsel64", "mips64n32",
     "mipsel64n32", "parisc", "parisc64", "ppc", "ppc64",
-    "ppc64le", "s390" and "s390x".
+    "ppc64le", "s390", "s390x", "sheb" and "sh".
 
 **-t**
 
@@ -60,4 +60,3 @@ AUTHOR
 ======
 
 Paul Moore <paul@paul-moore.com>
-

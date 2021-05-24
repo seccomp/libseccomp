@@ -39,7 +39,7 @@ EXAMPLES
 
     	ctx = seccomp_init(SCMP_ACT_KILL);
     	if (ctx == NULL)
-    		return -1;
+    		return 1;
 
     	/* ... */
 

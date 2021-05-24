@@ -40,7 +40,7 @@ the request, so that the kernel knows which request this response
 corresponds to.
 
 The **seccomp_notify_id_valid**() function checks to see if the
-syscall from a particualr notification request is still valid, i.e. if
+syscall from a particular notification request is still valid, i.e. if
 the task is still alive. See NOTES below for details on race conditions.
 
 The **seccomp_notify_fd**() returns the notification fd of a filter
@@ -49,15 +49,33 @@ after it has been loaded.
 RETURN VALUE
 ============
 
-The **seccomp_notify_alloc**(), **seccomp_notify_receive**(), and
-**seccomp_notify_respond**() functions all return 0 on success, -1 on
-failure.
+The **seccomp_notify_fd**() returns the notification fd of the loaded
+filter, -1 if a notification fd has not yet been created, and -EINVAL if
+the filter context is invalid.
 
 The **seccomp_notify_id_valid**() returns 0 if the id is valid, and
 -ENOENT if it is not.
 
-The **seccomp_notify_fd**() returns the notification fd of the loaded
-filter.
+The **seccomp_notify_alloc**(), **seccomp_notify_receive**(), and
+**seccomp_notify_respond**() functions return zero on success, or one
+of the following error codes on failure:
+
+**-ECANCELED**
+
+:   There was a system failure beyond the control of the library, check
+    the *errno* value for more information.
+
+**-EFAULT**
+
+:   Internal libseccomp failure.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
+
+**-EOPNOTSUPP**
+
+:   The library doesn't support the particular operation.
 
 NOTES
 =====

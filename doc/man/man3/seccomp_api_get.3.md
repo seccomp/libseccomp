@@ -54,7 +54,12 @@ The different API level values are described below:
 
 **5**
 
-:   The SCMP_ACT_NOTIFY action is supported.
+:   The SCMP_ACT_NOTIFY action and the notify APIs are supported.
+
+**6**
+
+:   The simultaneous use of SCMP_FLTATR_CTL_TSYNC and the notify APIs
+    are supported.
 
 RETURN VALUE
 ============
@@ -83,7 +88,7 @@ EXAMPLES
     	return 0;
 
     err:
-    	return -1;
+    	return 1;
     }
 
 NOTES

@@ -19,7 +19,7 @@ DESCRIPTION
 ===========
 
 The **seccomp_export_bpf**() and **seccomp_export_pfc**() functions
-generate and output the current seccomp filter in either BPF (Berkley
+generate and output the current seccomp filter in either BPF (Berkeley
 Packet Filter) or PFC (Pseudo Filter Code). The output of
 **seccomp_export_bpf**() is suitable for loading into the kernel,
 while the output of **seccomp_export_pfc**() is human readable and is
@@ -37,7 +37,29 @@ both the BPF and PFC formats.
 RETURN VALUE
 ============
 
-Returns zero on success, negative errno values on failure.
+Return zero on success or one of the following error codes on failure:
+
+**-ECANCELED**
+
+:   There was a system failure beyond the control of the library.
+
+**-EFAULT**
+
+:   Internal libseccomp failure.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
+
+If the *SCMP_FLTATR_API_SYSRAWRC* filter attribute is non-zero then
+additional error codes may be returned to the caller; these additional
+error codes are the negative *errno* values returned by the system.
+Unfortunately libseccomp can make no guarantees about these return
+values.
 
 EXAMPLES
 ========

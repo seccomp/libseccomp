@@ -25,7 +25,13 @@ and sets the default action based on the *def_action* parameter. The
 functions as the rest of the library API will fail if the filter context
 is not initialized properly. The **seccomp_reset**() function releases
 the existing filter context state before reinitializing it and can only
-be called after a call to **seccomp_init**() has succeeded.
+be called after a call to **seccomp_init**() has succeeded. If
+**seccomp_reset**() is called with a NULL filter, it resets the
+library's global task state, including any notification file
+descriptors retrieved by **seccomp_notify_fd(3)**. Normally this is
+not needed, but it may be required to continue using the library after a
+**fork**() or **clone**() call to ensure the API level and user
+notification state is properly reset.
 
 When the caller is finished configuring the seccomp filter and has
 loaded it into the kernel, the caller should call
@@ -86,7 +92,15 @@ RETURN VALUE
 
 The **seccomp_init**() function returns a filter context on success,
 NULL on failure. The **seccomp_reset**() function returns zero on
-success, negative errno values on failure.
+success or one of the following error codes on failure:
+
+**-EINVAL**
+
+:   Invalid input, either the context or action is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
 
 EXAMPLES
 ========

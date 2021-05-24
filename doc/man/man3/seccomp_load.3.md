@@ -32,7 +32,33 @@ with the lowest value (e.g. *SCMP_ACT_KILL* is "stricter" than
 RETURN VALUE
 ============
 
-Returns zero on success, negative errno values on failure.
+Returns zero on success or one of the following error codes on failure:
+
+**-ECANCELED**
+
+:   There was a system failure beyond the control of the library.
+
+**-EFAULT**
+
+:   Internal libseccomp failure.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-ENOMEM**
+
+:   The library was unable to allocate enough memory.
+
+**-ESRCH**
+
+:   Unable to load the filter due to thread issues.
+
+If the *SCMP_FLTATR_API_SYSRAWRC* filter attribute is non-zero then
+additional error codes may be returned to the caller; these additional
+error codes are the negative *errno* values returned by the system.
+Unfortunately libseccomp can make no guarantees about these return
+values.
 
 EXAMPLES
 ========
