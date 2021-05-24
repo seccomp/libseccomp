@@ -8,3 +8,44 @@ docs_dir: doc
 
 repo_url: https://github.com/seccomp/libseccomp.git
 
+nav:
+  - Home: index.md
+  - Admin:
+    - admin/MAINTAINER_PROCESS.md
+    - admin/RELEASE_PROCESS.md
+  - Commands:
+    - scmp_sys_resolver: man/man1/scmp_sys_resolver.1.md
+  - Library:
+    - seccomp_init: man/man3/seccomp_init.3.md
+    - seccomp_reset: man/man3/seccomp_reset.3.md
+    - seccomp_load: man/man3/seccomp_load.3.md
+    - seccomp_merge: man/man3/seccomp_merge.3.md
+    - seccomp_release: man/man3/seccomp_release.3.md
+    - seccomp_version: man/man3/seccomp_version.3.md
+    - seccomp_arch_resolve_name: man/man3/seccomp_arch_resolve_name.3.md
+    - seccomp_arch_native: man/man3/seccomp_arch_native.3.md
+    - seccomp_arch_exist: man/man3/seccomp_arch_exist.3.md
+    - seccomp_arch_add: man/man3/seccomp_arch_add.3.md
+    - seccomp_arch_remove: man/man3/seccomp_arch_remove.3.md
+    - seccomp_api_get: man/man3/seccomp_api_get.3.md
+    - seccomp_api_set: man/man3/seccomp_api_set.3.md
+    - seccomp_attr_get: man/man3/seccomp_attr_get.3.md
+    - seccomp_attr_set: man/man3/seccomp_attr_set.3.md
+    - seccomp_notify_receive: man/man3/seccomp_notify_receive.3.md
+    - seccomp_notify_fd: man/man3/seccomp_notify_fd.3.md
+    - seccomp_notify_id_valid: man/man3/seccomp_notify_id_valid.3.md
+    - seccomp_notify_free: man/man3/seccomp_notify_free.3.md
+    - seccomp_notify_alloc: man/man3/seccomp_notify_alloc.3.md
+    - seccomp_notify_respond: man/man3/seccomp_notify_respond.3.md
+    - seccomp_syscall_priority: man/man3/seccomp_syscall_priority.3.md
+    - seccomp_syscall_resolve_name: man/man3/seccomp_syscall_resolve_name.3.md
+    - seccomp_syscall_resolve_name_arch: man/man3/seccomp_syscall_resolve_name_arch.3.md
+    - seccomp_syscall_resolve_name_rewrite: man/man3/seccomp_syscall_resolve_name_rewrite.3.md
+    - seccomp_syscall_resolve_num_arch: man/man3/seccomp_syscall_resolve_num_arch.3.md
+    - seccomp_rule_add: man/man3/seccomp_rule_add.3.md
+    - seccomp_rule_add_exact: man/man3/seccomp_rule_add_exact.3.md
+    - seccomp_rule_add_array: man/man3/seccomp_rule_add_array.3.md
+    - seccomp_rule_add_exact_array: man/man3/seccomp_rule_add_exact_array.3.md
+    - seccomp_export_bpf: man/man3/seccomp_export_bpf.3.md
+    - seccomp_export_pfc: man/man3/seccomp_export_pfc.3.md
+
