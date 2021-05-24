@@ -1,13 +1,13 @@
 NAME
 ====
 
-scmp\_sys\_resolver - Resolve system calls
+scmp_sys_resolver - Resolve system calls
 
 SYNOPSIS
 ========
 
-**scmp\_sys\_resolver** \[-h\] \[-a *ARCH* \] \[-t\] *SYSCALL\_NAME* \|
-*SYSCALL\_NUMBER*
+**scmp_sys_resolver** [-h] [-a *ARCH* ] [-t] *SYSCALL_NAME* |
+*SYSCALL_NUMBER*
 
 DESCRIPTION
 ===========
@@ -15,9 +15,9 @@ DESCRIPTION
 This command resolves both system call names and numbers with respect to
 the given architecture supplied in the optional *ARCH* argument. If the
 architecture is not supplied on the command line then the native
-architecture is used. If the \"-t\" argument is specified along with a
+architecture is used. If the "-t" argument is specified along with a
 system call name, then the system call will be translated as necessary
-for the given architecture. The \"-t\" argument has no effect if a
+for the given architecture. The "-t" argument has no effect if a
 system call number is specified.
 
 In some combinations of architecture and system call, a negative system
@@ -28,10 +28,10 @@ treated in a special manner by libseccomp depending on the operation.
 **-a *ARCH***
 
 :   The architecture to use for resolving the system call. Valid *ARCH*
-    values are \"x86\", \"x86\_64\", \"x32\", \"arm\", \"aarch64\",
-    \"mips\", \"mipsel\", \"mips64\", \"mipsel64\", \"mips64n32\",
-    \"mipsel64n32\", \"parisc\", \"parisc64\", \"ppc\", \"ppc64\",
-    \"ppc64le\", \"s390\" and \"s390x\".
+    values are "x86", "x86_64", "x32", "arm", "aarch64",
+    "mips", "mipsel", "mips64", "mipsel64", "mips64n32",
+    "mipsel64n32", "parisc", "parisc64", "ppc", "ppc64",
+    "ppc64le", "s390" and "s390x".
 
 **-t**
 
@@ -59,4 +59,5 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
+

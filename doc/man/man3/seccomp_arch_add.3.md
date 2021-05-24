@@ -1,8 +1,8 @@
 NAME
 ====
 
-seccomp\_arch\_add, seccomp\_arch\_remove, seccomp\_arch\_exist,
-seccomp\_arch\_native - Manage seccomp filter architectures
+seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist,
+seccomp_arch_native - Manage seccomp filter architectures
 
 SYNOPSIS
 ========
@@ -26,21 +26,21 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_arch\_exist**() function tests to see if a given
+The **seccomp_arch_exist**() function tests to see if a given
 architecture has been added to the seccomp filter in *ctx* , where the
-**seccomp\_arch\_add**() and **seccomp\_arch\_remove**() add and remove,
+**seccomp_arch_add**() and **seccomp_arch_remove**() add and remove,
 respectively, architectures from the seccomp filter. In all three
-functions, the architecture values given in *arch\_token* should be the
-**SCMP\_ARCH\_\*** defined constants; with the **SCMP\_ARCH\_NATIVE**
+functions, the architecture values given in *arch_token* should be the
+**SCMP_ARCH_*** defined constants; with the **SCMP_ARCH_NATIVE**
 constant always referring to the native compiled architecture. The
-**seccomp\_arch\_native**() function returns the system\'s architecture
-such that it will match one of the **SCMP\_ARCH\_\*** constants. While
-the **seccomp\_arch\_resolve\_name**() function also returns a
-**SCMP\_ARCH\_\*** constant, the returned token matches the name of the
+**seccomp_arch_native**() function returns the system's architecture
+such that it will match one of the **SCMP_ARCH_*** constants. While
+the **seccomp_arch_resolve_name**() function also returns a
+**SCMP_ARCH_*** constant, the returned token matches the name of the
 architecture passed as an argument to the function.
 
 When a seccomp filter is initialized with the call to
-**seccomp\_init**(3) the native architecture is automatically added to
+**seccomp_init**(3) the native architecture is automatically added to
 the filter.
 
 While it is possible to remove all architectures from a filter, most of
@@ -55,9 +55,9 @@ the filter.
 RETURN VALUE
 ============
 
-The **seccomp\_arch\_add**() and **seccomp\_arch\_remove**() functions
+The **seccomp_arch_add**() and **seccomp_arch_remove**() functions
 return zero on success, negative errno values on failure. The
-**seccomp\_arch\_exist**() function returns zero if the architecture
+**seccomp_arch_exist**() function returns zero if the architecture
 exists, -EEXIST if it does not, and other negative errno values on
 failure.
 
@@ -106,9 +106,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_reset**(3), **seccomp\_merge**(3)
+**seccomp_init**(3), **seccomp_reset**(3), **seccomp_merge**(3)

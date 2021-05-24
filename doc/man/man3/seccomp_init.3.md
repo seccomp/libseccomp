@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_init, seccomp\_reset - Initialize the seccomp filter state
+seccomp_init, seccomp_reset - Initialize the seccomp filter state
 
 SYNOPSIS
 ========
@@ -18,64 +18,64 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_init**() and **seccomp\_reset**() functions
+The **seccomp_init**() and **seccomp_reset**() functions
 (re)initialize the internal seccomp filter state, prepares it for use,
-and sets the default action based on the *def\_action* parameter. The
-**seccomp\_init**() function must be called before any other libseccomp
+and sets the default action based on the *def_action* parameter. The
+**seccomp_init**() function must be called before any other libseccomp
 functions as the rest of the library API will fail if the filter context
-is not initialized properly. The **seccomp\_reset**() function releases
+is not initialized properly. The **seccomp_reset**() function releases
 the existing filter context state before reinitializing it and can only
-be called after a call to **seccomp\_init**() has succeeded.
+be called after a call to **seccomp_init**() has succeeded.
 
 When the caller is finished configuring the seccomp filter and has
 loaded it into the kernel, the caller should call
-**seccomp\_release**(3) to release all of the filter context state.
+**seccomp_release**(3) to release all of the filter context state.
 
-Valid *def\_action* values are as follows:
+Valid *def_action* values are as follows:
 
-**SCMP\_ACT\_KILL**
+**SCMP_ACT_KILL**
 
 :   The thread will be terminated by the kernel with SIGSYS when it
     calls a syscall that does not match any of the configured seccomp
     filter rules. The thread will not be able to catch the signal.
 
-**SCMP\_ACT\_KILL\_PROCESS**
+**SCMP_ACT_KILL_PROCESS**
 
 :   The entire process will be terminated by the kernel with SIGSYS when
     it calls a syscall that does not match any of the configured seccomp
     filter rules.
 
-**SCMP\_ACT\_TRAP**
+**SCMP_ACT_TRAP**
 
 :   The thread will be sent a SIGSYS signal when it calls a syscall that
     does not match any of the configured seccomp filter rules. It may
     catch this and change its behavior accordingly. When using
-    SA\_SIGINFO with **sigaction**(2), si\_code will be set to
-    SYS\_SECCOMP, si\_syscall will be set to the syscall that failed the
-    rules, and si\_arch will be set to the AUDIT\_ARCH for the active
+    SA_SIGINFO with **sigaction**(2), si_code will be set to
+    SYS_SECCOMP, si_syscall will be set to the syscall that failed the
+    rules, and si_arch will be set to the AUDIT_ARCH for the active
     ABI.
 
-**SCMP\_ACT\_ERRNO(uint16\_t errno)**
+**SCMP_ACT_ERRNO(uint16_t errno)**
 
 :   The thread will receive a return value of *errno* when it calls a
     syscall that does not match any of the configured seccomp filter
     rules.
 
-**SCMP\_ACT\_TRACE(uint16\_t msg\_num)**
+**SCMP_ACT_TRACE(uint16_t msg_num)**
 
 :   If the thread is being traced and the tracing process specified the
-    **PTRACE\_O\_TRACESECCOMP** option in the call to **ptrace**(2), the
-    tracing process will be notified, via **PTRACE\_EVENT\_SECCOMP**,
-    and the value provided in *msg\_num* can be retrieved using the
-    **PTRACE\_GETEVENTMSG** option.
+    **PTRACE_O_TRACESECCOMP** option in the call to **ptrace**(2), the
+    tracing process will be notified, via **PTRACE_EVENT_SECCOMP**,
+    and the value provided in *msg_num* can be retrieved using the
+    **PTRACE_GETEVENTMSG** option.
 
-**SCMP\_ACT\_LOG**
+**SCMP_ACT_LOG**
 
 :   The seccomp filter will have no effect on the thread calling the
     syscall if it does not match any of the configured seccomp filter
     rules but the syscall will be logged.
 
-**SCMP\_ACT\_ALLOW**
+**SCMP_ACT_ALLOW**
 
 :   The seccomp filter will have no effect on the thread calling the
     syscall if it does not match any of the configured seccomp filter
@@ -84,8 +84,8 @@ Valid *def\_action* values are as follows:
 RETURN VALUE
 ============
 
-The **seccomp\_init**() function returns a filter context on success,
-NULL on failure. The **seccomp\_reset**() function returns zero on
+The **seccomp_init**() function returns a filter context on success,
+NULL on failure. The **seccomp_reset**() function returns zero on
 success, negative errno values on failure.
 
 EXAMPLES
@@ -130,9 +130,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_release**(3)
+**seccomp_release**(3)

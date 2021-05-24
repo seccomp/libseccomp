@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_version - Query the libseccomp version information
+seccomp_version - Query the libseccomp version information
 
 SYNOPSIS
 ========
@@ -21,20 +21,20 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_version**() and **seccomp\_reset**() functions return a
-pointer to a **scmp\_version** struct which contains the version
+The **seccomp_version**() and **seccomp_reset**() functions return a
+pointer to a **scmp_version** struct which contains the version
 information of the currently loaded libseccomp library. This function
 can be used by applications that need to verify that they are linked to
 a specific libseccomp version at runtime.
 
-The caller should not attempt to free the returned **scmp\_version**
+The caller should not attempt to free the returned **scmp_version**
 struct when finished.
 
 RETURN VALUE
 ============
 
-The **seccomp\_version**() function returns a pointer to a
-**scmp\_version** structure on success, NULL on failure. The caller
+The **seccomp_version**() function returns a pointer to a
+**scmp_version** structure on success, NULL on failure. The caller
 should not attempt to free the returned structure.
 
 EXAMPLES
@@ -73,4 +73,4 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>

@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_export\_bpf, seccomp\_export\_pfc - Export the seccomp filter
+seccomp_export_bpf, seccomp_export_pfc - Export the seccomp filter
 
 SYNOPSIS
 ========
@@ -18,16 +18,16 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_export\_bpf**() and **seccomp\_export\_pfc**() functions
+The **seccomp_export_bpf**() and **seccomp_export_pfc**() functions
 generate and output the current seccomp filter in either BPF (Berkley
 Packet Filter) or PFC (Pseudo Filter Code). The output of
-**seccomp\_export\_bpf**() is suitable for loading into the kernel,
-while the output of **seccomp\_export\_pfc**() is human readable and is
+**seccomp_export_bpf**() is suitable for loading into the kernel,
+while the output of **seccomp_export_pfc**() is human readable and is
 intended primarily as a debugging tool for developers using libseccomp.
 Both functions write the filter to the *fd* file descriptor.
 
 The filter context *ctx* is the value returned by the call to
-**seccomp\_init**(3).
+**seccomp_init**(3).
 
 While the two output formats are guaranteed to be functionally
 equivalent for the given seccomp filter configuration, the filter
@@ -91,9 +91,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_release**(3)
+**seccomp_init**(3), **seccomp_release**(3)

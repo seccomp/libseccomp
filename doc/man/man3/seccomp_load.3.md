@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_load - Load the current seccomp filter into the kernel
+seccomp_load - Load the current seccomp filter into the kernel
 
 SYNOPSIS
 ========
@@ -24,10 +24,10 @@ function returns.
 As it is possible to have multiple stacked seccomp filters for a given
 task (defined as either a process or a thread), it is important to
 remember that each of the filters loaded for a given task are executed
-when a syscall is made and the \"strictest\" rule is the rule that is
-applied. In the case of seccomp, \"strictest\" is defined as the action
-with the lowest value (e.g. *SCMP\_ACT\_KILL* is \"stricter\" than
-*SCMP\_ACT\_ALLOW* ).
+when a syscall is made and the "strictest" rule is the rule that is
+applied. In the case of seccomp, "strictest" is defined as the action
+with the lowest value (e.g. *SCMP_ACT_KILL* is "stricter" than
+*SCMP_ACT_ALLOW* ).
 
 RETURN VALUE
 ============
@@ -76,10 +76,10 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_reset**(3), **seccomp\_release**(3),
-**seccomp\_rule\_add**(3), **seccomp\_rule\_add\_exact**(3)
+**seccomp_init**(3), **seccomp_reset**(3), **seccomp_release**(3),
+**seccomp_rule_add**(3), **seccomp_rule_add_exact**(3)

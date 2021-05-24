@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_attr\_set, seccomp\_attr\_get - Manage the seccomp filter
+seccomp_attr_set, seccomp_attr_get - Manage the seccomp filter
 attributes
 
 SYNOPSIS
@@ -22,50 +22,50 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_attr\_set**() function sets the different seccomp filter
-attributes while the **seccomp\_attr\_get**() function fetches the
+The **seccomp_attr_set**() function sets the different seccomp filter
+attributes while the **seccomp_attr_get**() function fetches the
 filter attributes. The seccomp filter attributes are tunable values that
 affect how the library behaves when generating and loading the seccomp
 filter into the kernel. The attributes are reset to their default values
 whenever the filter is initialized or reset via
-**seccomp\_filter\_init**(3) or **seccomp\_filter\_reset**(3).
+**seccomp_filter_init**(3) or **seccomp_filter_reset**(3).
 
 The filter context *ctx* is the value returned by the call to
-**seccomp\_init**(3).
+**seccomp_init**(3).
 
 Valid *attr* values are as follows:
 
-**SCMP\_FLTATR\_ACT\_DEFAULT**
+**SCMP_FLTATR_ACT_DEFAULT**
 
 :   The default filter action as specified in the call to
-    **seccomp\_filter\_init**(3) or **seccomp\_filter\_reset**(3). This
+    **seccomp_filter_init**(3) or **seccomp_filter_reset**(3). This
     attribute is read-only.
 
-**SCMP\_FLTATR\_ACT\_BADARCH**
+**SCMP_FLTATR_ACT_BADARCH**
 
 :   The filter action taken when the loaded filter does not match the
     architecture of the executing application. Defaults to the
-    **SCMP\_ACT\_KILL** action.
+    **SCMP_ACT_KILL** action.
 
-**SCMP\_FLTATR\_CTL\_NNP**
+**SCMP_FLTATR_CTL_NNP**
 
-:   A flag to specify if the NO\_NEW\_PRIVS functionality should be
+:   A flag to specify if the NO_NEW_PRIVS functionality should be
     enabled before loading the seccomp filter into the kernel. Setting
     this to off ( *value* == 0) results in no action, meaning that
     loading the seccomp filter into the kernel will fail if
-    CAP\_SYS\_ADMIN is missing and NO\_NEW\_PRIVS has not been
+    CAP_SYS_ADMIN is missing and NO_NEW_PRIVS has not been
     externally set. Defaults to on ( *value* == 1).
 
-**SCMP\_FLTATR\_CTL\_TSYNC**
+**SCMP_FLTATR_CTL_TSYNC**
 
 :   A flag to specify if the kernel should attempt to synchronize the
-    filters across all threads on **seccomp\_load**(3). If the kernel is
+    filters across all threads on **seccomp_load**(3). If the kernel is
     unable to synchronize all of the thread then the load operation will
     fail. This flag is only available on Linux Kernel 3.17 or greater;
     attempting to enable this flag on earlier kernels will result in an
     error being returned. Defaults to off ( *value* == 0).
 
-**SCMP\_FLTATR\_API\_TSKIP**
+**SCMP_FLTATR_API_TSKIP**
 
 :   A flag to specify if libseccomp should allow filter rules to be
     created for the -1 syscall. The -1 syscall value can be used by
@@ -73,13 +73,13 @@ Valid *attr* values are as follows:
     **seccomp**(2) for more information. Defaults to off ( *value* ==
     0).
 
-**SCMP\_FLTATR\_CTL\_LOG**
+**SCMP_FLTATR_CTL_LOG**
 
 :   A flag to specify if the kernel should log all filter actions taken
-    except for the **SCMP\_ACT\_ALLOW** action. Defaults to off (
+    except for the **SCMP_ACT_ALLOW** action. Defaults to off (
     *value* == 0).
 
-**SCMP\_FLTATR\_CTL\_SSB**
+**SCMP_FLTATR_CTL_SSB**
 
 :   A flag to disable Speculative Store Bypass mitigations for this
     filter. Defaults to off ( *value* == 0).
@@ -131,10 +131,10 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_reset**(3), **seccomp\_load**(3),
+**seccomp_init**(3), **seccomp_reset**(3), **seccomp_load**(3),
 **seccomp**(2)

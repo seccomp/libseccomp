@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_syscall\_resolve\_name - Resolve a syscall name
+seccomp_syscall_resolve_name - Resolve a syscall name
 
 SYNOPSIS
 ========
@@ -20,35 +20,35 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_syscall\_resolve\_name()**,
-**seccomp\_syscall\_resolve\_name\_arch()**, and
-**seccomp\_syscall\_resolve\_name\_rewrite()** functions resolve the
+The **seccomp_syscall_resolve_name()**,
+**seccomp_syscall_resolve_name_arch()**, and
+**seccomp_syscall_resolve_name_rewrite()** functions resolve the
 commonly used syscall name to the syscall number used by the kernel and
 the rest of the libseccomp API, with
-**seccomp\_syscall\_resolve\_name\_rewrite()** rewriting the syscall
+**seccomp_syscall_resolve_name_rewrite()** rewriting the syscall
 number for architectures that modify the syscall. Syscall rewriting
 typically happens in case of a multiplexed syscall, like
 **socketcall**(2) or **ipc**(2) on x86.
-**seccomp\_syscall\_resolve\_num\_arch()** function resolves the syscall
+**seccomp_syscall_resolve_num_arch()** function resolves the syscall
 number used by the kernel to the commonly used syscall name.
 
 The caller is responsible for freeing the returned string from
-**seccomp\_syscall\_resolve\_num\_arch()**.
+**seccomp_syscall_resolve_num_arch()**.
 
 RETURN VALUE
 ============
 
-In the case of **seccomp\_syscall\_resolve\_name()**,
-**seccomp\_syscall\_resolve\_name\_arch()**, and
-**seccomp\_syscall\_resolve\_name\_rewrite()** the associated syscall
+In the case of **seccomp_syscall_resolve_name()**,
+**seccomp_syscall_resolve_name_arch()**, and
+**seccomp_syscall_resolve_name_rewrite()** the associated syscall
 number is returned, with the negative pseudo syscall number being
 returned in cases where the given syscall does not exist for the
-architecture. The value **\_\_NR\_SCMP\_ERROR** is returned in case of
+architecture. The value **__NR_SCMP_ERROR** is returned in case of
 error. In all cases, the return value is suitable for use in any
 libseccomp API function which requires the syscall number, examples
-include **seccomp\_rule\_add**() and **seccomp\_rule\_add\_exact**().
+include **seccomp_rule_add**() and **seccomp_rule_add_exact**().
 
-In the case of **seccomp\_syscall\_resolve\_num\_arch()** the associated
+In the case of **seccomp_syscall_resolve_num_arch()** the associated
 syscall name is returned and it remains the callers responsibility to
 free the returned string via **free**(3).
 
@@ -90,10 +90,10 @@ NOTES
 =====
 
 In case of bare syscalls implemented on top of a multiplexed syscall,
-**seccomp\_syscall\_resolve\_name()** and
-**seccomp\_syscall\_resolve\_name\_arch()** can be used to verify if a
+**seccomp_syscall_resolve_name()** and
+**seccomp_syscall_resolve_name_arch()** can be used to verify if a
 bare syscall is implemented for a specific architecture, while
-**seccomp\_syscall\_resolve\_name\_rewrite()** can be used to determine
+**seccomp_syscall_resolve_name_rewrite()** can be used to determine
 the underlying multiplexed syscall.
 
 While the seccomp filter can be generated independent of the kernel,
@@ -108,9 +108,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_rule\_add**(3), **seccomp\_rule\_add\_exact**(3)
+**seccomp_rule_add**(3), **seccomp_rule_add_exact**(3)

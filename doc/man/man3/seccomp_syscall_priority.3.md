@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_syscall\_priority - Prioritize syscalls in the seccomp filter
+seccomp_syscall_priority - Prioritize syscalls in the seccomp filter
 
 SYNOPSIS
 ========
@@ -20,33 +20,33 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_syscall\_priority**() function provides a priority hint
+The **seccomp_syscall_priority**() function provides a priority hint
 to the seccomp filter generator in libseccomp such that higher priority
 syscalls are placed earlier in the seccomp filter code so that they
 incur less overhead at the expense of lower priority syscalls. A
-syscall\'s priority can be set regardless of if any rules currently
+syscall's priority can be set regardless of if any rules currently
 exist for that syscall; the library will remember the priority and it
 will be assigned to the syscall if and when a rule for that syscall is
 created.
 
 While it is possible to specify the *syscall* value directly using the
-standard **\_\_NR\_syscall** values, in order to ensure proper operation
+standard **__NR_syscall** values, in order to ensure proper operation
 across multiple architectures it is highly recommended to use the
-**SCMP\_SYS**() macro instead. See the EXAMPLES section below.
+**SCMP_SYS**() macro instead. See the EXAMPLES section below.
 
 The *priority* parameter takes an 8-bit value ranging from 0 - 255; a
 higher value represents a higher priority.
 
 The filter context *ctx* is the value returned by the call to
-**seccomp\_init**().
+**seccomp_init**().
 
 RETURN VALUE
 ============
 
-The **seccomp\_syscall\_priority**() function returns zero on success,
-negative errno values on failure. The **SCMP\_SYS**() macro returns a
+The **seccomp_syscall_priority**() function returns zero on success,
+negative errno values on failure. The **SCMP_SYS**() macro returns a
 value suitable for use as the *syscall* value in
-**seccomp\_syscall\_priority**().
+**seccomp_syscall_priority**().
 
 EXAMPLES
 ========
@@ -90,9 +90,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_rule\_add**(3), **seccomp\_rule\_add\_exact**(3)
+**seccomp_rule_add**(3), **seccomp_rule_add_exact**(3)

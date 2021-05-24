@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_merge - Merge two seccomp filters
+seccomp_merge - Merge two seccomp filters
 
 SYNOPSIS
 ========
@@ -17,11 +17,11 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_merge**() function merges the seccomp filter in *src*
+The **seccomp_merge**() function merges the seccomp filter in *src*
 with the filter in *dst* and stores the resulting in the *dst* filter.
 If successful, the *src* seccomp filter is released and all internal
 memory associated with the filter is freed; there is no need to call
-**seccomp\_release**(3) on *src* and the caller should discard any
+**seccomp_release**(3) on *src* and the caller should discard any
 references to the filter.
 
 In order to merge two seccomp filters, both filters must have the same
@@ -99,11 +99,11 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_reset**(3), **seccomp\_arch\_add**(3),
-**seccomp\_arch\_remove**(3), **seccomp\_attr\_get**(3),
-**seccomp\_attr\_set**(3)
+**seccomp_init**(3), **seccomp_reset**(3), **seccomp_arch_add**(3),
+**seccomp_arch_remove**(3), **seccomp_attr_get**(3),
+**seccomp_attr_set**(3)

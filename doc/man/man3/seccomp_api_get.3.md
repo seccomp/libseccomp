@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_api\_get, seccomp\_api\_set - Manage the libseccomp API level
+seccomp_api_get, seccomp_api_set - Manage the libseccomp API level
 
 SYNOPSIS
 ========
@@ -16,14 +16,14 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-The **seccomp\_api\_get**() function returns an integer representing the
-functionality (\"API level\") provided by the current running kernel. It
-is important to note that while **seccomp\_api\_get**() can be called
+The **seccomp_api_get**() function returns an integer representing the
+functionality ("API level") provided by the current running kernel. It
+is important to note that while **seccomp_api_get**() can be called
 multiple times, the kernel is only probed the first time to see what
 functionality is supported, all following calls to
-**seccomp\_api\_get**() return a cached value.
+**seccomp_api_get**() return a cached value.
 
-The **seccomp\_api\_set**() function allows callers to force the API
+The **seccomp_api_set**() function allows callers to force the API
 level to the provided value; however, this is almost always a bad idea
 and use of this function is strongly discouraged.
 
@@ -39,28 +39,28 @@ The different API level values are described below:
 
 **2**
 
-:   The SCMP\_FLTATR\_CTL\_TSYNC filter attribute is supported and
+:   The SCMP_FLTATR_CTL_TSYNC filter attribute is supported and
     libseccomp uses the **seccomp(2)** syscall to load the seccomp
     filter into the kernel.
 
 **3**
 
-:   The SCMP\_FLTATR\_CTL\_LOG filter attribute and the SCMP\_ACT\_LOG
+:   The SCMP_FLTATR_CTL_LOG filter attribute and the SCMP_ACT_LOG
     action are supported.
 
 **4**
 
-:   The SCMP\_FLTATR\_CTL\_SSB filter attribute is supported.
+:   The SCMP_FLTATR_CTL_SSB filter attribute is supported.
 
 **5**
 
-:   The SCMP\_ACT\_NOTIFY action is supported.
+:   The SCMP_ACT_NOTIFY action is supported.
 
 RETURN VALUE
 ============
 
-The **seccomp\_api\_get**() function returns an integer representing the
-supported API level. The **seccomp\_api\_set**() function returns zero
+The **seccomp_api_get**() function returns an integer representing the
+supported API level. The **seccomp_api_set**() function returns zero
 on success, negative values on failure.
 
 EXAMPLES
@@ -101,4 +101,4 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>

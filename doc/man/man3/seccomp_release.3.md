@@ -1,7 +1,7 @@
 NAME
 ====
 
-seccomp\_release - Release the seccomp filter state
+seccomp_release - Release the seccomp filter state
 
 SYNOPSIS
 ========
@@ -18,7 +18,7 @@ DESCRIPTION
 ===========
 
 Releases the seccomp filter in *ctx* which was first initialized by
-**seccomp\_init**(3) or **seccomp\_reset**(3) and frees any memory
+**seccomp_init**(3) or **seccomp_reset**(3) and frees any memory
 associated with the given seccomp filter context. Any seccomp filters
 loaded into the kernel are not affected.
 
@@ -62,9 +62,9 @@ please report any bugs at the project site or directly to the author.
 AUTHOR
 ======
 
-Paul Moore \<paul\@paul-moore.com\>
+Paul Moore <paul@paul-moore.com>
 
 SEE ALSO
 ========
 
-**seccomp\_init**(3), **seccomp\_reset**(3)
+**seccomp_init**(3), **seccomp_reset**(3)
