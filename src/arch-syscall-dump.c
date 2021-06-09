@@ -43,6 +43,7 @@
 #include "arch-ppc.h"
 #include "arch-ppc64.h"
 #include "arch-riscv64.h"
+#include "arch-riscv32.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
 #include "arch-sh.h"
@@ -134,6 +135,9 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_RISCV64:
 			sys = riscv64_syscall_iterate(iter);
+			break;
+		case SCMP_ARCH_RISCV32:
+			sys = riscv32_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_S390:
 			sys = s390_syscall_iterate(iter);
