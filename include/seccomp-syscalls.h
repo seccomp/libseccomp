@@ -282,6 +282,7 @@
 #define __PNR_clock_gettime			-10248
 #define __PNR_clock_nanosleep			-10249
 #define __PNR_gettimeofday			-10250
+#define __PNR_quotactl_path			-10251
 
 /*
  * libseccomp syscall definitions
@@ -1545,6 +1546,12 @@
 #define __SNR_riscv_flush_icache	__NR_riscv_flush_icache
 #else
 #define __SNR_riscv_flush_icache	__PNR_riscv_flush_icache
+#endif
+
+#ifdef __NR_quotactl_path
+#define __SNR_quotactl_path       __NR_quotactl_path
+#else
+#define __SNR_quotactl_path       __PNR_quotactl_path
 #endif
 
 #ifdef __NR_rmdir
