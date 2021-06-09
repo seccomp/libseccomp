@@ -508,6 +508,8 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_S390X;
 			else if (strcmp(optarg, "riscv64") == 0)
 				arch = AUDIT_ARCH_RISCV64;
+			else if (strcmp(optarg, "riscv32") == 0)
+				arch = AUDIT_ARCH_RISCV32;
 			else
 				exit_usage(argv[0]);
 			break;

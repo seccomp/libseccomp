@@ -28,6 +28,7 @@
 #include "arch-x86.h"
 #include "arch-x86.h"
 #include "arch-riscv64.h"
+#include "arch-riscv32.h"
 
 /* NOTE: changes to the arch_syscall_table layout may require changes to the
  *       generate_syscalls_perf.sh and arch-syscall-validate scripts */
@@ -49,6 +50,7 @@ struct arch_syscall_table {
 	int parisc64;
 	int ppc;
 	int ppc64;
+	int riscv32;
 	int riscv64;
 	int s390;
 	int s390x;

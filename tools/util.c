@@ -78,8 +78,12 @@
 #define ARCH_NATIVE		AUDIT_ARCH_S390X
 #elif __s390__
 #define ARCH_NATIVE		AUDIT_ARCH_S390
-#elif __riscv && __riscv_xlen == 64
+#elif __riscv
+#if __riscv_xlen == 64
 #define ARCH_NATIVE		AUDIT_ARCH_RISCV64
+#elif __riscv_xlen == 32
+#define ARCH_NATIVE		AUDIT_ARCH_RISCV32
+#endif
 #elif __sh__
 #ifdef __BIG_ENDIAN__
 #define ARCH_NATIVE		AUDIT_ARCH_SH

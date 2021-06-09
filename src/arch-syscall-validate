@@ -520,6 +520,49 @@ function dump_lib_riscv64() {
 }
 
 #
+# Dump the riscv32 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_riscv32() {
+	local sed_filter=""
+
+	sed_filter+='s/__NR3264_fadvise64/223/;'
+	sed_filter+='s/__NR3264_fcntl/25/;'
+	sed_filter+='s/__NR3264_fstatat/79/;'
+	sed_filter+='s/__NR3264_fstatfs/44/;'
+	sed_filter+='s/__NR3264_ftruncate/46/;'
+	sed_filter+='s/__NR3264_lseek/62/;'
+	sed_filter+='s/__NR3264_mmap/222/;'
+	sed_filter+='s/__NR3264_sendfile/71/;'
+	sed_filter+='s/__NR3264_statfs/43/;'
+	sed_filter+='s/__NR3264_truncate/45/;'
+	sed_filter+='s/__NR3264_fstat/80/;'
+
+	gcc -E -dM -I$1/include/uapi \
+		-D__BITS_PER_LONG=32 \
+		$1/arch/riscv/include/uapi/asm/unistd.h | \
+		grep "^#define __NR_" | \
+		sed '/__NR_syscalls/d' | \
+		sed 's/(__NR_arch_specific_syscall + 15)/259/' | \
+		sed '/__NR_arch_specific_syscall/d' | \
+		sed 's/#define[ \t]\+__NR_\([^ \t]\+\)[ \t]\+\(.*\)/\1,\2/' | \
+		sed $sed_filter | sort
+}
+
+#
+# Dump the riscv32 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_riscv32() {
+	dump_lib_arch riscv32 | mangle_lib_syscall riscv32
+}
+
+#
 # Dump the s390 system syscall table
 #
 # Arguments:
@@ -639,6 +682,9 @@ function dump_sys() {
 	ppc64)
 		dump_sys_ppc64 "$2"
 		;;
+	riscv32)
+		dump_sys_riscv32 "$2"
+		;;
 	riscv64)
 		dump_sys_riscv64 "$2"
 		;;
@@ -706,6 +752,9 @@ function dump_lib() {
 	ppc64)
 		dump_lib_ppc64
 		;;
+	riscv32)
+		dump_lib_riscv32
+		;;
 	riscv64)
 		dump_lib_riscv64
 		;;
@@ -751,7 +800,7 @@ function gen_csv() {
 	abi_list+=" mips mips64 mips64n32"
 	abi_list+=" parisc parisc64"
 	abi_list+=" ppc ppc64"
-	abi_list+=" riscv64"
+	abi_list+=" riscv32 riscv64"
 	abi_list+=" s390 s390x"
 	abi_list+=" sh"
 
