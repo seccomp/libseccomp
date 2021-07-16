@@ -476,6 +476,8 @@
 
 #define __SNR_close			__NR_close
 
+#define __SNR_close_range		__NR_close_range
+
 #ifdef __NR_connect
 #define __SNR_connect			__NR_connect
 #else
