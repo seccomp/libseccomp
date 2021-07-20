@@ -1,0 +1,188 @@
+NAME
+====
+
+seccomp_attr_set, seccomp_attr_get - Manage the seccomp filter
+attributes
+
+SYNOPSIS
+========
+
+    #include <seccomp.h>
+
+    typedef void * scmp_filter_ctx;
+    enum scmp_filter_attr;
+
+    int seccomp_attr_set(scmp_filter_ctx ctx,
+     enum scmp_filter_attr attr, uint32_t value);
+    int seccomp_attr_get(scmp_filter_ctx ctx,
+     enum scmp_filter_attr attr, uint32_t *value);
+
+    Link with -lseccomp.
+
+DESCRIPTION
+===========
+
+The **seccomp_attr_set**() function sets the different seccomp filter
+attributes while the **seccomp_attr_get**() function fetches the
+filter attributes. The seccomp filter attributes are tunable values that
+affect how the library behaves when generating and loading the seccomp
+filter into the kernel. The attributes are reset to their default values
+whenever the filter is initialized or reset via
+**seccomp_filter_init**(3) or **seccomp_filter_reset**(3).
+
+The filter context *ctx* is the value returned by the call to
+**seccomp_init**(3).
+
+Valid *attr* values are as follows:
+
+**SCMP_FLTATR_ACT_DEFAULT**
+
+:   The default filter action as specified in the call to
+    **seccomp_filter_init**(3) or **seccomp_filter_reset**(3). This
+    attribute is read-only.
+
+**SCMP_FLTATR_ACT_BADARCH**
+
+:   The filter action taken when the loaded filter does not match the
+    architecture of the executing application. Defaults to the
+    **SCMP_ACT_KILL** action.
+
+**SCMP_FLTATR_CTL_NNP**
+
+:   A flag to specify if the NO_NEW_PRIVS functionality should be
+    enabled before loading the seccomp filter into the kernel. Setting
+    this to off ( *value* == 0) results in no action, meaning that
+    loading the seccomp filter into the kernel will fail if
+    CAP_SYS_ADMIN is missing and NO_NEW_PRIVS has not been
+    externally set. Defaults to on ( *value* == 1).
+
+**SCMP_FLTATR_CTL_TSYNC**
+
+:   A flag to specify if the kernel should attempt to synchronize the
+    filters across all threads on **seccomp_load**(3). If the kernel is
+    unable to synchronize all of the thread then the load operation will
+    fail. This flag is only available on Linux Kernel 3.17 or greater;
+    attempting to enable this flag on earlier kernels will result in an
+    error being returned. Defaults to off ( *value* == 0).
+
+**SCMP_FLTATR_API_TSKIP**
+
+:   A flag to specify if libseccomp should allow filter rules to be
+    created for the -1 syscall. The -1 syscall value can be used by
+    tracer programs to skip specific syscall invocations, see
+    **seccomp**(2) for more information. Defaults to off ( *value* ==
+    0).
+
+**SCMP_FLTATR_CTL_LOG**
+
+:   A flag to specify if the kernel should log all filter actions taken
+    except for the **SCMP_ACT_ALLOW** action. Defaults to off (
+    *value* == 0).
+
+**SCMP_FLTATR_CTL_SSB**
+
+:   A flag to disable Speculative Store Bypass mitigations for this
+    filter. Defaults to off ( *value* == 0).
+
+**SCMP_FLTATR_CTL_OPTIMIZE**
+
+:   A flag to specify the optimization level of the seccomp filter. By
+    default libseccomp generates a set of sequential 'if' statements
+    for each rule in the filter. **seccomp_syscall_priority(3)** can
+    be used to prioritize the order for the default cause. The binary
+    tree optimization sorts by syscall numbers and generates consistent
+    **O(log n)** filter traversal for every rule in the filter. The
+    binary tree may be advantageous for large filters. Note that
+    **seccomp_syscall_priority(3)** is ignored when
+    SCMP_FLTATR_CTL_OPTIMIZE == 2.
+
+    The different optimization levels are described below:
+
+    **0**
+
+    :   Reserved value, not currently used.
+
+    **1**
+
+    :   Rules sorted by priority and complexity (DEFAULT).
+
+    **2**
+
+    :   Binary tree sorted by syscall number.
+
+**SCMP_FLTATR_API_SYSRAWRC**
+
+:   A flag to specify if libseccomp should pass system error codes back
+    to the caller instead of the default -ECANCELED. Defaults to off (
+    *value* == 0).
+
+RETURN VALUE
+============
+
+Returns zero on success or one of the following error codes on failure:
+
+**-EACCES**
+
+:   Setting the attribute with the given value is not allowed.
+
+**-EEXIST**
+
+:   The attribute does not exist.
+
+**-EINVAL**
+
+:   Invalid input, either the context or architecture token is invalid.
+
+**-EOPNOTSUPP**
+
+:   The library doesn't support the particular operation.
+
+EXAMPLES
+========
+
+    #include <seccomp.h>
+
+    int main(int argc, char *argv[])
+    {
+    	int rc = -1;
+    	scmp_filter_ctx ctx;
+
+    	ctx = seccomp_init(SCMP_ACT_ALLOW);
+    	if (ctx == NULL)
+    		goto out;
+
+    	/* ... */
+
+    	rc = seccomp_attr_set(ctx, SCMP_FLTATR_ACT_BADARCH, SCMP_ACT_TRAP);
+    	if (rc < 0)
+    		goto out;
+
+    	/* ... */
+
+    out:
+    	seccomp_release(ctx);
+    	return -rc;
+    }
+
+NOTES
+=====
+
+While the seccomp filter can be generated independent of the kernel,
+kernel support is required to load and enforce the seccomp filter
+generated by libseccomp.
+
+The libseccomp project site, with more information and the source code
+repository, can be found at https://github.com/seccomp/libseccomp. This
+tool, as well as the libseccomp library, is currently under development,
+please report any bugs at the project site or directly to the author.
+
+AUTHOR
+======
+
+Paul Moore <paul@paul-moore.com>
+
+SEE ALSO
+========
+
+**seccomp_init**(3), **seccomp_reset**(3), **seccomp_load**(3),
+**seccomp**(2)
