@@ -275,6 +275,14 @@
 #define __PNR_ppoll				-10241
 #define __PNR_renameat				-10242
 #define __PNR_riscv_flush_icache		-10243
+#define __PNR_fstat				-10244
+#define __PNR_futex				-10245
+#define __PNR_nanosleep				-10246
+#define __PNR_lseek				-10247
+#define __PNR_clock_gettime			-10248
+#define __PNR_clock_nanosleep			-10249
+#define __PNR_gettimeofday			-10250
+#define __PNR_quotactl_path			-10251
 
 /*
  * libseccomp syscall definitions
@@ -442,7 +450,11 @@
 #define __SNR_clock_getres_time64	__PNR_clock_getres_time64
 #endif
 
+#ifdef __NR_clock_gettime
 #define __SNR_clock_gettime		__NR_clock_gettime
+#else
+#define __SNR_clock_gettime		__PNR_clock_gettime
+#endif
 
 #ifdef __NR_clock_gettime64
 #define __SNR_clock_gettime64		__NR_clock_gettime64
@@ -450,7 +462,11 @@
 #define __SNR_clock_gettime64		__PNR_clock_gettime64
 #endif
 
+#ifdef __NR_clock_nanosleep
 #define __SNR_clock_nanosleep		__NR_clock_nanosleep
+#else
+#define __SNR_clock_nanosleep		__PNR_clock_nanosleep
+#endif
 
 #ifdef __NR_clock_nanosleep_time64
 #define __SNR_clock_nanosleep_time64	__NR_clock_nanosleep_time64
@@ -712,7 +728,11 @@
 #define __SNR_ftruncate64		__PNR_ftruncate64
 #endif
 
+#ifdef __NR_futex
 #define __SNR_futex			__NR_futex
+#else
+#define __SNR_futex			__PNR_futex
+#endif
 
 #ifdef __NR_futex_time64
 #define __SNR_futex_time64		__NR_futex_time64
@@ -898,7 +918,11 @@
 
 #define __SNR_gettid			__NR_gettid
 
+#ifdef __NR_gettimeofday
 #define __SNR_gettimeofday		__NR_gettimeofday
+#else
+#define __SNR_gettimeofday		__PNR_gettimeofday
+#endif
 
 #ifdef __NR_getuid
 #define __SNR_getuid			__NR_getuid
@@ -1048,7 +1072,11 @@
 
 #define __SNR_lremovexattr		__NR_lremovexattr
 
+#ifdef __NR_lseek
 #define __SNR_lseek			__NR_lseek
+#else
+#define __SNR_lseek			__PNR_lseek
+#endif
 
 #define __SNR_lsetxattr			__NR_lsetxattr
 
@@ -1220,7 +1248,11 @@
 
 #define __SNR_name_to_handle_at			__NR_name_to_handle_at
 
+#ifdef __NR_nanosleep
 #define __SNR_nanosleep			__NR_nanosleep
+#else
+#define __SNR_nanosleep			__PNR_nanosleep
+#endif
 
 #ifdef __NR_newfstatat
 #define __SNR_newfstatat		__NR_newfstatat
@@ -1516,6 +1548,12 @@
 #define __SNR_riscv_flush_icache	__NR_riscv_flush_icache
 #else
 #define __SNR_riscv_flush_icache	__PNR_riscv_flush_icache
+#endif
+
+#ifdef __NR_quotactl_path
+#define __SNR_quotactl_path       __NR_quotactl_path
+#else
+#define __SNR_quotactl_path       __PNR_quotactl_path
 #endif
 
 #ifdef __NR_rmdir

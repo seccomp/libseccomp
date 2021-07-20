@@ -92,6 +92,9 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_PPC64LE);
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_RISCV32);
+	if (rc != 0)
+		goto out;
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_RISCV64);
 	if (rc != 0)
 		goto out;
@@ -160,6 +163,9 @@ int main(int argc, char *argv[])
 	if (rc != 0)
 		goto out;
 	rc = seccomp_arch_remove(ctx, SCMP_ARCH_PPC64LE);
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_remove(ctx, SCMP_ARCH_RISCV32);
 	if (rc != 0)
 		goto out;
 	rc = seccomp_arch_remove(ctx, SCMP_ARCH_RISCV64);

@@ -37,6 +37,7 @@ arch_list = ["x86",
              "mipsel64",
              "mipsel64n32",
              "ppc64le",
+             "riscv32",
              "riscv64"]
 
 def test_arch(arch, init):
