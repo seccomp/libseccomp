@@ -3,7 +3,7 @@
 https://github.com/seccomp/libseccomp
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/608/badge)](https://bestpractices.coreinfrastructure.org/projects/608)
-[![Build Status](https://img.shields.io/travis/seccomp/libseccomp/main.svg)](https://travis-ci.org/seccomp/libseccomp)
+[![Build Status](https://github.com/seccomp/libseccomp/workflows/Continuous%20Integration/badge.svg?branch=main)](https://github.com/seccomp/libseccomp/actions)
 [![Coverage Status](https://img.shields.io/coveralls/github/seccomp/libseccomp/main.svg)](https://coveralls.io/github/seccomp/libseccomp?branch=main)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/seccomp/libseccomp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seccomp/libseccomp/context:cpp)
 
