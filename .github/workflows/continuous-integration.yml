@@ -1,0 +1,100 @@
+#
+# Continuous Integration Workflow for libseccomp
+#
+# Copyright (c) 2021 Oracle and/or its affiliates.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+#
+# This library is free software; you can redistribute it and/or modify it
+# under the terms of version 2.1 of the GNU Lesser General Public License as
+# published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses>.
+#
+
+name: Continuous Integration
+on: ["push", "pull_request"]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Build libseccomp
+      run: |
+        ./configure --enable-python
+        make check-build
+    - name: Run tests
+      run: LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
+
+  livetests:
+    name: Live Tests
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Build libseccomp
+      run: |
+        ./configure --enable-python
+        make check-build
+    - name: Run live tests
+      run: LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
+
+  scanbuild:
+    name: Scan Build
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Run scan-build
+      run: |
+        ./configure
+        scan-build --status-bugs make
+
+  codecoverage:
+    name: Code Coverage
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Configure libseccomp
+      run: |
+        ./configure --enable-code-coverage
+    - name: Run tests with code coverage enabled
+      run: |
+        make test-code-coverage
+    - name: Gather code coverage results
+      run:  lcov -c --exclude tests --exclude tools --exclude src/arch-syscall-check.c -d . -o lcov.info
+    - name: Upload code coverage results
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./lcov.info
+        flag-name: "amd64"
+    - name: Archive code coverage results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: Code Coverage Artifacts
+        path: lcov.*
