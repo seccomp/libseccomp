@@ -114,6 +114,21 @@ EOF
 }
 
 #
+# Match on a single word/column in a CSV string
+#
+# Arguments:
+#     1    string containing the CSV
+#     2    string containing the word to match
+#
+# Returns true/0 if a match is found false/1 otherwise.
+#
+function match_csv_word() {
+	[[ -z $1 || -z $2 ]] && return 1
+
+	echo "$1" | sed 's/,/ /g' | grep -w "$2"
+}
+
+#
 # Generate a string representing the test number
 #
 # Arguments:
@@ -852,7 +867,9 @@ function run_test() {
 	local testnumstr=$(generate_test_num "$1" $2 1)
 
 	# ensure we only run tests which match the specified type
-	[[ -n $type && "$4" != "$type" ]] && return
+	match_csv_word "$type" "$4"
+	local type_match=$?
+	[[ -n $type && $type_match -eq 1 ]] && return
 
 	# execute the function corresponding to the test type
 	if [[ "$4" == "basic" ]]; then
