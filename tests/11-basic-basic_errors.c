@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 	int rc;
 	scmp_filter_ctx ctx;
 	uint32_t attr;
+	struct seccomp_notif *req = NULL;
+	struct seccomp_notif_resp *resp = NULL;
 
 	/* seccomp_init errors */
 	ctx = seccomp_init(SCMP_ACT_ALLOW + 1);
@@ -125,6 +127,9 @@ int main(int argc, char *argv[])
 				    SCMP_A0(SCMP_CMP_EQ, 2));
 	if (rc != -EINVAL)
 		return -1;
+	rc = seccomp_rule_add_exact(ctx, 0xdeadbeef, SCMP_SYS(open), 0);
+	if (rc != -EINVAL)
+		return -1;
 	seccomp_release(ctx);
 	ctx = NULL;
 
@@ -180,6 +185,53 @@ int main(int argc, char *argv[])
 	rc = seccomp_attr_set(ctx, 1000, 1);
 	if (rc != -EINVAL)
 		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
+	/* seccomp_merge() errors */
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_merge(ctx, NULL);
+	if (rc == 0)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
+	/* seccomp notify errors */
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_notify_alloc(NULL, NULL);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_notify_alloc(&req, NULL);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_notify_alloc(NULL, &resp);
+	if (rc != 0)
+		return -1;
+	seccomp_notify_free(NULL, NULL);
+	seccomp_notify_free(req, resp);
+	req = NULL;
+	resp = NULL;
+	rc = seccomp_notify_receive(-1, NULL);
+	if (rc == 0)
+		return -1;
+	rc = seccomp_notify_respond(-1, NULL);
+	if (rc == 0)
+		return -1;
+	rc = seccomp_notify_id_valid(-1, 0);
+	if (rc == 0)
+		return -1;
+	rc = seccomp_notify_fd(NULL);
+	if (rc == 0)
+		return -1;
+	rc = seccomp_notify_fd(ctx);
+	if (rc == 0)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
 
 	return 0;
 }

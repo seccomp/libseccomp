@@ -33,6 +33,7 @@ def test(args):
     f.remove_arch(Arch())
     f.add_arch(Arch("s390"))
     f.add_arch(Arch("s390x"))
+    f.add_arch(Arch("ppc"))
     f.add_rule(ALLOW, "semop")
     f.add_rule(ALLOW, "semtimedop")
     f.add_rule(ALLOW, "semget")

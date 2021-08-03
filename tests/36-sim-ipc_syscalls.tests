@@ -7,31 +7,31 @@
 
 test type: bpf-sim
 
-# Testname		Arch		Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		1	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		2	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		3	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		4	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		11	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		12	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		13	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		14	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		21	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		22	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		23	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86,+ppc64le	ipc		24	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		semop		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		semget		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		semctl		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		semtimedop	N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		msgsnd		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		msgrcv		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		msgget		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		msgctl		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		shmat		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		shmdt		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		shmget		N	N	N	N	N	N	ALLOW
-36-sim-ipc_syscalls	+x86_64		shmctl		N	N	N	N	N	N	ALLOW
+# Testname		Arch			Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		1	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		2	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		3	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		4	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		11	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		12	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		13	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		14	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		21	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		22	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		23	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86,+ppc64le,+mipsel	ipc		24	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				semop		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				semget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				semctl		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				semtimedop	N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				msgsnd		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				msgrcv		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				msgget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				msgctl		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				shmat		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				shmdt		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				shmget		N	N	N	N	N	N	ALLOW
+36-sim-ipc_syscalls	+x86_64				shmctl		N	N	N	N	N	N	ALLOW
 
 test type: bpf-valgrind
 

@@ -57,6 +57,30 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, SCMP_ARCH_X86);
 	if (rc < 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_X32);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_ARM);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_AARCH64);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPSEL);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPSEL64);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_MIPSEL64N32);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_PPC64LE);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, SCMP_ARCH_RISCV64);
+	if (rc < 0)
+		goto out;
 
 	/* NOTE: the syscalls and their arguments have been picked to achieve
 	 *       the highest possible code coverage, this is not a useful
@@ -85,6 +109,9 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL_PROCESS, SCMP_SYS(fstat), 0);
+	if (rc < 0)
+		goto out;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_LOG, SCMP_SYS(exit_group), 0);
 	if (rc < 0)
 		goto out;
 

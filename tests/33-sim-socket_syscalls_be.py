@@ -33,6 +33,7 @@ def test(args):
     f.remove_arch(Arch())
     f.add_arch(Arch("s390"))
     f.add_arch(Arch("s390x"))
+    f.add_arch(Arch("ppc"))
     f.add_rule(ALLOW, "socket")
     f.add_rule(ALLOW, "connect")
     f.add_rule(ALLOW, "accept")
