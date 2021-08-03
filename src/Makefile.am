@@ -16,10 +16,6 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-@CODE_COVERAGE_RULES@
-
-CODE_COVERAGE_IGNORE_PATTERN = /usr/include/bits/* */arch-syscall-check.c
-
 SUBDIRS = .
 if ENABLE_PYTHON
 SUBDIRS += python
@@ -62,8 +58,7 @@ lib_LTLIBRARIES = libseccomp.la
 arch_syscall_dump_SOURCES = arch-syscall-dump.c ${SOURCES_ALL}
 
 arch_syscall_check_SOURCES = arch-syscall-check.c ${SOURCES_ALL}
-arch_syscall_check_CFLAGS = ${AM_CFLAGS} ${CODE_COVERAGE_CFLAGS}
-arch_syscall_check_LDFLAGS = ${CODE_COVERAGE_LDFLAGS}
+arch_syscall_check_CFLAGS = ${AM_CFLAGS}
 
 libseccomp_la_SOURCES = ${SOURCES_ALL}
 libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} ${CODE_COVERAGE_CPPFLAGS}
