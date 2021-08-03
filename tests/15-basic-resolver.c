@@ -46,6 +46,7 @@ unsigned int arch_list[] = {
 	SCMP_ARCH_PARISC,
 	SCMP_ARCH_PARISC64,
 	SCMP_ARCH_RISCV64,
+	SCMP_ARCH_SH,
 	-1
 };
 
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
 		goto fail;
 
 	while ((arch = arch_list[iter++]) != -1) {
+		int sys;
 		int nr_open;
 		int nr_read;
 		int nr_socket;
@@ -119,6 +121,45 @@ int main(int argc, char *argv[])
 			goto fail;
 		free(name);
 		name = NULL;
+
+		/* socket pseudo-syscalls */
+		if (seccomp_syscall_resolve_name_arch(arch, "socketcall") > 0) {
+			for (sys = -101; sys >= -120; sys--) {
+				name = seccomp_syscall_resolve_num_arch(arch,
+									sys);
+				if (name == NULL)
+					goto fail;
+				free(name);
+				name = NULL;
+			}
+		}
+		/* ipc pseudo-syscalls */
+		if (seccomp_syscall_resolve_name_arch(arch, "ipc") > 0) {
+			for (sys = -201; sys >= -204; sys--) {
+				name = seccomp_syscall_resolve_num_arch(arch,
+									sys);
+				if (name == NULL)
+					goto fail;
+				free(name);
+				name = NULL;
+			}
+			for (sys = -211; sys >= -214; sys--) {
+				name = seccomp_syscall_resolve_num_arch(arch,
+									sys);
+				if (name == NULL)
+					goto fail;
+				free(name);
+				name = NULL;
+			}
+			for (sys = -221; sys >= -224; sys--) {
+				name = seccomp_syscall_resolve_num_arch(arch,
+									sys);
+				if (name == NULL)
+					goto fail;
+				free(name);
+				name = NULL;
+			}
+		}
 	}
 
 	return 0;
