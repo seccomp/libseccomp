@@ -31,14 +31,37 @@ int main(int argc, char *argv[])
 	int rc;
 	struct util_options opts;
 	scmp_filter_ctx ctx = NULL;
+	unsigned int api;
 
 	rc = util_getopt(argc, argv, &opts);
 	if (rc < 0)
 		goto out;
 
+	api = seccomp_api_get();
+	if (api == 0) {
+		rc = -EFAULT;
+		goto out;
+	}
+
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
 		return ENOMEM;
+
+	if (api >= 2) {
+		rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_TSYNC, 1);
+		if (rc != 0)
+			goto out;
+	}
+	if (api >= 3) {
+		rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_LOG, 1);
+		if (rc != 0)
+			goto out;
+	}
+	if (api >= 4) {
+		rc = seccomp_attr_set(ctx, SCMP_FLTATR_CTL_SSB, 1);
+		if (rc != 0)
+			goto out;
+	}
 
 	rc = seccomp_load(ctx);
 
