@@ -104,6 +104,7 @@ optional arguments:
                   can also be set via LIBSECCOMP_TSTCFG_MODE_LIST env variable
   -a             specifies all tests are to be run
   -b BATCH_NAME  specifies batch of tests to be run
+                  can also be set via LIBSECCOMP_TSTCFG_BATCHES env variable
   -l [LOG]       specifies log file to write test results to
   -s SINGLE_TEST specifies individual test number to be run
   -t [TEMP_DIR]  specifies directory to create temporary files in
@@ -1156,6 +1157,14 @@ if [[ -z $mode_list ]]; then
 		   awk '{ print $3 }')" = "1" ]] && \
 			mode_list="$mode_list python"
 	fi
+fi
+
+# check if we specified a list of tests via the environment variable
+if [[ -n $LIBSECCOMP_TSTCFG_BATCHES ]]; then
+	for i in $(echo "$LIBSECCOMP_TSTCFG_BATCHES" | sed 's/,/ /g'); do
+		batch_list[batch_count]="$i"
+		batch_count=$(($batch_count+1))
+	done
 fi
 
 # default to all tests if batch or single tests not requested
