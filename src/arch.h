@@ -49,10 +49,18 @@ struct arch_def {
 		ARCH_ENDIAN_BIG,
 	} endian;
 
+	/* arch specific constants */
+	int sys_socketcall;
+	int sys_ipc;
+
 	/* arch specific functions */
-	int (*syscall_resolve_name)(const char *name);
-	const char *(*syscall_resolve_num)(int num);
-	int (*syscall_rewrite)(int *syscall);
+	int (*syscall_resolve_name)(const struct arch_def *arch,
+				    const char *name);
+	int (*syscall_resolve_name_raw)(const char *name);
+	const char *(*syscall_resolve_num)(const struct arch_def *arch,
+					   int num);
+	const char *(*syscall_resolve_num_raw)(int num);
+	int (*syscall_rewrite)(const struct arch_def *arch, int *syscall);
 	int (*rule_add)(struct db_filter *db, struct db_api_rule_list *rule);
 };
 
