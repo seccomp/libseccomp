@@ -37,7 +37,9 @@ jobs:
         ./configure --enable-python
         make check-build
     - name: Run tests
-      run: LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
+      run: |
+        LIBSECCOMP_TSTCFG_JOBS=0 \
+          LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
 
   livetests:
     name: Live Tests
@@ -53,7 +55,10 @@ jobs:
         ./configure --enable-python
         make check-build
     - name: Run live tests
-      run: LIBSECCOMP_TSTCFG_TYPE=live LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
+      run: |
+        LIBSECCOMP_TSTCFG_JOBS=0 \
+          LIBSECCOMP_TSTCFG_TYPE=live \
+          LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
 
   scanbuild:
     name: Scan Build
@@ -83,18 +88,19 @@ jobs:
         ./configure --enable-code-coverage
     - name: Run tests with code coverage enabled
       run: |
-        make test-code-coverage
-    - name: Gather code coverage results
-      run:  lcov -c --exclude tests --exclude tools --exclude src/arch-syscall-check.c -d . -o lcov.info
+        LIBSECCOMP_TSTCFG_JOBS=0 \
+          make test-code-coverage
     - name: Upload code coverage results
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ./lcov.info
+        path-to-lcov: ./libseccomp.lcov.info
         flag-name: "amd64"
     - name: Archive code coverage results
       if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: Code Coverage Artifacts
-        path: lcov.*
+        path: |
+          ./libseccomp.lcov.info
+          ./libseccomp.lcov.html.d
