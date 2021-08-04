@@ -300,7 +300,9 @@ int arch_arg_offset(const struct arch_def *arch, unsigned int arg)
 int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 {
 	if (arch->syscall_resolve_name)
-		return (*arch->syscall_resolve_name)(name);
+		return (*arch->syscall_resolve_name)(arch, name);
+	if (arch->syscall_resolve_name_raw)
+		return (*arch->syscall_resolve_name_raw)(name);
 
 	return __NR_SCMP_ERROR;
 }
@@ -318,7 +320,9 @@ int arch_syscall_resolve_name(const struct arch_def *arch, const char *name)
 const char *arch_syscall_resolve_num(const struct arch_def *arch, int num)
 {
 	if (arch->syscall_resolve_num)
-		return (*arch->syscall_resolve_num)(num);
+		return (*arch->syscall_resolve_num)(arch, num);
+	if (arch->syscall_resolve_num_raw)
+		return (*arch->syscall_resolve_num_raw)(num);
 
 	return NULL;
 }
@@ -381,7 +385,7 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall)
 	} else if (sys > -10000) {
 		/* rewritable syscalls */
 		if (arch->syscall_rewrite)
-			(*arch->syscall_rewrite)(syscall);
+			(*arch->syscall_rewrite)(arch, syscall);
 	}
 
 	/* syscalls not defined on this architecture */

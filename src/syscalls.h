@@ -59,4 +59,12 @@ int syscall_resolve_name(const char *name, int offset);
 const char *syscall_resolve_num(int num, int offset);
 const struct arch_syscall_def *syscall_iterate(unsigned int spot, int offset);
 
+/* helper functions for multiplexed syscalls, e.g. socketcall(2) and ipc(2) */
+int abi_syscall_resolve_name_munge(const struct arch_def *arch,
+				   const char *name);
+const char *abi_syscall_resolve_num_munge(const struct arch_def *arch, int num);
+int abi_syscall_rewrite(const struct arch_def *arch, int *syscall);
+int abi_rule_add(struct db_filter *db, struct db_api_rule_list *rule);
+
+
 #endif
