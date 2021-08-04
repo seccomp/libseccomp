@@ -48,6 +48,46 @@ static void _trap_handler(int signal, siginfo_t *info, void *ctx)
 }
 
 /**
+ * Add rules for gcov/lcov
+ * @param ctx the filter context
+ * @param action the action for the rules
+ *
+ * This function is to make it easier for developers to temporarily add support
+ * for gcov/lcov to a test program; it likely should not be used in the normal
+ * regression tests.  Further, this should only be necessary for the "live"
+ * tests.
+ *
+ */
+int util_gcov_rules(const scmp_filter_ctx ctx, int action)
+{
+	int rc;
+
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(open), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(openat), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(fcntl), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(lseek), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(read), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(write), 0);
+	if (rc != 0)
+		return rc;
+	rc = seccomp_rule_add(ctx, action, SCMP_SYS(getpid), 0);
+	if (rc != 0)
+		return rc;
+
+	return 0;
+}
+
+/**
  * Parse the arguments passed to main
  * @param argc the argument count
  * @param argv the argument pointer
