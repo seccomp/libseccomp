@@ -28,6 +28,7 @@
 
 /**
  * Resolve a syscall name to a number
+ * @param arch the architecture definition
  * @param name the syscall name
  *
  * Resolve the given syscall name to the syscall number using the syscall table.
@@ -35,12 +36,13 @@
  * numbers; returns __NR_SCMP_ERROR on failure.
  *
  */
-int x32_syscall_resolve_name_munge(const char *name)
+int x32_syscall_resolve_name_munge(const struct arch_def *arch,
+				   const char *name)
 {
 	int sys;
 
 	/* NOTE: we don't want to modify the pseudo-syscall numbers */
-	sys = x32_syscall_resolve_name(name);
+	sys = arch->syscall_resolve_name_raw(name);
 	if (sys == __NR_SCMP_ERROR || sys < 0)
 		return sys;
 
@@ -49,6 +51,7 @@ int x32_syscall_resolve_name_munge(const char *name)
 
 /**
  * Resolve a syscall number to a name
+ * @param arch the architecture definition
  * @param num the syscall number
  *
  * Resolve the given syscall number to the syscall name using the syscall table.
@@ -56,12 +59,13 @@ int x32_syscall_resolve_name_munge(const char *name)
  * syscall names; returns NULL on failure.
  *
  */
-const char *x32_syscall_resolve_num_munge(int num)
+const char *x32_syscall_resolve_num_munge(const struct arch_def *arch,
+					  int num)
 {
 	/* NOTE: we don't want to modify the pseudo-syscall numbers */
 	if (num >= 0)
 		num &= ~X32_SYSCALL_BIT;
-	return x32_syscall_resolve_num(num);
+	return arch->syscall_resolve_num_raw(num);
 }
 
 const struct arch_def arch_def_x32 = {
@@ -71,7 +75,9 @@ const struct arch_def arch_def_x32 = {
 	.size = ARCH_SIZE_32,
 	.endian = ARCH_ENDIAN_LITTLE,
 	.syscall_resolve_name = x32_syscall_resolve_name_munge,
+	.syscall_resolve_name_raw = x32_syscall_resolve_name,
 	.syscall_resolve_num = x32_syscall_resolve_num_munge,
+	.syscall_resolve_num_raw = x32_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };

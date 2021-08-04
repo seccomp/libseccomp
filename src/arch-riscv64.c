@@ -24,8 +24,8 @@ const struct arch_def arch_def_riscv64 = {
 	.token_bpf = AUDIT_ARCH_RISCV64,
 	.size = ARCH_SIZE_64,
 	.endian = ARCH_ENDIAN_LITTLE,
-	.syscall_resolve_name = riscv64_syscall_resolve_name,
-	.syscall_resolve_num = riscv64_syscall_resolve_num,
+	.syscall_resolve_name_raw = riscv64_syscall_resolve_name,
+	.syscall_resolve_num_raw = riscv64_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
 };
