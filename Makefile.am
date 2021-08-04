@@ -18,8 +18,10 @@
 
 @CODE_COVERAGE_RULES@
 
+CODE_COVERAGE_OUTPUT_FILE = libseccomp.lcov.info
+CODE_COVERAGE_OUTPUT_DIRECTORY = libseccomp.lcov.html.d
 CODE_COVERAGE_IGNORE_PATTERN = \
-	/usr/include/bits/* \
+	*/usr/include/* \
 	*/src/arch-syscall-check.c \
 	*/src/syscalls.perf
 
