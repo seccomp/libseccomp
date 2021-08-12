@@ -1001,6 +1001,19 @@ cdef class SyscallFilter:
         if rc < 0:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
 
+    def get_notify_fd(self):
+        """ Get the seccomp notification file descriptor
+
+        Description:
+        Returns the seccomp listener file descriptor that was generated when
+        the seccomp policy was loaded. This is only valid after load() with a
+        filter that makes use of the NOTIFY action.
+        """
+        fd = libseccomp.seccomp_notify_fd(self._ctx)
+        if fd < 0:
+            raise RuntimeError("Notifications not enabled/active")
+        return fd
+
     def export_pfc(self, file):
         """ Export the filter in PFC format.
 
