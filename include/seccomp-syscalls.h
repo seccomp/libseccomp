@@ -275,6 +275,7 @@
 #define __PNR_ppoll				-10241
 #define __PNR_renameat				-10242
 #define __PNR_riscv_flush_icache		-10243
+#define __PNR_memfd_secret			-10244
 
 /*
  * libseccomp syscall definitions
@@ -1082,6 +1083,12 @@
 #define __SNR_memfd_create		__NR_memfd_create
 #else
 #define __SNR_memfd_create		__PNR_memfd_create
+#endif
+
+#ifdef __NR_memfd_secret
+#define __SNR_memfd_secret		__NR_memfd_secret
+#else
+#define __SNR_memfd_secret		__PNR_memfd_secret
 #endif
 
 #ifdef __NR_migrate_pages
