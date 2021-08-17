@@ -425,6 +425,24 @@ repository, can be found at https://github.com/seccomp/libseccomp.  This tool,
 as well as the libseccomp library, is currently under development, please
 report any bugs at the project site or directly to the author.
 .\" //////////////////////////////////////////////////////////////////////////
+.SH BUGS
+.\" //////////////////////////////////////////////////////////////////////////
+.P
+The runtime behavior of seccomp filters is dependent upon the kernel
+version, the processor architecture, and other libraries including libc.
+This could affect the return code of a seccomp filter.
+
+.TP
+.B *
+PowerPC glibc will not return a negative number when the
+.B getpid()
+syscall is invoked.  If a seccomp filter has been created where
+.B getpid()
+will return a negative number from the kernel, then PowerPC glibc will
+return the absolute value of the errno.  In this case, it is very difficult
+for an application to distinguish between the errno and a valid pid.
+
+.\" //////////////////////////////////////////////////////////////////////////
 .SH AUTHOR
 .\" //////////////////////////////////////////////////////////////////////////
 Paul Moore <paul@paul-moore.com>
