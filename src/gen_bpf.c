@@ -435,7 +435,7 @@ static struct bpf_blk *_blk_prepend(struct bpf_state *state,
  * @param blk the BPF instruction block
  *
  * Add the BPF instruction block to the end of the BPF program and perform the
- * necssary translation.  Returns zero on success, negative values on failure
+ * necessary translation.  Returns zero on success, negative values on failure
  * and in the case of failure the BPF program is free'd.
  *
  */
