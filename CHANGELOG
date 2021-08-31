@@ -2,6 +2,18 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.5.2 - August 31, 2021
+- Update the syscall table for Linux v5.14-rc7
+- Add a function, get_notify_fd(), to the Python bindings to get the
+  nofication file descriptor
+- Consolidate multiplexed syscall handling for all architectures into one
+  location
+- Add multiplexed syscall support to PPC
+- Add multiplexed syscall support to MIPS
+- The meaning of SECCOMP_IOCTL_NOTIF_ID_VALID changed within the kernel.
+  Modify the libseccomp file descriptor notification logic to support the
+  kernel's previous and new usage of SECCOMP_IOCTL_NOTIF_ID_VALID
+
 * Version 2.5.1 - November 20, 2020
 - Fix a bug where seccomp_load() could only be called once
 - Change the notification fd handling to only request a notification fd if
