@@ -41,6 +41,7 @@ def test():
     # NOTE: additional syscalls required for python
     f.add_rule(ALLOW, "write", Arg(0, EQ, fd))
     f.add_rule(ALLOW, "close")
+    f.add_rule(ALLOW, "munmap")
     f.add_rule(ALLOW, "rt_sigaction")
     f.add_rule(ALLOW, "rt_sigreturn")
     f.add_rule(ALLOW, "sigaltstack")
