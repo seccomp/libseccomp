@@ -331,6 +331,11 @@ Architecture specific failure.
 .B -EEXIST
 The rule already exists.
 .TP
+.B -EACCCES
+The rule conflicts with the filter (for example, the rule
+.I action
+equals the default action of the filter).
+.TP
 .B -EFAULT
 Internal libseccomp failure.
 .TP
