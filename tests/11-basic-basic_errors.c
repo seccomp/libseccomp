@@ -192,9 +192,11 @@ int main(int argc, char *argv[])
 	if (rc != -EINVAL)
 		return -1;
 
+	buf_len = sizeof(buf);
 	rc = seccomp_export_bpf_mem(ctx, NULL, &buf_len);
 	if (rc != 0)
 		return -1;
+	buf_len = sizeof(buf);
 	rc = seccomp_export_bpf_mem(ctx, buf, &buf_len);
 	if (rc != 0)
 		return -1;
