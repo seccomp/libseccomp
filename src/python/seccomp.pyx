@@ -1061,8 +1061,8 @@ cdef class SyscallFilter:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
 
         # Get the program.
-        cdef array.array data = array.array('b', bytes(len))
-        cdef char[:] program = data
+        cdef array.array data = array.array('B', bytes(len))
+        cdef unsigned char[:] program = data
         rc = libseccomp.seccomp_export_bpf_mem(self._ctx, <void *>&program[0],
                                                <size_t *>&len)
         if rc != 0:
