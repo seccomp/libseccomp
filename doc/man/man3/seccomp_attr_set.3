@@ -59,12 +59,12 @@ action.
 .TP
 .B SCMP_FLTATR_CTL_NNP
 A flag to specify if the NO_NEW_PRIVS functionality should be enabled before
-loading the seccomp filter into the kernel.  Setting this to off (
-.I value
+loading the seccomp filter into the kernel.  Setting this to off
+.RI ( value
 == 0) results in no action, meaning that loading the seccomp filter into the
 kernel will fail if CAP_SYS_ADMIN is missing and NO_NEW_PRIVS has not been
-externally set.  Defaults to on (
-.I value
+externally set.  Defaults to on
+.RI ( value
 == 1).
 .TP
 .B SCMP_FLTATR_CTL_TSYNC
@@ -74,8 +74,8 @@ across all threads on
 If the kernel is unable to synchronize all of the thread then the load
 operation will fail.  This flag is only available on Linux Kernel 3.17 or
 greater; attempting to enable this flag on earlier kernels will result in an
-error being returned.  Defaults to off (
-.I value
+error being returned.  Defaults to off
+.RI ( value
 == 0).
 .TP
 .B SCMP_FLTATR_API_TSKIP
@@ -83,22 +83,22 @@ A flag to specify if libseccomp should allow filter rules to be created for
 the -1 syscall.  The -1 syscall value can be used by tracer programs to skip
 specific syscall invocations, see
 .BR seccomp (2)
-for more information.  Defaults to off (
-.I value
+for more information.  Defaults to off
+.RI ( value
 == 0).
 .TP
 .B SCMP_FLTATR_CTL_LOG
 A flag to specify if the kernel should log all filter actions taken except for
 the
 .BR SCMP_ACT_ALLOW
-action. Defaults to off (
-.I value
+action. Defaults to off
+.RI ( value
 == 0).
 .TP
 .B SCMP_FLTATR_CTL_SSB
 A flag to disable Speculative Store Bypass mitigations for this filter.
-Defaults to off (
-.I value
+Defaults to off
+.RI ( value
 == 0).
 .TP
 .B SCMP_FLTATR_CTL_OPTIMIZE
@@ -129,8 +129,8 @@ Binary tree sorted by syscall number.
 .TP
 .B SCMP_FLTATR_API_SYSRAWRC
 A flag to specify if libseccomp should pass system error codes back to the
-caller instead of the default -ECANCELED.  Defaults to off (
-.I value
+caller instead of the default -ECANCELED.  Defaults to off
+.RI ( value
 == 0).
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
