@@ -40,7 +40,7 @@ has succeeded.  If
 .BR seccomp_reset ()
 is called with a NULL filter, it resets the library's global task state,
 including any notification file descriptors retrieved by
-.BR seccomp_notify_fd(3) .
+.BR seccomp_notify_fd (3).
 Normally this is not needed, but it may be required to continue using the
 library after a
 .BR fork ()
@@ -164,4 +164,3 @@ Paul Moore <paul@paul-moore.com>
 .SH SEE ALSO
 .\" //////////////////////////////////////////////////////////////////////////
 .BR seccomp_release (3)
-

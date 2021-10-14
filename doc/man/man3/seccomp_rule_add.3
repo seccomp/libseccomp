@@ -214,7 +214,7 @@ matches the filter rule.
 A monitoring process will be notified when a process running the seccomp
 filter calls a syscall that matches the filter rule.  The process that invokes
 the syscall waits in the kernel until the monitoring process has responded via
-.B seccomp_notify_respond(3)
+.B seccomp_notify_respond (3)
 \&.
 
 When a filter utilizing
@@ -222,7 +222,7 @@ When a filter utilizing
 is loaded into the kernel, the kernel generates a notification fd that must be
 used to communicate between the monitoring process and the process(es) being
 filtered.  See
-.B seccomp_notif_fd(3)
+.B seccomp_notif_fd (3)
 for more information.
 
 .P
