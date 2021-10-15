@@ -29,8 +29,12 @@ int main(int argc, char *argv[])
 	int rc;
 	scmp_filter_ctx ctx;
 	uint32_t attr;
+	unsigned int api;
 	struct seccomp_notif *req = NULL;
 	struct seccomp_notif_resp *resp = NULL;
+
+	/* get the api level */
+	api = seccomp_api_get();
 
 	/* seccomp_init errors */
 	ctx = seccomp_init(SCMP_ACT_ALLOW + 1);
@@ -234,39 +238,41 @@ int main(int argc, char *argv[])
 	ctx = NULL;
 
 	/* seccomp notify errors */
-	ctx = seccomp_init(SCMP_ACT_ALLOW);
-	if (ctx == NULL)
-		return -1;
-	rc = seccomp_notify_alloc(NULL, NULL);
-	if (rc != 0)
-		return -1;
-	rc = seccomp_notify_alloc(&req, NULL);
-	if (rc != 0)
-		return -1;
-	rc = seccomp_notify_alloc(NULL, &resp);
-	if (rc != 0)
-		return -1;
-	seccomp_notify_free(NULL, NULL);
-	seccomp_notify_free(req, resp);
-	req = NULL;
-	resp = NULL;
-	rc = seccomp_notify_receive(-1, NULL);
-	if (rc == 0)
-		return -1;
-	rc = seccomp_notify_respond(-1, NULL);
-	if (rc == 0)
-		return -1;
-	rc = seccomp_notify_id_valid(-1, 0);
-	if (rc == 0)
-		return -1;
-	rc = seccomp_notify_fd(NULL);
-	if (rc == 0)
-		return -1;
-	rc = seccomp_notify_fd(ctx);
-	if (rc == 0)
-		return -1;
-	seccomp_release(ctx);
-	ctx = NULL;
+	if (api >= 5) {
+		ctx = seccomp_init(SCMP_ACT_ALLOW);
+		if (ctx == NULL)
+			return -1;
+		rc = seccomp_notify_alloc(NULL, NULL);
+		if (rc != 0)
+			return -1;
+		rc = seccomp_notify_alloc(&req, NULL);
+		if (rc != 0)
+			return -1;
+		rc = seccomp_notify_alloc(NULL, &resp);
+		if (rc != 0)
+			return -1;
+		seccomp_notify_free(NULL, NULL);
+		seccomp_notify_free(req, resp);
+		req = NULL;
+		resp = NULL;
+		rc = seccomp_notify_receive(-1, NULL);
+		if (rc == 0)
+			return -1;
+		rc = seccomp_notify_respond(-1, NULL);
+		if (rc == 0)
+			return -1;
+		rc = seccomp_notify_id_valid(-1, 0);
+		if (rc == 0)
+			return -1;
+		rc = seccomp_notify_fd(NULL);
+		if (rc == 0)
+			return -1;
+		rc = seccomp_notify_fd(ctx);
+		if (rc == 0)
+			return -1;
+		seccomp_release(ctx);
+		ctx = NULL;
+	}
 
 	return 0;
 }
