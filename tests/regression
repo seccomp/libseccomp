@@ -107,6 +107,7 @@ optional arguments:
                   can also be set via LIBSECCOMP_TSTCFG_BATCHES env variable
   -l [LOG]       specifies log file to write test results to
   -s SINGLE_TEST specifies individual test number to be run
+                  can also assign multiple tests with multiple -s flags
   -t [TEMP_DIR]  specifies directory to create temporary files in
   -T [TEST_TYPE] only run tests matching the specified type
                   can also be set via LIBSECCOMP_TSTCFG_TYPE env variable
@@ -1117,6 +1118,10 @@ while getopts "ab:gj:l:m:s:t:T:vh" opt; do
 		esac
 		;;
 	s)
+		if [[ ! $OPTARG =~ ^[0-9]+$ ]]; then
+			echo "Please just enter number for the -s flag, terminating..."
+			exit 1
+		fi
 		single_list[single_count]=$OPTARG
 		single_count=$(($single_count+1))
 		;;
