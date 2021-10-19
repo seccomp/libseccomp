@@ -29,37 +29,6 @@
 #include "arch.h"
 #include "syscalls.h"
 
-#define ARCH_DEF(NAME) \
-	int NAME##_syscall_resolve_name(const char *name) \
-	{ \
-		return syscall_resolve_name(name, OFFSET_ARCH(NAME)); \
-	} \
-	const char *NAME##_syscall_resolve_num(int num) \
-	{ \
-		return syscall_resolve_num(num, OFFSET_ARCH(NAME)); \
-	} \
-	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot) \
-	{ \
-		return syscall_iterate(spot, OFFSET_ARCH(NAME)); \
-	}
-
-ARCH_DEF(x86_64)
-ARCH_DEF(arm)
-ARCH_DEF(aarch64)
-ARCH_DEF(mips64n32)
-ARCH_DEF(mips64)
-ARCH_DEF(mips)
-ARCH_DEF(parisc)
-ARCH_DEF(parisc64)
-ARCH_DEF(ppc64)
-ARCH_DEF(ppc)
-ARCH_DEF(s390)
-ARCH_DEF(s390x)
-ARCH_DEF(sh)
-ARCH_DEF(x32)
-ARCH_DEF(x86)
-ARCH_DEF(riscv64)
-
 /**
  * Resolve a syscall name to a number
  * @param arch the arch definition

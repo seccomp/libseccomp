@@ -26,6 +26,7 @@
 
 #include "arch.h"
 #include "arch-mips64n32.h"
+#include "syscalls.h"
 
 /* N32 ABI */
 #define __SCMP_NR_BASE			6000
@@ -71,6 +72,8 @@ const char *mips64n32_syscall_resolve_num_munge(const struct arch_def *arch,
 		num -= __SCMP_NR_BASE;
 	return mips64n32_syscall_resolve_num(num);
 }
+
+ARCH_DEF(mips64n32)
 
 const struct arch_def arch_def_mips64n32 = {
 	.token = SCMP_ARCH_MIPS64N32,
