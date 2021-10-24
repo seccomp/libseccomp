@@ -1298,6 +1298,7 @@
 #endif
 
 #define __SNR_openat			__NR_openat
+#define __SNR_openat2			__NR_openat2
 
 #ifdef __NR_pause
 #define __SNR_pause			__NR_pause
