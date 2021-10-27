@@ -537,6 +537,8 @@
 
 #define __SNR_epoll_pwait		__NR_epoll_pwait
 
+#define __SNR_epoll_pwait2		__NR_epoll_pwait2
+
 #ifdef __NR_epoll_wait
 #define __SNR_epoll_wait		__NR_epoll_wait
 #else
@@ -1007,6 +1009,10 @@
 
 #define __SNR_kill			__NR_kill
 
+#define __SNR_landlock_add_rule		__NR_landlock_add_rule
+#define __SNR_landlock_create_ruleset	__NR_landlock_create_ruleset
+#define __SNR_landlock_restrict_self	__NR_landlock_restrict_self
+
 #ifdef __NR_lchown
 #define __SNR_lchown			__NR_lchown
 #else
@@ -1140,6 +1146,8 @@
 #endif
 
 #define __SNR_mount			__NR_mount
+
+#define __SNR_mount_setattr		__NR_mount_setattr
 
 #ifdef __NR_move_mount
 #define __SNR_move_mount		__NR_move_mount
@@ -1277,12 +1285,6 @@
 #define __SNR_olduname			__PNR_olduname
 #endif
 
-#ifdef __NR_oldwait4
-#define __SNR_oldwait4			__NR_oldwait4
-#else
-#define __SNR_oldwait4			__PNR_oldwait4
-#endif
-
 #ifdef __NR_open
 #define __SNR_open			__NR_open
 #else
@@ -1298,6 +1300,8 @@
 #endif
 
 #define __SNR_openat			__NR_openat
+
+#define __SNR_openat2			__NR_openat2
 
 #ifdef __NR_pause
 #define __SNR_pause			__NR_pause
@@ -1326,6 +1330,8 @@
 #define __SNR_perf_event_open		__NR_perf_event_open
 
 #define __SNR_personality		__NR_personality
+
+#define __SNR_pidfd_getfd		__NR_pidfd_getfd
 
 #ifdef __NR_pidfd_open
 #define __SNR_pidfd_open		__NR_pidfd_open
@@ -1395,6 +1401,8 @@
 
 #define __SNR_prlimit64			__NR_prlimit64
 
+#define __SNR_process_madvise		__NR_process_madvise
+
 #define __SNR_process_vm_readv		__NR_process_vm_readv
 
 #define __SNR_process_vm_writev		__NR_process_vm_writev
@@ -1440,6 +1448,8 @@
 #endif
 
 #define __SNR_quotactl			__NR_quotactl
+
+#define __SNR_quotactl_fd		__NR_quotactl_fd
 
 #ifdef __NR_read
 #define __SNR_read			__NR_read
