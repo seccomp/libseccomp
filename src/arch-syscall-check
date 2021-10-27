@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#
+# libseccomp syscall build-time checking script
+#
+# Copyright (c) 2021 Microsoft Corporation. <paulmoore@microsoft.com>
+#
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+#
+# This library is free software; you can redistribute it and/or modify it
+# under the terms of version 2.1 of the GNU Lesser General Public License as
+# published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses>.
+#
+
+SYSCALL_CSV="./syscalls.csv"
+SYSCALL_HDR="../include/seccomp-syscalls.h"
+
+function check_snr() {
+	(export LC_ALL=C; diff \
+		--label "CSV ($SYSCALL_CSV)" --label "HDR ($SYSCALL_HDR)" -u \
+		<(tail -n+2 $SYSCALL_CSV | cut -d',' -f1 | sort -u) \
+		<(grep __SNR_ $SYSCALL_HDR | awk '{ print $2 }' | \
+		  sed -e 's/^__SNR_//' | sort -u))
+	return $?
+}
+
+function check_pnr() {
+	# NOTE: we don't care if we have __PNR_ define that isn't needed, we
+	#       likely want to preserve those values so they aren't mistakenly
+	#       reused by a new __PNR_ in the future
+	(export LC_ALL=C; diff \
+		<(tail -n+2 $SYSCALL_CSV | grep "PNR" | cut -d',' -f1 | \
+		  sort -u) \
+		<(grep "#define __PNR_" $SYSCALL_HDR | awk '{ print $2 }' | \
+		  sed -e 's/^__PNR_//' | sort -u) | \
+		grep "^<")
+	[[ $? -eq 1 ]] && return 0 || return 1
+}
+
+rc=0
+
+echo ">>> CHECKING FOR MISSING __SNR_syscall VALUES"
+check_snr
+rc=$(( $rc + $? ))
+
+echo ">>> CHECKING FOR MISSING __PNR_syscall VALUES"
+check_pnr
+rc=$(( $rc + $? ))
+
+exit $rc

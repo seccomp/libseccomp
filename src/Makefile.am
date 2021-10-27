@@ -45,19 +45,16 @@ SOURCES_ALL = \
 	syscalls.h syscalls.c syscalls.perf.c
 
 EXTRA_DIST = \
-	arch-syscall-validate arch-gperf-generate \
-	syscalls.csv syscalls.perf.template
+	arch-syscall-validate arch-syscall-check \
+	arch-gperf-generate syscalls.csv syscalls.perf.template
 
 TESTS = arch-syscall-check
 
-check_PROGRAMS = arch-syscall-check arch-syscall-dump
+check_PROGRAMS = arch-syscall-dump
 
 lib_LTLIBRARIES = libseccomp.la
 
 arch_syscall_dump_SOURCES = arch-syscall-dump.c ${SOURCES_ALL}
-
-arch_syscall_check_SOURCES = arch-syscall-check.c ${SOURCES_ALL}
-arch_syscall_check_CFLAGS = ${AM_CFLAGS}
 
 libseccomp_la_SOURCES = ${SOURCES_ALL}
 libseccomp_la_CPPFLAGS = ${AM_CPPFLAGS} ${CODE_COVERAGE_CPPFLAGS}
