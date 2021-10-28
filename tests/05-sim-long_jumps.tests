@@ -1,30 +1,23 @@
 #
 # libseccomp regression test automation data
 #
-# Copyright IBM Corp. 2012
+# Copyright (c) 2012 IBM Corp.
+# Copyright (c) 2021 Microsoft Corporation <paulmoore@microsoft.com>
 # Author: Corey Bryant <coreyb@linux.vnet.ibm.com>
 #
 
 test type: bpf-sim
 
 # Testname		Arch		Syscall	Arg0	Arg1		Arg2			Arg3	Arg4	Arg5	Result
-05-sim-long_jumps	all,-x32	1	1	2		3			4	5	6	ALLOW
-05-sim-long_jumps	all,-x32	2	N	N		N			N	N	N	KILL
-05-sim-long_jumps	all,-x32	999	N	N		N			N	N	N	KILL
-05-sim-long_jumps	x86		1000	0-5 	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
-05-sim-long_jumps	x86_64		1000	0-5 	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
-05-sim-long_jumps	x86		1000	95-99	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
-05-sim-long_jumps	x86_64		1000	95-99	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
-05-sim-long_jumps	x86		1000	100	0x856B008	0x7FFFFFFE		N	N	N	KILL
-05-sim-long_jumps	x86_64		1000	100	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	KILL
-05-sim-long_jumps	all,-x32	1001	N	N		N			N	N	N	KILL
-05-sim-long_jumps	all,-x32	99	1	N		N			N	N	N	KILL
-05-sim-long_jumps	all,-x32	100-105	1	N		N			N	N	N	ALLOW
-05-sim-long_jumps	all,-x32	195-199	1	N		N			N	N	N	ALLOW
-05-sim-long_jumps	all,-x32	200	1	N		N			N	N	N	KILL
-05-sim-long_jumps	all,-x32	3	N	N		N			N	N	N	KILL
-05-sim-long_jumps	all,-x32	4	1	2		3			4	5	6	ALLOW
-05-sim-long_jumps	all,-x32	5	N	N		N			N	N	N	KILL
+05-sim-long_jumps	all,-x32	brk	1	2		3			4	5	6	ALLOW
+05-sim-long_jumps	all,-x32	9999	N	N		N			N	N	N	KILL
+05-sim-long_jumps	x86		chdir	0-5 	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-sim-long_jumps	x86_64		chdir	0-5 	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+05-sim-long_jumps	x86		chdir	95-99	0x856B008	0x7FFFFFFE		N	N	N	ALLOW
+05-sim-long_jumps	x86_64		chdir	95-99	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	ALLOW
+05-sim-long_jumps	x86		chdir	100	0x856B008	0x7FFFFFFE		N	N	N	KILL
+05-sim-long_jumps	x86_64		chdir	100	0x856B008	0x7FFFFFFFFFFFFFFE	N	N	N	KILL
+05-sim-long_jumps	all,-x32	close	1	N		N			N	N	N	ALLOW
 
 test type: bpf-sim-fuzz
 
