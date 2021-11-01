@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <limits.h>
+#include <stdlib.h>
 
 #include <seccomp.h>
 
