@@ -2,6 +2,7 @@
  * Seccomp Library test program
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2021 Microsoft Corporation <paulmoore@microsoft.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -30,7 +31,8 @@
 int main(int argc, char *argv[])
 {
 	int rc;
-	int iter;
+	int iter, ctr;
+	char *syscall;
 	struct util_options opts;
 	scmp_filter_ctx ctx = NULL;
 
@@ -42,31 +44,37 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
-	/* NOTE - syscalls referenced by number to make the test simpler */
-
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1, 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
 	if (rc != 0)
 		goto out;
 
 	/* same syscall, many chains */
 	for (iter = 0; iter < 100; iter++) {
-		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 1000, 3,
-					    SCMP_A0(SCMP_CMP_EQ, iter),
-					    SCMP_A1(SCMP_CMP_NE, 0x0),
-					    SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
+		rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(chdir), 3,
+				      SCMP_A0(SCMP_CMP_EQ, iter),
+				      SCMP_A1(SCMP_CMP_NE, 0x0),
+				      SCMP_A2(SCMP_CMP_LT, SSIZE_MAX));
 		if (rc != 0)
 			goto out;
 	}
 
 	/* many syscalls, same chain */
-	for (iter = 100; iter < 200; iter++) {
-		rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, iter, 1,
-					    SCMP_A0(SCMP_CMP_NE, 0));
-		if (rc != 0)
-			goto out;
+	for (iter = 0, ctr = 0; iter < 10000 && ctr < 100; iter++) {
+		if (iter == SCMP_SYS(chdir))
+			continue;
+		syscall = seccomp_syscall_resolve_num_arch(SCMP_ARCH_NATIVE,
+							   iter);
+		if (syscall) {
+			free(syscall);
+			rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, iter, 1,
+					      SCMP_A0(SCMP_CMP_NE, 0));
+			if (rc != 0)
+				goto out;
+			ctr++;
+		}
 	}
 
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_ALLOW, 4, 0);
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close), 0);
 	if (rc != 0)
 		goto out;
 
