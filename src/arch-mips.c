@@ -30,9 +30,50 @@
 #include "arch.h"
 #include "arch-mips.h"
 
+/* O32 ABI */
+#define __SCMP_NR_BASE			4000
+
 /* mips syscall numbers */
-#define __mips_NR_socketcall		102
-#define __mips_NR_ipc			117
+#define __mips_NR_socketcall		(__SCMP_NR_BASE + 102)
+#define __mips_NR_ipc			(__SCMP_NR_BASE + 117)
+
+/**
+ * Resolve a syscall name to a number
+ * @param name the syscall name
+ *
+ * Resolve the given syscall name to the syscall number using the syscall table.
+ * Returns the syscall number on success, including negative pseudo syscall
+ * numbers; returns __NR_SCMP_ERROR on failure.
+ *
+ */
+int mips_syscall_resolve_name_raw(const char *name)
+{
+	int sys;
+
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
+	sys = mips_syscall_resolve_name(name);
+	if (sys == __NR_SCMP_ERROR || sys < 0)
+		return sys;
+
+	return sys + __SCMP_NR_BASE;
+}
+
+/**
+ * Resolve a syscall number to a name
+ * @param num the syscall number
+ *
+ * Resolve the given syscall number to the syscall name using the syscall table.
+ * Returns a pointer to the syscall name string on success, including pseudo
+ * syscall names; returns NULL on failure.
+ *
+ */
+const char *mips_syscall_resolve_num_raw(int num)
+{
+	/* NOTE: we don't want to modify the pseudo-syscall numbers */
+	if (num >= __SCMP_NR_BASE)
+		num -= __SCMP_NR_BASE;
+	return mips_syscall_resolve_num(num);
+}
 
 const struct arch_def arch_def_mips = {
 	.token = SCMP_ARCH_MIPS,
@@ -42,9 +83,9 @@ const struct arch_def arch_def_mips = {
 	.sys_socketcall = __mips_NR_socketcall,
 	.sys_ipc = __mips_NR_ipc,
 	.syscall_resolve_name = abi_syscall_resolve_name_munge,
-	.syscall_resolve_name_raw = mips_syscall_resolve_name,
+	.syscall_resolve_name_raw = mips_syscall_resolve_name_raw,
 	.syscall_resolve_num = abi_syscall_resolve_num_munge,
-	.syscall_resolve_num_raw = mips_syscall_resolve_num,
+	.syscall_resolve_num_raw = mips_syscall_resolve_num_raw,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
 };
@@ -57,9 +98,9 @@ const struct arch_def arch_def_mipsel = {
 	.sys_socketcall = __mips_NR_socketcall,
 	.sys_ipc = __mips_NR_ipc,
 	.syscall_resolve_name = abi_syscall_resolve_name_munge,
-	.syscall_resolve_name_raw = mips_syscall_resolve_name,
+	.syscall_resolve_name_raw = mips_syscall_resolve_name_raw,
 	.syscall_resolve_num = abi_syscall_resolve_num_munge,
-	.syscall_resolve_num_raw = mips_syscall_resolve_num,
+	.syscall_resolve_num_raw = mips_syscall_resolve_num_raw,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
 };
