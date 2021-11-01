@@ -4,6 +4,7 @@
 # Seccomp Library test program
 #
 # Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2021 Microsoft Corporation <paulmoore@microsoft.com>
 # Author: Paul Moore <paul@paul-moore.com>
 #
 
@@ -30,21 +31,28 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(KILL)
-    # syscalls referenced by number to make the test simpler
-    f.add_rule_exactly(ALLOW, 1)
+    f.add_rule(ALLOW, "brk")
     i = 0
     while i < 100:
-        f.add_rule_exactly(ALLOW, 1000,
-                           Arg(0, EQ, i),
-                           Arg(1, NE, 0),
-                           Arg(2, LT, sys.maxsize))
+        f.add_rule(ALLOW, "chdir",
+                   Arg(0, EQ, i),
+                   Arg(1, NE, 0),
+                   Arg(2, LT, sys.maxsize))
         i += 1
-    i = 100
-    while i < 200:
-        f.add_rule_exactly(ALLOW, i,
-                           Arg(0, NE, 0))
+    i = 0
+    ctr = 0
+    while i < 10000 and ctr < 100:
+        sc = i
         i += 1
-    f.add_rule_exactly(ALLOW, 4)
+        if sc == resolve_syscall(Arch(), "chdir"):
+            continue
+        try:
+            resolve_syscall(Arch(), sc)
+        except ValueError:
+            continue
+        f.add_rule(ALLOW, sc, Arg(0, NE, 0))
+        ctr += 1
+    f.add_rule(ALLOW, "close")
     return f
 
 args = util.get_opt()
