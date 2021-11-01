@@ -25,6 +25,9 @@
 
 #include "arch.h"
 #include "arch-aarch64.h"
+#include "syscalls.h"
+
+ARCH_DEF(aarch64)
 
 const struct arch_def arch_def_aarch64 = {
 	.token = SCMP_ARCH_AARCH64,

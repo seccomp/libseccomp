@@ -25,6 +25,7 @@
 
 #include "arch.h"
 #include "arch-x32.h"
+#include "syscalls.h"
 
 /**
  * Resolve a syscall name to a number
@@ -67,6 +68,8 @@ const char *x32_syscall_resolve_num_munge(const struct arch_def *arch,
 		num &= ~X32_SYSCALL_BIT;
 	return arch->syscall_resolve_num_raw(num);
 }
+
+ARCH_DEF(x32)
 
 const struct arch_def arch_def_x32 = {
 	.token = SCMP_ARCH_X32,

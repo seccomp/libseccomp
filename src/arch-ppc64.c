@@ -34,6 +34,8 @@
 #define __ppc64_NR_socketcall		102
 #define __ppc64_NR_ipc			117
 
+ARCH_DEF(ppc64)
+
 const struct arch_def arch_def_ppc64 = {
 	.token = SCMP_ARCH_PPC64,
 	.token_bpf = AUDIT_ARCH_PPC64,

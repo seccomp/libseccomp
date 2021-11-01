@@ -17,6 +17,8 @@
 #define __s390_NR_socketcall		102
 #define __s390_NR_ipc			117
 
+ARCH_DEF(s390)
+
 const struct arch_def arch_def_s390 = {
 	.token = SCMP_ARCH_S390,
 	.token_bpf = AUDIT_ARCH_S390,

@@ -9,6 +9,9 @@
 
 #include "arch.h"
 #include "arch-parisc64.h"
+#include "syscalls.h"
+
+ARCH_DEF(parisc64)
 
 const struct arch_def arch_def_parisc64 = {
 	.token = SCMP_ARCH_PARISC64,
