@@ -75,6 +75,8 @@ const char *mips_syscall_resolve_num_raw(int num)
 	return mips_syscall_resolve_num(num);
 }
 
+ARCH_DEF(mips)
+
 const struct arch_def arch_def_mips = {
 	.token = SCMP_ARCH_MIPS,
 	.token_bpf = AUDIT_ARCH_MIPS,

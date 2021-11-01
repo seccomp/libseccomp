@@ -18,6 +18,9 @@
 
 #include "arch.h"
 #include "arch-riscv64.h"
+#include "syscalls.h"
+
+ARCH_DEF(riscv64)
 
 const struct arch_def arch_def_riscv64 = {
 	.token = SCMP_ARCH_RISCV64,

@@ -26,6 +26,8 @@
 #define __sh_NR_socketcall		102
 #define __sh_NR_ipc			117
 
+ARCH_DEF(sh)
+
 const struct arch_def arch_def_sheb = {
 	.token = SCMP_ARCH_SHEB,
 	.token_bpf = AUDIT_ARCH_SH,

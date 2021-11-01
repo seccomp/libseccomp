@@ -74,6 +74,21 @@ extern const struct arch_def *arch_def_native;
 	const char *NAME##_syscall_resolve_num(int num); \
 	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot);
 
+/* macro to define the arch specific structures and functions */
+#define ARCH_DEF(NAME) \
+	int NAME##_syscall_resolve_name(const char *name) \
+	{ \
+		return syscall_resolve_name(name, OFFSET_ARCH(NAME)); \
+	} \
+	const char *NAME##_syscall_resolve_num(int num) \
+	{ \
+		return syscall_resolve_num(num, OFFSET_ARCH(NAME)); \
+	} \
+	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot) \
+	{ \
+		return syscall_iterate(spot, OFFSET_ARCH(NAME)); \
+	}
+
 /* syscall name/num mapping */
 struct arch_syscall_def {
 	const char *name;

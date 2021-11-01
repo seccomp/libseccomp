@@ -25,6 +25,7 @@
 
 #include "arch.h"
 #include "arch-arm.h"
+#include "syscalls.h"
 
 #define __SCMP_NR_OABI_SYSCALL_BASE     0x900000
 #define __SCMP_ARM_NR_BASE              0x0f0000
@@ -77,6 +78,8 @@ const char *arm_syscall_resolve_num_munge(const struct arch_def *arch, int num)
 		num &= ~__SCMP_NR_BASE;
 	return arch->syscall_resolve_num_raw(num);
 }
+
+ARCH_DEF(arm)
 
 const struct arch_def arch_def_arm = {
 	.token = SCMP_ARCH_ARM,

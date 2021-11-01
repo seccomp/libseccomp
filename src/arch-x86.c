@@ -33,6 +33,8 @@
 #define __x86_NR_socketcall		102
 #define __x86_NR_ipc			117
 
+ARCH_DEF(x86)
+
 const struct arch_def arch_def_x86 = {
 	.token = SCMP_ARCH_X86,
 	.token_bpf = AUDIT_ARCH_I386,

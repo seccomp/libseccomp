@@ -25,6 +25,9 @@
 
 #include "arch.h"
 #include "arch-x86_64.h"
+#include "syscalls.h"
+
+ARCH_DEF(x86_64)
 
 const struct arch_def arch_def_x86_64 = {
 	.token = SCMP_ARCH_X86_64,
