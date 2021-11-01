@@ -7,39 +7,45 @@
 
 test type: bpf-sim
 
-# Testname		Arch		Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
+# Testname		Arch				Syscall		Arg0		Arg1		Arg2	Arg3	Arg4	Arg5	Result
 # socket
-30-sim-socket_syscalls	+x86,+ppc64le	socketcall	1		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	socketcall	1		N		N	N	N	N	ALLOW
 # connect
-30-sim-socket_syscalls	+x86,+ppc64le	socketcall	3		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	socketcall	3		N		N	N	N	N	ALLOW
 # accept
-30-sim-socket_syscalls	+x86,+ppc64le	socketcall	5		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	socketcall	5		N		N	N	N	N	ALLOW
 # accept4
-30-sim-socket_syscalls	+ppc64le	socketcall	18		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			socketcall	18		N		N	N	N	N	ALLOW
 # shutdown
-30-sim-socket_syscalls	+x86,+ppc64le	socketcall	13		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	socketcall	13		N		N	N	N	N	ALLOW
 # socket
-30-sim-socket_syscalls	+x86		359		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+ppc64le	326		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86				359		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			326		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+mipsel				4183		0		1		2	N	N	N	ALLOW
 # connect
-30-sim-socket_syscalls	+x86		362		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+ppc64le	328		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86				362		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			328		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+mipsel				4170		0		1		2	N	N	N	ALLOW
 # accept
-30-sim-socket_syscalls	+ppc64le	330		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			330		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+mipsel				4168		0		1		2	N	N	N	ALLOW
 # accept4
-30-sim-socket_syscalls	+x86		364		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+ppc64le	344		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86				364		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			344		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+mipsel				4334		0		1		2	N	N	N	ALLOW
 # shutdown
-30-sim-socket_syscalls	+x86		373		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+ppc64le	338		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86,+ppc64le	accept		5		N		N	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86,+ppc64le	accept		0		1		2	N	N	N	KILL
-30-sim-socket_syscalls	+x86,+ppc64le	accept4		18		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86,+ppc64le	accept4		0		1		2	N	N	N	KILL
-30-sim-socket_syscalls	+x86_64		socket		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86_64		connect		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86_64		accept4		0		1		2	N	N	N	ALLOW
-30-sim-socket_syscalls	+x86_64		shutdown	0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86				373		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+ppc64le			338		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+mipsel				4182		0		1		2	N	N	N	ALLOW
+# direct syscalls
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	accept		5		N		N	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	accept		0		1		2	N	N	N	KILL
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	accept4		18		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86,+ppc64le,+mipsel	accept4		0		1		2	N	N	N	KILL
+30-sim-socket_syscalls	+x86_64				socket		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64				connect		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64				accept4		0		1		2	N	N	N	ALLOW
+30-sim-socket_syscalls	+x86_64				shutdown	0		1		2	N	N	N	ALLOW
 
 test type: bpf-valgrind
 
