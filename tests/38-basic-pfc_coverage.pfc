@@ -302,23 +302,23 @@ if ($arch == 3221225655)
   action ALLOW;
 # filter for arch mipsel (1073741832)
 if ($arch == 1073741832)
-  # filter for syscall "exit_group" (246) [priority: 65535]
-  if ($syscall == 246)
+  # filter for syscall "exit_group" (4246) [priority: 65535]
+  if ($syscall == 4246)
     action LOG;
-  # filter for syscall "fstat" (108) [priority: 65535]
-  if ($syscall == 108)
+  # filter for syscall "fstat" (4108) [priority: 65535]
+  if ($syscall == 4108)
     action KILL_PROCESS;
-  # filter for syscall "close" (6) [priority: 65535]
-  if ($syscall == 6)
+  # filter for syscall "close" (4006) [priority: 65535]
+  if ($syscall == 4006)
     action ERRNO(1);
-  # filter for syscall "open" (5) [priority: 65535]
-  if ($syscall == 5)
+  # filter for syscall "open" (4005) [priority: 65535]
+  if ($syscall == 4005)
     action KILL;
-  # filter for syscall "exit" (1) [priority: 65535]
-  if ($syscall == 1)
+  # filter for syscall "exit" (4001) [priority: 65535]
+  if ($syscall == 4001)
     action TRACE(1);
-  # filter for syscall "write" (4) [priority: 65532]
-  if ($syscall == 4)
+  # filter for syscall "write" (4004) [priority: 65532]
+  if ($syscall == 4004)
     if ($a0 == 0)
     else
       if ($a1 > 1)
@@ -326,8 +326,8 @@ if ($arch == 1073741832)
         if ($a2 >= 2)
         else
           action TRAP;
-  # filter for syscall "read" (3) [priority: 65531]
-  if ($syscall == 3)
+  # filter for syscall "read" (4003) [priority: 65531]
+  if ($syscall == 4003)
     if ($a0 == 0)
       if ($a1 >= 1)
         if ($a2 > 2)
