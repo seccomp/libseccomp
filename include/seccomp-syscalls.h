@@ -1403,6 +1403,8 @@
 
 #define __SNR_process_madvise		__NR_process_madvise
 
+#define __SNR_process_mrelease		__NR_process_mrelease
+
 #define __SNR_process_vm_readv		__NR_process_vm_readv
 
 #define __SNR_process_vm_writev		__NR_process_vm_writev
