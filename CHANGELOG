@@ -2,6 +2,12 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.5.3 - November 5, 2021
+- Update the syscall table for Linux v5.15
+- Fix issues with multiplexed syscalls on mipsel introduced in v2.5.2
+- Document that seccomp_rule_add() may return -EACCES
+- Fix issues with test 11-basic-basic_errors on old kernels (API level < 5)
+
 * Version 2.5.2 - August 31, 2021
 - Update the syscall table for Linux v5.14-rc7
 - Add a function, get_notify_fd(), to the Python bindings to get the
