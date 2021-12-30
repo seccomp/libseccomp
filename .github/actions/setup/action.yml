@@ -1,5 +1,5 @@
 #
-# Github Action to setup the libcgroup directory
+# Github Action to setup the libseccomp directory
 #
 # Copyright (c) 2021 Oracle and/or its affiliates.
 # Author: Tom Hromatka <tom.hromatka@oracle.com>
