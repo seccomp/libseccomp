@@ -34,7 +34,11 @@ jobs:
       uses: ./.github/actions/setup
     - name: Build libseccomp
       run: |
-        ./configure --enable-python
+        ./configure --prefix=$(pwd)/src/.libs --enable-python --enable-rust
+        # make and make install are required to create a pkconfig because
+        # the Rust bindings need it for the compilation.
+        make
+        make install
         make check-build
     - name: Run tests
       run: |
@@ -52,13 +56,18 @@ jobs:
       uses: ./.github/actions/setup
     - name: Build libseccomp
       run: |
-        ./configure --enable-python
+        ./configure --prefix=$(pwd)/src/.libs --enable-python --enable-rust
+        # make and make install are required to create a pkconfig because
+        # the Rust bindings need it for the compilation.
+        # This can be removed when the Rust bindings drop the version check by pkgconfig.
+        make
+        make install
         make check-build
     - name: Run live tests
       run: |
         LIBSECCOMP_TSTCFG_JOBS=0 \
           LIBSECCOMP_TSTCFG_TYPE=live \
-          LIBSECCOMP_TSTCFG_MODE_LIST=c make -C tests check
+          LIBSECCOMP_TSTCFG_MODE_LIST="c rust" make -C tests check
 
   scanbuild:
     name: Scan Build

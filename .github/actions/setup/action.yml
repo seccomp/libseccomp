@@ -37,4 +37,8 @@ runs:
     shell: bash
   - run: |
       ./autogen.sh
+      # Specify the tentative version of the libseccomp test library because some
+      # functions of the Rust bindings are restricted based on the version.
+      TEST_VERSION=9.9.9
+      sed -i "/^AC_INIT/ s/0.0.0/$TEST_VERSION/" configure.ac
     shell: bash
