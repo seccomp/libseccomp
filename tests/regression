@@ -567,7 +567,7 @@ function run_test_bpf_sim() {
 
 		# if ranges exist, the following will loop through all syscall
 		# and arg ranges and generate/run every combination of requested
-		# tests; if no ranges were specifed, then the single test is
+		# tests; if no ranges were specified, then the single test is
 		# run
 		for sys in $(get_seq $low_syscall $high_syscall); do
 		for arg0 in $(get_seq ${low_arg[0]} ${high_arg[0]}); do
@@ -628,7 +628,7 @@ function run_test_bpf_sim() {
 				return
 			fi
 
-			# simulate the specifed syscall against the BPF filter
+			# simulate the specified syscall against the BPF filter
 			# and verify the results
 			action=$($GLBL_SYS_SIM -a $simarch -f $tmpfile \
 				 -s $sys ${arg[0]} ${arg[1]} ${arg[2]} \

@@ -104,5 +104,5 @@ release.
 The following Markdown text is suggested at the top of the release note, see old GitHub releases for examples.
 
 ```
-***This release is no longer supported upsteam, please use a more recent release***
+***This release is no longer supported upstream, please use a more recent release***
 ```

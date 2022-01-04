@@ -623,7 +623,7 @@ cdef class SyscallFilter:
         Resets the seccomp filter state to an initial default state, if a
         default filter action is not specified in the reset call the
         original action will be reused.  This function does not affect any
-        seccomp filters alread loaded into the kernel.
+        seccomp filters already loaded into the kernel.
         """
         if defaction == -1:
             defaction = self._defaction
@@ -800,7 +800,7 @@ cdef class SyscallFilter:
 
         In the case where the specific rule is not valid on a specific
         architecture, e.g. socket() on 32-bit x86, this method rewrites
-        the rule to the best possible match.  If you don't want this fule
+        the rule to the best possible match.  If you don't want this rule
         rewriting to take place use add_rule_exactly().
         """
         cdef libseccomp.scmp_arg_cmp c_arg[6]
