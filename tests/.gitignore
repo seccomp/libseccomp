@@ -1,6 +1,8 @@
 *.bpf
 *.bpfd
 *.pfc
+*.log
+*.stats
 __pycache__/
 miniseq
 util.pyc
