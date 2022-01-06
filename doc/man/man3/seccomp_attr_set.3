@@ -31,9 +31,9 @@ function fetches the filter attributes.  The seccomp filter attributes are
 tunable values that affect how the library behaves when generating and loading
 the seccomp filter into the kernel.  The attributes are reset to their default
 values whenever the filter is initialized or reset via
-.BR seccomp_filter_init (3)
+.BR seccomp_init (3)
 or
-.BR seccomp_filter_reset (3).
+.BR seccomp_reset (3).
 .P
 The filter context
 .I ctx
@@ -46,9 +46,9 @@ values are as follows:
 .TP
 .B SCMP_FLTATR_ACT_DEFAULT
 The default filter action as specified in the call to
-.BR seccomp_filter_init (3)
+.BR seccomp_init (3)
 or
-.BR seccomp_filter_reset (3).
+.BR seccomp_reset (3).
 This attribute is read-only.
 .TP
 .B SCMP_FLTATR_ACT_BADARCH
