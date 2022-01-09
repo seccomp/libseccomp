@@ -64,7 +64,7 @@ mostly in the form of manpages.  The top level directory also contains a README
 file (this file) as well as the LICENSE, CREDITS, CONTRIBUTING, and
 CHANGELOG files.
 
-Those who are interested in contributing to the the project are encouraged to
+Those who are interested in contributing to the project are encouraged to
 read the CONTRIBUTING in the top level directory.
 
 ## Verifying Release Tarballs
