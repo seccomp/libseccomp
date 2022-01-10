@@ -104,3 +104,16 @@ jobs:
         path: |
           ./libseccomp.lcov.info
           ./libseccomp.lcov.html.d
+
+  codespell:
+    name: Codespell
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v2
+    - name: Spellcheck
+      uses: codespell-project/actions-codespell@master
+      with:
+        ignore_words_list: extraversion
+        exclude_file: src/syscalls.csv
