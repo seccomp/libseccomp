@@ -1,0 +1,38 @@
+#
+# Doxygen Workflow for libseccomp
+#
+# Copyright (c) 2022 Oracle and/or its affiliates.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+name: "Doxygen"
+on: ["push"]
+
+jobs:
+  doxygen:
+    name: Doxygen
+    # Only run Doxygen against the main branch
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: false
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Build libseccomp
+      run: |
+        ./configure
+        make check-build
+    - uses: mattnotmitt/doxygen-action@v1
+      with:
+        working-directory: "./"
+        doxyfile-path: "./doc/Doxygen"
+    - name: Deploy Doxygen
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./html
+        publish_branch: html
+        destination_dir: doxygen/${{ github.ref_name }}
