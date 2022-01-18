@@ -43,3 +43,4 @@ followed, including notification to the linux-distros and oss-security mailing
 lists.
 
 * https://oss-security.openwall.org/wiki/mailing-lists/distros
+* https://oss-security.openwall.org/wiki/mailing-lists/oss-security
