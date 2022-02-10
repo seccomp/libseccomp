@@ -47,12 +47,8 @@ the patch can be merged without a simple majority.
 The libseccomp vulnerability reporting process is documented in the SECURITY.md
 document.
 
-The maintainers should work together with the reporter to asses the validity
-and seriousness of the reported vulnerability.  Whenever possible, responsible
-reporting and patching practices should be followed, including notification to
-the _linux-distros_ and _oss-security_ mailing lists.
-
-* https://oss-security.openwall.org/wiki/mailing-lists/distros
+The maintainers should work together with the reporter to assess the validity
+and seriousness of the reported vulnerability.
 
 ### Managing the GitHub Issue Tracker
 
