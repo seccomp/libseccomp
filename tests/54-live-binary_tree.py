@@ -62,6 +62,7 @@ def test():
     util.install_trap()
     f = SyscallFilter(TRAP)
     f.set_attr(Attr.CTL_TSYNC, 1)
+    f.set_attr(Attr.CTL_OPTIMIZE, 2)
     # NOTE: additional syscalls required for python
     f.add_rule(ALLOW, "stat")
     f.add_rule(ALLOW, "fstat")
