@@ -1348,6 +1348,9 @@ static int _get_bintree_levels(unsigned int syscall_cnt)
 {
 	unsigned int i = 2, max_level = SYSCALLS_PER_NODE * 2;
 
+	if (syscall_cnt == 0)
+		return 0;
+
 	while (max_level < syscall_cnt) {
 		max_level <<= 1;
 		i++;
