@@ -68,6 +68,7 @@ table = [
 
 def test(args):
     f = SyscallFilter(ALLOW)
+    f.set_attr(Attr.CTL_OPTIMIZE, 2)
 
     f.remove_arch(Arch())
     f.add_arch(Arch("aarch64"))
