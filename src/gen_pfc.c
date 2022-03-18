@@ -271,6 +271,9 @@ static int _get_bintree_levels(unsigned int syscall_cnt,
 		/* Only use a binary tree if requested */
 		return 0;
 
+	if (syscall_cnt == 0)
+		return 0;
+
 	do {
 		max_level = SYSCALLS_PER_NODE << i;
 		i++;
