@@ -23,9 +23,9 @@
 
 import os
 
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
+from setuptools import setup
+from setuptools.extension import Extension
+from Cython.Build import cythonize
 
 setup(
 	name = "seccomp",
@@ -37,12 +37,9 @@ setup(
 	maintainer_email = "paul@paul-moore.com",
 	license = "LGPLv2.1",
 	platforms = "Linux",
-	cmdclass = {'build_ext': build_ext},
-	ext_modules = [
+	ext_modules = cythonize([
 		Extension("seccomp", ["seccomp.pyx"],
 			# unable to handle libtool libraries directly
-			extra_objects=["../.libs/libseccomp.a"],
-			# fix build warnings, see PEP 3123
-			extra_compile_args=["-fno-strict-aliasing"])
-	]
+			extra_objects=["../.libs/libseccomp.a"]),
+	])
 )
