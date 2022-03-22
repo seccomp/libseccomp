@@ -40,6 +40,7 @@ SOURCES_ALL = \
 	arch-ppc.h arch-ppc.c \
 	arch-ppc64.h arch-ppc64.c \
 	arch-riscv64.h arch-riscv64.c \
+	arch-riscv32.h arch-riscv32.c \
 	arch-s390.h arch-s390.c \
 	arch-s390x.h arch-s390x.c \
 	arch-sh.h arch-sh.c \

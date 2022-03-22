@@ -79,6 +79,13 @@
 #define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
 #endif /* AUDIT_ARCH_RISCV64 */
 
+#ifndef AUDIT_ARCH_RISCV32
+#ifndef EM_RISCV
+#define EM_RISCV		243
+#endif /* EM_RISCV */
+#define AUDIT_ARCH_RISCV32	(EM_RISCV|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_RISCV32 */
+
 extern uint32_t arch;
 
 uint16_t ttoh16(uint32_t arch, uint16_t val);

@@ -130,6 +130,7 @@ int sys_chk_seccomp_syscall(void)
 	case SCMP_ARCH_PPC64LE:
 	case SCMP_ARCH_S390:
 	case SCMP_ARCH_S390X:
+	case SCMP_ARCH_RISCV32:
 	case SCMP_ARCH_RISCV64:
 		break;
 	default:

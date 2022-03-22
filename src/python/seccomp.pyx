@@ -216,6 +216,7 @@ cdef class Arch:
     PARISC64 - 64-bit PA-RISC
     PPC64 - 64-bit PowerPC
     PPC - 32-bit PowerPC
+    RISCV32 - 32-bit RISC-V
     RISCV64 - 64-bit RISC-V
     """
 
@@ -240,6 +241,7 @@ cdef class Arch:
     PPC64LE = libseccomp.SCMP_ARCH_PPC64LE
     S390 = libseccomp.SCMP_ARCH_S390
     S390X = libseccomp.SCMP_ARCH_S390X
+    RISCV32 = libseccomp.SCMP_ARCH_RISCV32
     RISCV64 = libseccomp.SCMP_ARCH_RISCV64
 
     def __cinit__(self, arch=libseccomp.SCMP_ARCH_NATIVE):

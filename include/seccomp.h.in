@@ -215,7 +215,16 @@ struct scmp_arg_cmp {
 #endif /* EM_RISCV */
 #define AUDIT_ARCH_RISCV64	(EM_RISCV|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
 #endif /* AUDIT_ARCH_RISCV64 */
+
+#ifndef AUDIT_ARCH_RISCV32
+#ifndef EM_RISCV
+#define EM_RISCV		243
+#endif /* EM_RISCV */
+#define AUDIT_ARCH_RISCV32	(EM_RISCV|__AUDIT_ARCH_LE)
+#endif /* AUDIT_ARCH_RISCV32 */
+
 #define SCMP_ARCH_RISCV64	AUDIT_ARCH_RISCV64
+#define SCMP_ARCH_RISCV32	AUDIT_ARCH_RISCV32
 
 /**
  * The SuperH architecture tokens
