@@ -74,17 +74,6 @@ the next major/minor release (for example, v2.5), and one for the next patch
 release (for example, v2.4.2).  As issues are entered into the system, they can
 be added to the milestones at the discretion of the maintainers.
 
-### Managing the Public Mailing List
-
-The mailing list is currently hosted on Google Groups, and while it is possible
-to participate in discussions without a Google account, a Google account is
-required to moderate/administer the group.  Those maintainers who do have a
-Google account and wish to be added to the moderators list should be added, but
-there is no requirement to do so.
-
-Despite the term "moderator" the list is currently unmoderated and should
-remain the way.
-
 ### Handling Inappropriate Community Behavior
 
 The libseccomp project community is relatively small, and almost always

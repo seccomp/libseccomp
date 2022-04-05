@@ -24,13 +24,6 @@ URL:
 
 * https://github.com/seccomp/libseccomp-golang
 
-The project mailing list is currently hosted on Google Groups at the URL below,
-please note that a Google account is not required to subscribe to the mailing
-list.
-
-* https://groups.google.com/forum/#!forum/libseccomp
-* https://groups.google.com/forum/#!forum/libseccomp/join
-
 ## Supported Architectures
 
 The libseccomp library currently supports the architectures listed below:
@@ -133,5 +126,5 @@ these tools are installed by default.
 ## Bug and Vulnerability Reporting
 
 Problems with the libseccomp library can be reported using the GitHub issue
-tracking system or the mailing list.  Those who wish to privately report
-potential vulnerabilities should follow the directions in SECURITY.md.
+tracking system.  Those who wish to privately report potential vulnerabilities
+should follow the directions in SECURITY.md.
