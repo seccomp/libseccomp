@@ -49,6 +49,8 @@ const struct arch_def arch_def_ppc64 = {
 	.syscall_resolve_num_raw = ppc64_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = ppc64_syscall_name_kver,
+	.syscall_num_kver = ppc64_syscall_num_kver,
 };
 
 const struct arch_def arch_def_ppc64le = {
@@ -64,4 +66,6 @@ const struct arch_def arch_def_ppc64le = {
 	.syscall_resolve_num_raw = ppc64_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = ppc64_syscall_name_kver,
+	.syscall_num_kver = ppc64_syscall_num_kver,
 };

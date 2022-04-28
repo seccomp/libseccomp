@@ -48,4 +48,6 @@ const struct arch_def arch_def_x86 = {
 	.syscall_resolve_num_raw = x86_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = x86_syscall_name_kver,
+	.syscall_num_kver = x86_syscall_num_kver,
 };

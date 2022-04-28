@@ -49,4 +49,6 @@ const struct arch_def arch_def_ppc = {
 	.syscall_resolve_num_raw = ppc_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = ppc_syscall_name_kver,
+	.syscall_num_kver = ppc_syscall_num_kver,
 };

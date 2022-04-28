@@ -32,4 +32,6 @@ const struct arch_def arch_def_s390 = {
 	.syscall_resolve_num_raw = s390_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = s390_syscall_name_kver,
+	.syscall_num_kver = s390_syscall_num_kver,
 };

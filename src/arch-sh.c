@@ -41,6 +41,8 @@ const struct arch_def arch_def_sheb = {
 	.syscall_resolve_num_raw = sh_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = sh_syscall_name_kver,
+	.syscall_num_kver = sh_syscall_num_kver,
 };
 
 const struct arch_def arch_def_sh = {
@@ -56,4 +58,6 @@ const struct arch_def arch_def_sh = {
 	.syscall_resolve_num_raw = sh_syscall_resolve_num,
 	.syscall_rewrite = abi_syscall_rewrite,
 	.rule_add = abi_rule_add,
+	.syscall_name_kver = sh_syscall_name_kver,
+	.syscall_num_kver = sh_syscall_num_kver,
 };

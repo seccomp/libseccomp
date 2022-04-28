@@ -22,4 +22,6 @@ const struct arch_def arch_def_parisc64 = {
 	.syscall_resolve_num_raw = parisc64_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
+	.syscall_name_kver = parisc64_syscall_name_kver,
+	.syscall_num_kver = parisc64_syscall_num_kver,
 };

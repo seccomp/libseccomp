@@ -86,6 +86,8 @@ const struct arch_def arch_def_mips64n32 = {
 	.syscall_resolve_num_raw = mips64n32_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
+	.syscall_name_kver = mips64n32_syscall_name_kver,
+	.syscall_num_kver = mips64n32_syscall_num_kver,
 };
 
 const struct arch_def arch_def_mipsel64n32 = {
@@ -99,4 +101,6 @@ const struct arch_def arch_def_mipsel64n32 = {
 	.syscall_resolve_num_raw = mips64n32_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
+	.syscall_name_kver = mips64n32_syscall_name_kver,
+	.syscall_num_kver = mips64n32_syscall_num_kver,
 };

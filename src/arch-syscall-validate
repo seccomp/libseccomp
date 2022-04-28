@@ -5,6 +5,7 @@
 #
 # Copyright (c) 2014 Red Hat <pmoore@redhat.com>
 # Copyright (c) 2020 Cisco Systems, Inc. <pmoore2@cisco.com>
+# Copyright (c) 2022 Microsoft Corporation. <paulmoore@microsoft.com>
 #
 # Author: Paul Moore <paul@paul-moore.com>
 #
@@ -59,7 +60,7 @@ function verify_deps() {
 #
 function usage() {
 cat << EOF
-usage: arch-syscall-validate [-h] [-c] [-a <arch>] <kernel_directory>
+usage: arch-syscall-validate [-h] [-c <file>] [-a <arch>] <kernel_directory>
 
 libseccomp syscall validation script
 optional arguments:
@@ -67,7 +68,7 @@ optional arguments:
   -a             architecture
   -l             output the library's syscall definitions
   -s             output the kernel's syscall definitions
-  -c             generate a CSV of the kernel's syscall definitions
+  -c <file>      generate a CSV of the kernel's syscall definitions
 EOF
 }
 
@@ -733,6 +734,7 @@ function dump_lib() {
 # Arguments:
 #     1    path to the kernel source
 #     2    "sys" or "lib" depending on the syscall list to use
+#     3    csv file to use as input for saved fields
 #
 #   Generare a syscall csv file from the given kernel sources.
 #
@@ -755,6 +757,26 @@ function gen_csv() {
 	abi_list+=" s390 s390x"
 	abi_list+=" sh"
 
+	# read the csv to get the existing data
+	local -A csv
+	local csv_has_kver=0
+	local csv_input="$3"
+	[[ ! -e "$3" ]] && csv_input=/dev/null
+	grep -q "KV_" "$csv_input" && csv_has_kver=1
+	while read line; do
+		sc=$(echo $line | cut -d, -f 1)
+		local field=2
+		for abi in $abi_list; do
+			csv[$sc,$abi]=$(echo $line | cut -d, -f $field)
+			((field++))
+			if [[ $csv_has_kver -eq 1 ]]; then
+				csv[$sc,${abi}_KVER]=$(echo $line | \
+						       cut -d, -f $field)
+				((field++))
+			fi
+		done
+	done < <(sed 's/#.*//;/^[ \t]*$/d' "$csv_input")
+
 	# get the full syscall list
 	for abi in $abi_list; do
 		eval output_$abi=$(mktemp -t syscall_validate_XXXXXX)
@@ -764,26 +786,31 @@ function gen_csv() {
 			cat $(eval echo $`eval echo output_$abi`);
 		   done) | awk -F "," '{ print $1 }' | sort -u)
 
-	# output a simple header
-	printf "#syscall (v%s %s)" \
-		"$(kernel_version "$1")" "$(TZ=UTC date "+%Y-%m-%d")"
-	for abi in $abi_list; do
-		printf ",%s" $abi
-	done
-	printf "\n"
-
-	# output the syscall csv details
-	for sc in $sc_list; do
-		printf "%s" $sc
+	# redirect the subshell to the csv file
+	(
+		# output a simple header
+		printf "#syscall (v%s %s)" \
+			"$(kernel_version "$1")" "$(TZ=UTC date "+%Y-%m-%d")"
 		for abi in $abi_list; do
-			num=$(grep "^$sc," \
-				$(eval echo $`eval echo output_$abi`) | \
-			      awk -F "," '{ print $2 }' )
-			[[ -z $num ]] && num="PNR"
-			printf ",%s" $num
+			printf ",%s,%s_kver" $abi $abi
 		done
 		printf "\n"
-	done
+
+		# output the syscall csv details
+		for sc in $sc_list; do
+			printf "%s" $sc
+			for abi in $abi_list; do
+				num=$(grep "^$sc," \
+				      $(eval echo $`eval echo output_$abi`) | \
+				awk -F "," '{ print $2 }' )
+				kver=${csv[$sc,${abi}_KVER]}
+				[[ -z $num ]] && num="PNR"
+				[[ -z $kver ]] && kver="KV_UNDEF"
+				printf ",%s,%s" $num $kver
+			done
+			printf "\n"
+		done
+	) > "$3"
 
 	# cleanup
 	for abi in $abi_list; do
@@ -799,29 +826,29 @@ verify_deps gcc
 verify_deps grep
 verify_deps mktemp
 verify_deps sed
-if [[ ! -x $LIB_SYS_DUMP ]]; then
-	echo "error: \"$LIB_SYS_DUMP\" is not in the current working directory"
-	exit 1
-fi
 
 opt_arches=""
-opt_csv=0
+opt_csv=""
 opt_sys=0
 opt_lib=0
 
-while getopts "a:cslh" opt; do
+while getopts "a:c:slh" opt; do
 	case $opt in
 	a)
 		opt_arches+="$OPTARG "
 		;;
 	c)
-		opt_csv=1
+		opt_csv="$OPTARG"
 		;;
 	s)
 		opt_sys=1
 		opt_lib=0
 		;;
 	l)
+		if [[ ! -x $LIB_SYS_DUMP ]]; then
+			echo "error: \"$LIB_SYS_DUMP\" is not present"
+			exit 1
+		fi
 		opt_sys=0
 		opt_lib=1
 		;;
@@ -860,12 +887,12 @@ fi
 tmp_lib=$(mktemp -t syscall_validate_XXXXXX)
 tmp_sys=$(mktemp -t syscall_validate_XXXXXX)
 
-if [[ $opt_csv -eq 1 ]]; then
+if [[ -n $opt_csv ]]; then
 	# generate the syscall csv file
 	if [[ $opt_lib -eq 1 ]]; then
-		gen_csv $kernel_dir "lib"
+		gen_csv $kernel_dir "lib" $opt_csv
 	else
-		gen_csv $kernel_dir "sys"
+		gen_csv $kernel_dir "sys" $opt_csv
 	fi
 else
 	# loop through the architectures and compare
