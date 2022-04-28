@@ -83,4 +83,6 @@ const struct arch_def arch_def_x32 = {
 	.syscall_resolve_num_raw = x32_syscall_resolve_num,
 	.syscall_rewrite = NULL,
 	.rule_add = NULL,
+	.syscall_name_kver = x32_syscall_name_kver,
+	.syscall_num_kver = x32_syscall_num_kver,
 };

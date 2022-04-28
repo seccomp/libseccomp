@@ -2,6 +2,8 @@
  * Enhanced Seccomp Architecture/Machine Specific Code
  *
  * Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2022 Microsoft Corporation. <paulmoore@microsoft.com>
+ *
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -62,6 +64,8 @@ struct arch_def {
 	const char *(*syscall_resolve_num_raw)(int num);
 	int (*syscall_rewrite)(const struct arch_def *arch, int *syscall);
 	int (*rule_add)(struct db_filter *db, struct db_api_rule_list *rule);
+	enum scmp_kver (*syscall_name_kver)(const char *name);
+	enum scmp_kver (*syscall_num_kver)(int num);
 };
 
 /* arch_def for the current architecture */
@@ -72,21 +76,34 @@ extern const struct arch_def *arch_def_native;
 	extern const struct arch_def arch_def_##NAME; \
 	int NAME##_syscall_resolve_name(const char *name); \
 	const char *NAME##_syscall_resolve_num(int num); \
+	enum scmp_kver NAME##_syscall_name_kver(const char *name); \
+	enum scmp_kver NAME##_syscall_num_kver(int num); \
 	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot);
 
 /* macro to define the arch specific structures and functions */
 #define ARCH_DEF(NAME) \
 	int NAME##_syscall_resolve_name(const char *name) \
 	{ \
-		return syscall_resolve_name(name, OFFSET_ARCH(NAME)); \
+		return syscall_resolve_name(name, SYSTBL_OFFSET(NAME)); \
 	} \
 	const char *NAME##_syscall_resolve_num(int num) \
 	{ \
-		return syscall_resolve_num(num, OFFSET_ARCH(NAME)); \
+		return syscall_resolve_num(num, SYSTBL_OFFSET(NAME)); \
+	} \
+	enum scmp_kver NAME##_syscall_name_kver(const char *name) \
+	{ \
+		return syscall_resolve_name_kver(name, \
+						 SYSTBL_OFFSET(NAME##_kver)); \
+	} \
+	enum scmp_kver NAME##_syscall_num_kver(int num) \
+	{ \
+		return syscall_resolve_num_kver(num, \
+						SYSTBL_OFFSET(NAME), \
+						SYSTBL_OFFSET(NAME##_kver)); \
 	} \
 	const struct arch_syscall_def *NAME##_syscall_iterate(unsigned int spot) \
 	{ \
-		return syscall_iterate(spot, OFFSET_ARCH(NAME)); \
+		return syscall_iterate(spot, SYSTBL_OFFSET(NAME)); \
 	}
 
 /* syscall name/num mapping */
