@@ -26,13 +26,15 @@ noinst_PROGRAMS = \
 	scmp_arch_detect \
 	scmp_bpf_disasm \
 	scmp_bpf_sim \
-	scmp_api_level
+	scmp_api_level \
+	scmp_run
 
 EXTRA_DIST = check-syntax scmp_app_inspector
 
 scmp_bpf_disasm_SOURCES = scmp_bpf_disasm.c bpf.h util.h
 scmp_bpf_sim_SOURCES = scmp_bpf_sim.c bpf.h util.h
 scmp_api_level_SOURCES = scmp_api_level.c
+scmp_run_SOURCES=scmp_run.c
 
 scmp_sys_resolver_LDADD = ../src/libseccomp.la
 scmp_arch_detect_LDADD = ../src/libseccomp.la
