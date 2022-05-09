@@ -2316,7 +2316,8 @@ int db_col_rule_add(struct db_filter_col *col,
 		if (arg_num < ARG_COUNT_MAX && chain[arg_num].valid == 0) {
 			chain[arg_num].valid = 1;
 			chain[arg_num].arg = arg_num;
-			chain[arg_num].op = arg_data.op;
+			chain[arg_num].op = arg_data.op & SCMP_CMP_OPMASK;
+			chain[arg_num].is_32bit = (arg_data.op & SCMP_CMP_32BIT) != 0;
 			/* TODO: we should check datum/mask size against the
 			 *	 arch definition, e.g. 64 bit datum on x86 */
 			switch (chain[arg_num].op) {
