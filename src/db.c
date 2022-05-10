@@ -1944,6 +1944,72 @@ gen_64_failure:
 	return NULL;
 }
 
+static int _db_rule_gen_arg_32(struct db_sys_list *s_new,
+			       const struct arch_def *arch,
+			       const struct db_api_arg *api_arg,
+			       struct db_arg_chain_tree *prev_nodes[4],
+			       bool *tf_flag)
+{
+	struct db_arg_chain_tree *c_iter = NULL;
+	struct db_arg_chain_tree **node;
+
+	if (api_arg->valid == 0)
+		return 0;
+
+	/* skip generating instructions which are no-ops */
+	if (!_db_arg_cmp_need_lo(api_arg))
+		return 0;
+
+	c_iter = zmalloc(sizeof(*c_iter));
+	if (c_iter == NULL)
+		return -1;
+
+	c_iter->arg = api_arg->arg;
+	c_iter->arg_h_flg = false;
+	c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
+	c_iter->op = api_arg->op;
+	c_iter->op_orig = api_arg->op;
+	/* implicitly strips off the upper 32 bit */
+	c_iter->mask = api_arg->mask;
+	c_iter->datum = api_arg->datum;
+	c_iter->datum_full = api_arg->datum;
+
+	/* link in the new node and update the chain */
+	for (node = prev_nodes; *node != NULL; node++)
+		if (*tf_flag)
+			(*node)->nxt_t = _db_node_get(c_iter);
+		else
+			(*node)->nxt_f = _db_node_get(c_iter);
+	prev_nodes[0] = c_iter;
+	prev_nodes[1] = NULL;
+	if (s_new->chains == NULL)
+		s_new->chains = _db_node_get(c_iter);
+	s_new->node_cnt++;
+
+	/* rewrite the op to reduce the op/datum combos */
+	switch (c_iter->op) {
+	case SCMP_CMP_NE:
+		c_iter->op = SCMP_CMP_EQ;
+		*tf_flag = false;
+		break;
+	case SCMP_CMP_LT:
+		c_iter->op = SCMP_CMP_GE;
+		*tf_flag = false;
+		break;
+	case SCMP_CMP_LE:
+		c_iter->op = SCMP_CMP_GT;
+		tf_flag = false;
+		break;
+	default:
+		*tf_flag = true;
+	}
+
+	/* fixup the mask/datum */
+	_db_node_mask_fixup(c_iter);
+
+	return 0;
+}
+
 /**
  * Generate a new filter rule for a 32 bit system
  * @param arch the architecture definition
@@ -1959,8 +2025,8 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	unsigned int iter;
 	struct db_sys_list *s_new;
 	const struct db_api_arg *chain = rule->args;
-	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
-	bool tf_flag;
+	struct db_arg_chain_tree *prev_nodes[4] = { NULL, };
+	bool tf_flag = false;
 
 	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
@@ -1969,67 +2035,19 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
-		if (chain[iter].valid == 0)
-			continue;
-
-		/* skip generating instructions which are no-ops */
-		if (!_db_arg_cmp_need_lo(&chain[iter]))
-			continue;
-
-		c_iter = zmalloc(sizeof(*c_iter));
-		if (c_iter == NULL)
+		if (_db_rule_gen_arg_32(s_new, arch, &chain[iter],
+					prev_nodes, &tf_flag) < 0)
 			goto gen_32_failure;
-		c_iter->arg = chain[iter].arg;
-		c_iter->arg_h_flg = false;
-		c_iter->arg_offset = arch_arg_offset(arch, c_iter->arg);
-		c_iter->op = chain[iter].op;
-		c_iter->op_orig = chain[iter].op;
-		/* implicitly strips off the upper 32 bit */
-		c_iter->mask = chain[iter].mask;
-		c_iter->datum = chain[iter].datum;
-		c_iter->datum_full = chain[iter].datum;
-
-		/* link in the new node and update the chain */
-		if (c_prev != NULL) {
-			if (tf_flag)
-				c_prev->nxt_t = _db_node_get(c_iter);
-			else
-				c_prev->nxt_f = _db_node_get(c_iter);
-		} else
-			s_new->chains = _db_node_get(c_iter);
-		s_new->node_cnt++;
-
-		/* rewrite the op to reduce the op/datum combos */
-		switch (c_iter->op) {
-		case SCMP_CMP_NE:
-			c_iter->op = SCMP_CMP_EQ;
-			tf_flag = false;
-			break;
-		case SCMP_CMP_LT:
-			c_iter->op = SCMP_CMP_GE;
-			tf_flag = false;
-			break;
-		case SCMP_CMP_LE:
-			c_iter->op = SCMP_CMP_GT;
-			tf_flag = false;
-			break;
-		default:
-			tf_flag = true;
-		}
-
-		/* fixup the mask/datum */
-		_db_node_mask_fixup(c_iter);
-
-		c_prev = c_iter;
 	}
-	if (c_iter != NULL) {
-		/* set the leaf node */
-		if (tf_flag) {
-			c_iter->act_t_flg = true;
-			c_iter->act_t = rule->action;
-		} else {
-			c_iter->act_f_flg = true;
-			c_iter->act_f = rule->action;
+	if (s_new->chains != NULL) {
+		for (iter = 0; prev_nodes[iter] != NULL; iter++) {
+			if (tf_flag) {
+				prev_nodes[iter]->act_t_flg = true;
+				prev_nodes[iter]->act_t = rule->action;
+			} else {
+				prev_nodes[iter]->act_f_flg = true;
+				prev_nodes[iter]->act_f = rule->action;
+			}
 		}
 	} else
 		s_new->action = rule->action;
