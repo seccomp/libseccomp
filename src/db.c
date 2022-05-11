@@ -1997,7 +1997,7 @@ static struct db_sys_list *_db_rule_gen(const struct arch_def *arch,
 	struct db_sys_list *s_new;
 	const struct db_api_arg *chain = rule->args;
 	struct db_arg_chain_tree *prev_nodes[4] = { NULL, };
-	bool is_32bit = arch->size == ARCH_SIZE_32;
+	bool arch_32bit = arch->size == ARCH_SIZE_32;
 	bool tf_flag = false;
 
 	s_new = zmalloc(sizeof(*s_new));
@@ -2007,7 +2007,7 @@ static struct db_sys_list *_db_rule_gen(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
-		if (is_32bit) {
+		if (arch_32bit || chain[iter].is_32bit) {
 			if (_db_rule_gen_arg_32(s_new, arch, &chain[iter],
 						prev_nodes, &tf_flag) < 0)
 				goto gen_failure;
