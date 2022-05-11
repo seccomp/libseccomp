@@ -1587,6 +1587,310 @@ static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
 	node->datum &= node->mask;
 }
 
+static int _db_rule_gen_arg_64(struct db_sys_list *s_new,
+			       const struct arch_def *arch,
+			       const struct db_api_arg *api_arg,
+			       struct db_arg_chain_tree *prev_nodes[4],
+			       bool *tf_flag)
+{
+	unsigned int iter;
+	struct db_arg_chain_tree *c_iter[3] = { NULL, NULL, NULL };
+	unsigned int arg;
+	scmp_datum_t mask;
+	scmp_datum_t datum;
+
+	if (api_arg->valid == 0)
+		return 0;
+
+	/* TODO: handle the case were either hi or lo isn't needed */
+
+	/* skip generating instruction which are no-ops */
+	if (!_db_arg_cmp_need_hi(api_arg) &&
+	    !_db_arg_cmp_need_lo(api_arg))
+		return 0;
+
+	c_iter[0] = zmalloc(sizeof(*c_iter[0]));
+	if (c_iter[0] == NULL)
+		return -1;
+	c_iter[1] = zmalloc(sizeof(*c_iter[1]));
+	if (c_iter[1] == NULL) {
+		free(c_iter[0]);
+		return -1;
+	}
+	c_iter[2] = zmalloc(sizeof(*c_iter[2]));
+	if (c_iter[2] == NULL) {
+		free(c_iter[1]);
+		free(c_iter[0]);
+		return -1;
+	}
+
+	arg = api_arg->arg;
+	mask = api_arg->mask;
+	datum = api_arg->datum;
+
+	/* link this level to the previous level */
+	for (iter = 0; prev_nodes[iter] != NULL; iter++)
+		if (*tf_flag)
+			prev_nodes[iter]->nxt_t = _db_node_get(c_iter[0]);
+		else
+			prev_nodes[iter]->nxt_f = _db_node_get(c_iter[0]);
+	prev_nodes[0] = prev_nodes[1] = prev_nodes[2] = prev_nodes[3] = NULL;
+
+	/* NOTE: with the idea that a picture is worth a thousand
+	 *       words, i'm presenting the following diagrams which
+	 *       show how we should compare 64-bit syscall arguments
+	 *       using 32-bit comparisons.
+	 *
+	 *       in the diagrams below "A(x)" is the syscall argument
+	 *       being evaluated and "R(x)" is the syscall argument
+	 *       value specified in the libseccomp rule.  the "ACCEPT"
+	 *       verdict indicates a rule match and processing should
+	 *       continue on to the rest of the rule, or the final rule
+	 *       action should be triggered.  the "REJECT" verdict
+	 *       indicates that the rule does not match and processing
+	 *       should continue to the next rule or the default
+	 *       action.
+	 *
+	 * SCMP_CMP_GT:
+	 *                   +------------------+
+	 *                +--|  Ah(x) >  Rh(x)  |------+
+	 *                |  +------------------+      |
+	 *              FALSE                         TRUE     A
+	 *                |                            |       C
+	 *                +-----------+                +---->  C
+	 *                            v                +---->  E
+	 *                   +------------------+      |       P
+	 *                +--|  Ah(x) == Rh(x)  |--+   |       T
+	 *        R       |  +------------------+  |   |
+	 *        E     FALSE                     TRUE |
+	 *        J  <----+                        |   |
+	 *        E  <----+           +------------+   |
+	 *        C     FALSE         v                |
+	 *        T       |  +------------------+      |
+	 *                +--|  Al(x) >  Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 * SCMP_CMP_GE:
+	 *                   +------------------+
+	 *                +--|  Ah(x) >  Rh(x)  |------+
+	 *                |  +------------------+      |
+	 *              FALSE                         TRUE     A
+	 *                |                            |       C
+	 *                +-----------+                +---->  C
+	 *                            v                +---->  E
+	 *                   +------------------+      |       P
+	 *                +--|  Ah(x) == Rh(x)  |--+   |       T
+	 *        R       |  +------------------+  |   |
+	 *        E     FALSE                     TRUE |
+	 *        J  <----+                        |   |
+	 *        E  <----+           +------------+   |
+	 *        C     FALSE         v                |
+	 *        T       |  +------------------+      |
+	 *                +--|  Al(x) >= Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 * SCMP_CMP_LT:
+	 *                   +------------------+
+	 *                +--|  Ah(x) >  Rh(x)  |------+
+	 *                |  +------------------+      |
+	 *              FALSE                         TRUE     R
+	 *                |                            |       E
+	 *                +-----------+                +---->  J
+	 *                            v                +---->  E
+	 *                   +------------------+      |       C
+	 *                +--|  Ah(x) == Rh(x)  |--+   |       T
+	 *        A       |  +------------------+  |   |
+	 *        C     FALSE                     TRUE |
+	 *        C  <----+                        |   |
+	 *        E  <----+           +------------+   |
+	 *        P     FALSE         v                |
+	 *        T       |  +------------------+      |
+	 *                +--|  Al(x) >= Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 * SCMP_CMP_LE:
+	 *                   +------------------+
+	 *                +--|  Ah(x) >  Rh(x)  |------+
+	 *                |  +------------------+      |
+	 *              FALSE                         TRUE     R
+	 *                |                            |       E
+	 *                +-----------+                +---->  J
+	 *                            v                +---->  E
+	 *                   +------------------+      |       C
+	 *                +--|  Ah(x) == Rh(x)  |--+   |       T
+	 *        A       |  +------------------+  |   |
+	 *        C     FALSE                     TRUE |
+	 *        C  <----+                        |   |
+	 *        E  <----+           +------------+   |
+	 *        P     FALSE         v                |
+	 *        T       |  +------------------+      |
+	 *                +--|  Al(x) >  Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 * SCMP_CMP_EQ:
+	 *                   +------------------+
+	 *                +--|  Ah(x) == Rh(x)  |--+
+	 *        R       |  +------------------+  |           A
+	 *        E     FALSE                     TRUE         C
+	 *        J  <----+                        |           C
+	 *        E  <----+           +------------+   +---->  E
+	 *        C     FALSE         v                |       P
+	 *        T       |  +------------------+      |       T
+	 *                +--|  Al(x) == Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 * SCMP_CMP_NE:
+	 *                   +------------------+
+	 *                +--|  Ah(x) == Rh(x)  |--+
+	 *        A       |  +------------------+  |           R
+	 *        C     FALSE                     TRUE         E
+	 *        C  <----+                        |           J
+	 *        E  <----+           +------------+   +---->  E
+	 *        P     FALSE         v                |       C
+	 *        T       |  +------------------+      |       T
+	 *                +--|  Al(x) == Rl(x)  |------+
+	 *                   +------------------+
+	 *
+	 */
+
+	/* setup the level */
+	switch (api_arg->op) {
+	case SCMP_CMP_GT:
+	case SCMP_CMP_GE:
+	case SCMP_CMP_LE:
+	case SCMP_CMP_LT:
+		c_iter[0]->arg = arg;
+		c_iter[1]->arg = arg;
+		c_iter[2]->arg = arg;
+		c_iter[0]->arg_h_flg = true;
+		c_iter[1]->arg_h_flg = true;
+		c_iter[2]->arg_h_flg = false;
+		c_iter[0]->arg_offset = arch_arg_offset_hi(arch, arg);
+		c_iter[1]->arg_offset = arch_arg_offset_hi(arch, arg);
+		c_iter[2]->arg_offset = arch_arg_offset_lo(arch, arg);
+
+		c_iter[0]->mask = D64_HI(mask);
+		c_iter[1]->mask = D64_HI(mask);
+		c_iter[2]->mask = D64_LO(mask);
+		c_iter[0]->datum = D64_HI(datum);
+		c_iter[1]->datum = D64_HI(datum);
+		c_iter[2]->datum = D64_LO(datum);
+		c_iter[0]->datum_full = datum;
+		c_iter[1]->datum_full = datum;
+		c_iter[2]->datum_full = datum;
+
+		_db_node_mask_fixup(c_iter[0]);
+		_db_node_mask_fixup(c_iter[1]);
+		_db_node_mask_fixup(c_iter[2]);
+
+		c_iter[0]->op = SCMP_CMP_GT;
+		c_iter[1]->op = SCMP_CMP_EQ;
+		switch (api_arg->op) {
+		case SCMP_CMP_GT:
+		case SCMP_CMP_LE:
+			c_iter[2]->op = SCMP_CMP_GT;
+			break;
+		case SCMP_CMP_GE:
+		case SCMP_CMP_LT:
+			c_iter[2]->op = SCMP_CMP_GE;
+			break;
+		default:
+			/* we should never get here */
+			return -1;
+		}
+		c_iter[0]->op_orig = api_arg->op;
+		c_iter[1]->op_orig = api_arg->op;
+		c_iter[2]->op_orig = api_arg->op;
+
+		c_iter[0]->nxt_f = _db_node_get(c_iter[1]);
+		c_iter[1]->nxt_t = _db_node_get(c_iter[2]);
+		break;
+	case SCMP_CMP_EQ:
+	case SCMP_CMP_MASKED_EQ:
+	case SCMP_CMP_NE:
+		free(c_iter[2]);
+		c_iter[2] = NULL;
+		c_iter[0]->arg = arg;
+		c_iter[1]->arg = arg;
+		c_iter[0]->arg_h_flg = true;
+		c_iter[1]->arg_h_flg = false;
+		c_iter[0]->arg_offset = arch_arg_offset_hi(arch, arg);
+		c_iter[1]->arg_offset = arch_arg_offset_lo(arch, arg);
+
+		c_iter[0]->mask = D64_HI(mask);
+		c_iter[1]->mask = D64_LO(mask);
+		c_iter[0]->datum = D64_HI(datum);
+		c_iter[1]->datum = D64_LO(datum);
+		c_iter[0]->datum_full = datum;
+		c_iter[1]->datum_full = datum;
+
+		_db_node_mask_fixup(c_iter[0]);
+		_db_node_mask_fixup(c_iter[1]);
+
+		switch (api_arg->op) {
+		case SCMP_CMP_MASKED_EQ:
+			c_iter[0]->op = SCMP_CMP_MASKED_EQ;
+			c_iter[1]->op = SCMP_CMP_MASKED_EQ;
+			break;
+		default:
+			c_iter[0]->op = SCMP_CMP_EQ;
+			c_iter[1]->op = SCMP_CMP_EQ;
+		}
+		c_iter[0]->op_orig = api_arg->op;
+		c_iter[1]->op_orig = api_arg->op;
+
+		c_iter[0]->nxt_t = _db_node_get(c_iter[1]);
+		break;
+	default:
+		/* we should never get here */
+		return -1;
+	}
+
+	/* Allow the next level to link to the new nodes */
+	if (s_new->chains == NULL)
+		s_new->chains = _db_node_get(c_iter[0]);
+	switch (api_arg->op) {
+	case SCMP_CMP_GT:
+	case SCMP_CMP_GE:
+		prev_nodes[0] = c_iter[0];
+		prev_nodes[1] = c_iter[2];
+		*tf_flag = true;
+		break;
+	case SCMP_CMP_EQ:
+	case SCMP_CMP_MASKED_EQ:
+		prev_nodes[0] = c_iter[1];
+		*tf_flag = true;
+		break;
+	case SCMP_CMP_LE:
+	case SCMP_CMP_LT:
+		prev_nodes[0] = c_iter[1];
+		prev_nodes[1] = c_iter[2];
+		*tf_flag = false;
+		break;
+	case SCMP_CMP_NE:
+		prev_nodes[0] = c_iter[0];
+		prev_nodes[1] = c_iter[1];
+		*tf_flag = false;
+		break;
+	default:
+		/* we should never get here */
+		return -1;
+	}
+
+	/* update the node count */
+	switch (api_arg->op) {
+	case SCMP_CMP_NE:
+	case SCMP_CMP_EQ:
+	case SCMP_CMP_MASKED_EQ:
+		s_new->node_cnt += 2;
+		break;
+	default:
+		s_new->node_cnt += 3;
+	}
+
+	return 0;
+}
+
 /**
  * Generate a new filter rule for a 64 bit system
  * @param arch the architecture definition
@@ -1602,12 +1906,8 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	unsigned int iter;
 	struct db_sys_list *s_new;
 	const struct db_api_arg *chain = rule->args;
-	struct db_arg_chain_tree *c_iter[3] = { NULL, NULL, NULL };
-	struct db_arg_chain_tree *c_prev[3] = { NULL, NULL, NULL };
-	enum scmp_compare op_prev = _SCMP_CMP_MIN;
-	unsigned int arg;
-	scmp_datum_t mask;
-	scmp_datum_t datum;
+	struct db_arg_chain_tree *prev_nodes[4] = { NULL, };
+	bool tf_flag = false;
 
 	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
@@ -1616,321 +1916,20 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
-		if (chain[iter].valid == 0)
-			continue;
-
-		/* TODO: handle the case were either hi or lo isn't needed */
-
-		/* skip generating instruction which are no-ops */
-		if (!_db_arg_cmp_need_hi(&chain[iter]) &&
-		    !_db_arg_cmp_need_lo(&chain[iter]))
-			continue;
-
-		c_iter[0] = zmalloc(sizeof(*c_iter[0]));
-		if (c_iter[0] == NULL)
+		if (_db_rule_gen_arg_64(s_new, arch, &chain[iter],
+					prev_nodes, &tf_flag) < 0)
 			goto gen_64_failure;
-		c_iter[1] = zmalloc(sizeof(*c_iter[1]));
-		if (c_iter[1] == NULL) {
-			free(c_iter[0]);
-			goto gen_64_failure;
-		}
-		c_iter[2] = NULL;
-
-		arg = chain[iter].arg;
-		mask = chain[iter].mask;
-		datum = chain[iter].datum;
-
-		/* NOTE: with the idea that a picture is worth a thousand
-		 *       words, i'm presenting the following diagrams which
-		 *       show how we should compare 64-bit syscall arguments
-		 *       using 32-bit comparisons.
-		 *
-		 *       in the diagrams below "A(x)" is the syscall argument
-		 *       being evaluated and "R(x)" is the syscall argument
-		 *       value specified in the libseccomp rule.  the "ACCEPT"
-		 *       verdict indicates a rule match and processing should
-		 *       continue on to the rest of the rule, or the final rule
-		 *       action should be triggered.  the "REJECT" verdict
-		 *       indicates that the rule does not match and processing
-		 *       should continue to the next rule or the default
-		 *       action.
-		 *
-		 * SCMP_CMP_GT:
-		 *                   +------------------+
-		 *                +--|  Ah(x) >  Rh(x)  |------+
-		 *                |  +------------------+      |
-		 *              FALSE                         TRUE     A
-		 *                |                            |       C
-		 *                +-----------+                +---->  C
-		 *                            v                +---->  E
-		 *                   +------------------+      |       P
-		 *                +--|  Ah(x) == Rh(x)  |--+   |       T
-		 *        R       |  +------------------+  |   |
-		 *        E     FALSE                     TRUE |
-		 *        J  <----+                        |   |
-		 *        E  <----+           +------------+   |
-		 *        C     FALSE         v                |
-		 *        T       |  +------------------+      |
-		 *                +--|  Al(x) >  Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 * SCMP_CMP_GE:
-		 *                   +------------------+
-		 *                +--|  Ah(x) >  Rh(x)  |------+
-		 *                |  +------------------+      |
-		 *              FALSE                         TRUE     A
-		 *                |                            |       C
-		 *                +-----------+                +---->  C
-		 *                            v                +---->  E
-		 *                   +------------------+      |       P
-		 *                +--|  Ah(x) == Rh(x)  |--+   |       T
-		 *        R       |  +------------------+  |   |
-		 *        E     FALSE                     TRUE |
-		 *        J  <----+                        |   |
-		 *        E  <----+           +------------+   |
-		 *        C     FALSE         v                |
-		 *        T       |  +------------------+      |
-		 *                +--|  Al(x) >= Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 * SCMP_CMP_LT:
-		 *                   +------------------+
-		 *                +--|  Ah(x) >  Rh(x)  |------+
-		 *                |  +------------------+      |
-		 *              FALSE                         TRUE     R
-		 *                |                            |       E
-		 *                +-----------+                +---->  J
-		 *                            v                +---->  E
-		 *                   +------------------+      |       C
-		 *                +--|  Ah(x) == Rh(x)  |--+   |       T
-		 *        A       |  +------------------+  |   |
-		 *        C     FALSE                     TRUE |
-		 *        C  <----+                        |   |
-		 *        E  <----+           +------------+   |
-		 *        P     FALSE         v                |
-		 *        T       |  +------------------+      |
-		 *                +--|  Al(x) >= Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 * SCMP_CMP_LE:
-		 *                   +------------------+
-		 *                +--|  Ah(x) >  Rh(x)  |------+
-		 *                |  +------------------+      |
-		 *              FALSE                         TRUE     R
-		 *                |                            |       E
-		 *                +-----------+                +---->  J
-		 *                            v                +---->  E
-		 *                   +------------------+      |       C
-		 *                +--|  Ah(x) == Rh(x)  |--+   |       T
-		 *        A       |  +------------------+  |   |
-		 *        C     FALSE                     TRUE |
-		 *        C  <----+                        |   |
-		 *        E  <----+           +------------+   |
-		 *        P     FALSE         v                |
-		 *        T       |  +------------------+      |
-		 *                +--|  Al(x) >  Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 * SCMP_CMP_EQ:
-		 *                   +------------------+
-		 *                +--|  Ah(x) == Rh(x)  |--+
-		 *        R       |  +------------------+  |           A
-		 *        E     FALSE                     TRUE         C
-		 *        J  <----+                        |           C
-		 *        E  <----+           +------------+   +---->  E
-		 *        C     FALSE         v                |       P
-		 *        T       |  +------------------+      |       T
-		 *                +--|  Al(x) == Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 * SCMP_CMP_NE:
-		 *                   +------------------+
-		 *                +--|  Ah(x) == Rh(x)  |--+
-		 *        A       |  +------------------+  |           R
-		 *        C     FALSE                     TRUE         E
-		 *        C  <----+                        |           J
-		 *        E  <----+           +------------+   +---->  E
-		 *        P     FALSE         v                |       C
-		 *        T       |  +------------------+      |       T
-		 *                +--|  Al(x) == Rl(x)  |------+
-		 *                   +------------------+
-		 *
-		 */
-
-		/* setup the level */
-		switch (chain[iter].op) {
-		case SCMP_CMP_GT:
-		case SCMP_CMP_GE:
-		case SCMP_CMP_LE:
-		case SCMP_CMP_LT:
-			c_iter[2] = zmalloc(sizeof(*c_iter[2]));
-			if (c_iter[2] == NULL) {
-				free(c_iter[0]);
-				free(c_iter[1]);
-				goto gen_64_failure;
-			}
-
-			c_iter[0]->arg = arg;
-			c_iter[1]->arg = arg;
-			c_iter[2]->arg = arg;
-			c_iter[0]->arg_h_flg = true;
-			c_iter[1]->arg_h_flg = true;
-			c_iter[2]->arg_h_flg = false;
-			c_iter[0]->arg_offset = arch_arg_offset_hi(arch, arg);
-			c_iter[1]->arg_offset = arch_arg_offset_hi(arch, arg);
-			c_iter[2]->arg_offset = arch_arg_offset_lo(arch, arg);
-
-			c_iter[0]->mask = D64_HI(mask);
-			c_iter[1]->mask = D64_HI(mask);
-			c_iter[2]->mask = D64_LO(mask);
-			c_iter[0]->datum = D64_HI(datum);
-			c_iter[1]->datum = D64_HI(datum);
-			c_iter[2]->datum = D64_LO(datum);
-			c_iter[0]->datum_full = datum;
-			c_iter[1]->datum_full = datum;
-			c_iter[2]->datum_full = datum;
-
-			_db_node_mask_fixup(c_iter[0]);
-			_db_node_mask_fixup(c_iter[1]);
-			_db_node_mask_fixup(c_iter[2]);
-
-			c_iter[0]->op = SCMP_CMP_GT;
-			c_iter[1]->op = SCMP_CMP_EQ;
-			switch (chain[iter].op) {
-			case SCMP_CMP_GT:
-			case SCMP_CMP_LE:
-				c_iter[2]->op = SCMP_CMP_GT;
-				break;
-			case SCMP_CMP_GE:
-			case SCMP_CMP_LT:
-				c_iter[2]->op = SCMP_CMP_GE;
-				break;
-			default:
-				/* we should never get here */
-				goto gen_64_failure;
-			}
-			c_iter[0]->op_orig = chain[iter].op;
-			c_iter[1]->op_orig = chain[iter].op;
-			c_iter[2]->op_orig = chain[iter].op;
-
-			c_iter[0]->nxt_f = _db_node_get(c_iter[1]);
-			c_iter[1]->nxt_t = _db_node_get(c_iter[2]);
-			break;
-		case SCMP_CMP_EQ:
-		case SCMP_CMP_MASKED_EQ:
-		case SCMP_CMP_NE:
-			c_iter[0]->arg = arg;
-			c_iter[1]->arg = arg;
-			c_iter[0]->arg_h_flg = true;
-			c_iter[1]->arg_h_flg = false;
-			c_iter[0]->arg_offset = arch_arg_offset_hi(arch, arg);
-			c_iter[1]->arg_offset = arch_arg_offset_lo(arch, arg);
-
-			c_iter[0]->mask = D64_HI(mask);
-			c_iter[1]->mask = D64_LO(mask);
-			c_iter[0]->datum = D64_HI(datum);
-			c_iter[1]->datum = D64_LO(datum);
-			c_iter[0]->datum_full = datum;
-			c_iter[1]->datum_full = datum;
-
-			_db_node_mask_fixup(c_iter[0]);
-			_db_node_mask_fixup(c_iter[1]);
-
-			switch (chain[iter].op) {
-			case SCMP_CMP_MASKED_EQ:
-				c_iter[0]->op = SCMP_CMP_MASKED_EQ;
-				c_iter[1]->op = SCMP_CMP_MASKED_EQ;
-				break;
-			default:
-				c_iter[0]->op = SCMP_CMP_EQ;
-				c_iter[1]->op = SCMP_CMP_EQ;
-			}
-			c_iter[0]->op_orig = chain[iter].op;
-			c_iter[1]->op_orig = chain[iter].op;
-
-			c_iter[0]->nxt_t = _db_node_get(c_iter[1]);
-			break;
-		default:
-			/* we should never get here */
-			goto gen_64_failure;
-		}
-
-		/* link this level to the previous level */
-		if (c_prev[0] != NULL) {
-			switch (op_prev) {
-			case SCMP_CMP_GT:
-			case SCMP_CMP_GE:
-				c_prev[0]->nxt_t = _db_node_get(c_iter[0]);
-				c_prev[2]->nxt_t = _db_node_get(c_iter[0]);
-				break;
-			case SCMP_CMP_EQ:
-			case SCMP_CMP_MASKED_EQ:
-				c_prev[1]->nxt_t = _db_node_get(c_iter[0]);
-				break;
-			case SCMP_CMP_LE:
-			case SCMP_CMP_LT:
-				c_prev[1]->nxt_f = _db_node_get(c_iter[0]);
-				c_prev[2]->nxt_f = _db_node_get(c_iter[0]);
-				break;
-			case SCMP_CMP_NE:
-				c_prev[0]->nxt_f = _db_node_get(c_iter[0]);
-				c_prev[1]->nxt_f = _db_node_get(c_iter[0]);
-				break;
-			default:
-				/* we should never get here */
-				goto gen_64_failure;
-			}
-		} else
-			s_new->chains = _db_node_get(c_iter[0]);
-
-		/* update the node count */
-		switch (chain[iter].op) {
-		case SCMP_CMP_NE:
-		case SCMP_CMP_EQ:
-		case SCMP_CMP_MASKED_EQ:
-			s_new->node_cnt += 2;
-			break;
-		default:
-			s_new->node_cnt += 3;
-		}
-
-		/* keep pointers to this level */
-		c_prev[0] = c_iter[0];
-		c_prev[1] = c_iter[1];
-		c_prev[2] = c_iter[2];
-		op_prev = chain[iter].op;
 	}
-	if (c_iter[0] != NULL) {
+	if (s_new->chains != NULL) {
 		/* set the actions on the last layer */
-		switch (op_prev) {
-		case SCMP_CMP_GT:
-		case SCMP_CMP_GE:
-			c_iter[0]->act_t_flg = true;
-			c_iter[0]->act_t = rule->action;
-			c_iter[2]->act_t_flg = true;
-			c_iter[2]->act_t = rule->action;
-			break;
-		case SCMP_CMP_LE:
-		case SCMP_CMP_LT:
-			c_iter[1]->act_f_flg = true;
-			c_iter[1]->act_f = rule->action;
-			c_iter[2]->act_f_flg = true;
-			c_iter[2]->act_f = rule->action;
-			break;
-		case SCMP_CMP_EQ:
-		case SCMP_CMP_MASKED_EQ:
-			c_iter[1]->act_t_flg = true;
-			c_iter[1]->act_t = rule->action;
-			break;
-		case SCMP_CMP_NE:
-			c_iter[0]->act_f_flg = true;
-			c_iter[0]->act_f = rule->action;
-			c_iter[1]->act_f_flg = true;
-			c_iter[1]->act_f = rule->action;
-			break;
-		default:
-			/* we should never get here */
-			goto gen_64_failure;
+		for (iter = 0; prev_nodes[iter] != NULL; iter++) {
+			if (tf_flag) {
+				prev_nodes[iter]->act_t_flg = true;
+				prev_nodes[iter]->act_t = rule->action;
+			} else {
+				prev_nodes[iter]->act_f_flg = true;
+				prev_nodes[iter]->act_f = rule->action;
+			}
 		}
 	} else
 		s_new->action = rule->action;
@@ -1951,7 +1950,7 @@ static int _db_rule_gen_arg_32(struct db_sys_list *s_new,
 			       bool *tf_flag)
 {
 	struct db_arg_chain_tree *c_iter = NULL;
-	struct db_arg_chain_tree **node;
+	unsigned int iter;
 
 	if (api_arg->valid == 0)
 		return 0;
@@ -1975,11 +1974,11 @@ static int _db_rule_gen_arg_32(struct db_sys_list *s_new,
 	c_iter->datum_full = api_arg->datum;
 
 	/* link in the new node and update the chain */
-	for (node = prev_nodes; *node != NULL; node++)
+	for (iter = 0; prev_nodes[iter] != NULL; iter++)
 		if (*tf_flag)
-			(*node)->nxt_t = _db_node_get(c_iter);
+			prev_nodes[iter]->nxt_t = _db_node_get(c_iter);
 		else
-			(*node)->nxt_f = _db_node_get(c_iter);
+			prev_nodes[iter]->nxt_f = _db_node_get(c_iter);
 	prev_nodes[0] = c_iter;
 	prev_nodes[1] = NULL;
 	if (s_new->chains == NULL)
