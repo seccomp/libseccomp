@@ -1587,6 +1587,18 @@ static void _db_node_mask_fixup(struct db_arg_chain_tree *node)
 	node->datum &= node->mask;
 }
 
+/**
+ * Generate tree nodes for a 64 bit argument comparison
+ * @param s_new the syscall filter
+ * @param arch the architecture definition
+ * @param api_arg the argument comparison
+ * @param prev_nodes a NULL terminated array of tree nodes to link to
+ * @param tf_flag whether to link to the nxt_t or nxt_f branch of prev_nodes
+ *
+ * This function generates tree nodes representing a 64 bit argument
+ * comparison. Returns zero on success, negative values on failure.
+ *
+ */
 static int _db_rule_gen_arg_64(struct db_sys_list *s_new,
 			       const struct arch_def *arch,
 			       const struct db_api_arg *api_arg,
@@ -1892,57 +1904,17 @@ static int _db_rule_gen_arg_64(struct db_sys_list *s_new,
 }
 
 /**
- * Generate a new filter rule for a 64 bit system
+ * Generate tree nodes for a 32 bit argument comparison
+ * @param s_new the syscall filter
  * @param arch the architecture definition
- * @param rule the new filter rule
+ * @param api_arg the argument comparison
+ * @param prev_nodes a NULL terminated array of tree nodes to link to
+ * @param tf_flag whether to link to the nxt_t or nxt_f branch of prev_nodes
  *
- * This function generates a new syscall filter for a 64 bit system. Returns
- * zero on success, negative values on failure.
+ * This function generates tree nodes representing a 32 bit argument
+ * comparison. Returns zero on success, negative values on failure.
  *
  */
-static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
-					   const struct db_api_rule_list *rule)
-{
-	unsigned int iter;
-	struct db_sys_list *s_new;
-	const struct db_api_arg *chain = rule->args;
-	struct db_arg_chain_tree *prev_nodes[4] = { NULL, };
-	bool tf_flag = false;
-
-	s_new = zmalloc(sizeof(*s_new));
-	if (s_new == NULL)
-		return NULL;
-	s_new->num = rule->syscall;
-	s_new->valid = true;
-	/* run through the argument chain */
-	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
-		if (_db_rule_gen_arg_64(s_new, arch, &chain[iter],
-					prev_nodes, &tf_flag) < 0)
-			goto gen_64_failure;
-	}
-	if (s_new->chains != NULL) {
-		/* set the actions on the last layer */
-		for (iter = 0; prev_nodes[iter] != NULL; iter++) {
-			if (tf_flag) {
-				prev_nodes[iter]->act_t_flg = true;
-				prev_nodes[iter]->act_t = rule->action;
-			} else {
-				prev_nodes[iter]->act_f_flg = true;
-				prev_nodes[iter]->act_f = rule->action;
-			}
-		}
-	} else
-		s_new->action = rule->action;
-
-	return s_new;
-
-gen_64_failure:
-	/* free the new chain and its syscall struct */
-	_db_tree_put(&s_new->chains);
-	free(s_new);
-	return NULL;
-}
-
 static int _db_rule_gen_arg_32(struct db_sys_list *s_new,
 			       const struct arch_def *arch,
 			       const struct db_api_arg *api_arg,
@@ -2010,21 +1982,22 @@ static int _db_rule_gen_arg_32(struct db_sys_list *s_new,
 }
 
 /**
- * Generate a new filter rule for a 32 bit system
+ * Generate a new filter rule
  * @param arch the architecture definition
  * @param rule the new filter rule
  *
- * This function generates a new syscall filter for a 32 bit system. Returns
- * zero on success, negative values on failure.
+ * This function generates a new syscall filter. Returns
+ * an allocated db_sys_struct on success, NULL on failure.
  *
  */
-static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
-					   const struct db_api_rule_list *rule)
+static struct db_sys_list *_db_rule_gen(const struct arch_def *arch,
+					const struct db_api_rule_list *rule)
 {
 	unsigned int iter;
 	struct db_sys_list *s_new;
 	const struct db_api_arg *chain = rule->args;
 	struct db_arg_chain_tree *prev_nodes[4] = { NULL, };
+	bool is_32bit = arch->size == ARCH_SIZE_32;
 	bool tf_flag = false;
 
 	s_new = zmalloc(sizeof(*s_new));
@@ -2034,9 +2007,15 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	s_new->valid = true;
 	/* run through the argument chain */
 	for (iter = 0; iter < ARG_COUNT_MAX; iter++) {
-		if (_db_rule_gen_arg_32(s_new, arch, &chain[iter],
-					prev_nodes, &tf_flag) < 0)
-			goto gen_32_failure;
+		if (is_32bit) {
+			if (_db_rule_gen_arg_32(s_new, arch, &chain[iter],
+						prev_nodes, &tf_flag) < 0)
+				goto gen_failure;
+		} else {
+			if (_db_rule_gen_arg_64(s_new, arch, &chain[iter],
+						prev_nodes, &tf_flag) < 0)
+				goto gen_failure;
+		}
 	}
 	if (s_new->chains != NULL) {
 		for (iter = 0; prev_nodes[iter] != NULL; iter++) {
@@ -2053,7 +2032,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 
 	return s_new;
 
-gen_32_failure:
+gen_failure:
 	/* free the new chain and its syscall struct */
 	_db_tree_put(&s_new->chains);
 	free(s_new);
@@ -2088,12 +2067,9 @@ int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule)
 	/* do all our possible memory allocation up front so we don't have to
 	 * worry about failure once we get to the point where we start updating
 	 * the filter db */
-	if (db->arch->size == ARCH_SIZE_64)
-		s_new = _db_rule_gen_64(db->arch, rule);
-	else if (db->arch->size == ARCH_SIZE_32)
-		s_new = _db_rule_gen_32(db->arch, rule);
-	else
+	if (db->arch->size != ARCH_SIZE_64 && db->arch->size != ARCH_SIZE_32)
 		return -EFAULT;
+	s_new = _db_rule_gen(db->arch, rule);
 	if (s_new == NULL)
 		return -ENOMEM;
 
