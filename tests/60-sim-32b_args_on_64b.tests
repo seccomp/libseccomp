@@ -1,0 +1,54 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2022 Canonical Ltd.
+# Author: James Henstridge <james.henstridge@canonical.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0			Arg1	Arg2	Arg3	Arg4	Arg5	Result
+60-sim-32b_args_on_64b		all	1001	0x1			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1001	0x10			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1001	0xffffffff00000001	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1001	0xffffffff00000010	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1002	0x1			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1002	0x20			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1002	0xffffffff00000001	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1002	0xffffffff00000020	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1003	0x10			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1003	0x20			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1003	0xffffffff00000010	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1003	0xffffffff00000020	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1004	0x10			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1004	0x20			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1004	0xffffffff00000010	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1004	0xffffffff00000020	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1005	0x10			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1005	0x01			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1005	0xffffffff00000010	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1005	0xffffffff00000001	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1006	0x20			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1006	0x01			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1006	0xffffffff00000020	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1006	0xffffffff00000001	N	N	N	N	N	KILL
+
+60-sim-32b_args_on_64b		all	1007	0xff10			N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1007	0x01			N	N	N	N	N	KILL
+60-sim-32b_args_on_64b		all	1007	0xffffffff0000ff10	N	N	N	N	N	ALLOW
+60-sim-32b_args_on_64b		all	1007	0xffffffff00000001	N	N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+60-sim-32b_args_on_64b		5
+
+test type: bpf-valgrind
+
+# Testname
+60-sim-32b_args_on_64b
