@@ -2331,6 +2331,11 @@ int db_col_rule_add(struct db_filter_col *col,
 				rc = -EINVAL;
 				goto add_return;
 			}
+                        /* Check that no unknown flags are specified in the op */
+                        if ((arg_data.op & ~(SCMP_CMP_OPMASK | SCMP_CMP_32BIT)) != 0) {
+                            rc = -EINVAL;
+                            goto add_return;
+                        }
 		} else {
 			rc = -EINVAL;
 			goto add_return;
