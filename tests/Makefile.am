@@ -155,7 +155,8 @@ EXTRA_DIST_TESTPYTHON = \
 	56-basic-iterate_syscalls.py \
 	57-basic-rawsysrc.py \
 	58-live-tsync_notify.py \
-	59-basic-empty_binary_tree.py
+	59-basic-empty_binary_tree.py \
+	60-sim-32b_args_on_64b.tests.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \

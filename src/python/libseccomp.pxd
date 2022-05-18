@@ -72,6 +72,7 @@ cdef extern from "seccomp.h":
         SCMP_CMP_GE
         SCMP_CMP_GT
         SCMP_CMP_MASKED_EQ
+        SCMP_CMP_32BIT
 
     cdef enum:
         SCMP_ACT_KILL_PROCESS

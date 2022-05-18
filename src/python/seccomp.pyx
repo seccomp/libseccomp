@@ -133,6 +133,7 @@ EQ = libseccomp.SCMP_CMP_EQ
 GE = libseccomp.SCMP_CMP_GE
 GT = libseccomp.SCMP_CMP_GT
 MASKED_EQ = libseccomp.SCMP_CMP_MASKED_EQ
+CMP_32BIT = libseccomp.SCMP_CMP_32BIT
 
 def system_arch():
     """ Return the system architecture value.
