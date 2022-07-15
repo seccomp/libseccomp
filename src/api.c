@@ -38,6 +38,11 @@
 #include "helper.h"
 #include "system.h"
 
+/**
+ * @defgroup APIs
+ * @{
+ */
+
 #define API	__attribute__((visibility("default")))
 
 const struct scmp_version library_version = {
@@ -765,3 +770,7 @@ API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
 
 	return rc;
 }
+
+/**
+ * @}
+ */
