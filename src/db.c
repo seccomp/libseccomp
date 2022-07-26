@@ -654,7 +654,7 @@ prune_next_node:
 		x_iter = x_iter_next;
 	} while (x_iter);
 
-	// if we are falling through, we clearly didn't match on anything
+	/* if we are falling through, we clearly didn't match on anything */
 	state_new.flags &= ~_DB_IST_MATCH;
 
 prune_return:
