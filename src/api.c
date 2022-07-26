@@ -2,6 +2,7 @@
  * Seccomp Library API
  *
  * Copyright (c) 2012,2013 Red Hat <pmoore@redhat.com>
+ * Copyright (c) 2022 Microsoft Corporation <paulmoore@microsoft.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -723,11 +724,11 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 		return _rc_filter(-EINVAL);
 	col = (struct db_filter_col *)ctx;
 
-	rc = gen_bpf_generate(col, &program);
+	rc = db_col_precompute(col);
 	if (rc < 0)
 		return _rc_filter(rc);
+	program = col->prgm_bpf;
 	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
-	gen_bpf_release(program);
 	if (rc < 0)
 		return _rc_filter_sys(col, -errno);
 
@@ -739,7 +740,6 @@ API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
 			       size_t *len)
 {
 	int rc;
-	size_t buf_len;
 	struct db_filter_col *col;
 	struct bpf_program *program;
 
@@ -747,21 +747,31 @@ API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
 		return _rc_filter(-EINVAL);
 	col = (struct db_filter_col *)ctx;
 
-	rc = gen_bpf_generate(col, &program);
+	rc = db_col_precompute(col);
 	if (rc < 0)
 		return _rc_filter(rc);
-	buf_len = *len;
-	*len = BPF_PGM_SIZE(program);
+	program = col->prgm_bpf;
 
-	rc = 0;
 	if (buf) {
 		/* If we have a big enough buffer, write the program. */
-		if (*len > buf_len)
+		if (BPF_PGM_SIZE(program) > *len)
 			rc = _rc_filter(-ERANGE);
 		else
 			memcpy(buf, program->blks, *len);
 	}
-	gen_bpf_release(program);
+	*len = BPF_PGM_SIZE(program);
 
 	return rc;
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_precompute(const scmp_filter_ctx ctx)
+{
+	struct db_filter_col *col;
+
+	if (_ctx_valid(ctx))
+		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
+
+	return _rc_filter(db_col_precompute(col));
 }

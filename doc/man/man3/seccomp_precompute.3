@@ -1,8 +1,8 @@
-.TH "seccomp_load" 3 "30 May 2020" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_precompute" 3 "19 September 2022" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
-seccomp_load \- Load the current seccomp filter into the kernel
+seccomp_precompute \- Precompute the current seccomp filter
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SYNOPSIS
 .\" //////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@ seccomp_load \- Load the current seccomp filter into the kernel
 .sp
 .B typedef void * scmp_filter_ctx;
 .sp
-.BI "int seccomp_load(scmp_filter_ctx " ctx ");"
+.BI "int seccomp_precompute(scmp_filter_ctx " ctx ");"
 .sp
 Link with \fI\-lseccomp\fP.
 .fi
@@ -19,24 +19,12 @@ Link with \fI\-lseccomp\fP.
 .SH DESCRIPTION
 .\" //////////////////////////////////////////////////////////////////////////
 .P
-Loads the seccomp filter provided by
-.I ctx
-into the kernel; if the function
-succeeds the new seccomp filter will be active when the function returns.  If
-.BR seccomp_precompute (3)
-was called prior to attempting to load the seccomp filter, and no changes have
-been made to the filter,
+Precomputes the seccomp filter for later use by
 .BR seccomp_load ()
-can be considered to be async-signal-safe.
-.P
-As it is possible to have multiple stacked seccomp filters for a given task
-(defined as either a process or a thread), it is important to remember that
-each of the filters loaded for a given task are executed when a syscall is
-made and the "strictest" rule is the rule that is applied.  In the case of
-seccomp, "strictest" is defined as the action with the lowest value (e.g.
-.I SCMP_ACT_KILL
-is "stricter" than
-.IR SCMP_ACT_ALLOW ).
+and similar functions.  Not only does this improve performance of
+.BR seccomp_load ()
+it also ensures that the seccomp filter can be loaded in an async-signal-safe
+manner if no changes have been made to the filter since it was precomputed.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
@@ -53,9 +41,6 @@ Invalid input, either the context or architecture token is invalid.
 .TP
 .B -ENOMEM
 The library was unable to allocate enough memory.
-.TP
-.B -ESRCH
-Unable to load the filter due to thread issues.
 .P
 If the \fISCMP_FLTATR_API_SYSRAWRC\fP filter attribute is non-zero then
 additional error codes may be returned to the caller; these additional error
@@ -74,6 +59,12 @@ int main(int argc, char *argv[])
 
 	ctx = seccomp_init(SCMP_ACT_KILL);
 	if (ctx == NULL)
+		goto out;
+
+	/* ... */
+
+	rc = seccomp_precompute(ctx);
+	if (rc < 0)
 		goto out;
 
 	/* ... */
@@ -108,10 +99,5 @@ Paul Moore <paul@paul-moore.com>
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SEE ALSO
 .\" //////////////////////////////////////////////////////////////////////////
-.BR seccomp_init (3),
-.BR seccomp_reset (3),
-.BR seccomp_release (3),
-.BR seccomp_rule_add (3),
-.BR seccomp_rule_add_exact (3)
-.BR seccomp_precompute (3)
+.BR seccomp_load (3)
 .BR signal-safety (7)

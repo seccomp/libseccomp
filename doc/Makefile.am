@@ -33,6 +33,7 @@ dist_man3_MANS = \
 	man/man3/seccomp_init.3 \
 	man/man3/seccomp_load.3 \
 	man/man3/seccomp_merge.3 \
+	man/man3/seccomp_precompute.3 \
 	man/man3/seccomp_release.3 \
 	man/man3/seccomp_reset.3 \
 	man/man3/seccomp_rule_add.3 \

@@ -1069,5 +1069,17 @@ cdef class SyscallFilter:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
         return program
 
+    def precompute(self):
+        """ Precompute the seccomp filter.
+
+        Description:
+        Precompute the seccomp filter and store it internally for future use,
+        speeding up filter loads and other functions which require the
+        generated filter.
+        """
+        rc = libseccomp.seccomp_precompute(self._ctx)
+        if rc != 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;

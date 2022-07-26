@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2012,2016,2018 Red Hat <pmoore@redhat.com>
  * Copyright (c) 2019 Cisco Systems, Inc. <pmoore2@cisco.com>
+ * Copyright (c) 2022 Microsoft Corporation <paulmoore@microsoft.com>
  * Author: Paul Moore <paul@paul-moore.com>
  */
 
@@ -1098,6 +1099,9 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 		free(snap);
 	}
 
+	/* reset the precomputed programs */
+	db_col_precompute_reset(col);
+
 	return 0;
 }
 
@@ -1161,6 +1165,9 @@ void db_col_release(struct db_filter_col *col)
 	if (col->filters)
 		free(col->filters);
 	col->filters = NULL;
+
+	/* free any precompute */
+	db_col_precompute_reset(col);
 
 	/* free the collection */
 	free(col);
@@ -1249,6 +1256,9 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 		col_dst->filters[iter_a] = col_src->filters[iter_b];
 		col_dst->filter_cnt++;
 	}
+
+	/* reset the precompute */
+	db_col_precompute_reset(col_dst);
 
 	/* free the source */
 	col_src->filter_cnt = 0;
@@ -1373,6 +1383,7 @@ int db_col_attr_set(struct db_filter_col *col,
 			col->attr.act_badarch = value;
 		else
 			return -EINVAL;
+		db_col_precompute_reset(col);
 		break;
 	case SCMP_FLTATR_CTL_NNP:
 		col->attr.nnp_enable = (value ? 1 : 0);
@@ -1394,6 +1405,7 @@ int db_col_attr_set(struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_API_TSKIP:
 		col->attr.api_tskip = (value ? 1 : 0);
+		db_col_precompute_reset(col);
 		break;
 	case SCMP_FLTATR_CTL_LOG:
 		rc = sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_LOG);
@@ -1427,6 +1439,7 @@ int db_col_attr_set(struct db_filter_col *col,
 			rc = -EOPNOTSUPP;
 			break;
 		}
+		db_col_precompute_reset(col);
 		break;
 	case SCMP_FLTATR_API_SYSRAWRC:
 		col->attr.api_sysrawrc = (value ? 1 : 0);
@@ -1460,6 +1473,8 @@ int db_col_db_new(struct db_filter_col *col, const struct arch_def *arch)
 	rc = db_col_db_add(col, db);
 	if (rc < 0)
 		_db_release(db);
+	else
+		db_col_precompute_reset(col);
 
 	return rc;
 }
@@ -1539,6 +1554,8 @@ int db_col_db_remove(struct db_filter_col *col, uint32_t arch_token)
 		col->filters = NULL;
 		col->endian = 0;
 	}
+
+	db_col_precompute_reset(col);
 
 	return 0;
 }
@@ -2233,6 +2250,9 @@ priority_failure:
 			rc = rc_tmp;
 	}
 
+	if (rc == 0)
+		db_col_precompute_reset(col);
+
 	return rc;
 }
 
@@ -2377,8 +2397,11 @@ add_arch_fail:
 
 add_return:
 	/* update the misc state */
-	if (rc == 0 && action == SCMP_ACT_NOTIFY)
-		col->notify_used = true;
+	if (rc == 0) {
+		if (action == SCMP_ACT_NOTIFY)
+			col->notify_used = true;
+		db_col_precompute_reset(col);
+	}
 	if (chain != NULL)
 		free(chain);
 	return rc;
@@ -2501,6 +2524,9 @@ void db_col_transaction_abort(struct db_filter_col *col)
 	for (iter = 0; iter < filter_cnt; iter++)
 		_db_release(filters[iter]);
 	free(filters);
+
+	/* free any precompute */
+	db_col_precompute_reset(col);
 }
 
 /**
@@ -2617,4 +2643,34 @@ shadow_err:
 	col->snapshots = snap->next;
 	_db_snap_release(snap);
 	return;
+}
+
+/**
+ * Precompute the seccomp filters
+ * @param col the filter collection
+ *
+ * This function precomputes the seccomp filters before they are needed,
+ * returns zero on success, negative values on error.
+ *
+ */
+int db_col_precompute(struct db_filter_col *col)
+{
+	if (!col->prgm_bpf)
+		return gen_bpf_generate(col, &col->prgm_bpf);
+	return 0;
+}
+
+/**
+ * Free any precomputed filter programs
+ * @param col the filter collection
+ *
+ * This function releases any precomputed filter programs.
+ */
+void db_col_precompute_reset(struct db_filter_col *col)
+{
+	if (!col->prgm_bpf)
+		return;
+
+	gen_bpf_release(col->prgm_bpf);
+	col->prgm_bpf = NULL;
 }

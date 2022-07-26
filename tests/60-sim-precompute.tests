@@ -1,0 +1,23 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2022 Microsoft Corporation <paulmoore@microsoft.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+60-sim-precompute	all	0-10	N	N	N	N	N	N	ALLOW
+60-sim-precompute	all	1000	N	N	N	N	N	N	KILL
+60-sim-precompute	all	1001	N	N	N	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+60-sim-precompute	5
+
+test type: bpf-valgrind
+
+# Testname
+60-sim-precompute

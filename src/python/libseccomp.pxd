@@ -170,5 +170,7 @@ cdef extern from "seccomp.h":
     int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
                                size_t *len)
 
+    int seccomp_precompute(const scmp_filter_ctx ctx)
+
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;

@@ -830,6 +830,17 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
  */
 int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf, size_t *len);
 
+/**
+ * Precompute the seccomp filter for future use
+ * @param ctx the filter context
+ *
+ * This function precomputes the seccomp filter and stores it internally for
+ * future use, speeding up seccomp_load() and other functions which require
+ * the generated filter.
+ *
+ */
+int seccomp_precompute(const scmp_filter_ctx ctx);
+
 /*
  * pseudo syscall definitions
  */

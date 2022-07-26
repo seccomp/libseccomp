@@ -360,9 +360,10 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 	bool listener_req;
 	struct bpf_program *prgm = NULL;
 
-	rc = gen_bpf_generate(col, &prgm);
+	rc = db_col_precompute(col);
 	if (rc < 0)
 		return rc;
+	prgm = col->prgm_bpf;
 
 	/* attempt to set NO_NEW_PRIVS */
 	if (col->attr.nnp_enable) {
@@ -417,7 +418,6 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 
 filter_load_out:
 	/* cleanup and return */
-	gen_bpf_release(prgm);
 	if (rc == -ESRCH)
 		return -ESRCH;
 	if (rc < 0)
