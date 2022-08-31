@@ -736,7 +736,7 @@ function dump_lib() {
 #     2    "sys" or "lib" depending on the syscall list to use
 #     3    csv file to use as input for saved fields
 #
-#   Generare a syscall csv file from the given kernel sources.
+#   Generate a syscall csv file from the given kernel sources.
 #
 function gen_csv() {
 
