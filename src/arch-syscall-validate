@@ -845,10 +845,6 @@ while getopts "a:c:slh" opt; do
 		opt_lib=0
 		;;
 	l)
-		if [[ ! -x $LIB_SYS_DUMP ]]; then
-			echo "error: \"$LIB_SYS_DUMP\" is not present"
-			exit 1
-		fi
 		opt_sys=0
 		opt_lib=1
 		;;
@@ -880,6 +876,11 @@ if [[ -z $kernel_dir ]]; then
 fi
 if [[ ! -d $kernel_dir ]]; then
 	echo "error: \"$1\" is not a valid directory"
+	exit 1
+fi
+
+if [[ ! -x "$LIB_SYS_DUMP" ]]; then
+	echo "error: \"$LIB_SYS_DUMP\" is not present"
 	exit 1
 fi
 
