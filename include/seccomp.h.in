@@ -421,7 +421,7 @@ const struct scmp_version *seccomp_version(void);
  *  3 : support for the SCMP_FLTATR_CTL_LOG filter attribute
  *      support for the SCMP_ACT_LOG action
  *      support for the SCMP_ACT_KILL_PROCESS action
- *  4 : support for the SCMP_FLTATR_CTL_SSB filter attrbute
+ *  4 : support for the SCMP_FLTATR_CTL_SSB filter attribute
  *  5 : support for the SCMP_ACT_NOTIFY action and notify APIs
  *  6 : support the simultaneous use of SCMP_FLTATR_CTL_TSYNC and notify APIs
  *
