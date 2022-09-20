@@ -38,6 +38,7 @@ struct db_api_arg {
 	scmp_datum_t datum;
 
 	bool valid;
+	bool is_32bit;
 };
 
 struct db_api_rule_list {

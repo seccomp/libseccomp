@@ -94,6 +94,9 @@ enum scmp_compare {
 	SCMP_CMP_GT = 6,		/**< greater than */
 	SCMP_CMP_MASKED_EQ = 7,		/**< masked equality */
 	_SCMP_CMP_MAX,
+
+	SCMP_CMP_OPMASK = 0xFFFF,
+	SCMP_CMP_32BIT = 1 << 16,	/**< operation is 32-bit */
 };
 
 /**
