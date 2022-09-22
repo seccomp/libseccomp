@@ -58,6 +58,7 @@ struct task_state {
 	int sup_flag_new_listener;
 	int sup_user_notif;
 	int sup_flag_tsync_esrch;
+	int sup_flag_wait_kill;
 };
 static struct task_state state = {
 	.nr_seccomp = -1,
@@ -73,6 +74,7 @@ static struct task_state state = {
 	.sup_flag_new_listener = -1,
 	.sup_user_notif = -1,
 	.sup_flag_tsync_esrch = -1,
+	.sup_flag_wait_kill = -1,
 };
 
 /**
@@ -307,6 +309,10 @@ int sys_chk_seccomp_flag(int flag)
 		if (state.sup_flag_tsync_esrch < 0)
 			state.sup_flag_tsync_esrch = _sys_chk_flag_kernel(flag);
 		return state.sup_flag_tsync_esrch;
+	case SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
+		if (state.sup_flag_wait_kill < 0)
+			state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag);
+		return state.sup_flag_wait_kill;
 	}
 
 	return -EOPNOTSUPP;
@@ -338,6 +344,9 @@ void sys_set_seccomp_flag(int flag, bool enable)
 		break;
 	case SECCOMP_FILTER_FLAG_TSYNC_ESRCH:
 		state.sup_flag_tsync_esrch = (enable ? 1 : 0);
+		break;
+	case SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
+		state.sup_flag_wait_kill = (enable ? 1 : 0);
 		break;
 	}
 }
@@ -394,6 +403,9 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			flgs |= SECCOMP_FILTER_FLAG_TSYNC;
 		} else if (listener_req)
 			flgs |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
+		if ((flgs & SECCOMP_FILTER_FLAG_NEW_LISTENER) &&
+		    col->attr.wait_killable_recv)
+			flgs |= SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV;
 		if (col->attr.log_enable)
 			flgs |= SECCOMP_FILTER_FLAG_LOG;
 		if (col->attr.spec_allow)

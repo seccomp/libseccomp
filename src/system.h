@@ -138,6 +138,9 @@ typedef struct sock_filter bpf_instr_raw;
 #ifndef SECCOMP_FILTER_FLAG_TSYNC_ESRCH
 #define SECCOMP_FILTER_FLAG_TSYNC_ESRCH		(1UL << 4)
 #endif
+#ifndef SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV
+#define SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV	(1UL << 5)
+#endif
 
 #ifndef SECCOMP_RET_LOG
 #define SECCOMP_RET_LOG			0x7ffc0000U /* allow after logging */

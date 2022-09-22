@@ -325,6 +325,7 @@ cdef class Attr:
                    1: rules weighted by priority and complexity (DEFAULT)
                    2: binary tree sorted by syscall number
     API_SYSRAWRC - return the raw syscall codes
+    CTL_WAITKILL - request wait killable semantics
     """
     ACT_DEFAULT = libseccomp.SCMP_FLTATR_ACT_DEFAULT
     ACT_BADARCH = libseccomp.SCMP_FLTATR_ACT_BADARCH
@@ -335,6 +336,7 @@ cdef class Attr:
     CTL_SSB = libseccomp.SCMP_FLTATR_CTL_SSB
     CTL_OPTIMIZE = libseccomp.SCMP_FLTATR_CTL_OPTIMIZE
     API_SYSRAWRC = libseccomp.SCMP_FLTATR_API_SYSRAWRC
+    CTL_WAITKILL = libseccomp.SCMP_FLTATR_CTL_WAITKILL
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.
