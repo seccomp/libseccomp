@@ -39,7 +39,7 @@ setup(
 	platforms = "Linux",
 	ext_modules = cythonize([
 		Extension("seccomp", ["seccomp.pyx"],
-			# unable to handle libtool libraries directly
-			extra_objects=["../.libs/libseccomp.a"]),
+			library_dirs=["../.libs"],
+			libraries=["seccomp"]),
 	])
 )

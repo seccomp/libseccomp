@@ -1010,6 +1010,9 @@ function run_tests() {
 	local -a job_pids
 	local -a job_logs
 
+	# Allow tests to find freshly built library
+	export LD_LIBRARY_PATH="../src/.libs:$LD_LIBRARY_PATH"
+
 	# loop through all test files
 	for file in $basedir/*.tests; do
 		local batch_requested=false
