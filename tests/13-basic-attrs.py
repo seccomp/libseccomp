@@ -61,6 +61,9 @@ def test():
     f.set_attr(Attr.API_SYSRAWRC, 1)
     if f.get_attr(Attr.API_SYSRAWRC) != 1:
         raise RuntimeError("Failed getting Attr.API_SYSRAWRC")
+    f.set_attr(Attr.CTL_WAITKILL, 1)
+    if f.get_attr(Attr.CTL_WAITKILL) != 1:
+        raise RuntimeError("Failed getting Attr.CTL_WAITKILL")
 
 test()
 

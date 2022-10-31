@@ -75,13 +75,20 @@ int main(int argc, char *argv[])
 	if (api != 6)
 		return -13;
 
+	rc = seccomp_api_set(7);
+	if (rc != 0)
+		return -14;
+	api = seccomp_api_get();
+	if (api != 7)
+		return -15;
+
 	/* Attempt to set a high, invalid API level */
 	rc = seccomp_api_set(1024);
 	if (rc != -EINVAL)
 		return -1001;
 	/* Ensure that the previously set API level didn't change */
 	api = seccomp_api_get();
-	if (api != 6)
+	if (api != 7)
 		return -1002;
 
 	return 0;

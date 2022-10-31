@@ -63,6 +63,7 @@ cdef extern from "seccomp.h":
         SCMP_FLTATR_CTL_SSB
         SCMP_FLTATR_CTL_OPTIMIZE
         SCMP_FLTATR_API_SYSRAWRC
+        SCMP_FLTATR_CTL_WAITKILL
 
     cdef enum scmp_compare:
         SCMP_CMP_NE

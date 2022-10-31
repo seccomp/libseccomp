@@ -1,4 +1,4 @@
-.TH "seccomp_attr_set" 3 "06 June 2020" "paul@paul-moore.com" "libseccomp Documentation"
+.TH "seccomp_attr_set" 3 "21 September 2022" "paul@paul-moore.com" "libseccomp Documentation"
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
@@ -130,6 +130,12 @@ Binary tree sorted by syscall number.
 .B SCMP_FLTATR_API_SYSRAWRC
 A flag to specify if libseccomp should pass system error codes back to the
 caller instead of the default -ECANCELED.  Defaults to off
+.RI ( value
+== 0).
+.TP
+.B SCMP_FLTATR_CTL_WAITKILL
+A flag to specify if libseccomp should request wait killable semantics when
+possible.  Defaults to off
 .RI ( value
 == 0).
 .\" //////////////////////////////////////////////////////////////////////////

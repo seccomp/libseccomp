@@ -78,6 +78,7 @@ enum scmp_filter_attr {
 					 *     number
 					 */
 	SCMP_FLTATR_API_SYSRAWRC = 9,	/**< return the system return codes */
+	SCMP_FLTATR_CTL_WAITKILL = 10,	/**< request wait killable semantics */
 	_SCMP_FLTATR_MAX,
 };
 
@@ -424,6 +425,7 @@ const struct scmp_version *seccomp_version(void);
  *  4 : support for the SCMP_FLTATR_CTL_SSB filter attribute
  *  5 : support for the SCMP_ACT_NOTIFY action and notify APIs
  *  6 : support the simultaneous use of SCMP_FLTATR_CTL_TSYNC and notify APIs
+ *  7 : support for the SCMP_FLTATR_CTL_WAITKILL filter attribute
  *
  */
 unsigned int seccomp_api_get(void);

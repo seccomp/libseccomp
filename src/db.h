@@ -124,6 +124,8 @@ struct db_filter_attr {
 	uint32_t optimize;
 	/* return the raw system return codes */
 	uint32_t api_sysrawrc;
+	/* request SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV */
+	uint32_t wait_killable_recv;
 };
 
 struct db_filter {

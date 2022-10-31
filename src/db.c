@@ -1072,6 +1072,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.spec_allow = 0;
 	col->attr.optimize = 1;
 	col->attr.api_sysrawrc = 0;
+	col->attr.wait_killable_recv = 0;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -1331,6 +1332,9 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_API_SYSRAWRC:
 		*value = col->attr.api_sysrawrc;
 		break;
+	case SCMP_FLTATR_CTL_WAITKILL:
+		*value = col->attr.wait_killable_recv;
+		break;
 	default:
 		rc = -EINVAL;
 		break;
@@ -1443,6 +1447,9 @@ int db_col_attr_set(struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_API_SYSRAWRC:
 		col->attr.api_sysrawrc = (value ? 1 : 0);
+		break;
+	case SCMP_FLTATR_CTL_WAITKILL:
+		col->attr.wait_killable_recv = (value ? 1 : 0);
 		break;
 	default:
 		rc = -EINVAL;
