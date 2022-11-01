@@ -120,7 +120,7 @@ AS_IF([test "$enable_python" = yes], [
 ])
 AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = yes])
 AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
-	[$(test "$enable_python" = yes && echo 1 || echo 0)],
+	[$(test "$enable_python" = "yes" && echo 1 || echo 0)],
 	[Python bindings build flag.])
 
 AC_CHECK_TOOL(GPERF, gperf)
