@@ -95,9 +95,11 @@ dnl cython checks
 dnl ####
 AC_CHECK_PROGS(cython, cython3 cython, "no")
 AS_IF([test "$cython" != no], [
-	AS_ECHO("checking cython version... $($cython -V 2>&1 | cut -d' ' -f 3)")
-	CYTHON_VER_MAJ=$($cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 1);
-	CYTHON_VER_MIN=$($cython -V 2>&1 | cut -d' ' -f 3 | cut -d'.' -f 2);
+	AC_MSG_CHECKING([cython version])
+	CYTHON_VER_FULL=$(cython -V 2>&1 | cut -d' ' -f 3);
+	CYTHON_VER_MAJ=$(echo $CYTHON_VER_FULL | cut -d'.' -f 1);
+	CYTHON_VER_MIN=$(echo $CYTHON_VER_FULL | cut -d'.' -f 2);
+	AC_MSG_RESULT([$CYTHON_VER_FULL])
 ],[
 	CYTHON_VER_MAJ=0
 	CYTHON_VER_MIN=0
