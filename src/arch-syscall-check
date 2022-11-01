@@ -22,8 +22,11 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
-SYSCALL_CSV="./syscalls.csv"
-SYSCALL_HDR="../include/seccomp-syscalls.h"
+# Based on an idea from GNU coreutils
+abs_topsrcdir="$(unset CDPATH; cd $(dirname $0)/.. && pwd)"
+
+SYSCALL_CSV="$abs_topsrcdir/src/syscalls.csv"
+SYSCALL_HDR="$abs_topsrcdir/include/seccomp-syscalls.h"
 
 function check_snr() {
 	(export LC_ALL=C; diff \
