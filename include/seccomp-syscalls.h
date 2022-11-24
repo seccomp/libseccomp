@@ -23,6 +23,11 @@
 #error "do not include seccomp-syscalls.h directly, use seccomp.h instead"
 #endif
 
+/* XXX: remove me once upstream */
+#ifndef __NR_vgetrandom_alloc
+#define __NR_vgetrandom_alloc 463
+#endif
+
 /*
  * pseudo syscall definitions
  */
@@ -280,6 +285,7 @@
 #define __PNR_atomic_barrier			-10246
 #define __PNR_atomic_cmpxchg_32			-10247
 #define __PNR_getpagesize			-10248
+#define __PNR_vgetrandom_alloc			-10249
 
 /*
  * libseccomp syscall definitions
@@ -2321,6 +2327,12 @@
 #define __SNR_vfork			__NR_vfork
 #else
 #define __SNR_vfork			__PNR_vfork
+#endif
+
+#ifdef __NR_vgetrandom_alloc
+#define __SNR_vgetrandom_alloc	__NR_vgetrandom_alloc
+#else
+#define __SNR_vgetrandom_alloc	__PNR_vgetrandom_alloc
 #endif
 
 #define __SNR_vhangup			__NR_vhangup
