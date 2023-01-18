@@ -165,6 +165,11 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_LOONGARCH64	AUDIT_ARCH_LOONGARCH64
 
 /**
+ * The Motorola 68000 architecture tokens
+ */
+#define SCMP_ARCH_M68K		AUDIT_ARCH_M68K
+
+/**
  * The MIPS architecture tokens
  */
 #ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32

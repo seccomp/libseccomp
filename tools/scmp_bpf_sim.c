@@ -261,6 +261,8 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_AARCH64;
 			else if (strcmp(optarg, "loongarch64") == 0)
 				arch = AUDIT_ARCH_LOONGARCH64;
+			else if (strcmp(optarg, "m68k") == 0)
+				arch = AUDIT_ARCH_M68K;
 			else if (strcmp(optarg, "mips") == 0)
 				arch = AUDIT_ARCH_MIPS;
 			else if (strcmp(optarg, "mipsel") == 0)

@@ -30,6 +30,7 @@ from seccomp import *
 def test(args):
     f = SyscallFilter(KILL)
     f.remove_arch(Arch())
+    f.add_arch(Arch("m68k"))
     f.add_arch(Arch("mips"))
     f.add_arch(Arch("mips64"))
     f.add_arch(Arch("mips64n32"))
