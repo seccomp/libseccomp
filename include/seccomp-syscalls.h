@@ -277,6 +277,9 @@
 #define __PNR_riscv_flush_icache		-10243
 #define __PNR_memfd_secret			-10244
 #define __PNR_fstat				-10245
+#define __PNR_atomic_barrier			-10246
+#define __PNR_atomic_cmpxchg_32			-10247
+#define __PNR_getpagesize			-10248
 
 /*
  * libseccomp syscall definitions
@@ -352,6 +355,18 @@
 #define __SNR_arch_prctl		__NR_arch_prctl
 #else
 #define __SNR_arch_prctl		__PNR_arch_prctl
+#endif
+
+#ifdef __NR_atomic_barrier
+#define __SNR_atomic_barrier		__NR_atomic_barrier
+#else
+#define __SNR_atomic_barrier		__PNR_atomic_barrier
+#endif
+
+#ifdef __NR_atomic_cmpxchg_32
+#define __SNR_atomic_cmpxchg_32		__NR_atomic_cmpxchg_32
+#else
+#define __SNR_atomic_cmpxchg_32		__PNR_atomic_cmpxchg_32
 #endif
 
 #ifdef __NR_bdflush
@@ -823,6 +838,12 @@
 #endif
 
 #define __SNR_getitimer			__NR_getitimer
+
+#ifdef __NR_getpagesize
+#define __SNR_getpagesize		__NR_getpagesize
+#else
+#define __SNR_getpagesize		__PNR_getpagesize
+#endif
 
 #ifdef __NR_getpeername
 #define __SNR_getpeername		__NR_getpeername

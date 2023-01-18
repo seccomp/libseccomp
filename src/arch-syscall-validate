@@ -348,6 +348,30 @@ function dump_lib_loongarch64() {
 	dump_lib_arch loongarch64 | mangle_lib_syscall loongarch64
 }
 
+# Dump the m68k system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_m68k() {
+	cat $1/arch/m68k/kernel/syscalls/syscall.tbl | \
+		grep -v "^#" | \
+		sed -n "/[0-9]\+[ \t]\+\(common\)/p" | \
+		awk '{ print $3","$1 }' | \
+		sort
+}
+
+#
+# Dump the m68k library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_m68k() {
+	dump_lib_arch m68k | mangle_lib_syscall m68k
+}
+
 #
 # Dump the mips system syscall table
 #
@@ -664,6 +688,9 @@ function dump_sys() {
 	loongarch64)
 		dump_sys_loongarch64 "$2"
 		;;
+	m68k)
+		dump_sys_m68k "$2"
+		;;
 	mips)
 		dump_sys_mips "$2"
 		;;
@@ -734,6 +761,9 @@ function dump_lib() {
 	loongarch64)
 		dump_lib_loongarch64
 		;;
+	m68k)
+		dump_lib_m68k
+		;;
 	mips)
 		dump_lib_mips
 		;;
@@ -799,6 +829,7 @@ function gen_csv() {
 	abi_list+=" x86 x86_64 x32"
 	abi_list+=" arm aarch64"
 	abi_list+=" loongarch64"
+	abi_list+=" m68k"
 	abi_list+=" mips mips64 mips64n32"
 	abi_list+=" parisc parisc64"
 	abi_list+=" ppc ppc64"
@@ -911,6 +942,7 @@ if [[ $opt_arches == "" ]]; then
 		x86 x86_64 x32 \
 		arm aarch64 \
 		loongarch64 \
+		m68k \
 		mips mips64 mips64n32 \
 		parisc parisc64 \
 		ppc ppc64 \

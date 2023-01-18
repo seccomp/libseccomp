@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_LOONGARCH64:
 			printf("loongarch64\n");
+		case SCMP_ARCH_M68K:
+			printf("m68k\n");
 			break;
 		case SCMP_ARCH_MIPS:
 			printf("mips\n");

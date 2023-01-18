@@ -30,6 +30,7 @@ GLBL_ARCH_LE_SUPPORT=" \
 	riscv64 \
 	sh"
 GLBL_ARCH_BE_SUPPORT=" \
+	m68k \
 	mips mips64 mips64n32 \
 	parisc parisc64 \
 	ppc ppc64 \
@@ -39,6 +40,7 @@ GLBL_ARCH_BE_SUPPORT=" \
 GLBL_ARCH_32B_SUPPORT=" \
 	x86 x32 \
 	arm \
+	m68k \
 	mips mipsel mips64n32 mipsel64n32 \
 	parisc \
 	ppc \
@@ -803,7 +805,7 @@ function run_test_live() {
 
 	# setup the arch specific return values
 	case "$arch" in
-	x86|x86_64|x32|arm|aarch64|loongarch64|parisc|parisc64|ppc|ppc64|ppc64le|ppc|s390|s390x|riscv64|sh|sheb)
+	x86|x86_64|x32|arm|aarch64|loongarch64|m68k|parisc|parisc64|ppc|ppc64|ppc64le|ppc|s390|s390x|riscv64|sh|sheb)
 		rc_kill_process=159
 		rc_kill=159
 		rc_allow=160
