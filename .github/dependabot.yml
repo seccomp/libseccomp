@@ -1,0 +1,23 @@
+#
+# Dependabot Workflow for libseccomp
+#
+# Copyright (c) 2023 Oracle and/or its affiliates.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+# based on this guide from GitHub:
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot
+
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
+    commit-message:
+      prefix: "RFE:"
+    labels:
+      - "enhancement"
+      - "priority/low"
