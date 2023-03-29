@@ -289,7 +289,7 @@ case __PNR_##NAME: \
  * @param arch the arch definition
  * @param syscall the direct syscall
  *
- * Return the related multiplexed pseduo syscall number, __NR_SCMP_UNDEF is
+ * Return the related multiplexed pseudo syscall number, __NR_SCMP_UNDEF is
  * there is no related pseudo syscall, or __NR_SCMP_ERROR otherwise.
  *
  */

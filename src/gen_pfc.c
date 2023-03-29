@@ -238,7 +238,7 @@ static void _gen_pfc_chain(const struct arch_def *arch,
  * @param sys the syscall filter
  * @param fds the file stream to send the output
  *
- * This function generates a pseduo filter code representation of the given
+ * This function generates a pseudo filter code representation of the given
  * syscall filter and writes it to the given output stream.
  *
  */
