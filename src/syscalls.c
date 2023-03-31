@@ -146,7 +146,7 @@ static bool _abi_syscall_socket_test(const struct arch_def *arch, int sys)
 {
 	const char *name;
 
-	/* multiplexed pseduo-syscalls */
+	/* multiplexed pseudo-syscalls */
 	if (sys <= -100 && sys >= -120)
 		return true;
 
@@ -193,7 +193,7 @@ static bool _abi_syscall_ipc_test(const struct arch_def *arch, int sys)
 {
 	const char *name;
 
-	/* multiplexed pseduo-syscalls */
+	/* multiplexed pseudo-syscalls */
 	if (sys <= -200 && sys >= -224)
 		return true;
 

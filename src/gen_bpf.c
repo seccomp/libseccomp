@@ -1309,7 +1309,7 @@ static inline bool _skip_syscall(struct bpf_state *state,
 	if (!syscall->valid)
 		return true;
 
-	/* psuedo-syscalls should not be added to the filter unless explicitly
+	/* pseudo-syscalls should not be added to the filter unless explicitly
 	 * requested via SCMP_FLTATR_API_TSKIP
 	 */
 	if (((int)syscall->num < 0) &&
