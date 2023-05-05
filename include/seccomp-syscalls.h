@@ -276,6 +276,7 @@
 #define __PNR_renameat				-10242
 #define __PNR_riscv_flush_icache		-10243
 #define __PNR_memfd_secret			-10244
+#define __PNR_map_shadow_stack			-10245
 
 /*
  * libseccomp syscall definitions
@@ -400,6 +401,8 @@
 #else
 #define __SNR_cacheflush		__PNR_cacheflush
 #endif
+
+#define __SNR_cachestat			__NR_cachestat
 
 #define __SNR_capget			__NR_capget
 
@@ -595,6 +598,8 @@
 
 #define __SNR_fchmodat			__NR_fchmodat
 
+#define __SNR_fchmodat2			__NR_fchmodat2
+
 #ifdef __NR_fchown
 #define __SNR_fchown			__NR_fchown
 #else
@@ -717,13 +722,19 @@
 
 #define __SNR_futex			__NR_futex
 
+#define __SNR_futex_requeue		__NR_futex_requeue
+
 #ifdef __NR_futex_time64
 #define __SNR_futex_time64		__NR_futex_time64
 #else
 #define __SNR_futex_time64		__PNR_futex_time64
 #endif
 
+#define __SNR_futex_wait		__NR_futex_wait
+
 #define __SNR_futex_waitv		__NR_futex_waitv
+
+#define __SNR_futex_wake		__NR_futex_wake
 
 #ifdef __NR_futimesat
 #define __SNR_futimesat			__NR_futimesat
@@ -1074,6 +1085,12 @@
 #endif
 
 #define __SNR_madvise			__NR_madvise
+
+#ifdef __NR_map_shadow_stack
+#define __SNR_map_shadow_stack		__NR_map_shadow_stack
+#else
+#define __SNR_map_shadow_stack		__PNR_map_shadow_stack
+#endif
 
 #ifdef __NR_mbind
 #define __SNR_mbind			__NR_mbind
