@@ -2090,15 +2090,19 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			if (i_iter->jt.type == TGT_NXT) {
 				b_jmp = _gen_bpf_find_nxt(b_iter,
 							  i_iter->jt.tgt.nxt);
-				if (b_jmp == NULL)
-					return -EFAULT;
+				if (b_jmp == NULL) {
+					rc = -EFAULT;
+					goto state_reset;
+				}
 				i_iter->jt = _BPF_JMP_HSH(b_jmp->hash);
 			}
 			if (i_iter->jf.type == TGT_NXT) {
 				b_jmp = _gen_bpf_find_nxt(b_iter,
 							  i_iter->jf.tgt.nxt);
-				if (b_jmp == NULL)
-					return -EFAULT;
+				if (b_jmp == NULL) {
+					rc = -EFAULT;
+					goto state_reset;
+				}
 				i_iter->jf = _BPF_JMP_HSH(b_jmp->hash);
 			}
 			/* we shouldn't need to worry about a TGT_NXT in k */
@@ -2140,8 +2144,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 						b_jmp = _blk_prepend(state,
 								     b_jmp,
 								     &instr);
-						if (b_jmp == NULL)
-							return -EFAULT;
+						if (b_jmp == NULL) {
+							rc = -EFAULT;
+							goto state_reset;
+						}
 					}
 					_BPF_INSTR(instr,
 						   _BPF_OP(state->arch,
@@ -2151,8 +2157,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 							  b_jmp->acc_start.offset));
 					b_jmp = _blk_prepend(state,
 							     b_jmp, &instr);
-					if (b_jmp == NULL)
-						return -EFAULT;
+					if (b_jmp == NULL) {
+						rc = -EFAULT;
+						goto state_reset;
+					}
 					/* not reliant on the accumulator */
 					b_jmp->acc_start = _ACC_STATE_UNDEF;
 				}
@@ -2288,6 +2296,7 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 		_blk_free(state, b_iter);
 	} while (b_head != NULL);
 
+	state->arch = NULL;
 	return 0;
 
 build_bpf_free_blks:
@@ -2298,6 +2307,8 @@ build_bpf_free_blks:
 		__blk_free(state, b_iter);
 		b_iter = b_jmp;
 	}
+state_reset:
+	state->arch = NULL;
 	return rc;
 }
 
