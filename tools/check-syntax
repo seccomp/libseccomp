@@ -81,10 +81,9 @@ function tool_c_style() {
 	cat - | astyle --options=none --lineend=linux --mode=c \
 		--style=linux \
 		--indent=force-tab=8 \
-		--indent-preprocessor \
 		--indent-col1-comments \
 		--min-conditional-indent=0 \
-		--max-instatement-indent=80 \
+		--max-continuation-indent=80 \
 		--pad-oper \
 		--align-pointer=name \
 		--align-reference=name \

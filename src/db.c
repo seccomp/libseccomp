@@ -1123,14 +1123,12 @@ struct db_filter_col *db_col_init(uint32_t def_action)
 		return NULL;
 
 	/* reset the DB to a known state */
-	if (db_col_reset(col, def_action) < 0)
-		goto init_failure;
+	if (db_col_reset(col, def_action) < 0) {
+		db_col_release(col);
+		return NULL;
+	}
 
 	return col;
-
-init_failure:
-	db_col_release(col);
-	return NULL;
 }
 
 /**
