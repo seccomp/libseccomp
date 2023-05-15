@@ -2485,12 +2485,19 @@ void db_col_transaction_abort(struct db_filter_col *col)
 	struct db_filter **filters;
 	struct db_filter_snap *snap;
 
-	if (col->snapshots == NULL)
+	snap = col->snapshots;
+	if (snap == NULL)
 		return;
 
-	/* replace the current filter with the last snapshot */
-	snap = col->snapshots;
+	/* replace the current filter with the last snapshot, skipping shadow
+	 * snapshots are they are duplicates of the current snapshot */
+	if (snap->shadow) {
+		struct db_filter_snap *tmp = snap;
+		snap = snap->next;
+		_db_snap_release(tmp);
+	}
 	col->snapshots = snap->next;
+
 	filter_cnt = col->filter_cnt;
 	filters = col->filters;
 	col->filter_cnt = snap->filter_cnt;
@@ -2528,8 +2535,9 @@ void db_col_transaction_commit(struct db_filter_col *col)
 	if (snap->shadow) {
 		/* leave the shadow intact, but drop the next snapshot */
 		if (snap->next) {
-			snap->next = snap->next->next;
-			_db_snap_release(snap->next);
+			struct db_filter_snap *tmp = snap->next;
+			snap->next = tmp->next;
+			_db_snap_release(tmp);
 		}
 		return;
 	}
