@@ -111,6 +111,7 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_LOONGARCH64:
 			sys = loongarch64_syscall_iterate(iter);
+			break;
 		case SCMP_ARCH_M68K:
 			sys = m68k_syscall_iterate(iter);
 			break;
