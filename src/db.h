@@ -145,6 +145,7 @@ struct db_filter_snap {
 	struct db_filter **filters;
 	unsigned int filter_cnt;
 	bool shadow;
+	bool user;
 
 	struct db_filter_snap *next;
 };
@@ -215,9 +216,9 @@ int db_col_rule_add(struct db_filter_col *col,
 int db_col_syscall_priority(struct db_filter_col *col,
 			    int syscall, uint8_t priority);
 
-int db_col_transaction_start(struct db_filter_col *col);
-void db_col_transaction_abort(struct db_filter_col *col);
-void db_col_transaction_commit(struct db_filter_col *col);
+int db_col_transaction_start(struct db_filter_col *col, bool user);
+void db_col_transaction_abort(struct db_filter_col *col, bool user);
+void db_col_transaction_commit(struct db_filter_col *col, bool user);
 
 int db_col_precompute(struct db_filter_col *col);
 void db_col_precompute_reset(struct db_filter_col *col);
