@@ -173,6 +173,10 @@ cdef extern from "seccomp.h":
     int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
                                size_t *len)
 
+    int seccomp_transaction_start(const scmp_filter_ctx ctx)
+    void seccomp_transaction_reject(const scmp_filter_ctx ctx)
+    int seccomp_transaction_commit(const scmp_filter_ctx ctx)
+
     int seccomp_precompute(const scmp_filter_ctx ctx)
 
 # kate: syntax python;

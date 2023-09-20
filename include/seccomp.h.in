@@ -850,6 +850,35 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf, size_t *len);
 
 /**
+ * Start a filter transaction
+ * @param ctx the filter context
+ *
+ * This function starts a filter transaction for modifying the seccomp filter.
+ * Returns zero on success, negative values on failure.
+ *
+ */
+int seccomp_transaction_start(const scmp_filter_ctx ctx);
+
+/**
+ * Reject the current filter transaction
+ * @param ctx the filter context
+ *
+ * This function rejects the current seccomp filter transaction.
+ *
+ */
+void seccomp_transaction_reject(const scmp_filter_ctx ctx);
+
+/**
+ * Commit the current filter transaction
+ * @param ctx the filter context
+ *
+ * This function commits the current seccomp filter transaction.  Returns zero
+ * on success, negative values on failure.
+ *
+ */
+int seccomp_transaction_commit(const scmp_filter_ctx ctx);
+
+/**
  * Precompute the seccomp filter for future use
  * @param ctx the filter context
  *
