@@ -1079,6 +1079,34 @@ cdef class SyscallFilter:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
         return program
 
+    def start_transaction(self):
+        """ Start a transaction.
+
+        Description:
+        Start a transaction for modifying the seccomp filter.
+        """
+        rc = libseccomp.seccomp_transaction_start(self._ctx)
+        if rc != 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
+    def reject_transaction(self):
+        """ Reject a transaction.
+
+        Description:
+        Reject the current seccomp filter transaction.
+        """
+        libseccomp.seccomp_transaction_reject(self._ctx)
+
+    def commit_transaction(self):
+        """ Commit a transaction.
+
+        Description:
+        Commit the current seccomp filter transaction.
+        """
+        rc = libseccomp.seccomp_transaction_commit(self._ctx)
+        if rc != 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+
     def precompute(self):
         """ Precompute the seccomp filter.
 
