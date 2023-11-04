@@ -312,7 +312,7 @@ int sys_chk_seccomp_flag(int flag)
 		return state.sup_flag_tsync_esrch;
 	case SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
 		if (state.sup_flag_wait_kill < 0)
-			state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag);
+			state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag|SECCOMP_FILTER_FLAG_NEW_LISTENER);
 		return state.sup_flag_wait_kill;
 	}
 
