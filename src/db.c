@@ -1982,7 +1982,7 @@ static struct db_sys_list *_db_rule_gen_32(const struct arch_def *arch,
 	struct db_sys_list *s_new;
 	const struct db_api_arg *chain = rule->args;
 	struct db_arg_chain_tree *c_iter = NULL, *c_prev = NULL;
-	bool tf_flag;
+	bool tf_flag = false;
 
 	s_new = zmalloc(sizeof(*s_new));
 	if (s_new == NULL)
