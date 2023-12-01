@@ -49,4 +49,4 @@ uninstall-local:
 
 clean-local:
 	[ ${srcdir} = ${builddir} ] || ${RM} -f ${builddir}/seccomp.pyx
-	${RM} -rf seccomp.c build
+	${RM} -rf seccomp.c build dist seccomp.egg-info
