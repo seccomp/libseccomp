@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	if (rc == 0)
 		goto out;
 	/* -10001 == 4294957295 (unsigned) */
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, -10001, 0);
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, -11001, 0);
 	if (rc == 0)
 		goto out;
 
