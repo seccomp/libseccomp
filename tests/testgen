@@ -32,7 +32,7 @@
 #
 function verify_deps() {
 	[[ -z "$1" ]] && return
-	if ! which "$1" >& /dev/null; then
+	if ! type -P "$1" >& /dev/null; then
 		echo "error: install \"$1\" and include it in your \$PATH"
 		exit 1
 	fi

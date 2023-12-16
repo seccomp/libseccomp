@@ -18,7 +18,7 @@
 #
 function check_deps() {
 	[[ -z "$1" ]] && return
-	which "$1" >& /dev/null
+	type -P "$1" >& /dev/null
 	return $?
 }
 
