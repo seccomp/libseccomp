@@ -73,7 +73,7 @@ GLBL_SYS_API="../tools/scmp_api_level"
 #
 function check_deps() {
 	[[ -z "$1" ]] && return
-	which "$1" >& /dev/null
+	type -P "$1" >& /dev/null
 	return $?
 }
 
