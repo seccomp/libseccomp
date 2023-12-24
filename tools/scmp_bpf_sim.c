@@ -182,7 +182,8 @@ static void bpf_execute(const struct bpf_program *prg,
 		switch (code) {
 		case BPF_LD+BPF_W+BPF_ABS:
 			if (k < BPF_SYSCALL_MAX) {
-				uint32_t val = *((uint32_t *)&sys_data_b[k]);
+				uint32_t val;
+				memcpy(&val, &sys_data_b[k], sizeof(val));
 				state.acc = ttoh32(arch, val);
 			} else
 				exit_error(ERANGE, ip_c);
