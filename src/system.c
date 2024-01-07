@@ -311,8 +311,16 @@ int sys_chk_seccomp_flag(int flag)
 			state.sup_flag_tsync_esrch = _sys_chk_flag_kernel(flag);
 		return state.sup_flag_tsync_esrch;
 	case SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
-		if (state.sup_flag_wait_kill < 0)
-			state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag);
+		if (state.sup_flag_wait_kill < 0) {
+			/* kernel requires NEW_LISTENER with WAIT_KILLABLE_RECV */
+			flag |= SECCOMP_FILTER_FLAG_NEW_LISTENER;
+			sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER);
+			if (state.sup_flag_new_listener) {
+				state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag);
+			} else {
+				state.sup_flag_wait_kill = 0;
+			}
+		}
 		return state.sup_flag_wait_kill;
 	}
 
