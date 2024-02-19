@@ -62,6 +62,9 @@ GLBL_SYS_RESOLVER="../tools/scmp_sys_resolver"
 GLBL_SYS_SIM="../tools/scmp_bpf_sim"
 GLBL_SYS_API="../tools/scmp_api_level"
 
+RUST_TESTS_DIR="./rust"
+RUST_TESTS_BIN_DIR="${RUST_TESTS_DIR}/bin"
+
 ####
 # functions
 
@@ -104,7 +107,7 @@ optional arguments:
   -h             show this help message and exit
   -j JOBS        run up to JOBS test jobs in parallel
                   can also be set via LIBSECCOMP_TSTCFG_JOBS env variable
-  -m MODE        specified the test mode [c (default), python]
+  -m MODE        specified the test mode [c (default), python, rust]
                   can also be set via LIBSECCOMP_TSTCFG_MODE_LIST env variable
   -a             specifies all tests are to be run
   -b BATCH_NAME  specifies batch of tests to be run
@@ -266,6 +269,8 @@ function run_test_command() {
 		else
 			cmd="$cmd /usr/bin/env python ${srcdir}/$2.py $3"
 		fi
+	elif [[ $mode == "rust" ]]; then
+		cmd="${RUST_TESTS_BIN_DIR}/$2 $3"
 	else
 		cmd="$2 $3"
 	fi
@@ -871,6 +876,16 @@ function run_test() {
 	# generate the test number string for the line of batch test data
 	local testnumstr=$(generate_test_num "$1" $2 1)
 
+	# skip tests not yet supported for Rust bindings
+	if [[ "$mode" == "rust" ]]; then
+		if [[ ! -e "${RUST_TESTS_DIR}/${1}.rs" ]]; then
+			print_result $testnumstr "SKIPPED" \
+				"(test not yet supported)"
+			stats_skipped=$(($stats_skipped+1))
+			return
+		fi
+	fi
+
 	# ensure we only run tests which match the specified type
 	match_csv_word "$type" "$4"
 	local type_match=$?
@@ -1115,6 +1130,9 @@ while getopts "ab:gj:l:m:s:t:T:vh" opt; do
 			verify_deps python
 			mode_list="$mode_list python"
 			;;
+		rust)
+			mode_list="$mode_list rust"
+			;;
 		*)
 			usage
 			exit 1
@@ -1160,6 +1178,10 @@ if [[ -z $mode_list ]]; then
 		[[ "$(grep "ENABLE_PYTHON" ../configure.h | \
 		   awk '{ print $3 }')" = "1" ]] && \
 			mode_list="$mode_list python"
+		# rust tests
+		[[ "$(grep "ENABLE_RUST" ../configure.h | \
+		   awk '{ print $3 }')" = "1" ]] && \
+			mode_list="$mode_list rust"
 	fi
 fi
 
