@@ -310,7 +310,7 @@ int sys_chk_seccomp_flag(int flag)
 		if (state.sup_flag_tsync_esrch < 0)
 			state.sup_flag_tsync_esrch = _sys_chk_flag_kernel(flag);
 		return state.sup_flag_tsync_esrch;
-	case SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
+	case SECCOMP_FILTER_FLAG_NEW_LISTENER | SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV:
 		if (state.sup_flag_wait_kill < 0)
 			state.sup_flag_wait_kill = _sys_chk_flag_kernel(flag);
 		return state.sup_flag_wait_kill;

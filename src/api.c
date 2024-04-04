@@ -192,7 +192,8 @@ static unsigned int _seccomp_api_update(void)
 		level = 6;
 
 	if (level == 6 &&
-	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV) == 1)
+	    sys_chk_seccomp_flag(SECCOMP_FILTER_FLAG_NEW_LISTENER |
+	                         SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV) == 1)
 		level = 7;
 
 	/* update the stored api level and return */
