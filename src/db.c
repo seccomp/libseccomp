@@ -2601,8 +2601,8 @@ void db_col_transaction_commit(struct db_filter_col *col)
 		 *       at the cost of a not reaping all the memory possible */
 
 		do {
-			_db_release(snap->filters[snap->filter_cnt--]);
-		} while (snap->filter_cnt > col->filter_cnt);
+			_db_release(snap->filters[--snap->filter_cnt]);
+		} while (col->filter_cnt < snap->filter_cnt);
 	}
 
 	/* loop through each filter and update the rules on the snapshot */
