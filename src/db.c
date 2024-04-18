@@ -2369,7 +2369,7 @@ int db_col_rule_add(struct db_filter_col *col,
 	}
 
 	/* create a checkpoint */
-	rc = db_col_transaction_start(col);
+	rc = db_col_transaction_start(col, false);
 	if (rc != 0)
 		goto add_return;
 
@@ -2396,9 +2396,9 @@ add_arch_fail:
 
 	/* commit the transaction or abort */
 	if (rc == 0)
-		db_col_transaction_commit(col);
+		db_col_transaction_commit(col, false);
 	else
-		db_col_transaction_abort(col);
+		db_col_transaction_abort(col, false);
 
 add_return:
 	/* update the misc state */
@@ -2415,12 +2415,13 @@ add_return:
 /**
  * Start a new seccomp filter transaction
  * @param col the filter collection
+ * @param user true if initiated by a user
  *
  * This function starts a new seccomp filter transaction for the given filter
  * collection.  Returns zero on success, negative values on failure.
  *
  */
-int db_col_transaction_start(struct db_filter_col *col)
+int db_col_transaction_start(struct db_filter_col *col, bool user)
 {
 	int rc;
 	unsigned int iter;
@@ -2439,6 +2440,7 @@ int db_col_transaction_start(struct db_filter_col *col)
 		 *       transaction is current/correct */
 
 		col->snapshots->shadow = false;
+		col->snapshots->user = user;
 		return 0;
 	}
 
@@ -2486,6 +2488,8 @@ int db_col_transaction_start(struct db_filter_col *col)
 		} while (rule_o != filter_o->rules);
 	}
 
+	snap->user = user;
+
 	/* add the snapshot to the list */
 	snap->next = col->snapshots;
 	col->snapshots = snap;
@@ -2502,23 +2506,35 @@ trans_start_failure:
 /**
  * Abort the top most seccomp filter transaction
  * @param col the filter collection
+ * @param user true if initiated by a user
  *
  * This function aborts the most recent seccomp filter transaction.
  *
  */
-void db_col_transaction_abort(struct db_filter_col *col)
+void db_col_transaction_abort(struct db_filter_col *col, bool user)
 {
 	int iter;
 	unsigned int filter_cnt;
 	struct db_filter **filters;
 	struct db_filter_snap *snap;
 
-	if (col->snapshots == NULL)
+	snap = col->snapshots;
+	if (snap == NULL)
 		return;
 
-	/* replace the current filter with the last snapshot */
-	snap = col->snapshots;
+	/* replace the current filter with the last snapshot, skipping shadow
+	 * snapshots are they are duplicates of the current snapshot */
+	if (snap->shadow) {
+		struct db_filter_snap *tmp = snap;
+		snap = snap->next;
+		_db_snap_release(tmp);
+	}
+
+	if (snap->user != user)
+		return;
+
 	col->snapshots = snap->next;
+
 	filter_cnt = col->filter_cnt;
 	filters = col->filters;
 	col->filter_cnt = snap->filter_cnt;
@@ -2537,13 +2553,14 @@ void db_col_transaction_abort(struct db_filter_col *col)
 /**
  * Commit the top most seccomp filter transaction
  * @param col the filter collection
+ * @param user true if initiated by a user
  *
  * This function commits the most recent seccomp filter transaction and
  * attempts to create a shadow transaction that is a duplicate of the current
  * filter to speed up future transactions.
  *
  */
-void db_col_transaction_commit(struct db_filter_col *col)
+void db_col_transaction_commit(struct db_filter_col *col, bool user)
 {
 	int rc;
 	unsigned int iter;
@@ -2559,11 +2576,15 @@ void db_col_transaction_commit(struct db_filter_col *col)
 	if (snap->shadow) {
 		/* leave the shadow intact, but drop the next snapshot */
 		if (snap->next) {
-			snap->next = snap->next->next;
-			_db_snap_release(snap->next);
+			struct db_filter_snap *tmp = snap->next;
+			snap->next = tmp->next;
+			_db_snap_release(tmp);
 		}
 		return;
 	}
+
+	if (snap->user != user)
+		return;
 
 	/* adjust the number of filters if needed */
 	if (col->filter_cnt > snap->filter_cnt) {
@@ -2593,8 +2614,8 @@ void db_col_transaction_commit(struct db_filter_col *col)
 		 *       at the cost of a not reaping all the memory possible */
 
 		do {
-			_db_release(snap->filters[snap->filter_cnt--]);
-		} while (snap->filter_cnt > col->filter_cnt);
+			_db_release(snap->filters[--snap->filter_cnt]);
+		} while (col->filter_cnt < snap->filter_cnt);
 	}
 
 	/* loop through each filter and update the rules on the snapshot */

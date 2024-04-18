@@ -794,6 +794,45 @@ API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+API int seccomp_transaction_start(const scmp_filter_ctx ctx)
+{
+	int rc;
+	struct db_filter_col *col;
+
+	if (_ctx_valid(ctx))
+		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
+
+	rc = db_col_transaction_start(col, true);
+	return _rc_filter(rc);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API void seccomp_transaction_reject(const scmp_filter_ctx ctx)
+{
+	struct db_filter_col *col;
+
+	if (_ctx_valid(ctx))
+		return;
+	col = (struct db_filter_col *)ctx;
+
+	db_col_transaction_abort(col, true);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
+API int seccomp_transaction_commit(const scmp_filter_ctx ctx)
+{
+	struct db_filter_col *col;
+
+	if (_ctx_valid(ctx))
+		return _rc_filter(-EINVAL);
+	col = (struct db_filter_col *)ctx;
+
+	db_col_transaction_commit(col, true);
+	return _rc_filter(0);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 API int seccomp_precompute(const scmp_filter_ctx ctx)
 {
 	struct db_filter_col *col;
