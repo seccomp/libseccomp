@@ -859,7 +859,7 @@ static void _db_reset(struct db_filter *db)
 }
 
 /**
- * Intitalize a seccomp filter DB
+ * Initialize a seccomp filter DB
  * @param arch the architecture definition
  *
  * This function initializes a seccomp filter DB and readies it for use.
@@ -1107,7 +1107,7 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 }
 
 /**
- * Intitalize a seccomp filter collection
+ * Initialize a seccomp filter collection
  * @param def_action the default filter action
  *
  * This function initializes a seccomp filter collection and readies it for
