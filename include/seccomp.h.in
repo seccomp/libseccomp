@@ -248,7 +248,7 @@ struct scmp_arg_cmp {
 #define SCMP_SYS(x)		(__SNR_##x)
 
 /* Helpers for the argument comparison macros, DO NOT USE directly */
-#define _SCMP_VA_NUM_ARGS(...)	_SCMP_VA_NUM_ARGS_IMPL(__VA_ARGS__,2,1)
+#define _SCMP_VA_NUM_ARGS(...)	_SCMP_VA_NUM_ARGS_IMPL(__VA_ARGS__,2,1,0)
 #define _SCMP_VA_NUM_ARGS_IMPL(_1,_2,N,...)	N
 #define _SCMP_MACRO_DISPATCHER(func, ...) \
 	_SCMP_MACRO_DISPATCHER_IMPL1(func, _SCMP_VA_NUM_ARGS(__VA_ARGS__))
