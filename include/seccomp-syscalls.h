@@ -276,10 +276,13 @@
 #define __PNR_renameat				-10242
 #define __PNR_riscv_flush_icache		-10243
 #define __PNR_memfd_secret			-10244
-#define __PNR_fstat				-10245
-#define __PNR_atomic_barrier			-10246
-#define __PNR_atomic_cmpxchg_32			-10247
-#define __PNR_getpagesize			-10248
+#define __PNR_map_shadow_stack			-10245
+#define __PNR_fstat				-10246
+#define __PNR_atomic_barrier			-10247
+#define __PNR_atomic_cmpxchg_32			-10248
+#define __PNR_getpagesize			-10249
+#define __PNR_riscv_hwprobe			-10250
+#define __PNR_uretprobe				-10251
 
 /*
  * libseccomp syscall definitions
@@ -416,6 +419,8 @@
 #else
 #define __SNR_cacheflush		__PNR_cacheflush
 #endif
+
+#define __SNR_cachestat			__NR_cachestat
 
 #define __SNR_capget			__NR_capget
 
@@ -611,6 +616,8 @@
 
 #define __SNR_fchmodat			__NR_fchmodat
 
+#define __SNR_fchmodat2			__NR_fchmodat2
+
 #ifdef __NR_fchown
 #define __SNR_fchown			__NR_fchown
 #else
@@ -733,13 +740,19 @@
 
 #define __SNR_futex			__NR_futex
 
+#define __SNR_futex_requeue		__NR_futex_requeue
+
 #ifdef __NR_futex_time64
 #define __SNR_futex_time64		__NR_futex_time64
 #else
 #define __SNR_futex_time64		__PNR_futex_time64
 #endif
 
+#define __SNR_futex_wait		__NR_futex_wait
+
 #define __SNR_futex_waitv		__NR_futex_waitv
+
+#define __SNR_futex_wake		__NR_futex_wake
 
 #ifdef __NR_futimesat
 #define __SNR_futimesat			__NR_futimesat
@@ -1065,6 +1078,8 @@
 #define __SNR_listen			__PNR_listen
 #endif
 
+#define __SNR_listmount			__NR_listmount
+
 #define __SNR_listxattr			__NR_listxattr
 
 #define __SNR_llistxattr		__NR_llistxattr
@@ -1083,6 +1098,12 @@
 
 #define __SNR_lsetxattr			__NR_lsetxattr
 
+#define __SNR_lsm_get_self_attr		__NR_lsm_get_self_attr
+
+#define __SNR_lsm_list_modules		__NR_lsm_list_modules
+
+#define __SNR_lsm_set_self_attr		__NR_lsm_set_self_attr
+
 #ifdef __NR_lstat
 #define __SNR_lstat			__NR_lstat
 #else
@@ -1096,6 +1117,12 @@
 #endif
 
 #define __SNR_madvise			__NR_madvise
+
+#ifdef __NR_map_shadow_stack
+#define __SNR_map_shadow_stack		__NR_map_shadow_stack
+#else
+#define __SNR_map_shadow_stack		__PNR_map_shadow_stack
+#endif
 
 #ifdef __NR_mbind
 #define __SNR_mbind			__NR_mbind
@@ -1218,6 +1245,8 @@
 #define __SNR_mq_unlink			__NR_mq_unlink
 
 #define __SNR_mremap			__NR_mremap
+
+#define __SNR_mseal			__NR_mseal
 
 #ifdef __NR_msgctl
 #define __SNR_msgctl			__NR_msgctl
@@ -1559,6 +1588,12 @@
 #define __SNR_riscv_flush_icache	__NR_riscv_flush_icache
 #else
 #define __SNR_riscv_flush_icache	__PNR_riscv_flush_icache
+#endif
+
+#ifdef __NR_riscv_hwprobe
+#define __SNR_riscv_hwprobe		__NR_riscv_hwprobe
+#else
+#define __SNR_riscv_hwprobe		__PNR_riscv_hwprobe
 #endif
 
 #ifdef __NR_rmdir
@@ -2051,6 +2086,8 @@
 #define __SNR_statfs64			__PNR_statfs64
 #endif
 
+#define __SNR_statmount			__NR_statmount
+
 #ifdef __NR_statx
 #define __SNR_statx			__NR_statx
 #else
@@ -2258,6 +2295,12 @@
 #define __SNR_unlinkat			__NR_unlinkat
 
 #define __SNR_unshare			__NR_unshare
+
+#ifdef __NR_uretprobe
+#define __SNR_uretprobe			__NR_uretprobe
+#else
+#define __SNR_uretprobe			__PNR_uretprobe
+#endif
 
 #ifdef __NR_uselib
 #define __SNR_uselib			__NR_uselib

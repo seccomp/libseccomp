@@ -305,15 +305,15 @@ if ($arch == 3221225730)
   # filter for syscall "open" (4294957130) [priority: 65535]
   if ($syscall == 4294957130)
     action KILL;
-  # filter for syscall "fstat" (4294957051) [priority: 65535]
-  if ($syscall == 4294957051)
-    action KILL_PROCESS;
   # filter for syscall "exit_group" (94) [priority: 65535]
   if ($syscall == 94)
     action LOG;
   # filter for syscall "exit" (93) [priority: 65535]
   if ($syscall == 93)
     action TRACE(1);
+  # filter for syscall "fstat" (80) [priority: 65535]
+  if ($syscall == 80)
+    action KILL_PROCESS;
   # filter for syscall "close" (57) [priority: 65535]
   if ($syscall == 57)
     action ERRNO(1);
