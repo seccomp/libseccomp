@@ -162,6 +162,31 @@ function mangle_lib_syscall() {
 }
 
 #
+# Dump syscalls matching specified tags from the given syscall.tbl file
+#
+# Arguments:
+#     1        path to the syscall.tbl file to dump
+#     (rest)   tags to match (except "common" which is always included)
+#
+#  Dump the matched syscall table entries to stdout.
+#
+function dump_from_syscall_tbl() {
+	local file="$1"
+	shift
+
+	local tag
+	local tag_regexp='^(common'
+	for tag in "$@"; do
+		tag_regexp="${tag_regexp}|${tag}"
+	done
+	tag_regexp="${tag_regexp}) "
+
+	cat "$file" | grep -v '^#\|^$' | awk '{ print $2,$3,$1 }' | \
+		grep -E "$tag_regexp" | awk '{ print $2","$3 }' | sort | \
+		grep -Ev '^(reserved|unused)[0-9]+,'
+}
+
+#
 # Dump the x86 system syscall table
 #
 # Arguments:
@@ -170,9 +195,7 @@ function mangle_lib_syscall() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x86() {
-	cat $1/arch/x86/entry/syscalls/syscall_32.tbl | \
-		grep -v "^#" | awk '{ print $3","$1 }' | \
-		sort
+	dump_from_syscall_tbl "$1/arch/x86/entry/syscalls/syscall_32.tbl" i386
 }
 
 #
@@ -193,9 +216,7 @@ function dump_lib_x86() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x86_64() {
-	cat $1/arch/x86/entry/syscalls/syscall_64.tbl | \
-		grep -v "^#" | sed '/^$/d' | awk '{ print $2,$3,$1 }' | \
-		sed '/^x32/d' | awk '{ print $2","$3 }' | sort
+	dump_from_syscall_tbl "$1/arch/x86/entry/syscalls/syscall_64.tbl" 64
 }
 
 #
@@ -216,9 +237,7 @@ function dump_lib_x86_64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_x32() {
-	cat $1/arch/x86/entry/syscalls/syscall_64.tbl | \
-		grep -v "^#" | sed '/^$/d' | awk '{ print $2,$3,$1 }' | \
-		sed '/^64/d' | awk '{ print $2","$3 }' | sort
+	dump_from_syscall_tbl "$1/arch/x86/entry/syscalls/syscall_64.tbl" x32
 }
 
 #
@@ -239,14 +258,12 @@ function dump_lib_x32() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_arm() {
-	cat $1/arch/arm/tools/syscall.tbl | grep -v "^#" | \
-		sed -n "/[0-9]\+[ \t]\+\(common\|eabi\)/p" | \
-		awk '{ print $3","$1 }' | sort | (cat -; \
-			(cat $1/arch/arm/include/uapi/asm/unistd.h | \
-			grep "^#define __ARM_NR_" | \
-			grep -v "^#define __ARM_NR_BASE" | \
-			sed 's/#define __ARM_NR_\([a-z0-9_]*\)[ \t]\+(__ARM_NR_BASE+\(.*\))/\1 983040 + \2/' | \
-			awk '{ print $1","$2+$4 }')) | sort
+	dump_from_syscall_tbl "$1/arch/arm/tools/syscall.tbl" eabi | (cat -; \
+		(cat $1/arch/arm/include/uapi/asm/unistd.h | \
+		grep "^#define __ARM_NR_" | \
+		grep -v "^#define __ARM_NR_BASE" | \
+		sed 's/#define __ARM_NR_\([a-z0-9_]*\)[ \t]\+(__ARM_NR_BASE+\(.*\))/\1 983040 + \2/' | \
+		awk '{ print $1","$2+$4 }')) | sort
 }
 
 #
@@ -314,11 +331,7 @@ function dump_lib_aarch64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips() {
-	cat $1/arch/mips/kernel/syscalls/syscall_o32.tbl | \
-		grep -v "^#" | \
-		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
-		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
-		awk '{ print $3","$1 }' | sort
+	dump_from_syscall_tbl "$1/arch/mips/kernel/syscalls/syscall_o32.tbl" o32
 }
 
 #
@@ -339,11 +352,7 @@ function dump_lib_mips() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64() {
-	cat $1/arch/mips/kernel/syscalls/syscall_n64.tbl | \
-		grep -v "^#" | \
-		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
-		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
-		awk '{ print $3","$1 }' | sort
+	dump_from_syscall_tbl "$1/arch/mips/kernel/syscalls/syscall_n64.tbl" n64
 }
 
 #
@@ -364,11 +373,7 @@ function dump_lib_mips64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_mips64n32() {
-	cat $1/arch/mips/kernel/syscalls/syscall_n32.tbl | \
-		grep -v "^#" | \
-		sed -e '/[ \t]\+reserved[0-9]\+[ \t]\+/d;' | \
-		sed -e '/[ \t]\+unused[0-9]\+[ \t]\+/d;' | \
-		awk '{ print $3","$1 }' | sort
+	dump_from_syscall_tbl "$1/arch/mips/kernel/syscalls/syscall_n32.tbl" n32
 }
 
 #
@@ -389,11 +394,7 @@ function dump_lib_mips64n32() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_parisc() {
-	cat $1/arch/parisc/kernel/syscalls/syscall.tbl | \
-		grep -v "^#" | \
-		sed -n "/[0-9]\+[ \t]\+\(common\|32\)/p" | \
-		awk '{ print $3","$1 }' | \
-		sort
+	dump_from_syscall_tbl "$1/arch/parisc/kernel/syscalls/syscall.tbl" 32
 }
 
 #
@@ -414,11 +415,7 @@ function dump_lib_parisc() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_parisc64() {
-	cat $1/arch/parisc/kernel/syscalls/syscall.tbl | \
-		grep -v "^#" | \
-		sed -n "/[0-9]\+[ \t]\+\(common\|64\)/p" | \
-		awk '{ print $3","$1 }' | \
-		sort
+	dump_from_syscall_tbl "$1/arch/parisc/kernel/syscalls/syscall.tbl" 64
 }
 
 #
@@ -439,9 +436,8 @@ function dump_lib_parisc64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_ppc() {
-	cat $1/arch/powerpc/kernel/syscalls/syscall.tbl | grep -v "^#" | \
-		sed -ne "/[0-9]\+[ \t]\+\(common\|nospu\|32\)/p" | \
-		awk '{ print $3","$1 }' | sort
+	dump_from_syscall_tbl "$1/arch/powerpc/kernel/syscalls/syscall.tbl" \
+		nospu 32
 }
 
 #
@@ -462,9 +458,8 @@ function dump_lib_ppc() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_ppc64() {
-	cat $1/arch/powerpc/kernel/syscalls/syscall.tbl | grep -v "^#" | \
-		sed -ne "/[0-9]\+[ \t]\+\(common\|nospu\|64\)/p" | \
-		awk '{ print $3","$1 }' | sort
+	dump_from_syscall_tbl "$1/arch/powerpc/kernel/syscalls/syscall.tbl" \
+		nospu 64
 }
 
 #
@@ -528,10 +523,7 @@ function dump_lib_riscv64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390() {
-	cat $1/arch/s390/kernel/syscalls/syscall.tbl | grep -v "^#" | \
-		sed -ne "/[0-9]\+[ \t]\+\(common\|32\)/p" | \
-		awk '{ print $3","$1 }' | \
-		sort
+	dump_from_syscall_tbl "$1/arch/s390/kernel/syscalls/syscall.tbl" 32
 }
 
 #
@@ -552,10 +544,7 @@ function dump_lib_s390() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390x() {
-	cat $1/arch/s390/kernel/syscalls/syscall.tbl | grep -v "^#" | \
-		sed -ne "/[0-9]\+[ \t]\+\(common\|64\)/p" | \
-		awk '{ print $3","$1 }' | \
-		sort
+	dump_from_syscall_tbl "$1/arch/s390/kernel/syscalls/syscall.tbl" 64
 }
 
 #
