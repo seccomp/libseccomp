@@ -286,6 +286,13 @@ function dump_lib_arm() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_aarch64() {
+	local syscall_tbl_file="$1/arch/arm64/tools/syscall_64.tbl"
+	if [[ -e $syscall_tbl_file ]]; then
+		dump_from_syscall_tbl "$syscall_tbl_file" \
+			64 renameat rlimit memfd_secret
+		return
+	fi
+
 	local sed_filter=""
 
 	sed_filter+='s/__NR3264_statfs/43/;'
@@ -480,6 +487,12 @@ function dump_lib_ppc64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_riscv64() {
+	if [[ -e $1/arch/riscv/kernel/Makefile.syscalls ]]; then
+		dump_from_syscall_tbl "$1/scripts/syscall.tbl" \
+			64 riscv rlimit memfd_secret
+		return
+	fi
+
 	local sed_filter=""
 
 	sed_filter+='s/__NR3264_fadvise64/223/;'
