@@ -9,8 +9,7 @@ test type: bpf-sim
 
 # Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
 29-sim-pseudo_syscall	+x86	0-10		N	N	N	N	N	N	ALLOW
-29-sim-pseudo_syscall	+x86	4294957190	N	N	N	N	N	N	ALLOW
-29-sim-pseudo_syscall	+x86	4294957295	N	N	N	N	N	N	ALLOW
+29-sim-pseudo_syscall	+x86	4294867295	N	N	N	N	N	N	ALLOW
 
 test type: bpf-valgrind
 
