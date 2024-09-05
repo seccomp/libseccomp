@@ -32,13 +32,8 @@ def test(args):
     f = SyscallFilter(ALLOW)
     f.remove_arch(Arch())
     f.add_arch(Arch("x86"))
-    f.add_rule(KILL, "sysmips")
     try:
-        f.add_rule_exactly(KILL, "sysmips")
-    except RuntimeError:
-        pass
-    try:
-        f.add_rule_exactly(KILL, -10001)
+        f.add_rule_exactly(KILL, -100001)
     except RuntimeError:
         pass
     return f

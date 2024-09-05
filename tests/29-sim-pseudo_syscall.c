@@ -49,15 +49,8 @@ int main(int argc, char *argv[])
 	if (rc < 0)
 		goto out;
 
-	/* SCMP_SYS(sysmips) == 4294957190 (unsigned) */
-	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(sysmips), 0);
-	if (rc < 0)
-		goto out;
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, SCMP_SYS(sysmips), 0);
-	if (rc == 0)
-		goto out;
-	/* -10001 == 4294957295 (unsigned) */
-	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, -10001, 0);
+	/* -100001 == 4294867295 (unsigned) */
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, -100001, 0);
 	if (rc == 0)
 		goto out;
 
