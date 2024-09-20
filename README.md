@@ -119,6 +119,20 @@ The generated seccomp-bpf filters can be tested on a live system using the
 These tests will fail if the running Linux Kernel does not provide the
 necessary support.
 
+## Release Process
+
+GitHub milestones are used to track development and manage new releases.  We do
+not currently follow a regular, calendar based release schedule; the libseccomp
+releases are determined by the number of outstanding issues and pull-requests
+assigned to the related GitHub milestone, when all of the outstanding items in
+the milestone have been closed, we create a new release.
+
+If you believe a particular issue or pull-request should be part of a release
+milestone, or excluded from one, please leave a comment in the issue or
+pull-request.  Creating new issues solely for the purpose of asking about the
+next release is strongly discouraged, and will likely be closed with a
+reference to this section in the project's README.
+
 ## Developer Tools
 
 The "tools/" directory includes a number of tools which may be helpful in the
