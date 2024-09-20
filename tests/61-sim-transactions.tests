@@ -1,0 +1,29 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2023 Microsoft Corporation <paulmoore@microsoft.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+61-sim-transactions	all	1000		N	N	N	N	N	N	KILL
+61-sim-transactions	all	1001		N	N	N	N	N	N	KILL
+61-sim-transactions	all	1002		N	N	N	N	N	N	KILL
+61-sim-transactions	all	1003		N	N	N	N	N	N	KILL
+61-sim-transactions	all	1101-1104	N	N	N	N	N	N	KILL
+61-sim-transactions	all	1105		N	N	N	N	N	N	ALLOW
+61-sim-transactions	all	1106-1109	N	N	N	N	N	N	KILL
+61-sim-transactions	all	1110		N	N	N	N	N	N	ALLOW
+61-sim-transactions	all	1200-1210	N	N	N	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+61-sim-transactions	5
+
+test type: bpf-valgrind
+
+# Testname
+61-sim-transactions

@@ -68,3 +68,5 @@ util.pyc
 58-live-tsync_notify
 59-basic-empty_binary_tree
 60-sim-precompute
+61-sim-transactions
+62-sim-arch_transactions
