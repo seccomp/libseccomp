@@ -1,0 +1,257 @@
+[package]
+name = "rust-bindings-tests"
+version = "0.0.0"
+authors = ["Manabu Sugimoto <Manabu.Sugimoto@sony.com>"]
+license = "LGPL-2.1-only"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.80"
+clap = { version = "~3.2.22", features = ["derive"]  }
+libc = "0.2.153"
+nix = "0.26.3"
+libseccomp = { git = "https://github.com/libseccomp-rs/libseccomp-rs.git", features = ["const-syscall"] }
+
+[lib]
+name = "utils"
+path = "utils.rs"
+
+[[bin]]
+name = "01-sim-allow"
+path = "01-sim-allow.rs"
+
+[[bin]]
+name = "02-sim-basic"
+path = "02-sim-basic.rs"
+
+[[bin]]
+name = "03-sim-basic_chains"
+path = "03-sim-basic_chains.rs"
+
+[[bin]]
+name = "04-sim-multilevel_chains"
+path = "04-sim-multilevel_chains.rs"
+
+[[bin]]
+name = "05-sim-long_jumps"
+path = "05-sim-long_jumps.rs"
+
+[[bin]]
+name = "06-sim-actions"
+path = "06-sim-actions.rs"
+
+[[bin]]
+name = "07-sim-db_bug_looping"
+path = "07-sim-db_bug_looping.rs"
+
+[[bin]]
+name = "08-sim-subtree_checks"
+path = "08-sim-subtree_checks.rs"
+
+[[bin]]
+name = "09-sim-syscall_priority_pre"
+path = "09-sim-syscall_priority_pre.rs"
+
+[[bin]]
+name = "10-sim-syscall_priority_post"
+path = "10-sim-syscall_priority_post.rs"
+
+[[bin]]
+name = "11-basic-basic_errors"
+path = "11-basic-basic_errors.rs"
+
+[[bin]]
+name = "12-sim-basic_masked_ops"
+path = "12-sim-basic_masked_ops.rs"
+
+[[bin]]
+name = "13-basic-attrs"
+path = "13-basic-attrs.rs"
+
+[[bin]]
+name = "14-sim-reset"
+path = "14-sim-reset.rs"
+
+[[bin]]
+name = "15-basic-resolver"
+path = "15-basic-resolver.rs"
+
+[[bin]]
+name = "16-sim-arch_basic"
+path = "16-sim-arch_basic.rs"
+
+[[bin]]
+name = "17-sim-arch_merge"
+path = "17-sim-arch_merge.rs"
+
+[[bin]]
+name = "18-sim-basic_allowlist"
+path = "18-sim-basic_allowlist.rs"
+
+[[bin]]
+name = "19-sim-missing_syscalls"
+path = "19-sim-missing_syscalls.rs"
+
+[[bin]]
+name = "20-live-basic_die"
+path = "20-live-basic_die.rs"
+
+[[bin]]
+name = "21-live-basic_allow"
+path = "21-live-basic_allow.rs"
+
+[[bin]]
+name = "22-sim-basic_chains_array"
+path = "22-sim-basic_chains_array.rs"
+
+[[bin]]
+name = "23-sim-arch_all_le_basic"
+path = "23-sim-arch_all_le_basic.rs"
+
+[[bin]]
+name = "24-live-arg_allow"
+path = "24-live-arg_allow.rs"
+
+[[bin]]
+name = "25-sim-multilevel_chains_adv"
+path = "25-sim-multilevel_chains_adv.rs"
+
+[[bin]]
+name = "26-sim-arch_all_be_basic"
+path = "26-sim-arch_all_be_basic.rs"
+
+[[bin]]
+name = "27-sim-bpf_blk_state"
+path = "27-sim-bpf_blk_state.rs"
+
+[[bin]]
+name = "28-sim-arch_x86"
+path = "28-sim-arch_x86.rs"
+
+[[bin]]
+name = "29-sim-pseudo_syscall"
+path = "29-sim-pseudo_syscall.rs"
+
+[[bin]]
+name = "30-sim-socket_syscalls"
+path = "30-sim-socket_syscalls.rs"
+
+[[bin]]
+name = "31-basic-version_check"
+path = "31-basic-version_check.rs"
+
+[[bin]]
+name = "32-live-tsync_allow"
+path = "32-live-tsync_allow.rs"
+
+[[bin]]
+name = "33-sim-socket_syscalls_be"
+path = "33-sim-socket_syscalls_be.rs"
+
+[[bin]]
+name = "34-sim-basic_denylist"
+path = "34-sim-basic_denylist.rs"
+
+[[bin]]
+name = "35-sim-negative_one"
+path = "35-sim-negative_one.rs"
+
+[[bin]]
+name = "36-sim-ipc_syscalls"
+path = "36-sim-ipc_syscalls.rs"
+
+[[bin]]
+name = "37-sim-ipc_syscalls_be"
+path = "37-sim-ipc_syscalls_be.rs"
+
+[[bin]]
+name = "38-basic-pfc_coverage"
+path = "38-basic-pfc_coverage.rs"
+
+[[bin]]
+name = "39-basic-api_level"
+path = "39-basic-api_level.rs"
+
+[[bin]]
+name = "40-sim-log"
+path = "40-sim-log.rs"
+
+[[bin]]
+name = "41-sim-syscall_priority_arch"
+path = "41-sim-syscall_priority_arch.rs"
+
+[[bin]]
+name = "42-sim-adv_chains"
+path = "42-sim-adv_chains.rs"
+
+[[bin]]
+name = "43-sim-a2_order"
+path = "43-sim-a2_order.rs"
+
+[[bin]]
+name = "44-live-a2_order"
+path = "44-live-a2_order.rs"
+
+[[bin]]
+name = "45-sim-chain_code_coverage"
+path = "45-sim-chain_code_coverage.rs"
+
+[[bin]]
+name = "46-sim-kill_process"
+path = "46-sim-kill_process.rs"
+
+[[bin]]
+name = "47-live-kill_process"
+path = "47-live-kill_process.rs"
+
+[[bin]]
+name = "48-sim-32b_args"
+path = "48-sim-32b_args.rs"
+
+[[bin]]
+name = "49-sim-64b_comparisons"
+path = "49-sim-64b_comparisons.rs"
+
+[[bin]]
+name = "50-sim-hash_collision"
+path = "50-sim-hash_collision.rs"
+
+[[bin]]
+name = "51-live-user_notification"
+path = "51-live-user_notification.rs"
+
+[[bin]]
+name = "52-basic-load"
+path = "52-basic-load.rs"
+
+[[bin]]
+name = "53-sim-binary_tree"
+path = "53-sim-binary_tree.rs"
+
+[[bin]]
+name = "54-live-binary_tree"
+path = "54-live-binary_tree.rs"
+
+[[bin]]
+name = "55-basic-pfc_binary_tree"
+path = "55-basic-pfc_binary_tree.rs"
+
+[[bin]]
+name = "56-basic-iterate_syscalls"
+path = "56-basic-iterate_syscalls.rs"
+
+[[bin]]
+name = "57-basic-rawsysrc"
+path = "57-basic-rawsysrc.rs"
+
+[[bin]]
+name = "58-live-tsync_notify"
+path = "58-live-tsync_notify.rs"
+
+[[bin]]
+name = "59-basic-empty_binary_tree"
+path = "59-basic-empty_binary_tree.rs"
+
+[[bin]]
+name = "60-sim-precompute"
+path = "60-sim-precompute.rs"

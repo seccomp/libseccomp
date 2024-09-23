@@ -34,6 +34,32 @@ miniseq_LDADD =
 
 TESTS = regression
 
+if ENABLE_RUST
+rust_BINDINGS_TEST = yes
+else
+rust_BINDINGS_TEST = no
+endif
+
+rust_TESTS_DIR = ./rust
+rust_CARGO_TOML = Cargo.toml
+rust_LINK_TYPE = static
+rust_LIBSECCOMP_LIBRARY_DIR = ../src/.libs/lib
+export LIBSECCOMP_LINK_TYPE =$(rust_LINK_TYPE)
+export LIBSECCOMP_LIB_PATH =$(shell realpath $(rust_LIBSECCOMP_LIBRARY_DIR))
+
+define check_rust_bindings
+	echo "Check format and lint for rust bindings"; \
+	cargo fmt --manifest-path $(rust_TESTS_DIR)/$(rust_CARGO_TOML) -- --check || exit 1; \
+	cargo clippy --manifest-path $(rust_TESTS_DIR)/$(rust_CARGO_TOML) \
+	--all-targets --all-features -- -D warnings || exit 1;
+endef
+
+define build_rust_bindings
+	echo "Build test programs for rust bindings"; \
+	cargo build --manifest-path $(rust_TESTS_DIR)/$(rust_CARGO_TOML) || exit 1; \
+	cargo install --quiet --root $(rust_TESTS_DIR) --path $(rust_TESTS_DIR) || exit 1;
+endef
+
 check_PROGRAMS = \
 	miniseq \
 	01-sim-allow \
@@ -240,6 +266,14 @@ EXTRA_PROGRAMS = 00-test
 
 check-build:
 	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}
+	@if [ "$(rust_BINDINGS_TEST)" = "yes" ]; then \
+		$(call check_rust_bindings) \
+		$(call build_rust_bindings) \
+	fi
 
 clean-local:
 	${RM} -f 00-test *.pyc
+	if [ "$(rust_BINDINGS_TEST)" = "yes" ]; then \
+		cargo clean --manifest-path $(rust_TESTS_DIR)/$(rust_CARGO_TOML); \
+		${RM} -rf $(rust_TESTS_DIR)/bin; \
+	fi
