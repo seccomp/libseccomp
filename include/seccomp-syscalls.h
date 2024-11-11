@@ -277,6 +277,12 @@
 #define __PNR_riscv_flush_icache		-10243
 #define __PNR_memfd_secret			-10244
 #define __PNR_map_shadow_stack			-10245
+#define __PNR_fstat				-10246
+#define __PNR_atomic_barrier			-10247
+#define __PNR_atomic_cmpxchg_32			-10248
+#define __PNR_getpagesize			-10249
+#define __PNR_riscv_hwprobe			-10250
+#define __PNR_uretprobe				-10251
 
 /*
  * libseccomp syscall definitions
@@ -1054,6 +1060,8 @@
 #define __SNR_listen			__PNR_listen
 #endif
 
+#define __SNR_listmount			__NR_listmount
+
 #define __SNR_listxattr			__NR_listxattr
 
 #define __SNR_llistxattr		__NR_llistxattr
@@ -1071,6 +1079,12 @@
 #define __SNR_lseek			__NR_lseek
 
 #define __SNR_lsetxattr			__NR_lsetxattr
+
+#define __SNR_lsm_get_self_attr		__NR_lsm_get_self_attr
+
+#define __SNR_lsm_list_modules		__NR_lsm_list_modules
+
+#define __SNR_lsm_set_self_attr		__NR_lsm_set_self_attr
 
 #ifdef __NR_lstat
 #define __SNR_lstat			__NR_lstat
@@ -1213,6 +1227,8 @@
 #define __SNR_mq_unlink			__NR_mq_unlink
 
 #define __SNR_mremap			__NR_mremap
+
+#define __SNR_mseal			__NR_mseal
 
 #ifdef __NR_msgctl
 #define __SNR_msgctl			__NR_msgctl
@@ -1554,6 +1570,12 @@
 #define __SNR_riscv_flush_icache	__NR_riscv_flush_icache
 #else
 #define __SNR_riscv_flush_icache	__PNR_riscv_flush_icache
+#endif
+
+#ifdef __NR_riscv_hwprobe
+#define __SNR_riscv_hwprobe		__NR_riscv_hwprobe
+#else
+#define __SNR_riscv_hwprobe		__PNR_riscv_hwprobe
 #endif
 
 #ifdef __NR_rmdir
@@ -2046,6 +2068,8 @@
 #define __SNR_statfs64			__PNR_statfs64
 #endif
 
+#define __SNR_statmount			__NR_statmount
+
 #ifdef __NR_statx
 #define __SNR_statx			__NR_statx
 #else
@@ -2253,6 +2277,12 @@
 #define __SNR_unlinkat			__NR_unlinkat
 
 #define __SNR_unshare			__NR_unshare
+
+#ifdef __NR_uretprobe
+#define __SNR_uretprobe			__NR_uretprobe
+#else
+#define __SNR_uretprobe			__PNR_uretprobe
+#endif
 
 #ifdef __NR_uselib
 #define __SNR_uselib			__NR_uselib
