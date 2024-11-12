@@ -123,6 +123,36 @@ AC_DEFINE_UNQUOTED([ENABLE_PYTHON],
 	[$(test "$enable_python" = "yes" && echo 1 || echo 0)],
 	[Python bindings build flag.])
 
+dnl ####
+dnl rustc checks
+dnl ####
+AC_CHECK_PROGS(rustc, rustc, "no")
+AS_IF([test "$rustc" != no], [
+	AS_ECHO("checking rustc version... $($rustc -V 2>&1 | cut -d' ' -f 2)")
+	RUSTC_VER_MAJ=$($rustc -V 2>&1 | cut -d' ' -f 2 | cut -d'.' -f 1);
+	RUSTC_VER_MIN=$($rustc -V 2>&1 | cut -d' ' -f 2 | cut -d'.' -f 2);
+],[
+	RUSTC_VER_MAJ=0
+	RUSTC_VER_MIN=0
+])
+
+dnl ####
+dnl rust binding checks
+dnl ####
+AC_ARG_ENABLE([rust],
+	[AS_HELP_STRING([--enable-rust],
+	[build the rust bindings, requires rustc])])
+AS_IF([test "$enable_rust" = yes], [
+	# rustc version check
+	AS_IF([test "$RUSTC_VER_MAJ" -eq 1 -a "$RUSTC_VER_MIN" -lt 63], [
+		AC_MSG_ERROR([rust bindings require rustc 1.63 or higher])
+	])
+])
+AM_CONDITIONAL([ENABLE_RUST], [test "$enable_rust" = yes])
+AC_DEFINE_UNQUOTED([ENABLE_RUST],
+	[$(test "$enable_rust" = yes && echo 1 || echo 0)],
+	[Rust bindings build flag.])
+
 AC_CHECK_TOOL(GPERF, gperf)
 if test -z "$GPERF"; then
 	AC_MSG_ERROR([please install gperf])
