@@ -25,7 +25,7 @@ on: ["push", "pull_request"]
 jobs:
   tests:
     name: Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout from github
@@ -43,7 +43,7 @@ jobs:
 
   livetests:
     name: Live Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout from github
@@ -62,7 +62,7 @@ jobs:
 
   scanbuild:
     name: Scan Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout from github
@@ -76,7 +76,7 @@ jobs:
 
   codecoverage:
     name: Code Coverage
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout from github
@@ -107,7 +107,7 @@ jobs:
 
   codespell:
     name: Codespell
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout from github
