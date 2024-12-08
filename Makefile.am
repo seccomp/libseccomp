@@ -22,7 +22,6 @@ CODE_COVERAGE_OUTPUT_FILE = libseccomp.lcov.info
 CODE_COVERAGE_OUTPUT_DIRECTORY = libseccomp.lcov.html.d
 CODE_COVERAGE_IGNORE_PATTERN = \
 	*/usr/include/* \
-	*/src/arch-syscall-check.c \
 	*/src/syscalls.perf
 
 ACLOCAL_AMFLAGS = -I m4
