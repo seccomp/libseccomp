@@ -954,6 +954,8 @@
 
 #define __SNR_getxattr			__NR_getxattr
 
+#define __SNR_getxattrat		__NR_getxattrat
+
 #ifdef __NR_gtty
 #define __SNR_gtty			__NR_gtty
 #else
@@ -1081,6 +1083,8 @@
 #define __SNR_listmount			__NR_listmount
 
 #define __SNR_listxattr			__NR_listxattr
+
+#define __SNR_listxattrat		__NR_listxattrat
 
 #define __SNR_llistxattr		__NR_llistxattr
 
@@ -1566,6 +1570,8 @@
 
 #define __SNR_removexattr		__NR_removexattr
 
+#define __SNR_removexattrat		__NR_removexattrat
+
 #ifdef __NR_rename
 #define __SNR_rename			__NR_rename
 #else
@@ -1941,6 +1947,8 @@
 #endif
 
 #define __SNR_setxattr			__NR_setxattr
+
+#define __SNR_setxattrat		__NR_setxattrat
 
 #ifdef __NR_sgetmask
 #define __SNR_sgetmask			__NR_sgetmask
