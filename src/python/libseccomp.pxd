@@ -86,6 +86,84 @@ cdef extern from "seccomp.h":
     unsigned int SCMP_ACT_ERRNO(int errno)
     unsigned int SCMP_ACT_TRACE(int value)
 
+    cdef enum scmp_kver:
+        SCMP_KV_UNDEF
+        SCMP_KV_3_0
+        SCMP_KV_3_1
+        SCMP_KV_3_2
+        SCMP_KV_3_3
+        SCMP_KV_3_4
+        SCMP_KV_3_5
+        SCMP_KV_3_6
+        SCMP_KV_3_7
+        SCMP_KV_3_8
+        SCMP_KV_3_9
+        SCMP_KV_3_10
+        SCMP_KV_3_11
+        SCMP_KV_3_12
+        SCMP_KV_3_13
+        SCMP_KV_3_14
+        SCMP_KV_3_15
+        SCMP_KV_3_16
+        SCMP_KV_3_17
+        SCMP_KV_3_18
+        SCMP_KV_3_19
+        SCMP_KV_4_0
+        SCMP_KV_4_1
+        SCMP_KV_4_2
+        SCMP_KV_4_3
+        SCMP_KV_4_4
+        SCMP_KV_4_5
+        SCMP_KV_4_6
+        SCMP_KV_4_7
+        SCMP_KV_4_8
+        SCMP_KV_4_9
+        SCMP_KV_4_10
+        SCMP_KV_4_11
+        SCMP_KV_4_12
+        SCMP_KV_4_13
+        SCMP_KV_4_14
+        SCMP_KV_4_15
+        SCMP_KV_4_16
+        SCMP_KV_4_17
+        SCMP_KV_4_18
+        SCMP_KV_4_19
+        SCMP_KV_4_20
+        SCMP_KV_5_0
+        SCMP_KV_5_1
+        SCMP_KV_5_2
+        SCMP_KV_5_3
+        SCMP_KV_5_4
+        SCMP_KV_5_5
+        SCMP_KV_5_6
+        SCMP_KV_5_7
+        SCMP_KV_5_8
+        SCMP_KV_5_9
+        SCMP_KV_5_10
+        SCMP_KV_5_11
+        SCMP_KV_5_12
+        SCMP_KV_5_13
+        SCMP_KV_5_14
+        SCMP_KV_5_15
+        SCMP_KV_5_16
+        SCMP_KV_5_17
+        SCMP_KV_5_18
+        SCMP_KV_5_19
+        SCMP_KV_6_0
+        SCMP_KV_6_1
+        SCMP_KV_6_2
+        SCMP_KV_6_3
+        SCMP_KV_6_4
+        SCMP_KV_6_5
+        SCMP_KV_6_6
+        SCMP_KV_6_7
+        SCMP_KV_6_8
+        SCMP_KV_6_9
+        SCMP_KV_6_10
+        SCMP_KV_6_11
+        SCMP_KV_6_12
+        SCMP_KV_6_13
+
     ctypedef uint64_t scmp_datum_t
 
     cdef struct scmp_arg_cmp:
