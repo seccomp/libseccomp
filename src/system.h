@@ -35,14 +35,6 @@
 
 struct db_filter_col;
 
-/* NOTE: temporary location, move to include/seccomp.h.in when complete */
-enum scmp_kver {
-	__SCMP_KV_NULL = 0,
-	SCMP_KV_UNDEF = 1,
-	/* TODO: add SCMP_KV_X_YY values as the syscall table is populated */
-	__SCMP_KV_MAX,
-};
-
 #ifdef HAVE_LINUX_SECCOMP_H
 
 /* system header file */

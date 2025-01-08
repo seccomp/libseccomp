@@ -898,6 +898,7 @@ int seccomp_precompute(const scmp_filter_ctx ctx);
 #define __NR_SCMP_UNDEF		-2
 
 #include <seccomp-syscalls.h>
+#include <seccomp-kvers.h>
 
 #ifdef __cplusplus
 }
