@@ -334,6 +334,8 @@ cdef class Attr:
                    2: binary tree sorted by syscall number
     API_SYSRAWRC - return the raw syscall codes
     CTL_WAITKILL - request wait killable semantics
+    ACT_ENOSYS - set the action to take for unknown (too new) syscalls
+    CTL_KVERMAX - the newest kernel version understood by the user application
     """
     ACT_DEFAULT = libseccomp.SCMP_FLTATR_ACT_DEFAULT
     ACT_BADARCH = libseccomp.SCMP_FLTATR_ACT_BADARCH
@@ -345,6 +347,8 @@ cdef class Attr:
     CTL_OPTIMIZE = libseccomp.SCMP_FLTATR_CTL_OPTIMIZE
     API_SYSRAWRC = libseccomp.SCMP_FLTATR_API_SYSRAWRC
     CTL_WAITKILL = libseccomp.SCMP_FLTATR_CTL_WAITKILL
+    ACT_ENOSYS = libseccomp.SCMP_FLTATR_ACT_ENOSYS
+    CTL_KVERMAX = libseccomp.SCMP_FLTATR_CTL_KVERMAX
 
 cdef class Arg:
     """ Python object representing a SyscallFilter syscall argument.

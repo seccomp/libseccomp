@@ -79,6 +79,17 @@ enum scmp_filter_attr {
 					 */
 	SCMP_FLTATR_API_SYSRAWRC = 9,	/**< return the system return codes */
 	SCMP_FLTATR_CTL_WAITKILL = 10,	/**< request wait killable semantics */
+	SCMP_FLTATR_ACT_ENOSYS = 11,	/**< action to take when an unknown
+					 * (newer than this filter) syscall is
+					 * invoked.  Must be used in conjunction
+					 * with SCMP_FLTATR_CTL_KVER
+					 */
+	SCMP_FLTATR_CTL_KVERMAX = 12,	/**< maximum kernel version understood
+					 * by the user application.  syscalls
+					 * from newer kernel versions will
+					 * return with the action in
+					 * SCMP_FLTATR_ACT_UNKNOWN
+					 */
 	_SCMP_FLTATR_MAX,
 };
 
