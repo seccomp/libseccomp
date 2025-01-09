@@ -1073,6 +1073,8 @@ int db_col_reset(struct db_filter_col *col, uint32_t def_action)
 	col->attr.optimize = 1;
 	col->attr.api_sysrawrc = 0;
 	col->attr.wait_killable_recv = 0;
+	col->attr.act_enosys = SCMP_ACT_ERRNO(38);
+	col->attr.kvermax = SCMP_KV_UNDEF;
 
 	/* set the state */
 	col->state = _DB_STA_VALID;
@@ -1333,6 +1335,12 @@ int db_col_attr_get(const struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_WAITKILL:
 		*value = col->attr.wait_killable_recv;
 		break;
+	case SCMP_FLTATR_ACT_ENOSYS:
+		*value = col->attr.act_enosys;
+		break;
+	case SCMP_FLTATR_CTL_KVERMAX:
+		*value = col->attr.kvermax;
+		break;
 	default:
 		rc = -EINVAL;
 		break;
@@ -1448,6 +1456,18 @@ int db_col_attr_set(struct db_filter_col *col,
 		break;
 	case SCMP_FLTATR_CTL_WAITKILL:
 		col->attr.wait_killable_recv = (value ? 1 : 0);
+		break;
+	case SCMP_FLTATR_ACT_ENOSYS:
+		if (db_col_action_valid(col, value) == 0)
+			col->attr.act_enosys = value;
+		else
+			return -EINVAL;
+		db_col_precompute_reset(col);
+		break;
+	case SCMP_FLTATR_CTL_KVERMAX:
+		if (value <= SCMP_KV_UNDEF || value >=__SCMP_KV_MAX)
+			return -EINVAL;
+		col->attr.kvermax = value;
 		break;
 	default:
 		rc = -EINVAL;
