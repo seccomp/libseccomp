@@ -21,6 +21,27 @@ if ENABLE_PYTHON
 SUBDIRS += python
 endif
 
+GET_MAX_SYSCALL= ./scmp_get_max_syscall_num.py
+AM_CFLAGS = \
+	-DMAX_SYSCALL_NUM_X86=`${GET_MAX_SYSCALL} -a x86` \
+	-DMAX_SYSCALL_NUM_X86_64=`${GET_MAX_SYSCALL} -a x86_64` \
+	-DMAX_SYSCALL_NUM_X32=`${GET_MAX_SYSCALL} -a x32` \
+	-DMAX_SYSCALL_NUM_ARM=`${GET_MAX_SYSCALL} -a arm` \
+	-DMAX_SYSCALL_NUM_AARCH64=`${GET_MAX_SYSCALL} -a aarch64` \
+	-DMAX_SYSCALL_NUM_LOONGARCH64=`${GET_MAX_SYSCALL} -a loongarch64` \
+	-DMAX_SYSCALL_NUM_M68K=`${GET_MAX_SYSCALL} -a m68k` \
+	-DMAX_SYSCALL_NUM_MIPS=`${GET_MAX_SYSCALL} -a mips` \
+	-DMAX_SYSCALL_NUM_MIPS64=`${GET_MAX_SYSCALL} -a mips64` \
+	-DMAX_SYSCALL_NUM_MIPS64N32=`${GET_MAX_SYSCALL} -a mips64n32` \
+	-DMAX_SYSCALL_NUM_PARISC=`${GET_MAX_SYSCALL} -a parisc` \
+	-DMAX_SYSCALL_NUM_PARISC64=`${GET_MAX_SYSCALL} -a parisc64` \
+	-DMAX_SYSCALL_NUM_PPC=`${GET_MAX_SYSCALL} -a ppc` \
+	-DMAX_SYSCALL_NUM_PPC64=`${GET_MAX_SYSCALL} -a ppc64` \
+	-DMAX_SYSCALL_NUM_RISCV64=`${GET_MAX_SYSCALL} -a riscv64` \
+	-DMAX_SYSCALL_NUM_S390=`${GET_MAX_SYSCALL} -a s390` \
+	-DMAX_SYSCALL_NUM_S390X=`${GET_MAX_SYSCALL} -a s390x` \
+	-DMAX_SYSCALL_NUM_SH=`${GET_MAX_SYSCALL} -a sh`
+
 SOURCES_ALL = \
 	api.c system.h system.c helper.h helper.c \
 	gen_pfc.h gen_pfc.c gen_bpf.h gen_bpf.c \
@@ -49,7 +70,8 @@ SOURCES_ALL = \
 
 EXTRA_DIST = \
 	arch-syscall-validate arch-syscall-check \
-	arch-gperf-generate syscalls.csv syscalls.perf.template
+	arch-gperf-generate syscalls.csv syscalls.perf.template \
+	scmp_get_max_syscall_num.py
 
 TESTS = arch-syscall-check
 
