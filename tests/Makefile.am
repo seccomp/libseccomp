@@ -97,7 +97,8 @@ check_PROGRAMS = \
 	59-basic-empty_binary_tree \
 	60-sim-precompute \
 	61-sim-transactions \
-	62-sim-arch_transactions
+	62-sim-arch_transactions \
+	63-sim-kernel_version
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -160,7 +161,8 @@ EXTRA_DIST_TESTPYTHON = \
 	59-basic-empty_binary_tree.py \
 	60-sim-precompute.py \
 	61-sim-transactions.py \
-	62-sim-arch_transactions.py
+	62-sim-arch_transactions.py \
+	63-sim-kernel_version.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -224,7 +226,8 @@ EXTRA_DIST_TESTCFGS = \
 	59-basic-empty_binary_tree.tests \
 	60-sim-precompute.tests \
 	61-sim-transactions.tests \
-	62-sim-arch_transactions.tests
+	62-sim-arch_transactions.tests \
+	63-sim-kernel_version.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \
