@@ -3,6 +3,7 @@ libseccomp: Contributors
 https://github.com/seccomp/libseccomp
 
 Alex Murray <alex.murray@canonical.com>
+Ali Polatel <alip@chesswob.org>
 Andreas Schwab <schwab@suse.de>
 Andrew Jones <drjones@redhat.com>
 Andy Lutomirski <luto@amacapital.net>
@@ -11,6 +12,7 @@ Bogdan Purcareata <bogdan.purcareata@freescale.com>
 Brian Cain <brian.cain@gmail.com>
 Christopher Waldon <christopher.waldon.dev@gmail.com>
 Chris Waldon <chris.waldon@ibm.com>
+CismonX <admin@cismon.net>
 Colin Walters <walters@verbum.org>
 Corey Bryant <coreyb@linux.vnet.ibm.com>
 David Drysdale <drysdale@google.com>
@@ -22,12 +24,14 @@ Felix Geyer <debfx@fobos.de>
 Giuseppe Scrivano <gscrivan@redhat.com>
 Heiko Carstens <heiko.carstens@de.ibm.com>
 Helge Deller <deller@gmx.de>
+Heran Yang <heran55@126.com>
 Jake Edge <jake@lwn.net>
 James Cowgill <jcowgill@jcowgill.uk>
 Jan Engelhardt <jengelh@inai.de>
 Jan Willeke <willeke@linux.vnet.ibm.com>
 Jay Guo <guojiannan@cn.ibm.com>
 Jiannan Guo <guojiannan1101@gmail.com>
+Jingyun Hua <huajingyun@loongson.cn>
 Joe MacDonald <joe@deserted.net>
 John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
 Jonah Petri <jonah@petri.us>
@@ -44,15 +48,19 @@ Marcus Meissner <meissner@suse.de>
 Markos Chandras <markos.chandras@imgtec.com>
 Mathias Krause <minipli@googlemail.com>
 Max Rees <maxcrees@me.com>
+Mayank Mrinal <mayank.mrinal@sony.com>
 Michael Forney <mforney@mforney.org>
 Michael Karcher <github@mkarcher.dialup.fu-berlin.de>
+Michal Privoznik <mprivozn@redhat.com>
 Mike Frysinger <vapier@gentoo.org>
 Mike Strosaker <strosake@linux.vnet.ibm.com>
 Miroslav Lichvar <mlichvar@redhat.com>
+Mаltе Ηagemаnn <rusty-snake@users.noreply.github.com>
 Paul Moore <paul@paul-moore.com>
 Rodrigo Campos <rodrigo@kinvolk.io>
 Rolf Eike Beer <eb@emlix.com>
 Samanta Navarro <ferivoz@riseup.net>
+Sam James <sam@gentoo.org>
 Sascha Grunert <sgrunert@redhat.com>
 Serge Hallyn <serge.hallyn@ubuntu.com>
 Stéphane Graber <stgraber@ubuntu.com>
@@ -67,3 +75,5 @@ Valoq <valoq@mailbox.org>
 Vicente Olivert Riera <Vincent.Riera@imgtec.com>
 Vitaly Vi Shukela <vi0oss@gmail.com>
 Vladimir Rutsky <vladimir@rutsky.org>
+WANG Xuerui <git@xen0n.name>
+Xiaotian Wu <wuxiaotian@loongson.cn>
