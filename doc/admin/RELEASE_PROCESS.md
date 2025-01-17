@@ -29,11 +29,6 @@ release.
 	# make coverity-tarball
 	<submit tarball manually>
 
-	... or ...
-
-	# git push -f coverity-scan
-	<leverage existing Travis CI infrastructure>
-
 #### 6. Perform any distribution test builds
 
   * Fedora Rawhide
