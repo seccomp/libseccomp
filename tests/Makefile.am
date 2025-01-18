@@ -248,4 +248,4 @@ check-build:
 	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}
 
 clean-local:
-	${RM} -f 00-test *.pyc
+	${RM} -f 00-test *.pyc *.log *.stats
