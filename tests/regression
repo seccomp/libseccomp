@@ -130,7 +130,7 @@ EOF
 function match_csv_word() {
 	[[ -z $1 || -z $2 ]] && return 1
 
-	echo "$1" | sed 's/,/ /g' | grep -w "$2"
+	echo "$1" | sed 's/,/ /g' | grep -qw "$2"
 }
 
 #
@@ -1036,6 +1036,8 @@ function run_tests() {
 		fi
 
 		# run the test batch
+		> $batch_name.$mode.log
+		> $batch_name.$mode.stats
 		run_test_batch $batch_name >& $batch_name.$mode.log &
 		job_pids[job_cnt]=$!
 		job_logs[job_cnt]=$batch_name.$mode.log
