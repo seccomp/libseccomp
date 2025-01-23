@@ -2,6 +2,34 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.6.0 - January 23, 2025
+- Update the syscall table for Linux v6.13
+- Add support for new arches: SuperH little and big endian, LoongArch, and
+  32-bit Motorola 68000
+- Add multiplexed syscall support for more arches: MIPS, SuperH, and PPC
+- Consolidate and simplify handling of multiplexed syscalls
+- Add support for the SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV flag
+- Add support for transactions with the seccomp_transaction_start(),
+  seccomp_transaction_commit(), and seccomp_transaction_reject() APIs
+- Add a seccomp_precompute() API to generate the seccomp BPF filter prior to
+  seccomp_load() or seccomp_export_bpf_mem()
+- Add support for binary tree filters without syscalls
+- Add support for the kernel’s implementation change of
+  SECCOMP_IOCTL_NOTIF_ID_VALID
+- Add Python binding support for retrieving the notification file descriptor
+- Improved tooling to help track syscall table updates in the Linux kernel
+- Handle EINVAL error from the kernel when the WAIT_KILLABLE_RECV flag is
+  erroneously provided to the kernel
+- Fix a seccomp userspace notification issue where the file descriptor was
+  being requested more than once
+- Fix a bug where the internal filter state could be corrupted when a filter
+  rule addition fails
+- Fix potential memory leak in the internal management of filter snapshots
+- Utilize Cython rather than distutils in the Python bindings, due to
+  distutils’ deprecation
+- Many test and CI improvements and fixes
+- Many documentation improvements and updates
+
 * Version 2.5.5 - December 1, 2023
 - Update the syscall table for Linux v6.7-rc3
 
