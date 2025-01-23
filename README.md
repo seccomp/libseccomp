@@ -4,8 +4,8 @@ https://github.com/seccomp/libseccomp
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/608/badge)](https://bestpractices.coreinfrastructure.org/projects/608)
 [![Build Status](https://github.com/seccomp/libseccomp/actions/workflows/continuous-integration.yml/badge.svg?branch=main)](https://github.com/seccomp/libseccomp/actions)
-[![Coverage Status](https://img.shields.io/coveralls/github/seccomp/libseccomp/main.svg)](https://coveralls.io/github/seccomp/libseccomp?branch=main)
 [![CodeQL Analysis](https://github.com/seccomp/libseccomp/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/seccomp/libseccomp/actions)
+[![Coverage Status](https://img.shields.io/coveralls/github/seccomp/libseccomp/main.svg)](https://coveralls.io/github/seccomp/libseccomp?branch=main)
 
 The libseccomp library provides an easy to use, platform independent, interface
 to the Linux Kernel's syscall filtering mechanism.  The libseccomp API is

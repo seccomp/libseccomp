@@ -3,7 +3,7 @@ libseccomp: Releases
 https://github.com/seccomp/libseccomp
 
 * Version 2.5.5 - December 1, 2023
-* Update the syscall table for Linux v6.7-rc3
+- Update the syscall table for Linux v6.7-rc3
 
 * Version 2.5.4 - April 21, 2022
 - Update the syscall table for Linux v5.17
