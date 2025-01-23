@@ -98,7 +98,7 @@ jobs:
         flag-name: "amd64"
     - name: Archive code coverage results
       if: ${{ always() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Code Coverage Artifacts
         path: |
