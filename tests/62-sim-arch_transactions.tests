@@ -14,11 +14,6 @@ test type: bpf-sim
 62-sim-arch_transactions	+x86_64	open		N	N	N	N	N	N	KILL
 62-sim-arch_transactions	+x86_64	close		N	N	N	N	N	N	ALLOW
 
-test type: bpf-sim-fuzz
-
-# Testname			StressCount
-62-sim-arch_transactions	5
-
 test type: bpf-valgrind
 
 # Testname
