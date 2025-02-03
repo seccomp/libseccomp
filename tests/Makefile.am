@@ -97,7 +97,8 @@ check_PROGRAMS = \
 	59-basic-empty_binary_tree \
 	60-sim-precompute \
 	61-sim-transactions \
-	62-sim-arch_transactions
+	62-sim-arch_transactions \
+	63-live-notify_addfd
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -224,7 +225,8 @@ EXTRA_DIST_TESTCFGS = \
 	59-basic-empty_binary_tree.tests \
 	60-sim-precompute.tests \
 	61-sim-transactions.tests \
-	62-sim-arch_transactions.tests
+	62-sim-arch_transactions.tests \
+	63-live-notify_addfd.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \

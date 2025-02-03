@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2025 Microsoft Corporation <sudpandit@microsoft.com>
+# Author: Sudipta Pandit <sudpandit@microsoft.com>
+#
+
+test type: live
+
+# Testname		API Result
+63-live-notify_addfd	5	ALLOW
