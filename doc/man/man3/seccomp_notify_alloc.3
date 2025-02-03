@@ -3,7 +3,7 @@
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
 seccomp_notify_alloc, seccomp_notify_free, seccomp_notify_receive,
-seccomp_notify_respond, seccomp_notify_id_valid, seccomp_notify_fd \- Manage seccomp notifications
+seccomp_notify_respond, seccomp_notify_id_valid, seccomp_notify_fd, seccomp_notify_addfd \- Manage seccomp notifications
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SYNOPSIS
 .\" //////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@ seccomp_notify_respond, seccomp_notify_id_valid, seccomp_notify_fd \- Manage sec
 .BI "int seccomp_notify_respond(int " fd ", struct seccomp_notif_resp *" resp ")"
 .BI "int seccomp_notify_id_valid(int " fd ", uint64_t " id ")"
 .BI "int seccomp_notify_fd(const scmp_filter_ctx " ctx ")"
+.BI "int seccomp_notify_addfd(int " fd ", struct seccomp_notif_addfd *" addfd ")"
 .sp
 Link with \fI\-lseccomp\fP.
 .fi
@@ -54,6 +55,11 @@ race conditions.
 The
 .BR seccomp_notify_fd ()
 returns the notification fd of a filter after it has been loaded.
+.P
+The
+.BR seccomp_notify_addfd ()
+function enables the caller to install a file descriptor into the target's file descriptor table.
+The id field of the struct should be the same as the id from the request.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
@@ -65,6 +71,10 @@ not yet been created, and -EINVAL if the filter context is invalid.
 The
 .BR seccomp_notify_id_valid ()
 returns 0 if the id is valid, and -ENOENT if it is not.
+.P
+The
+.BR seccomp_notify_addfd ()
+returns the installed fd number on success, and one of error codes mentioned below on failure.
 .P
 The
 .BR seccomp_notify_alloc (),
