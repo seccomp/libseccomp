@@ -161,7 +161,8 @@ EXTRA_DIST_TESTPYTHON = \
 	59-basic-empty_binary_tree.py \
 	60-sim-precompute.py \
 	61-sim-transactions.py \
-	62-sim-arch_transactions.py
+	62-sim-arch_transactions.py \
+	63-live-notify_addfd.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
