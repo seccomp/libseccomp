@@ -1381,7 +1381,7 @@ uint32_t db_col_attr_read(const struct db_filter_col *col,
 int db_col_attr_set(struct db_filter_col *col,
 		    enum scmp_filter_attr attr, uint32_t value)
 {
-	int rc = 0;
+	int rc = 0, iter;
 
 	switch (attr) {
 	case SCMP_FLTATR_ACT_DEFAULT:
@@ -1458,6 +1458,11 @@ int db_col_attr_set(struct db_filter_col *col,
 		col->attr.wait_killable_recv = (value ? 1 : 0);
 		break;
 	case SCMP_FLTATR_ACT_ENOSYS:
+		/* SCMP_FLTATR_ACT_ENOSYS must be set prior to setting
+		 * SCMP_FLTATR_CTL_KVERMAX */
+		if (col->attr.kvermax != SCMP_KV_UNDEF)
+			return -EINVAL;
+
 		if (db_col_action_valid(col, value) == 0)
 			col->attr.act_enosys = value;
 		else
@@ -1467,7 +1472,16 @@ int db_col_attr_set(struct db_filter_col *col,
 	case SCMP_FLTATR_CTL_KVERMAX:
 		if (value <= SCMP_KV_UNDEF || value >=__SCMP_KV_MAX)
 			return -EINVAL;
+
 		col->attr.kvermax = value;
+		db_col_precompute_reset(col);
+
+		/* Create a rule for every syscall that existed up to and
+		 * prior to attr.kver.  libseccomp capably handles duplicate
+		 * rules for a syscall, so if the user adds more rules after
+		 * setting this attribute, libseccomp will simply replace
+		 * the rules added by the unknown-syscall logic */
+		rc = db_add_known_syscalls(col);
 		break;
 	default:
 		rc = -EINVAL;
@@ -2719,4 +2733,111 @@ void db_col_precompute_reset(struct db_filter_col *col)
 
 	gen_bpf_release(col->prgm_bpf);
 	col->prgm_bpf = NULL;
+}
+
+static int get_max_syscall_num(struct db_filter *filter)
+{
+	if (!filter)
+		return -1;
+
+	switch (filter->arch->token) {
+	case SCMP_ARCH_X86:
+		return MAX_SYSCALL_NUM_X86;
+	case SCMP_ARCH_X86_64:
+		return MAX_SYSCALL_NUM_X86_64;
+	case SCMP_ARCH_X32:
+		return MAX_SYSCALL_NUM_X32;
+	case SCMP_ARCH_ARM:
+		return MAX_SYSCALL_NUM_ARM;
+	case SCMP_ARCH_AARCH64:
+		return MAX_SYSCALL_NUM_AARCH64;
+	case SCMP_ARCH_LOONGARCH64:
+		return MAX_SYSCALL_NUM_LOONGARCH64;
+	case SCMP_ARCH_M68K:
+		return MAX_SYSCALL_NUM_M68K;
+	case SCMP_ARCH_MIPS:
+	case SCMP_ARCH_MIPSEL:
+		return MAX_SYSCALL_NUM_MIPS;
+	case SCMP_ARCH_MIPS64:
+	case SCMP_ARCH_MIPSEL64:
+		return MAX_SYSCALL_NUM_MIPS64;
+	case SCMP_ARCH_MIPS64N32:
+	case SCMP_ARCH_MIPSEL64N32:
+		return MAX_SYSCALL_NUM_MIPS64N32;
+	case SCMP_ARCH_PARISC:
+		return MAX_SYSCALL_NUM_PARISC;
+	case SCMP_ARCH_PARISC64:
+		return MAX_SYSCALL_NUM_PARISC64;
+	case SCMP_ARCH_PPC64:
+	case SCMP_ARCH_PPC64LE:
+		return MAX_SYSCALL_NUM_PPC64;
+	case SCMP_ARCH_PPC:
+		return MAX_SYSCALL_NUM_PPC;
+	case SCMP_ARCH_S390X:
+		return MAX_SYSCALL_NUM_S390X;
+	case SCMP_ARCH_S390:
+		return MAX_SYSCALL_NUM_S390;
+	case SCMP_ARCH_RISCV64:
+		return MAX_SYSCALL_NUM_RISCV64;
+	case SCMP_ARCH_SH:
+	case SCMP_ARCH_SHEB:
+		return MAX_SYSCALL_NUM_SH;
+	default:
+		return -1;
+	}
+}
+
+int db_add_known_syscalls(struct db_filter_col *col)
+{
+	struct db_api_rule_list *rule = NULL;
+	ssize_t chain_size;
+	struct db_api_arg *chain = NULL;
+	int rc, iter, syscall_num, max_syscall_num;
+
+	chain_size = sizeof(*chain) * ARG_COUNT_MAX;
+	chain = zmalloc(chain_size);
+	if (chain == NULL)
+		return -ENOMEM;
+
+	/* create a checkpoint */
+	rc = db_col_transaction_start(col, false);
+	if (rc != 0)
+		goto add_failure;
+
+	for (iter = 0; iter < col->filter_cnt; iter++) {
+		max_syscall_num = get_max_syscall_num(col->filters[iter]);
+		if (max_syscall_num < 0)
+			goto add_failure;
+
+		for (syscall_num = 0; syscall_num < max_syscall_num; syscall_num++) {
+			rule = _db_rule_new(1, col->attr.act_default,
+					    syscall_num, chain);
+			if (rule == NULL) {
+				rc = -ENOMEM;
+				goto add_failure;
+			}
+
+			rc = arch_add_kver_rule(col->filters[iter], rule,
+						col->attr.kvermax);
+			if (rc != 0)
+				goto add_failure;
+
+			free(rule);
+			rule = NULL;
+		}
+	}
+
+add_failure:
+	/* commit the transaction or abort */
+	if (rc == 0)
+		db_col_transaction_commit(col, false);
+	else
+		db_col_transaction_abort(col, false);
+
+	if (rule != NULL)
+		free(rule);
+	if (chain != NULL)
+		free(chain);
+
+	return 0;
 }
