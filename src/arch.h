@@ -136,4 +136,6 @@ int arch_syscall_rewrite(const struct arch_def *arch, int *syscall);
 int arch_filter_rule_add(struct db_filter *db,
 			 const struct db_api_rule_list *rule);
 
+int arch_add_kver_rule(struct db_filter *db, struct db_api_rule_list *rule,
+		       enum scmp_kver supported_kver);
 #endif
