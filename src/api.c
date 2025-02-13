@@ -786,7 +786,7 @@ API int seccomp_export_bpf_mem(const scmp_filter_ctx ctx, void *buf,
 		if (BPF_PGM_SIZE(program) > *len)
 			rc = _rc_filter(-ERANGE);
 		else
-			memcpy(buf, program->blks, *len);
+			memcpy(buf, program->blks, BPF_PGM_SIZE(program));
 	}
 	*len = BPF_PGM_SIZE(program);
 
