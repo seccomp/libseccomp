@@ -12,14 +12,10 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <inttypes.h>
 
 #include "hash.h"
-
-static inline uint32_t getblock32(const uint32_t *p, int i)
-{
-	return p[i];
-}
 
 static inline uint32_t rotl32(uint32_t x, int8_t r)
 {
@@ -41,7 +37,6 @@ static inline uint32_t fmix32(uint32_t h)
 uint32_t hash(const void *key, size_t length)
 {
 	const uint8_t *data = (const uint8_t *)key;
-	const uint32_t *blocks;
 	const uint8_t *tail;
 	const int nblocks = length / 4;
 	const uint32_t c1 = 0xcc9e2d51;
@@ -54,9 +49,8 @@ uint32_t hash(const void *key, size_t length)
 	uint32_t h1 = 0;
 
 	/* body */
-	blocks = (const uint32_t *)(data + nblocks * 4);
 	for(i = -nblocks; i; i++) {
-		k1 = getblock32(blocks, i);
+		memcpy(&k1, data + (nblocks + i) * sizeof(uint32_t), sizeof(uint32_t));
 
 		k1 *= c1;
 		k1 = rotl32(k1, 15);
@@ -68,7 +62,7 @@ uint32_t hash(const void *key, size_t length)
 	}
 
 	/* tail */
-	tail = (const uint8_t *)(data + nblocks * 4);
+	tail = data + nblocks * sizeof(uint32_t);
 	switch(length & 3) {
 	case 3:
 		k2 ^= tail[2] << 16;
