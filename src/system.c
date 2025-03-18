@@ -573,3 +573,25 @@ int sys_notify_id_valid(int fd, uint64_t id)
 		return -ENOENT;
 	return 0;
 }
+
+/**
+ * Install a file descriptor into the supervisee's process.
+ * @param fd the notification fd
+ * @param addfd the addfd structure
+ *
+ * Install a file descriptor into the supervisee's process. Returns the
+ * installed fd number on success, negative values on failure.
+ *
+ */
+int sys_notify_addfd(int fd, struct seccomp_notif_addfd *addfd)
+{
+	if (state.sup_user_notif <= 0)
+		return -EOPNOTSUPP;
+
+	int rc = ioctl(fd, SECCOMP_IOCTL_NOTIF_ADDFD, addfd);
+	if ( rc < 0 && errno == EINVAL)
+		return -EOPNOTSUPP;
+	if (rc < 0)
+		return -ECANCELED;
+	return rc;
+}

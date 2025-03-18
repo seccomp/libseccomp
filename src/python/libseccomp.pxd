@@ -117,6 +117,13 @@ cdef extern from "seccomp.h":
         int32_t error
         uint32_t flags
 
+    cdef struct seccomp_notif_addfd:
+        uint64_t id
+        uint32_t flags
+        uint32_t srcfd
+        uint32_t newfd
+        uint32_t newfd_flags
+
     scmp_version *seccomp_version()
 
     unsigned int seccomp_api_get()
@@ -165,6 +172,7 @@ cdef extern from "seccomp.h":
     void seccomp_notify_free(seccomp_notif *req, seccomp_notif_resp *resp)
     int seccomp_notify_receive(int fd, seccomp_notif *req)
     int seccomp_notify_respond(int fd, seccomp_notif_resp *resp)
+    int seccomp_notify_addfd(int fd, seccomp_notif_addfd *addfd)
     int seccomp_notify_id_valid(int fd, uint64_t id)
     int seccomp_notify_fd(scmp_filter_ctx ctx)
 
