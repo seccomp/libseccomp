@@ -4,7 +4,9 @@
 # Enhanced Seccomp Library Python Module Build Script
 #
 # Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2025-2026 Oracle and/or its affiliates.
 # Author: Paul Moore <paul@paul-moore.com>
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
 #
 
 #
@@ -29,7 +31,7 @@ from Cython.Build import cythonize
 
 setup(
 	name = "seccomp",
-	version = os.environ["VERSION_RELEASE"],
+	version = "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_MICRO@",
 	description = "Python binding for libseccomp",
 	long_description = "Python API for the Linux Kernel's syscall filtering capability, seccomp.",
 	url = "https://github.com/seccomp/libseccomp",

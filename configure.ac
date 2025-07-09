@@ -146,6 +146,7 @@ dnl ####
 AC_CONFIG_FILES([
 	libseccomp.pc
 	include/seccomp.h
+	src/python/setup.py
 ])
 
 dnl ####
