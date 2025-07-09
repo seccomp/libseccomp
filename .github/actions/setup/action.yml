@@ -28,10 +28,14 @@ runs:
     shell: bash
   - run: sudo apt-get install -y build-essential valgrind clang-tools lcov gperf astyle codespell
     shell: bash
+  - name: Set up Python environment
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.13'
   - run: |
-      sudo apt-get install -y python3 python3-setuptools python3-pip
-      python3 -m pip install --upgrade pip
+      python3 -m pip install build
       python3 -m pip install cython
+      python3 -m pip install setuptools
       # Add cython to the path
       echo "$HOME/.local/bin" >> $GITHUB_PATH
     shell: bash
