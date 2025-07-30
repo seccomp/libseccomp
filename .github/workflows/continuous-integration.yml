@@ -117,3 +117,24 @@ jobs:
       with:
         ignore_words_list: extraversion
         exclude_file: src/syscalls.csv
+
+  clang:
+    name: Clang
+    runs-on: ubuntu-24.04
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+    - name: Checkout from github
+      uses: actions/checkout@v4
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Build libseccomp
+      run: |
+        ./configure --enable-python
+        make check-build
+    - name: Run tests
+      run: |
+        LIBSECCOMP_TSTCFG_JOBS=0 \
+          LIBSECCOMP_TSTCFG_STRESSCNT=5 make check
