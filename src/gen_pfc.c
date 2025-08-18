@@ -135,8 +135,8 @@ static void _pfc_action(FILE *fds, uint32_t action)
 	case SCMP_ACT_KILL_THREAD:
 		fprintf(fds, "action KILL;\n");
 		break;
-	case SCMP_ACT_TRAP:
-		fprintf(fds, "action TRAP;\n");
+	case SCMP_ACT_TRAPX(0):
+		fprintf(fds, "action TRAP(%u);\n", (action & 0x0000ffff));
 		break;
 	case SCMP_ACT_ERRNO(0):
 		fprintf(fds, "action ERRNO(%u);\n", (action & 0x0000ffff));

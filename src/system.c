@@ -196,7 +196,7 @@ int sys_chk_seccomp_action(uint32_t action)
 		return state.sup_kill_process;
 	} else if (action == SCMP_ACT_KILL_THREAD) {
 		return 1;
-	} else if (action == SCMP_ACT_TRAP) {
+	} else if (action == SCMP_ACT_TRAPX(action & 0x0000ffff)) {
 		return 1;
 	} else if ((action == SCMP_ACT_ERRNO(action & 0x0000ffff)) &&
 		   ((action & 0x0000ffff) < MAX_ERRNO)) {
