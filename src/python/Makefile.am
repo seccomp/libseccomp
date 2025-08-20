@@ -31,17 +31,26 @@ PY_BUILD = ${PY_BUILD_@AM_V@}
 
 PY_INSTALL = ${PY_DISTUTILS} install
 
-EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py
+EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py __init__.py MANIFEST.in pyproject.toml
 
 all-local: build
 
 build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
 	[ ${srcdir} = ${builddir} ] || cp ${srcdir}/seccomp.pyx ${builddir}
+	cp ${srcdir}/../.libs/libseccomp.a ${builddir}
+	cp ${top_srcdir}/include/seccomp.h ${builddir}
+	cp ${top_srcdir}/include/seccomp-syscalls.h ${builddir}
 	${PY_BUILD} && touch build
 
 install-exec-local: build
 	${PY_INSTALL} --install-lib=${DESTDIR}/${pyexecdir} \
 		--record=${DESTDIR}/${pyexecdir}/install_files.txt
+
+python-wheel: build
+	${PYTHON} -m build
+
+python-wheels: build
+	${PYTHON} -m cibuildwheel --output-dir wheelhouse
 
 uninstall-local:
 	cat ${DESTDIR}/${pyexecdir}/install_files.txt | xargs ${RM} -f
@@ -49,4 +58,7 @@ uninstall-local:
 
 clean-local:
 	[ ${srcdir} = ${builddir} ] || ${RM} -f ${builddir}/seccomp.pyx
+	${RM} -f ${builddir}/libseccomp.a
+	${RM} -f ${builddir}/seccomp.h
+	${RM} -f ${builddir}/seccomp-syscalls.h
 	${RM} -rf seccomp.c build dist seccomp.egg-info
