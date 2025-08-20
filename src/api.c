@@ -363,10 +363,14 @@ API int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src)
 	if (db_col_valid(col_dst) || db_col_valid(col_src))
 		return _rc_filter(-EINVAL);
 
-	/* NOTE: only the default action, NNP, and TSYNC settings must match */
+	/* NOTE: only the default action, NNP, TSYNC, and kernel version
+	 * settings must match */
 	if ((col_dst->attr.act_default != col_src->attr.act_default) ||
 	    (col_dst->attr.nnp_enable != col_src->attr.nnp_enable) ||
-	    (col_dst->attr.tsync_enable != col_src->attr.tsync_enable))
+	    (col_dst->attr.tsync_enable != col_src->attr.tsync_enable) ||
+	    (col_dst->attr.act_enosys != col_src->attr.act_enosys) ||
+	    (col_dst->attr.kvermax != col_src->attr.kvermax))
+
 		return _rc_filter(-EINVAL);
 
 	return _rc_filter(db_col_merge(col_dst, col_src));
@@ -589,6 +593,14 @@ API int seccomp_rule_add_array(scmp_filter_ctx ctx,
 		return _rc_filter(rc);
 	if (action == col->attr.act_default)
 		return _rc_filter(-EACCES);
+
+	if (col->attr.kvermax != SCMP_KV_UNDEF)
+		/* Currently libseccomp does not support overwriting rules
+		 * that have already been added to the filter.  The maximum
+		 * supported kernel version feature adds a rule for each
+		 * syscall.  Thus we can't support adding any more syscalls
+		 * after that value is set */
+		return _rc_filter(-EINVAL);
 
 	return _rc_filter(db_col_rule_add(col, 0, action,
 					  syscall, arg_cnt, arg_array));
