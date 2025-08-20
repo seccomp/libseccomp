@@ -1,0 +1,11 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2025 Oracle and/or its affiliates.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+test type: live
+
+# Testname		API	Result
+63-live-trapx		1	TRAP
