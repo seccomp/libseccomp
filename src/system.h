@@ -156,28 +156,14 @@ typedef struct sock_filter bpf_instr_raw;
 #define SECCOMP_RET_LOG			0x7fc00000U
 #endif
 
-/* SECCOMP_RET_USER_NOTIF was added in kernel v5.0. */
-#ifndef SECCOMP_RET_USER_NOTIF
-#define SECCOMP_RET_USER_NOTIF	 	0x7fc00000U
+/* seccomp user notifications were added in kernel v5.0. */
+#ifndef SECCOMP_IOCTL_NOTIF_ID_VALID
 
+/* NOTE: seccomp_{notif, notif_resp} structs are in include/seccomp.h */
 struct seccomp_notif_sizes {
 	__u16 seccomp_notif;
 	__u16 seccomp_notif_resp;
 	__u16 seccomp_data;
-};
-
-struct seccomp_notif {
-	__u64 id;
-	__u32 pid;
-	__u32 flags;
-	struct seccomp_data data;
-};
-
-struct seccomp_notif_resp {
-	__u64 id;
-	__s64 val;
-	__s32 error;
-	__u32 flags;
 };
 
 #define SECCOMP_IOC_MAGIC               '!'
@@ -191,7 +177,8 @@ struct seccomp_notif_resp {
 #define SECCOMP_IOCTL_NOTIF_SEND        SECCOMP_IOWR(1, \
 						     struct seccomp_notif_resp)
 #define SECCOMP_IOCTL_NOTIF_ID_VALID    SECCOMP_IOW(2, __u64)
-#endif /* SECCOMP_RET_USER_NOTIF */
+
+#endif /* SECCOMP_IOCTL_NOTIF_ID_VALID */
 
 /* non-public ioctl number for backwards compat (see system.c) */
 #define SECCOMP_IOCTL_NOTIF_ID_VALID_WRONG_DIR SECCOMP_IOR(2, __u64)
