@@ -591,6 +591,139 @@ cdef class NotificationResponse:
         """
         self._flags = value
 
+cdef class NotificationAddfd:
+    """ Python object representing a seccomp notification addfd structure.
+    """
+    cdef uint64_t _id
+    cdef uint32_t _flags
+    cdef uint32_t _srcfd
+    cdef uint32_t _newfd
+    cdef uint32_t _newfd_flags
+
+    def __cinit__(self, notify, flags, srcfd, newfd = 0, newflags = 0):
+        """ Initialize the notification addfd structure.
+
+        Arguments:
+        notify - a Notification object
+        srcfd - the source file descriptor
+        flags - notify addfd flags
+        newfd - 0 or desired file descriptor number in target
+        newflags - new flags to set on the target file descriptor
+
+        Description:
+        Create a seccomp NotificationAddfd object.
+        """
+        self._id = notify.id
+        self._flags = flags
+        self._srcfd = srcfd
+        self._newfd = newfd
+        self._newfd_flags = newflags
+
+    @property
+    def id(self):
+        """ Get the seccomp notification request ID.
+
+        Description:
+        Get the seccomp notification request ID.
+        """
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        """ Set the seccomp notification request ID.
+
+        Arguments:
+        id - the seccomp notification request ID
+
+        Description:
+        Set the seccomp notification request ID.
+        """
+        self._id = value
+
+    @property
+    def flags(self):
+        """ Get the seccomp notification addfd flags.
+
+        Description:
+        Get the seccomp notification addfd flags.
+        """
+        return self._flags
+
+    @flags.setter
+    def flags(self, value):
+        """ Set the seccomp notification addfd flags.
+
+        Arguments:
+        flags - the notification addfd flags
+
+        Description:
+        Set the seccomp notification addfd flags.
+        """
+        self._flags = value
+
+    @property
+    def srcfd(self):
+        """ Get the local file descriptor number.
+
+        Description:
+        Get the local file descriptor number.
+        """
+        return self._srcfd
+    
+    @srcfd.setter
+    def srcfd(self, value):
+        """ Set the local file descriptor number.
+
+        Arguments:
+        srcfd - the local file descriptor number
+
+        Description:
+        Set the local file descriptor number.
+        """
+        self._srcfd = value
+
+    @property
+    def newfd(self):
+        """ Get the target file descriptor number.
+
+        Description:
+        Get the target file descriptor number.
+        """
+        return self._newfd
+
+    @newfd.setter
+    def newfd(self, value):
+        """ Set the target file descriptor number.
+
+        Arguments:
+        newfd - the target file descriptor number
+
+        Description:
+        Set the target file descriptor number.
+        """
+        self._newfd = value
+
+    @property
+    def newflags(self):
+        """ Get the new flags to set on the target file descriptor.
+
+        Description:
+        Get the new flags to set on the target file descriptor.
+        """
+        return self._newfd_flags
+
+    @newflags.setter
+    def newflags(self, value):
+        """ Set the new flags to set on the target file descriptor.
+
+        Arguments:
+        newflags - the new flags to set on the target file descriptor
+
+        Description:
+        Set the new flags to set on the target file descriptor.
+        """
+        self._newfd_flags = value
+
 cdef class SyscallFilter:
     """ Python object representing a seccomp syscall filter. """
     cdef int _defaction
@@ -959,8 +1092,11 @@ cdef class SyscallFilter:
         if rc != 0:
             raise RuntimeError(str.format("Library error (errno = {0})", rc))
 
-    def receive_notify(self):
+    def receive_notify(self, fd = None):
         """ Receive seccomp notifications.
+
+        Arguments:
+        fd - the notify file descriptor
 
         Description:
         Receive a seccomp notification from the system, requires the use of
@@ -968,7 +1104,8 @@ cdef class SyscallFilter:
         """
         cdef libseccomp.seccomp_notif *req
 
-        fd = libseccomp.seccomp_notify_fd(self._ctx)
+        if fd is None:
+            fd = libseccomp.seccomp_notify_fd(self._ctx)
         if fd < 0:
             raise RuntimeError("Notifications not enabled/active")
         rc = libseccomp.seccomp_notify_alloc(&req, NULL)
@@ -988,18 +1125,20 @@ cdef class SyscallFilter:
         free(req)
         return notify
 
-    def respond_notify(self, response):
+    def respond_notify(self, response, fd = None):
         """ Send a seccomp notification response.
 
         Arguments:
         response - the response to send to the system
+        fd - the notify file descriptor
 
         Description:
         Respond to a seccomp notification.
         """
         cdef libseccomp.seccomp_notif_resp *resp
 
-        fd = libseccomp.seccomp_notify_fd(self._ctx)
+        if fd is None:
+            fd = libseccomp.seccomp_notify_fd(self._ctx)
         if fd < 0:
             raise RuntimeError("Notifications not enabled/active")
         rc = libseccomp.seccomp_notify_alloc(NULL, &resp)
@@ -1025,6 +1164,34 @@ cdef class SyscallFilter:
         if fd < 0:
             raise RuntimeError("Notifications not enabled/active")
         return fd
+
+    def notify_addfd(self, addfd, fd = None):
+        """Add a file descriptor to target
+
+        Arguments:
+        addfd - the addfd object
+        fd - the notify file descriptor
+
+        Description:
+        Add a file descriptor to the target process.
+        """
+        if fd is None:
+            fd = libseccomp.seccomp_notify_fd(self._ctx)
+        if fd < 0:
+            raise RuntimeError("Notifications not enabled/active")
+        
+        cdef libseccomp.seccomp_notif_addfd _addfd
+
+        _addfd.id = addfd.id
+        _addfd.flags = addfd.flags
+        _addfd.srcfd = addfd.srcfd
+        _addfd.newfd = addfd.newfd
+        _addfd.newfd_flags = addfd.newflags
+
+        rc = libseccomp.seccomp_notify_addfd(fd, &_addfd)
+        if rc < 0:
+            raise RuntimeError(str.format("Library error (errno = {0})", rc))
+        return rc
 
     def export_pfc(self, file):
         """ Export the filter in PFC format.
