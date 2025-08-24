@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("s390x"));
 	if (rc != 0)
 		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("sparc"));
+	if (rc != 0)
+		goto out;
+	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("sparc64"));
+	if (rc != 0)
+		goto out;
 	rc = seccomp_arch_add(ctx, seccomp_arch_resolve_name("sheb"));
 	if (rc != 0)
 		goto out;

@@ -53,6 +53,8 @@ cdef extern from "seccomp.h":
         SCMP_ARCH_PPC64LE
         SCMP_ARCH_S390
         SCMP_ARCH_S390X
+        SCMP_ARCH_SPARC
+        SCMP_ARCH_SPARC64
         SCMP_ARCH_RISCV64
 
     cdef enum scmp_filter_attr:

@@ -48,6 +48,8 @@
 #include "arch-s390.h"
 #include "arch-s390x.h"
 #include "arch-sh.h"
+#include "arch-sparc.h"
+#include "arch-sparc64.h"
 #include "db.h"
 #include "system.h"
 
@@ -110,6 +112,12 @@ const struct arch_def *arch_def_native = &arch_def_riscv64;
 const struct arch_def *arch_def_native = &arch_def_sheb;
 #else
 const struct arch_def *arch_def_native = &arch_def_sh;
+#endif
+#elif __sparc__
+#ifdef __arch64__
+const struct arch_def *arch_def_native = &arch_def_sparc64;
+#else
+const struct arch_def *arch_def_native = &arch_def_sparc;
 #endif
 #else
 #error the arch code needs to know about your machine type
@@ -183,6 +191,10 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_sheb;
 	case SCMP_ARCH_SH:
 		return &arch_def_sh;
+	case SCMP_ARCH_SPARC:
+		return &arch_def_sparc;
+	case SCMP_ARCH_SPARC64:
+		return &arch_def_sparc64;
 	}
 
 	return NULL;
@@ -243,6 +255,10 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_sheb;
 	else if (strcmp(arch_name, "sh") == 0)
 		return &arch_def_sh;
+	else if (strcmp(arch_name, "sparc64") == 0)
+		return &arch_def_sparc64;
+	else if (strcmp(arch_name, "sparc") == 0)
+		return &arch_def_sparc;
 
 	return NULL;
 }

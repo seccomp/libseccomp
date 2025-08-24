@@ -48,6 +48,8 @@
 #include "arch-s390.h"
 #include "arch-s390x.h"
 #include "arch-sh.h"
+#include "arch-sparc.h"
+#include "arch-sparc64.h"
 
 /**
  * Print the usage information to stderr and exit
@@ -152,6 +154,12 @@ int main(int argc, char *argv[])
 		case SCMP_ARCH_SH:
 		case SCMP_ARCH_SHEB:
 			sys = sh_syscall_iterate(iter);
+			break;
+		case SCMP_ARCH_SPARC:
+			sys = sparc_syscall_iterate(iter);
+			break;
+		case SCMP_ARCH_SPARC64:
+			sys = sparc64_syscall_iterate(iter);
 			break;
 		default:
 			/* invalid arch */
