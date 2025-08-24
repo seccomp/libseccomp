@@ -25,6 +25,8 @@
 #include "arch-ppc.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "arch-sparc64.h"
+#include "arch-sparc.h"
 #include "arch-sh.h"
 #include "arch-x32.h"
 #include "arch-x86_64.h"
@@ -83,6 +85,11 @@ struct arch_syscall_table {
 	enum scmp_kver s390_kver;
 	int s390x;
 	enum scmp_kver s390x_kver;
+
+	int sparc;
+	enum scmp_kver sparc_kver;
+	int sparc64;
+	enum scmp_kver sparc64_kver;
 
 	int sh;
 	enum scmp_kver sh_kver;

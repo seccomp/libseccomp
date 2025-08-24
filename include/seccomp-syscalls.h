@@ -283,6 +283,18 @@
 #define __PNR_getpagesize			-10249
 #define __PNR_riscv_hwprobe			-10250
 #define __PNR_uretprobe				-10251
+#define __PNR_execv				-10252
+#define __PNR_getdomainname			-10253
+#define __PNR_getresgid				-10254
+#define __PNR_getresuid				-10255
+#define __PNR_kern_features			-10256
+#define __PNR_memory_ordering			-10257
+#define __PNR_perfctr				-10258
+#define __PNR_sched_get_affinity		-10259
+#define __PNR_sched_set_affinity		-10260
+#define __PNR_setresgid				-10261
+#define __PNR_setresuid				-10262
+#define __PNR_utrap_install			-10263
 
 /*
  * libseccomp syscall definitions
@@ -580,6 +592,8 @@
 
 #define __SNR_eventfd2			__NR_eventfd2
 
+#define __SNR_execv			__NR_execv
+
 #define __SNR_execve			__NR_execve
 
 #define __SNR_execveat			__NR_execveat
@@ -647,6 +661,10 @@
 #define __SNR_fdatasync			__NR_fdatasync
 
 #define __SNR_fgetxattr			__NR_fgetxattr
+
+#define __SNR_file_getattr		__NR_file_getattr
+
+#define __SNR_file_setattr		__NR_file_setattr
 
 #define __SNR_finit_module		__NR_finit_module
 
@@ -801,6 +819,8 @@
 #endif
 
 #define __SNR_getdents64		__NR_getdents64
+
+#define __SNR_getdomainname		__NR_getdomainname
 
 #ifdef __NR_getegid
 #define __SNR_getegid			__NR_getegid
@@ -1036,6 +1056,8 @@
 
 #define __SNR_kcmp			__NR_kcmp
 
+#define __SNR_kern_features		__NR_kern_features
+
 #ifdef __NR_kexec_file_load
 #define __SNR_kexec_file_load		__NR_kexec_file_load
 #else
@@ -1151,6 +1173,8 @@
 #else
 #define __SNR_memfd_secret		__PNR_memfd_secret
 #endif
+
+#define __SNR_memory_ordering		__NR_memory_ordering
 
 #ifdef __NR_migrate_pages
 #define __SNR_migrate_pages		__NR_migrate_pages
@@ -1356,6 +1380,8 @@
 #define __SNR_open_tree			__PNR_open_tree
 #endif
 
+#define __SNR_open_tree_attr		__PNR_open_tree_attr
+
 #define __SNR_openat			__NR_openat
 
 #define __SNR_openat2			__NR_openat2
@@ -1385,6 +1411,8 @@
 #endif
 
 #define __SNR_perf_event_open		__NR_perf_event_open
+
+#define __SNR_perfctr			__PNR_perfctr
 
 #define __SNR_personality		__NR_personality
 
@@ -1672,6 +1700,8 @@
 #define __SNR_s390_sthyi		__PNR_s390_sthyi
 #endif
 
+#define __SNR_sched_get_affinity	__NR_sched_get_affinity
+
 #define __SNR_sched_get_priority_max	__NR_sched_get_priority_max
 
 #define __SNR_sched_get_priority_min	__NR_sched_get_priority_min
@@ -1691,6 +1721,8 @@
 #else
 #define __SNR_sched_rr_get_interval_time64	__PNR_sched_rr_get_interval_time64
 #endif
+
+#define __SNR_sched_set_affinity	__NR_sched_set_affinity
 
 #define __SNR_sched_setaffinity		__NR_sched_setaffinity
 
@@ -2367,6 +2399,8 @@
 #else
 #define __SNR_utimes			__PNR_utimes
 #endif
+
+#define __SNR_utrap_install		__PNR_utrap_install
 
 #ifdef __NR_vfork
 #define __SNR_vfork			__NR_vfork
