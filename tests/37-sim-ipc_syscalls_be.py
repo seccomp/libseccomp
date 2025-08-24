@@ -34,6 +34,8 @@ def test(args):
     f.add_arch(Arch("s390"))
     f.add_arch(Arch("s390x"))
     f.add_arch(Arch("ppc"))
+    f.add_arch(Arch("sparc"))
+    f.add_arch(Arch("sparc64"))
     f.add_rule(ALLOW, "semop")
     f.add_rule(ALLOW, "semtimedop")
     f.add_rule(ALLOW, "semget")

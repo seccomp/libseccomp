@@ -296,6 +296,10 @@ int main(int argc, char *argv[])
 				arch = AUDIT_ARCH_SH;
 			else if (strcmp(optarg, "sh") == 0)
 				arch = AUDIT_ARCH_SHEL;
+			else if (strcmp(optarg, "sparc") == 0)
+				arch = AUDIT_ARCH_SPARC;
+			else if (strcmp(optarg, "sparc64") == 0)
+				arch = AUDIT_ARCH_SPARC64;
 			else
 				exit_fault(EINVAL);
 			break;
