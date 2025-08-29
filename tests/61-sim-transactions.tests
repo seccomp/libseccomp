@@ -7,16 +7,16 @@
 
 test type: bpf-sim
 
-# Testname		Arch	Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-61-sim-transactions	all	1000		N	N	N	N	N	N	KILL
-61-sim-transactions	all	1001		N	N	N	N	N	N	KILL
-61-sim-transactions	all	1002		N	N	N	N	N	N	KILL
-61-sim-transactions	all	1003		N	N	N	N	N	N	KILL
-61-sim-transactions	all	1101-1104	N	N	N	N	N	N	KILL
-61-sim-transactions	all	1105		N	N	N	N	N	N	ALLOW
-61-sim-transactions	all	1106-1109	N	N	N	N	N	N	KILL
-61-sim-transactions	all	1110		N	N	N	N	N	N	ALLOW
-61-sim-transactions	all	1200-1210	N	N	N	N	N	N	ALLOW
+# Testname		Arch		Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+61-sim-transactions	all,-x32	1000		N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1001		N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1002		N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1003		N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1101-1104	N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1105		N	N	N	N	N	N	ALLOW
+61-sim-transactions	all,-x32	1106-1109	N	N	N	N	N	N	KILL
+61-sim-transactions	all,-x32	1110		N	N	N	N	N	N	ALLOW
+61-sim-transactions	all,-x32	1200-1210	N	N	N	N	N	N	ALLOW
 
 test type: bpf-sim-fuzz
 
