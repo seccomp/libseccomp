@@ -90,6 +90,12 @@
 #else
 #define ARCH_NATIVE		AUDIT_ARCH_SHEL
 #endif
+#elif __sparc__
+#ifdef __arch64__
+#define ARCH_NATIVE		AUDIT_ARCH_SPARC64
+#else
+#define ARCH_NATIVE		AUDIT_ARCH_SPARC
+#endif
 #else
 #error the simulator code needs to know about your machine type
 #endif
