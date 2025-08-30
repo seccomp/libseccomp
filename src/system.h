@@ -180,6 +180,29 @@ struct seccomp_notif_sizes {
 
 #endif /* SECCOMP_IOCTL_NOTIF_ID_VALID */
 
+/* seccomp_notif_addfd and ADDFD_FLAG_SETFD was added in kernel v5.10 */
+#ifndef SECCOMP_ADDFD_FLAG_SETFD
+#define SECCOMP_ADDFD_FLAG_SETFD        (1UL << 0)
+struct seccomp_notif_addfd {
+	__u64 id;
+	__u32 flags;
+	__u32 srcfd;
+	__u32 newfd;
+	__u32 newfd_flags;
+};
+#endif
+
+/* Addfd and return it, atomically. ADDFD_FLAG_SEND was added in kernel 5.14 */
+#ifndef SECCOMP_ADDFD_FLAG_SEND
+#define SECCOMP_ADDFD_FLAG_SEND        (1UL << 1)
+#endif
+
+/* SECCOMP_IOCTL_NOTIF_ADDFD was added in kernel v5.10 */
+#ifndef SECCOMP_IOCTL_NOTIF_ADDFD
+#define SECCOMP_IOCTL_NOTIF_ADDFD      SECCOMP_IOW(3, \
+                                                   struct seccomp_notif_addfd)
+#endif
+
 /* non-public ioctl number for backwards compat (see system.c) */
 #define SECCOMP_IOCTL_NOTIF_ID_VALID_WRONG_DIR SECCOMP_IOR(2, __u64)
 
@@ -202,4 +225,5 @@ int sys_notify_alloc(struct seccomp_notif **req,
 int sys_notify_receive(int fd, struct seccomp_notif *req);
 int sys_notify_respond(int fd, struct seccomp_notif_resp *resp);
 int sys_notify_id_valid(int fd, uint64_t id);
+int sys_notify_addfd(int fd, struct seccomp_notif_addfd *addfd);
 #endif
