@@ -884,7 +884,7 @@ function gen_csv() {
 				awk -F "," '{ print $2 }' )
 				kver=${csv[$sc,${abi}_KVER]}
 				[[ -z $num ]] && num="PNR"
-				[[ -z $kver ]] && kver="KV_UNDEF"
+				[[ -z $kver ]] && kver="SCMP_KV_UNDEF"
 				printf ",%s,%s" $num $kver
 			done
 			printf "\n"

@@ -283,6 +283,7 @@
 #define __PNR_getpagesize			-10249
 #define __PNR_riscv_hwprobe			-10250
 #define __PNR_uretprobe				-10251
+#define __PNR_open_tree_attr			-10252
 
 /*
  * libseccomp syscall definitions
@@ -1354,6 +1355,12 @@
 #define __SNR_open_tree			__NR_open_tree
 #else
 #define __SNR_open_tree			__PNR_open_tree
+#endif
+
+#ifdef __NR_open_tree_attr
+#define __SNR_open_tree_attr		__NR_open_tree_attr
+#else
+#define __SNR_open_tree_attr		__PNR_open_tree_attr
 #endif
 
 #define __SNR_openat			__NR_openat
