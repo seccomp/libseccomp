@@ -25,6 +25,8 @@
 #include "arch-ppc.h"
 #include "arch-s390.h"
 #include "arch-s390x.h"
+#include "arch-sparc64.h"
+#include "arch-sparc.h"
 #include "arch-sh.h"
 #include "arch-x32.h"
 #include "arch-x86_64.h"
@@ -40,6 +42,9 @@ struct arch_syscall_table {
 
 	/* each arch listed here must be defined in syscalls.c  */
 	/* NOTE: see the warning above - BEWARE! */
+
+	/* NOTE: the order of the members of this structure must exactly
+	 *       match the order of the columns in syscalls.csv! */
 
 	int x86;
 	enum scmp_kver x86_kver;
@@ -86,6 +91,11 @@ struct arch_syscall_table {
 
 	int sh;
 	enum scmp_kver sh_kver;
+
+	int sparc;
+	enum scmp_kver sparc_kver;
+	int sparc64;
+	enum scmp_kver sparc64_kver;
 };
 #define SYSTBL_OFFSET(NAME) offsetof(struct arch_syscall_table, NAME)
 

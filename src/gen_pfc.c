@@ -97,6 +97,10 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "sheb";
 	case SCMP_ARCH_SH:
 		return "sh";
+	case SCMP_ARCH_SPARC64:
+		return "sparc64";
+	case SCMP_ARCH_SPARC:
+		return "sparc";
 	default:
 		return "UNKNOWN";
 	}

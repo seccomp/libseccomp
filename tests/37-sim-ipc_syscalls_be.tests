@@ -7,19 +7,19 @@
 
 test type: bpf-sim
 
-# Testname		Arch			Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		1	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		2	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		3	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		4	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		11	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		12	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		13	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		14	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		21	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		22	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		23	N	N	N	N	N	ALLOW
-37-sim-ipc_syscalls_be	+s390,+s390x,+ppc	ipc		24	N	N	N	N	N	ALLOW
+# Testname		Arch					Syscall		Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		1	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		2	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		3	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		4	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		11	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		12	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		13	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		14	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		21	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		22	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		23	N	N	N	N	N	ALLOW
+37-sim-ipc_syscalls_be	+s390,+s390x,+ppc,+sparc,+sparc64	ipc		24	N	N	N	N	N	ALLOW
 
 test type: bpf-valgrind
 
