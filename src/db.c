@@ -1259,6 +1259,10 @@ int db_col_merge(struct db_filter_col *col_dst, struct db_filter_col *col_src)
 	/* reset the precompute */
 	db_col_precompute_reset(col_dst);
 
+    /* propagate NOTIFY usage so NEW_LISTENER is requested on load */
+    if (col_src->notify_used)
+        col_dst->notify_used = true;
+
 	/* free the source */
 	col_src->filter_cnt = 0;
 	db_col_release(col_src);
