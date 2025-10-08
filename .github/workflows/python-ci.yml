@@ -1,0 +1,75 @@
+#
+# Continuous Integration Workflow libseccomp Python Code
+#
+# Copyright (c) 2025 Oracle and/or its affiliates.
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
+#
+
+#
+# This library is free software; you can redistribute it and/or modify it
+# under the terms of version 2.1 of the GNU Lesser General Public License as
+# published by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, see <http://www.gnu.org/licenses>.
+#
+
+name: Python Continuous Integration
+on: ["push", "pull_request"]
+
+jobs:
+  build-wheel:
+    name: Build Wheel
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Build libseccomp
+      run: |
+        ./configure --enable-python
+        make check-build
+    - name: Build wheel
+      run: make python-wheel
+
+  build-wheels:
+    name: Build Wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, ubuntu-22.04, ubuntu-22.04-arm]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel
+    - name: Build libseccomp
+      run: |
+        ./configure --enable-python
+        make check-build
+    - name: Build wheels
+      run: make python-wheels
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: src/python/wheelhouse/*.whl
+
+  flake:
+    name: Run Flake
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Initialize libseccomp
+      uses: ./.github/actions/setup
+    - name: Install Flake Dependencies
+      run: sudo apt-get install python3-flake8-quotes
+    - name: flake8 Lint
+      uses: reviewdog/action-flake8@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}

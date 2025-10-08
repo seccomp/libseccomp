@@ -3,8 +3,9 @@
 #
 # Enhanced Seccomp Library Python Module Build Script
 #
-# Copyright (c) 2012 Red Hat <pmoore@redhat.com>
+# Copyright (c) 2012-2025 Red Hat <pmoore@redhat.com>
 # Author: Paul Moore <paul@paul-moore.com>
+# Author: Tom Hromatka <tom.hromatka@oracle.com>
 #
 
 #
@@ -29,17 +30,20 @@ from Cython.Build import cythonize
 
 setup(
 	name = "seccomp",
-	version = os.environ["VERSION_RELEASE"],
+	version = "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_MICRO@",
 	description = "Python binding for libseccomp",
 	long_description = "Python API for the Linux Kernel's syscall filtering capability, seccomp.",
 	url = "https://github.com/seccomp/libseccomp",
 	maintainer = "Paul Moore",
 	maintainer_email = "paul@paul-moore.com",
-	license = "LGPLv2.1",
+	license = "LGPL-2.1",
 	platforms = "Linux",
 	ext_modules = cythonize([
 		Extension("seccomp", ["seccomp.pyx"],
-			# unable to handle libtool libraries directly
-			extra_objects=["../.libs/libseccomp.a"]),
+			# Unable to handle libtool libraries directly.  Also note that
+			# python wheel builds cannot use files outside of the build
+			# directory, so libseccomp.a is manually copied into src/python
+			# by Makefile.am
+			extra_objects=["libseccomp.a"]),
 	])
 )

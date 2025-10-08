@@ -75,6 +75,14 @@ coverity-tarball: coverity-build
 	ls -l libseccomp-coverity_$$rev.tar.gz
 endif
 
+if ENABLE_PYTHON
+python-wheel: all
+	${MAKE} ${AM_MAKEFLAGS} -C src/python $@
+
+python-wheels: all
+	${MAKE} ${AM_MAKEFLAGS} -C src/python $@
+endif
+
 help:
 	@echo "libseccomp build system"
 	@echo " make targets:"
@@ -86,6 +94,8 @@ help:
 	@echo "  distcheck:        verify the build for distribution"
 	@echo "  dist-gzip:        build a release tarball"
 	@echo "  coverity-tarball: build a tarball for use with Coverity (opt)"
+	@echo "  python-wheel:     build a python wheel for this system"
+	@echo "  python-wheels:    build python wheels for distribution to pip"
 
 clean-local:
 	${RM} -rf cov-int libseccomp-coverity_*.tar.gz
