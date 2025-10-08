@@ -45,6 +45,8 @@ SOURCES_ALL = \
 	arch-s390.h arch-s390.c \
 	arch-s390x.h arch-s390x.c \
 	arch-sh.h arch-sh.c \
+	arch-sparc.h arch-sparc.c \
+	arch-sparc64.h arch-sparc64.c \
 	syscalls.h syscalls.c syscalls.perf.c
 
 EXTRA_DIST = \

@@ -659,6 +659,50 @@ function dump_lib_sh() {
 }
 
 #
+# Dump the sparc system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_sparc() {
+	dump_from_syscall_tbl "$1/arch/sparc/kernel/syscalls/syscall.tbl" \
+		nospu 32
+}
+
+#
+# Dump the sparc library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_sparc() {
+	dump_lib_arch sparc | mangle_lib_syscall sparc
+}
+
+#
+# Dump the sparc64 system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_sparc64() {
+	dump_from_syscall_tbl "$1/arch/sparc/kernel/syscalls/syscall.tbl" \
+		nospu 64
+}
+
+#
+# Dump the sparc64 library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_sparc64() {
+	dump_lib_arch sparc64 | mangle_lib_syscall sparc64
+}
+
+#
 # Dump the system syscall table
 #
 # Arguments:
@@ -722,6 +766,12 @@ function dump_sys() {
 		;;
 	sh)
 		dump_sys_sh "$2"
+		;;
+	sparc)
+		dump_sys_sparc "$2"
+		;;
+	sparc64)
+		dump_sys_sparc64 "$2"
 		;;
 	*)
 		echo ""
@@ -796,6 +846,12 @@ function dump_lib() {
 	sh)
 		dump_lib_sh
 		;;
+	sparc)
+		dump_lib_sparc
+		;;
+	sparc64)
+		dump_lib_sparc64
+		;;
 	*)
 		echo ""
 		return 1
@@ -835,6 +891,7 @@ function gen_csv() {
 	abi_list+=" riscv64"
 	abi_list+=" s390 s390x"
 	abi_list+=" sh"
+	abi_list+=" sparc sparc64"
 
 	# read the csv to get the existing data
 	local -A csv
@@ -946,7 +1003,8 @@ if [[ $opt_arches == "" ]]; then
 		parisc parisc64 \
 		ppc ppc64 \
 		s390 s390x \
-		sh"
+		sh \
+		sparc sparc64"
 fi
 
 # sanity checks

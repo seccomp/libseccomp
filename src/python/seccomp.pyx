@@ -218,6 +218,8 @@ cdef class Arch:
     PARISC64 - 64-bit PA-RISC
     PPC64 - 64-bit PowerPC
     PPC - 32-bit PowerPC
+    SPARC - 32-bit SPARC
+    SPARC64 - 64-bit SPARC
     RISCV64 - 64-bit RISC-V
     """
 
@@ -244,6 +246,8 @@ cdef class Arch:
     PPC64LE = libseccomp.SCMP_ARCH_PPC64LE
     S390 = libseccomp.SCMP_ARCH_S390
     S390X = libseccomp.SCMP_ARCH_S390X
+    SPARC = libseccomp.SCMP_ARCH_SPARC
+    SPARC64 = libseccomp.SCMP_ARCH_SPARC64
     RISCV64 = libseccomp.SCMP_ARCH_RISCV64
 
     def __cinit__(self, arch=libseccomp.SCMP_ARCH_NATIVE):
@@ -298,6 +302,10 @@ cdef class Arch:
                 self._token = libseccomp.SCMP_ARCH_S390
             elif arch == libseccomp.SCMP_ARCH_S390X:
                 self._token = libseccomp.SCMP_ARCH_S390X
+            elif arch == libseccomp.SCMP_ARCH_SPARC:
+                self._token = libseccomp.SCMP_ARCH_SPARC
+            elif arch == libseccomp.SCMP_ARCH_SPARC64:
+                self._token = libseccomp.SCMP_ARCH_SPARC64
             else:
                 self._token = 0;
         elif isinstance(arch, basestring):

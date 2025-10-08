@@ -48,6 +48,8 @@ The libseccomp library currently supports the architectures listed below:
 * 64-bit PowerPC little endian (ppc64le)
 * 32-bit s390 (s390)
 * 64-bit s390x (s390x)
+* 32-bit SPARC (sparc)
+* 64-bit SPARC (sparc64)
 * 64-bit RISC-V (riscv64)
 * 32-bit SuperH big endian (sheb)
 * 32-bit SuperH (sh)
