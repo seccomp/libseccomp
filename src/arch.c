@@ -477,3 +477,46 @@ rule_add_return:
 		free(rule_dup);
 	return rc;
 }
+
+int arch_add_kver_rule(struct db_filter *db, struct db_api_rule_list *rule,
+		       enum scmp_kver supported_kver)
+{
+	struct db_sys_list *s_iter;
+	enum scmp_kver syscall_added_ver;
+	const char *syscall_name;
+	int rc = 0;
+
+	db_list_foreach(s_iter, db->syscalls) {
+		if (rule->syscall == s_iter->num)
+			/* Do not overwrite existing rules */
+			return 0;
+	}
+
+	syscall_name = (db->arch->syscall_resolve_num_raw)(rule->syscall);
+	if (syscall_name == NULL)
+		/* This syscall number is invalid in this architecture */
+		return 0;
+
+	syscall_added_ver = (db->arch->syscall_num_kver)(rule->syscall);
+	if (syscall_added_ver > supported_kver)
+		/* This syscall is newer than the kernel version supported by
+		 * the application.  Don't add it to the rule, and therefore
+		 * it  will be subject to the attr->act_unknown action */
+		return 0;
+
+	rc = arch_syscall_translate(db->arch, &rule->syscall);
+	if (rc < 0)
+		return 0;
+
+	if (db->arch->rule_add == NULL) {
+		/* syscalls < -1 require a db->arch->rule_add() function */
+		if (rule->syscall < -1 && rule->strict)
+			return 0;
+
+		rc = db_rule_add(db, rule);
+	} else {
+		rc = (db->arch->rule_add)(db, rule);
+	}
+
+	return rc;
+}

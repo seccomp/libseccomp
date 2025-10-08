@@ -126,6 +126,13 @@ struct db_filter_attr {
 	uint32_t api_sysrawrc;
 	/* request SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV */
 	uint32_t wait_killable_recv;
+	/*
+	 * action to take if an unknown (newer than this filter) syscall is
+	 * invoked
+	 */
+	uint32_t act_enosys;
+	/* maximum kernel version understood by the userspace program */
+	uint32_t kvermax;
 };
 
 struct db_filter {
@@ -225,4 +232,5 @@ void db_col_precompute_reset(struct db_filter_col *col);
 
 int db_rule_add(struct db_filter *db, const struct db_api_rule_list *rule);
 
+int db_add_known_syscalls(struct db_filter_col *col);
 #endif

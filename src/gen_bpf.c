@@ -2019,7 +2019,10 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	state->bad_arch_hsh = b_badarch->hash;
 
 	/* generate the default action */
-	b_default = _gen_bpf_action(state, NULL, state->attr->act_default);
+	if (state->attr->kvermax != SCMP_KV_UNDEF)
+		b_default = _gen_bpf_action(state, NULL, state->attr->act_enosys);
+	else
+		b_default = _gen_bpf_action(state, NULL, state->attr->act_default);
 	if (b_default == NULL)
 		return -ENOMEM;
 	rc = _hsh_add(state, &b_default, 0);
