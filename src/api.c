@@ -729,6 +729,15 @@ API int seccomp_notify_fd(const scmp_filter_ctx ctx)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+API int seccomp_notify_addfd(int fd, struct seccomp_notif_addfd *addfd)
+{
+	/* force a runtime api level detection */
+	_seccomp_api_update();
+
+	return _rc_filter(sys_notify_addfd(fd, addfd));
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 API int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 {
 	int rc;
