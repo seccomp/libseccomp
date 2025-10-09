@@ -262,9 +262,9 @@ function run_test_command() {
 		cmd="$cmd:$(cd $(pwd)/../src/python/build/lib.*; pwd)"
 		# check and adjust if we are doing a VPATH build
 		if [[ -e "./$2.py" ]]; then
-			cmd="$cmd /usr/bin/env python $2.py $3"
+			cmd="$cmd /usr/bin/env/python3 $2.py $3"
 		else
-			cmd="$cmd /usr/bin/env python ${srcdir}/$2.py $3"
+			cmd="$cmd /usr/bin/env/python3 ${srcdir}/$2.py $3"
 		fi
 	else
 		cmd="$2 $3"
