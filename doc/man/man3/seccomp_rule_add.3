@@ -184,6 +184,13 @@ the filter rule.
 The thread will throw a SIGSYS signal when it calls a syscall that matches the
 filter rule.
 .TP
+.B SCMP_ACT_TRAPX(uint16_t reason)
+The thread will throw a SIGSYS signal when it calls a syscall that matches the
+filter rule. When using SA_SIGINFO with
+.BR sigaction (2),
+.I reason
+will be populated in the si_errno field.
+.TP
 .B SCMP_ACT_ERRNO(uint16_t errno)
 The thread will receive a return value of
 .I errno
