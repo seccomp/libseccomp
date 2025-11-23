@@ -64,7 +64,7 @@ def test():
         ret_bytes = os.read(ret_fd, 128)
         os.close(ret_fd)
         if len(ret_bytes) != 0:
-            # /dev/null should be empty
+            # Expect zero bytes since the fd now points to /dev/null
             quit(1)
 
         os.close(notify_fd)

@@ -54,6 +54,7 @@ int send_fd(int sock, int fd)
 
 int recv_fd(int sock)
 {
+	int fd;
 	char m_buffer[1];
 	struct iovec iov = {.iov_base = m_buffer, .iov_len = 1};
 
@@ -69,7 +70,6 @@ int recv_fd(int sock)
 	if (recvmsg(sock, &msg, 0) < 0)
 		return -1;
 
-	int fd;
 	memcpy(&fd, CMSG_DATA(cmsg), sizeof(fd));
 	return fd;
 }
