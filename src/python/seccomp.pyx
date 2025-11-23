@@ -600,7 +600,7 @@ cdef class NotificationAddfd:
     cdef uint32_t _newfd
     cdef uint32_t _newfd_flags
 
-    def __cinit__(self, notify, flags, srcfd, newfd = 0, newflags = 0):
+    def __cinit__(self, notify, flags, srcfd, newfd = 0, newfd_flags = 0):
         """ Initialize the notification addfd structure.
 
         Arguments:
@@ -608,7 +608,7 @@ cdef class NotificationAddfd:
         srcfd - the source file descriptor
         flags - notify addfd flags
         newfd - 0 or desired file descriptor number in target
-        newflags - new flags to set on the target file descriptor
+        newfd_flags - new flags to set on the target file descriptor
 
         Description:
         Create a seccomp NotificationAddfd object.
@@ -617,7 +617,7 @@ cdef class NotificationAddfd:
         self._flags = flags
         self._srcfd = srcfd
         self._newfd = newfd
-        self._newfd_flags = newflags
+        self._newfd_flags = newfd_flags
 
     @property
     def id(self):
@@ -704,7 +704,7 @@ cdef class NotificationAddfd:
         self._newfd = value
 
     @property
-    def newflags(self):
+    def newfd_flags(self):
         """ Get the new flags to set on the target file descriptor.
 
         Description:
@@ -712,12 +712,12 @@ cdef class NotificationAddfd:
         """
         return self._newfd_flags
 
-    @newflags.setter
-    def newflags(self, value):
+    @newfd_flags.setter
+    def newfd_flags(self, value):
         """ Set the new flags to set on the target file descriptor.
 
         Arguments:
-        newflags - the new flags to set on the target file descriptor
+        newfd_flags - the new flags to set on the target file descriptor
 
         Description:
         Set the new flags to set on the target file descriptor.
@@ -1186,7 +1186,7 @@ cdef class SyscallFilter:
         _addfd.flags = addfd.flags
         _addfd.srcfd = addfd.srcfd
         _addfd.newfd = addfd.newfd
-        _addfd.newfd_flags = addfd.newflags
+        _addfd.newfd_flags = addfd.newfd_flags
 
         rc = libseccomp.seccomp_notify_addfd(fd, &_addfd)
         if rc < 0:
