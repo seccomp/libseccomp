@@ -33,18 +33,18 @@ if ($arch == 3221225534)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -56,18 +56,18 @@ if ($arch == 3221225534)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (0) [priority: 65525]
   if ($syscall == 0)
     if ($a0.hi32 == 0)
@@ -123,7 +123,7 @@ if ($arch == 1073741827)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (3) [priority: 65531]
   if ($syscall == 3)
     if ($a0 == 0)
@@ -158,7 +158,7 @@ if ($arch == 3221225534)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (1073741824) [priority: 65531]
   if ($syscall == 1073741824)
     if ($a0 == 0)
@@ -193,7 +193,7 @@ if ($arch == 1073741864)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (3) [priority: 65531]
   if ($syscall == 3)
     if ($a0 == 0)
@@ -235,18 +235,18 @@ if ($arch == 3221225655)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -258,18 +258,18 @@ if ($arch == 3221225655)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (63) [priority: 65525]
   if ($syscall == 63)
     if ($a0.hi32 == 0)
@@ -332,18 +332,18 @@ if ($arch == 3221225730)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -355,18 +355,18 @@ if ($arch == 3221225730)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (63) [priority: 65525]
   if ($syscall == 63)
     if ($a0.hi32 == 0)
@@ -422,7 +422,7 @@ if ($arch == 1073741832)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (4003) [priority: 65531]
   if ($syscall == 4003)
     if ($a0 == 0)
@@ -464,18 +464,18 @@ if ($arch == 3221225480)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -487,18 +487,18 @@ if ($arch == 3221225480)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (5000) [priority: 65525]
   if ($syscall == 5000)
     if ($a0.hi32 == 0)
@@ -554,7 +554,7 @@ if ($arch == 3758096392)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (6000) [priority: 65531]
   if ($syscall == 6000)
     if ($a0 == 0)
@@ -596,18 +596,18 @@ if ($arch == 3221225493)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -619,18 +619,18 @@ if ($arch == 3221225493)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (3) [priority: 65525]
   if ($syscall == 3)
     if ($a0.hi32 == 0)
@@ -686,7 +686,7 @@ if ($arch == 1073741866)
       else
         if ($a2 >= 2)
         else
-          action TRAP;
+          action TRAP(0);
   # filter for syscall "read" (3) [priority: 65531]
   if ($syscall == 3)
     if ($a0 == 0)
@@ -728,18 +728,18 @@ if ($arch == 3221225715)
                 if ($a2.hi32 == 0)
                   if ($a2.lo32 >= 2)
                   else
-                    action TRAP;
+                    action TRAP(0);
                 else
-                  action TRAP;
+                  action TRAP(0);
           else
             if ($a2.hi32 > 0)
             else
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
     else
       if ($a1.hi32 > 0)
       else
@@ -751,18 +751,18 @@ if ($arch == 3221225715)
               if ($a2.hi32 == 0)
                 if ($a2.lo32 >= 2)
                 else
-                  action TRAP;
+                  action TRAP(0);
               else
-                action TRAP;
+                action TRAP(0);
         else
           if ($a2.hi32 > 0)
           else
             if ($a2.hi32 == 0)
               if ($a2.lo32 >= 2)
               else
-                action TRAP;
+                action TRAP(0);
             else
-              action TRAP;
+              action TRAP(0);
   # filter for syscall "read" (63) [priority: 65525]
   if ($syscall == 63)
     if ($a0.hi32 == 0)

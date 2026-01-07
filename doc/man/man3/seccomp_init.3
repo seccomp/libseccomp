@@ -67,12 +67,24 @@ The entire process will be terminated by the kernel with SIGSYS when it calls a
 syscall that does not match any of the configured seccomp filter rules.
 .TP
 .B SCMP_ACT_TRAP
+See
+.B SCMP_ACT_TRAPX
+.TP
+.B SCMP_ACT_TRAPX(unit16_t reason)
 The thread will be sent a SIGSYS signal when it calls a syscall that does not
 match any of the configured seccomp filter rules.  It may catch this and change
 its behavior accordingly.  When using SA_SIGINFO with
 .BR sigaction (2),
 si_code will be set to SYS_SECCOMP, si_syscall will be set to the syscall that
 failed the rules, and si_arch will be set to the AUDIT_ARCH for the active ABI.
+If
+.B SCMP_ACT_TRAPX
+is utilized,
+the si_errno field in
+.BR sigaction (2),
+will be set to
+.I reason
+.
 .TP
 .B SCMP_ACT_ERRNO(uint16_t errno)
 The thread will receive a return value of
