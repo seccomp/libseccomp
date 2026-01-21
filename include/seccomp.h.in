@@ -365,8 +365,12 @@ struct scmp_arg_cmp {
 #define SCMP_ACT_KILL		SCMP_ACT_KILL_THREAD
 /**
  * Throw a SIGSYS signal
+ *
+ * The Linux kernel supports a 16-bit parameter for the TRAP action, but
+ * libseccomp v2.6.x and older did not support or utilize this parameter.
  */
-#define SCMP_ACT_TRAP		0x00030000U
+#define SCMP_ACT_TRAP		SCMP_ACT_TRAPX(0)
+#define SCMP_ACT_TRAPX(x)	(0x00030000U | ((x) & 0x0000ffffU))
 /**
  * Notifies userspace
  */
