@@ -14,6 +14,7 @@
 
 #include "arch-aarch64.h"
 #include "arch-arm.h"
+#include "arch-alpha.h"
 #include "arch.h"
 #include "arch-loongarch64.h"
 #include "arch-m68k.h"
@@ -52,6 +53,9 @@ struct arch_syscall_table {
 	enum scmp_kver arm_kver;
 	int aarch64;
 	enum scmp_kver aarch64_kver;
+
+	int alpha;
+	enum scmp_kver alpha_kver;
 
 	int loongarch64;
 	enum scmp_kver loongarch64_kver;

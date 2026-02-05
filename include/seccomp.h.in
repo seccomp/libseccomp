@@ -153,6 +153,11 @@ struct scmp_arg_cmp {
 #define SCMP_ARCH_AARCH64	AUDIT_ARCH_AARCH64
 
 /**
+ * The Alpha architecture tokens
+ */
+#define SCMP_ARCH_ALPHA		AUDIT_ARCH_ALPHA
+
+/**
  * The LoongArch architecture tokens
  */
 /* 64-bit LoongArch audit support is upstream as of 5.19-rc1 */
