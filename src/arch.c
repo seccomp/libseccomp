@@ -35,6 +35,7 @@
 #include "arch-x32.h"
 #include "arch-arm.h"
 #include "arch-aarch64.h"
+#include "arch-alpha.h"
 #include "arch-loongarch64.h"
 #include "arch-m68k.h"
 #include "arch-mips.h"
@@ -65,6 +66,8 @@ const struct arch_def *arch_def_native = &arch_def_x86_64;
 const struct arch_def *arch_def_native = &arch_def_arm;
 #elif __aarch64__
 const struct arch_def *arch_def_native = &arch_def_aarch64;
+#elif __alpha__
+const struct arch_def *arch_def_native = &arch_def_alpha;
 #elif __loongarch_lp64
 const struct arch_def *arch_def_native = &arch_def_loongarch64;
 #elif __m68k__
@@ -147,6 +150,8 @@ const struct arch_def *arch_def_lookup(uint32_t token)
 		return &arch_def_arm;
 	case SCMP_ARCH_AARCH64:
 		return &arch_def_aarch64;
+	case SCMP_ARCH_ALPHA:
+		return &arch_def_alpha;
 	case SCMP_ARCH_LOONGARCH64:
 		return &arch_def_loongarch64;
 	case SCMP_ARCH_M68K:
@@ -207,6 +212,8 @@ const struct arch_def *arch_def_lookup_name(const char *arch_name)
 		return &arch_def_arm;
 	else if (strcmp(arch_name, "aarch64") == 0)
 		return &arch_def_aarch64;
+	else if (strcmp(arch_name, "alpha") == 0)
+		return &arch_def_alpha;
 	else if (strcmp(arch_name, "loongarch64") == 0)
 		return &arch_def_loongarch64;
 	else if (strcmp(arch_name, "m68k") == 0)

@@ -40,6 +40,7 @@
 #include "arch-mips64.h"
 #include "arch-mips64n32.h"
 #include "arch-aarch64.h"
+#include "arch-alpha.h"
 #include "arch-parisc.h"
 #include "arch-parisc64.h"
 #include "arch-ppc.h"
@@ -108,6 +109,9 @@ int main(int argc, char *argv[])
 			break;
 		case SCMP_ARCH_AARCH64:
 			sys = aarch64_syscall_iterate(iter);
+			break;
+		case SCMP_ARCH_ALPHA:
+			sys = alpha_syscall_iterate(iter);
 			break;
 		case SCMP_ARCH_LOONGARCH64:
 			sys = loongarch64_syscall_iterate(iter);
