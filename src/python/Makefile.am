@@ -36,7 +36,7 @@ EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py
 all-local: build
 
 build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
-	[ ${srcdir} = ${builddir} ] || cp ${srcdir}/seccomp.pyx ${builddir}
+	[ -f ${builddir}/seccomp.pyx ] || cp ${srcdir}/seccomp.pyx ${builddir}
 	${PY_BUILD} && touch build
 
 install-exec-local: build
