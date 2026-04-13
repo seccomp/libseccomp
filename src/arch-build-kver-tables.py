@@ -29,6 +29,7 @@
 #######################################################
 
 from subprocess import TimeoutExpired
+from pathlib import Path
 import subprocess
 import argparse
 import os
@@ -43,7 +44,7 @@ kernel_versions = ['3.0', '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7',
                    '5.11', '5.12', '5.13', '5.14', '5.15', '5.16', '5.17',
                    '5.18', '5.19', '6.0', '6.1', '6.2', '6.3', '6.4', '6.5',
                    '6.6', '6.7', '6.8', '6.9', '6.10', '6.11', '6.12',
-                   '6.13', '6.14', '6.15', '6.16', '6.17']
+                   '6.13', '6.14', '6.15', '6.16', '6.17', '6.18', '6.19', '7.0']
 
 def parse_args():
     parser = argparse.ArgumentParser('Script to populate the syscalls.csv kernel versions',
@@ -65,6 +66,10 @@ def parse_args():
         args.versions = kernel_versions
     else:
         args.versions = args.versions.split(',')
+
+    # Convert to absolute paths
+    args.datapath = Path(args.datapath).resolve()
+    args.kernelpath = Path(args.kernelpath).resolve()
 
     return args
 
@@ -135,10 +140,10 @@ def main(args):
 
         src_path = os.path.join(args.datapath, 'data/tables')
         dest_path = os.path.join(os.getcwd(), 'tables-{}'.format(kver))
-        cp_cmd = 'cp -r {} {}'.format(src_path, dest_path)
+        cp_cmd = 'cp -r {}/. {}'.format(src_path, dest_path)
         ret, out, err = run(cp_cmd, shell=True)
         if ret != 0:
-            raise RuntimeError('Table copy failed: {}'.format(ret))
+            raise RuntimeError('Table copy failed: {}'.format(err))
 
 if __name__ == '__main__':
     args = parse_args()
