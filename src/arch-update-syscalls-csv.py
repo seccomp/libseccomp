@@ -21,6 +21,7 @@
 # along with this library; if not, see <http://www.gnu.org/licenses>.
 #
 
+from pathlib import Path
 import subprocess
 import datetime
 import argparse
@@ -36,7 +37,7 @@ arch_list = [
 ignore_syscall_list = [
     'arc_gettls', 'arc_settls', 'arc_usr_cmpxchg', 'bfin_spinlock',
     'cache_sync', 'clone2', 'cmpxchg_badaddr', 'dipc', 'dma_memcpy',
-    'exec_with_loader', 'execv', 'file_getattr', 'file_setattr',
+    'exec_with_loader', 'execv',
     'flush_cache', 'fp_udfiex_crtl', 'getdomainname', 'getdtablesize',
     'gethostname', 'getunwind', 'getxgid', 'getxpid', 'getxuid',
     'kern_features', 'llseek', 'madvise1', 'memory_ordering', 'metag_get_tls',
@@ -78,6 +79,10 @@ def parse_args():
 
     args = parser.parse_args()
     args.versions = args.versions.split(',')
+
+    # Convert to absolute paths
+    args.datapath = Path(args.datapath).resolve()
+    args.kernelpath = Path(args.kernelpath).resolve()
 
     return args
 
@@ -182,18 +187,25 @@ def parse_syscalls_csv(args):
 
 def insert_new_syscall(syscalls, syscall_name, column_cnt):
     inserted = False
+    new_row = list()
+
+    for i in range(0, column_cnt):
+        if (i % 2) == 0:
+            new_row.append('PNR')
+        else:
+            new_row.append('SCMP_KV_UNDEF')
 
     for syscall in syscalls:
         if syscall_name < syscall:
             idx = list(syscalls.keys()).index(syscall)
             syscalls_list = list(syscalls.items())
-            syscalls_list.insert(idx, (syscall_name, ['PNR'] * column_cnt))
+            syscalls_list.insert(idx, (syscall_name, new_row))
             syscalls = dict(syscalls_list)
             inserted = True
             break
 
     if not inserted:
-        syscalls[syscall_name] = ['PNR'] * column_cnt
+        syscalls[syscall_name] = new_row
 
     return syscalls
 
@@ -290,8 +302,15 @@ def update_syscalls_dict(args, columns, syscalls, kver):
                                   format(syscall_name, column, kver))
 
                         syscalls[syscall_name][col_idx] = str(syscall_num)
-                        maj = kver.split('.')[0]
-                        mnr = kver.split('.')[1]
+
+                        if kver.find('-rc') > 0:
+                            # Remove trailing release candidate tags
+                            tmp_kver = kver.split('-')[0]
+                        else:
+                            tmp_kver = kver
+
+                        maj = tmp_kver.split('.')[0]
+                        mnr = tmp_kver.split('.')[1]
                         syscalls[syscall_name][col_idx + 1] = \
                             'SCMP_KV_{}_{}'.format(maj, mnr)
 
