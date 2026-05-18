@@ -42,6 +42,13 @@
 int abi_syscall_resolve_name_munge(const struct arch_def *arch,
 				   const char *name)
 {
+	int sys = __NR_SCMP_ERROR;
+
+	/* Check if arch implements syscall directly and return its number */
+	sys = arch->syscall_resolve_name_raw(name);
+	if (sys != __NR_SCMP_ERROR) {
+		return sys;
+	}
 
 #define _ABI_SYSCALL_RES_NAME_CHK(NAME) \
 	if (!strcmp(name, #NAME)) return __PNR_##NAME;
@@ -79,7 +86,7 @@ int abi_syscall_resolve_name_munge(const struct arch_def *arch,
 	_ABI_SYSCALL_RES_NAME_CHK(shmget)
 	_ABI_SYSCALL_RES_NAME_CHK(shmctl)
 
-	return arch->syscall_resolve_name_raw(name);
+	return __NR_SCMP_ERROR;
 }
 
 /**
