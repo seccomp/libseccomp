@@ -604,7 +604,8 @@ function dump_lib_riscv64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_s390() {
-	dump_from_syscall_tbl "$1/arch/s390/kernel/syscalls/syscall.tbl" 32
+	# s390 removed in Linux v6.19, use historical data
+	cat ./syscalls.s390.csv
 }
 
 #
