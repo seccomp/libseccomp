@@ -21,9 +21,10 @@ test type: bpf-sim
 33-sim-socket_syscalls_be	+s390,+s390x		373		0		1		2	N	N	N	ALLOW
 33-sim-socket_syscalls_be	+ppc			338		0		1		2	N	N	N	ALLOW
 33-sim-socket_syscalls_be	+s390,+s390x,+ppc	accept		5		N		N	N	N	N	ALLOW
-33-sim-socket_syscalls_be	+s390,+s390x,+ppc	accept		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+s390,+s390x		accept		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+ppc			accept		0		1		2	N	N	N	ALLOW
 33-sim-socket_syscalls_be	+s390,+s390x,+ppc	accept4		18		1		2	N	N	N	ALLOW
-33-sim-socket_syscalls_be	+s390,+s390x,+ppc	accept4		0		1		2	N	N	N	KILL
+33-sim-socket_syscalls_be	+s390,+s390x,+ppc	accept4		0		1		2	N	N	N	ALLOW
 
 test type: bpf-valgrind
 
