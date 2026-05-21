@@ -206,6 +206,7 @@ cdef class Arch:
     X32 - 64-bit x86 using the x32 ABI
     ARM - ARM
     AARCH64 - 64-bit ARM
+    ALPHA - 64-bit Alpha
     LOONGARCH64 - 64-bit LoongArch
     M68K - 32-bit Motorola 68000
     MIPS - MIPS O32 ABI
@@ -229,6 +230,7 @@ cdef class Arch:
     X32 = libseccomp.SCMP_ARCH_X32
     ARM = libseccomp.SCMP_ARCH_ARM
     AARCH64 = libseccomp.SCMP_ARCH_AARCH64
+    ALPHA = libseccomp.SCMP_ARCH_ALPHA
     LOONGARCH64 = libseccomp.SCMP_ARCH_LOONGARCH64
     M68K = libseccomp.SCMP_ARCH_M68K
     MIPS = libseccomp.SCMP_ARCH_MIPS
@@ -268,6 +270,8 @@ cdef class Arch:
                 self._token = libseccomp.SCMP_ARCH_ARM
             elif arch == libseccomp.SCMP_ARCH_AARCH64:
                 self._token = libseccomp.SCMP_ARCH_AARCH64
+            elif arch == libseccomp.SCMP_ARCH_ALPHA:
+                self._token = libseccomp.SCMP_ARCH_ALPHA
             elif arch == libseccomp.SCMP_ARCH_LOONGARCH64:
                 self._token = libseccomp.SCMP_ARCH_LOONGARCH64
             elif arch == libseccomp.SCMP_ARCH_M68K:

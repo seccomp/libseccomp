@@ -26,9 +26,9 @@ import argparse
 import math
 import os
 
-arch_list = ['i386', 'x86_64', 'x32', 'arm', 'arm64', 'loongarch64', 'm68k',
-             'mipso32', 'mips64', 'mips64n32', 'parisc', 'parisc64', 'powerpc',
-             'powerpc64', 'riscv64', 's390', 's390x', 'sh']
+arch_list = ['i386', 'x86_64', 'x32', 'arm', 'arm64', 'alpha', 'loongarch64',
+             'm68k', 'mipso32', 'mips64', 'mips64n32', 'parisc', 'parisc64',
+             'powerpc', 'powerpc64', 'riscv64', 's390', 's390x', 'sh']
 
 kernel_versions = ['3.0', '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7',
                    '3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14',
