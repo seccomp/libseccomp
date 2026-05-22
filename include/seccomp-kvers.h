@@ -108,5 +108,8 @@ enum scmp_kver {
 	SCMP_KV_6_15 = 78,
 	SCMP_KV_6_16 = 79,
 	SCMP_KV_6_17 = 80,
+	SCMP_KV_6_18 = 81,
+	SCMP_KV_6_19 = 82,
+	SCMP_KV_7_0 = 83,
 	__SCMP_KV_MAX,
 };

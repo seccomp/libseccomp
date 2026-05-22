@@ -64,6 +64,105 @@ base, and can be enabled via the "--enable-code-coverage" configure flag and
 the "check-code-coverage" make target.  Additional details on generating code
 coverage information can be found in the .travis.yml file.
 
+## How to Update the syscalls.csv Table
+
+*** NOTE - This currently can only be done on Ubuntu ***
+
+1. Install dependencies
+
+   In addition to the normal libseccomp package dependencies, the following
+   packages must also be installed:
+   ```
+   apt install libc6-dev-x32
+   ```
+
+1. Download source packages
+
+   Download the following source packages:
+   ```
+   git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+   git clone https://github.com/hrw/syscalls-table.git
+   git clone git@github.com:<yourrepo>/libseccomp.git
+   ```
+
+1. Add new kernel version enumerations
+
+   The first line of [src/syscalls.csv](https://github.com/seccomp/libseccomp/blob/main/src/syscalls.csv)
+   contains the newest kernel version known by libseccomp.  Add new kernel
+   version enumerations to the end of the `enum scmp_kver` enumeration in
+   [seccomp-kvers.h](https://github.com/seccomp/libseccomp/blob/main/include/seccomp-kvers.h).
+   
+   Optional - Add new kernel versions to the `kernel_versions` list in
+   [arch-build-kver-tables.py](https://github.com/seccomp/libseccomp/blob/main/src/arch-build-kver-tables.py).
+
+1. Build the table(s) of architectures, syscalls, and syscall numbers
+
+   Using the [syscalls-table](https://github.com/hrw/syscalls-table) tool,
+   build the tables of architectures, syscalls, and syscall numbers for the
+   new kernel versions.
+
+   ```
+   cd libseccomp
+   ./src/arch-build-kver-tables.py -d ../syscalls-table -k ../linux -V [Kernel Version(s)]
+
+   # example:
+   ./src/arch-build-kver-tables.py -d ../syscalls-table -k ../linux -V 6.14,6.15,6.16,6.17,6.18,6.19,7.0-rc7
+   ```
+
+1. Add the tables to syscalls.csv
+
+   Parse the tables generated in the previous step and add the data to
+   syscalls.csv.
+
+   ```
+   ./src/arch-update-syscalls-csv.py -a -d ./ -k ../linux -c src/syscalls.csv -V [Kernel Version(s)]
+
+   # example
+   ./src/arch-update-syscalls-csv.py -a -d ./ -k ../linux -c src/syscalls.csv -V 6.14,6.15,6.16,6.17,6.18,6.19,7.0-rc7
+   ```
+
+1. Update seccomp-syscalls.h with new syscalls
+
+   Run `cd src && ./arch-syscall-check` to determine if any new syscalls were
+   added and if they require __PNR and/or __SNR definitions.  If this tool
+   identifies missing definitions, add them to
+   [include/seccomp-syscalls.h](https://github.com/seccomp/libseccomp/blob/main/include/seccomp-syscalls.h).  [Here](https://github.com/seccomp/libseccomp/commit/f01e67509e45c672f4bdd643d94d90867cc19d90)
+    is an example of the syscalls that were added to kernel version v6.12.
+
+
+1. Build the legacy syscalls.csv table (optional but recommended)
+
+   Prior to tracking the kernel version where syscalls were added, libseccomp
+   employed internal tools to build the syscalls.csv table.  These tools can
+   be used to validate the syscall numbers and their architectures.  Note that
+   they cannot be used to validate the kernel version number.
+   
+   ```
+   ./autogen.sh && ./configure --enable-python && make check-build
+   
+   cd src
+   make arch-syscall-dump
+   ./arch-syscall-validate -c syscalls-prev.csv ../../linux/
+   ```
+
+1. Compare CSVs
+
+   Compare the checked-in (HEAD) CSV with the newly-generated syscalls.csv.
+   Verify the following:
+   * All new syscall names were properly added
+   * If a syscall number changed, it should only have transitioned from `PNR`
+     to a valid number.  If a number changed for an architecture, verify that
+     its associated kernel version is correct
+   * No syscall rows were deleted
+   
+   If you built `syscalls-prev.csv` in the previous step, do the same comparisons
+   as outlined above.  Again, note that `syscalls-prev.csv` does not contain
+   kernel version information, so only the syscall names, syscall numbers, and
+   architectures can be verified.
+   
+   There are many tools to compare CSVs.  This [tool](https://www.textcompare.org/csv/)
+   has been especially useful.
+
 ## Explain Your Work
 
 At the top of every patch you should include a description of the problem you

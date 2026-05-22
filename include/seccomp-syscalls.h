@@ -283,6 +283,9 @@
 #define __PNR_getpagesize			-10249
 #define __PNR_riscv_hwprobe			-10250
 #define __PNR_uretprobe				-10251
+#define __PNR_uprobe				-10252
+#define __PNR_rseq_slice_yield			-10253
+#define __PNR_listns				-10254
 
 /*
  * libseccomp syscall definitions
@@ -647,6 +650,9 @@
 #define __SNR_fdatasync			__NR_fdatasync
 
 #define __SNR_fgetxattr			__NR_fgetxattr
+
+#define __SNR_file_getattr		__NR_file_getattr
+#define __SNR_file_setattr		__NR_file_setattr
 
 #define __SNR_finit_module		__NR_finit_module
 
@@ -1082,6 +1088,8 @@
 
 #define __SNR_listmount			__NR_listmount
 
+#define __SNR_listns			__NR_listns
+
 #define __SNR_listxattr			__NR_listxattr
 
 #define __SNR_listxattrat		__NR_listxattrat
@@ -1356,6 +1364,8 @@
 #define __SNR_open_tree			__PNR_open_tree
 #endif
 
+#define __SNR_open_tree_attr		__NR_open_tree_attr
+
 #define __SNR_openat			__NR_openat
 
 #define __SNR_openat2			__NR_openat2
@@ -1613,6 +1623,8 @@
 #else
 #define __SNR_rseq			__PNR_rseq
 #endif
+
+#define __SNR_rseq_slice_yield		__NR_rseq_slice_yield
 
 #define __SNR_rt_sigaction		__NR_rt_sigaction
 
@@ -2303,6 +2315,12 @@
 #define __SNR_unlinkat			__NR_unlinkat
 
 #define __SNR_unshare			__NR_unshare
+
+#ifdef __NR_uprobe
+#define __SNR_uprobe			__NR_uprobe
+#else
+#define __SNR_uprobe			__PNR_uprobe
+#endif
 
 #ifdef __NR_uretprobe
 #define __SNR_uretprobe			__NR_uretprobe
