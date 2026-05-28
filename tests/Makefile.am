@@ -230,7 +230,7 @@ EXTRA_DIST_TESTCFGS = \
 	61-sim-transactions.tests \
 	62-sim-arch_transactions.tests \
 	63-live-notify_addfd.tests \
-	63-live-trapx.tests
+	64-live-trapx.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \
