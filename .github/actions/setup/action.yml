@@ -31,7 +31,7 @@ runs:
   - run: |
       sudo apt-get install -y python3 python3-setuptools python3-pip
       python3 -m pip install --upgrade pip
-      python3 -m pip install cython
+      python3 -m pip install cython wheel build installer
       # Add cython to the path
       echo "$HOME/.local/bin" >> $GITHUB_PATH
     shell: bash

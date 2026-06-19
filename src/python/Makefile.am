@@ -29,7 +29,15 @@ PY_BUILD_1 = ${PY_DISTUTILS} build
 PY_BUILD_ = ${PY_BUILD_0}
 PY_BUILD = ${PY_BUILD_@AM_V@}
 
-PY_INSTALL = ${PY_DISTUTILS} install
+# Build a wheel via PEP 517 (python -m build --no-isolation) to avoid the
+# deprecated "setup.py install" invocation.  The --no-isolation flag reuses
+# the in-tree build environment rather than creating an isolated venv.
+PY_BDIST_WHEEL = \
+	VERSION_RELEASE="@PACKAGE_VERSION@" \
+	CPPFLAGS="-I\${top_srcdir}/include ${AM_CPPFLAGS} ${CPPFLAGS}" \
+	CFLAGS="${AM_CFLAGS} ${CFLAGS}" \
+	LDFLAGS="${AM_LDFLAGS} ${LDFLAGS}" \
+	${PYTHON} -m build --wheel --no-isolation
 
 EXTRA_DIST = libseccomp.pxd seccomp.pyx setup.py
 
@@ -40,12 +48,14 @@ build: ../libseccomp.la libseccomp.pxd seccomp.pyx setup.py
 	${PY_BUILD} && touch build
 
 install-exec-local: build
-	${PY_INSTALL} --install-lib=${DESTDIR}/${pyexecdir} \
-		--record=${DESTDIR}/${pyexecdir}/install_files.txt
+	${PY_BDIST_WHEEL}
+	${PYTHON} -m installer \
+		--destdir=${DESTDIR}/ \
+		--prefix=${prefix} \
+		dist/seccomp-*.whl
 
 uninstall-local:
-	cat ${DESTDIR}/${pyexecdir}/install_files.txt | xargs ${RM} -f
-	${RM} -f ${DESTDIR}/${pyexecdir}/install_files.txt
+	${PYTHON} -m pip uninstall --yes seccomp
 
 clean-local:
 	[ ${srcdir} = ${builddir} ] || ${RM} -f ${builddir}/seccomp.pyx
