@@ -50,6 +50,44 @@ function check_pnr() {
 	[[ $? -eq 1 ]] && return 0 || return 1
 }
 
+function check_snr_ifdef() {
+	# Verify that each "#ifdef __NR_<name>" guard immediately preceding a
+	# "#define __SNR_<name>" uses the same syscall name as the define.
+	# A mismatch (e.g. "#ifdef __NR_foo" followed by "#define __SNR_bar")
+	# means the define will silently use the wrong guard and may resolve
+	# to __PNR_bar even when __NR_foo is present on the target arch.
+	local mismatch=0
+	local ifdef_name=""
+	local lineno=0
+
+	while IFS= read -r line; do
+		(( lineno++ ))
+
+		if [[ "$line" =~ ^#ifdef[[:space:]]+__NR_(.+)$ ]]; then
+			ifdef_name="${BASH_REMATCH[1]}"
+		elif [[ -n "$ifdef_name" ]]; then
+			if [[ "$line" =~ ^#define[[:space:]]+__SNR_([^[:space:]]+) ]]; then
+				snr_name="${BASH_REMATCH[1]}"
+				if [[ "$ifdef_name" != "$snr_name" ]]; then
+					echo "MISMATCH at $SYSCALL_HDR:$lineno:" \
+					     "#ifdef __NR_$ifdef_name" \
+					     "but #define __SNR_$snr_name"
+					mismatch=1
+				fi
+				ifdef_name=""
+			elif [[ "$line" =~ ^#ifdef || "$line" =~ ^#define || \
+			        "$line" =~ ^#else   || "$line" =~ ^#endif ]]; then
+				# Any other preprocessor directive clears the
+				# pending ifdef_name without a match being needed
+				# (e.g. unconditional defines have no #ifdef guard)
+				ifdef_name=""
+			fi
+		fi
+	done < "$SYSCALL_HDR"
+
+	return $mismatch
+}
+
 rc=0
 
 echo ">>> CHECKING FOR MISSING __SNR_syscall VALUES"
@@ -58,6 +96,10 @@ rc=$(( $rc + $? ))
 
 echo ">>> CHECKING FOR MISSING __PNR_syscall VALUES"
 check_pnr
+rc=$(( $rc + $? ))
+
+echo ">>> CHECKING FOR MISMATCHED __SNR_syscall/#ifdef __NR_syscall NAMES"
+check_snr_ifdef
 rc=$(( $rc + $? ))
 
 exit $rc
