@@ -388,6 +388,12 @@ API uint32_t seccomp_arch_resolve_name(const char *arch_name)
 }
 
 /* NOTE - function header comment in include/seccomp.h */
+API const char *seccomp_arch_name(uint32_t arch_token)
+{
+	return arch_def_name(arch_token);
+}
+
+/* NOTE - function header comment in include/seccomp.h */
 API uint32_t seccomp_arch_native(void)
 {
 	return arch_def_native->token;

@@ -26,9 +26,6 @@
 #include <string.h>
 #include <unistd.h>
 
-/* NOTE: needed for the arch->token decoding in _pfc_arch() */
-#include <linux/audit.h>
-
 #include <seccomp.h>
 
 #include "arch.h"
@@ -50,56 +47,8 @@ struct pfc_sys_list {
  */
 static const char *_pfc_arch(const struct arch_def *arch)
 {
-	switch (arch->token) {
-	case SCMP_ARCH_X86:
-		return "x86";
-	case SCMP_ARCH_X86_64:
-		return "x86_64";
-	case SCMP_ARCH_X32:
-		return "x32";
-	case SCMP_ARCH_ARM:
-		return "arm";
-	case SCMP_ARCH_AARCH64:
-		return "aarch64";
-	case SCMP_ARCH_LOONGARCH64:
-		return "loongarch64";
-	case SCMP_ARCH_M68K:
-		return "m68k";
-	case SCMP_ARCH_MIPS:
-		return "mips";
-	case SCMP_ARCH_MIPSEL:
-		return "mipsel";
-	case SCMP_ARCH_MIPS64:
-		return "mips64";
-	case SCMP_ARCH_MIPSEL64:
-		return "mipsel64";
-	case SCMP_ARCH_MIPS64N32:
-		return "mips64n32";
-	case SCMP_ARCH_MIPSEL64N32:
-		return "mipsel64n32";
-	case SCMP_ARCH_PARISC:
-		return "parisc";
-	case SCMP_ARCH_PARISC64:
-		return "parisc64";
-	case SCMP_ARCH_PPC64:
-		return "ppc64";
-	case SCMP_ARCH_PPC64LE:
-		return "ppc64le";
-	case SCMP_ARCH_PPC:
-		return "ppc";
-	case SCMP_ARCH_S390X:
-		return "s390x";
-	case SCMP_ARCH_S390:
-		return "s390";
-	case SCMP_ARCH_RISCV64:
-		return "riscv64";
-	case SCMP_ARCH_SHEB:
-		return "sheb";
-	case SCMP_ARCH_SH:
-		return "sh";
-	default:
-		return "UNKNOWN";
-	}
+	const char *name = arch_def_name(arch->token);
+	return (name != NULL ? name : "UNKNOWN");
 }
 
 /**

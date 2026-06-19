@@ -542,6 +542,19 @@ int seccomp_merge(scmp_filter_ctx ctx_dst, scmp_filter_ctx ctx_src);
 uint32_t seccomp_arch_resolve_name(const char *arch_name);
 
 /**
+ * Resolve the architecture token to a architecture name
+ * @param arch_token the architecture token, e.g. SCMP_ARCH_*
+ *
+ * This function resolves the given architecture token to the canonical
+ * architecture name string.  If the token is SCMP_ARCH_NATIVE the name of
+ * the native architecture is returned.  Returns a pointer to a static string
+ * on success; the caller must not free the returned string.  Returns NULL if
+ * the architecture token is not recognized.
+ *
+ */
+const char *seccomp_arch_name(uint32_t arch_token);
+
+/**
  * Return the native architecture token
  *
  * This function returns the native architecture token value, e.g. SCMP_ARCH_*.
