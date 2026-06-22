@@ -744,7 +744,7 @@ static int _db_tree_add(struct db_arg_chain_tree **existing,
 					if (n_iter->arg_h_flg &&
 					    (n_iter->datum_full <
 					     x_iter->datum_full))
-						x_iter->act_t = n_iter->act_t;
+						x_iter->act_f = n_iter->act_f;
 					if (_db_chain_leaf(x_iter) ||
 					    _db_chain_leaf(n_iter))
 						return -EEXIST;
