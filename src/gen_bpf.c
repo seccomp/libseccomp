@@ -351,25 +351,37 @@ static struct bpf_blk *_blk_resize(struct bpf_state *state,
 {
 	unsigned int size_adj = (AINC_BLK > size_add ? AINC_BLK : size_add);
 	struct bpf_instr *new;
-	size_t old_size, new_size;
+	unsigned int old_size, new_size, blk_new;
 
 	if (blk == NULL)
 		return NULL;
 
+	/* check for overflow of the blocks in use count */
+	blk_new = blk->blk_cnt + size_adj;
+	if (blk_new < blk->blk_cnt)
+		goto blk_resize_failure;
+
 	if ((blk->blk_cnt + size_adj) <= blk->blk_alloc)
 		return blk;
+
+	/* check for overflow of the allocated block count */
+	blk_new = blk->blk_alloc + size_adj;
+	if (blk_new < blk->blk_alloc)
+		goto blk_resize_failure;
 
 	old_size = blk->blk_alloc * sizeof(*new);
 	blk->blk_alloc += size_adj;
 	new_size = blk->blk_alloc * sizeof(*new);
 	new = zrealloc(blk->blks, old_size, new_size);
-	if (new == NULL) {
-		_blk_free(state, blk);
-		return NULL;
-	}
+	if (new == NULL)
+		goto blk_resize_failure;
 	blk->blks = new;
 
 	return blk;
+
+blk_resize_failure:
+	_blk_free(state, blk);
+	return NULL;
 }
 
 /**
@@ -447,6 +459,12 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 	unsigned int old_cnt = prg->blk_cnt;
 	unsigned int iter;
 	size_t old_size, new_size;
+
+	/* check for overflow of the blocks in use count */
+	if ((unsigned int)prg->blk_cnt + blk->blk_cnt > UINT16_MAX) {
+		rc = -E2BIG;
+		goto bpf_append_blk_failure;
+	}
 
 	/* (re)allocate the program memory */
 	old_size = BPF_PGM_SIZE(prg);
