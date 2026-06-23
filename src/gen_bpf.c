@@ -436,7 +436,7 @@ static struct bpf_blk *_blk_prepend(struct bpf_state *state,
  *
  * Add the BPF instruction block to the end of the BPF program and perform the
  * necessary translation.  Returns zero on success, negative values on failure
- * and in the case of failure the BPF program is free'd.
+ * and in the case of failure @prg is reset to an empty program.
  *
  */
 static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
@@ -506,6 +506,7 @@ static int _bpf_append_blk(struct bpf_program *prg, const struct bpf_blk *blk)
 bpf_append_blk_failure:
 	prg->blk_cnt = 0;
 	free(prg->blks);
+	prg->blks = NULL;
 	return rc;
 }
 
