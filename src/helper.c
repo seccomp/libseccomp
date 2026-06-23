@@ -62,6 +62,7 @@ void *zrealloc(void *ptr, size_t old_size, size_t size)
 	ptr = realloc(ptr, size);
 	if (!ptr)
 		return NULL;
-	memset(ptr + old_size, 0, size - old_size);
+	if (size > old_size)
+		memset(ptr + old_size, 0, size - old_size);
 	return ptr;
 }
