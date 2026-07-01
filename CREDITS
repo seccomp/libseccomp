@@ -2,14 +2,17 @@ libseccomp: Contributors
 ========================================================================
 https://github.com/seccomp/libseccomp
 
+Akihiro Suda <akihiro.suda.cz@hco.ntt.co.jp>
 Alex Murray <alex.murray@canonical.com>
 Ali Polatel <alip@chesswob.org>
+Alyssa Ross <hi@alyssa.is>
 Andreas Schwab <schwab@suse.de>
 Andrew Jones <drjones@redhat.com>
 Andy Lutomirski <luto@amacapital.net>
 Ashley Lai <adlai@us.ibm.com>
 Bogdan Purcareata <bogdan.purcareata@freescale.com>
 Brian Cain <brian.cain@gmail.com>
+Caetano Melone <melone1@llnl.gov>
 Christopher Waldon <christopher.waldon.dev@gmail.com>
 Chris Waldon <chris.waldon@ibm.com>
 CismonX <admin@cismon.net>
@@ -35,6 +38,7 @@ Jingyun Hua <huajingyun@loongson.cn>
 Joe MacDonald <joe@deserted.net>
 John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
 Jonah Petri <jonah@petri.us>
+Joshua Rogers <MegaManSec@users.noreply.github.com>
 Justin Cormack <justin.cormack@docker.com>
 Kees Cook <keescook@chromium.org>
 Kyle R. Conway <kyle.r.conway@gmail.com>
@@ -57,8 +61,10 @@ Mike Strosaker <strosake@linux.vnet.ibm.com>
 Miroslav Lichvar <mlichvar@redhat.com>
 Mаltе Ηagemаnn <rusty-snake@users.noreply.github.com>
 Paul Moore <paul@paul-moore.com>
+RocketDev <ma2014119@outlook.com>
 Rodrigo Campos <rodrigo@kinvolk.io>
 Rolf Eike Beer <eb@emlix.com>
+Romain Geissler <romain.geissler@amadeus.com>
 Samanta Navarro <ferivoz@riseup.net>
 Sam James <sam@gentoo.org>
 Sascha Grunert <sgrunert@redhat.com>
@@ -66,6 +72,7 @@ Serge Hallyn <serge.hallyn@ubuntu.com>
 Stéphane Graber <stgraber@ubuntu.com>
 Stephen Coleman <omegacoleman@gmail.com>
 Thiago Marcos P. Santos <thiago.santos@intel.com>
+Thomas Bettler <thomas.bettler@gmail.com>
 Tobias Klauser <tklauser@distanz.ch>
 Tom Hromatka <tom.hromatka@oracle.com>
 Tudor Brindus <me@tbrindus.ca>
