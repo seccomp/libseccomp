@@ -1,0 +1,7 @@
+include seccomp.pyx
+include libseccomp.pxd
+include libseccomp.a
+include seccomp.h
+include seccomp-syscalls.h
+include seccomp-kvers.h
+include __init__.py
