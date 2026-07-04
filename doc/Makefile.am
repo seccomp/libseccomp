@@ -22,6 +22,7 @@ dist_man1_MANS = \
 dist_man3_MANS = \
 	man/man3/seccomp_arch_add.3 \
 	man/man3/seccomp_arch_exist.3 \
+	man/man3/seccomp_arch_name.3 \
 	man/man3/seccomp_arch_native.3 \
 	man/man3/seccomp_arch_remove.3 \
 	man/man3/seccomp_arch_resolve_name.3 \

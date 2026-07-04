@@ -2,7 +2,7 @@
 .\" //////////////////////////////////////////////////////////////////////////
 .SH NAME
 .\" //////////////////////////////////////////////////////////////////////////
-seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist, seccomp_arch_native \- Manage seccomp filter architectures
+seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist, seccomp_arch_native, seccomp_arch_resolve_name, seccomp_arch_name \- Manage seccomp filter architectures
 .\" //////////////////////////////////////////////////////////////////////////
 .SH SYNOPSIS
 .\" //////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,7 @@ seccomp_arch_add, seccomp_arch_remove, seccomp_arch_exist, seccomp_arch_native \
 .B #define SCMP_ARCH_RISCV64
 .sp
 .BI "uint32_t seccomp_arch_resolve_name(const char *" arch_name ");"
+.BI "const char *seccomp_arch_name(uint32_t " arch_token ");"
 .BI "uint32_t seccomp_arch_native();"
 .BI "int seccomp_arch_exist(const scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
 .BI "int seccomp_arch_add(scmp_filter_ctx " ctx ", uint32_t " arch_token ");"
@@ -75,6 +76,17 @@ function also returns a
 constant, the returned token matches the name of the architecture
 passed as an argument to the function.
 .P
+The
+.BR seccomp_arch_name ()
+function is the inverse of
+.BR seccomp_arch_resolve_name ():
+it takes an architecture token and returns the canonical architecture name
+string.  If the token is
+.BR SCMP_ARCH_NATIVE
+the name of the native architecture is returned.  The returned string is a
+static constant; the caller must not free it.  Returns NULL if the token is
+not recognized.
+.P
 When a seccomp filter is initialized with the call to
 .BR seccomp_init (3)
 the native architecture is automatically added to the filter.
@@ -89,6 +101,7 @@ new architecture will be added to all of the architectures in the filter.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH RETURN VALUE
 .\" //////////////////////////////////////////////////////////////////////////
+.P
 The
 .BR seccomp_arch_add (),
 .BR seccomp_arch_remove (),
@@ -112,6 +125,18 @@ Invalid input, either the context or architecture token is invalid.
 .TP
 .B -ENOMEM
 The library was unable to allocate enough memory.
+.P
+The
+.BR seccomp_arch_resolve_name ()
+and
+.BR seccomp_arch_native ()
+functions return an architecture token value greater than zero on success and
+zero on failure.
+.P
+The
+.BR seccomp_arch_name ()
+function returns a pointer to a static architecture name string on success and
+NULL if the architecture token is not recognized.
 .\" //////////////////////////////////////////////////////////////////////////
 .SH EXAMPLES
 .\" //////////////////////////////////////////////////////////////////////////

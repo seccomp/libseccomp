@@ -99,7 +99,8 @@ check_PROGRAMS = \
 	61-sim-transactions \
 	62-sim-arch_transactions \
 	63-live-notify_addfd \
-	64-live-trapx
+	64-live-trapx \
+	65-basic-arch_name
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -230,7 +231,8 @@ EXTRA_DIST_TESTCFGS = \
 	61-sim-transactions.tests \
 	62-sim-arch_transactions.tests \
 	63-live-notify_addfd.tests \
-	64-live-trapx.tests
+	64-live-trapx.tests \
+	65-basic-arch_name.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \

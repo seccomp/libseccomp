@@ -1,0 +1,10 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2025 Paul Moore <paul@paul-moore.com>
+#
+
+test type: basic
+
+# Test command
+65-basic-arch_name
