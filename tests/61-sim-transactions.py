@@ -30,6 +30,11 @@ from seccomp import *
 
 def test(args):
     f = SyscallFilter(ALLOW)
+
+    f.add_rule_exactly(KILL, 1000)
+    # Intentionally call reject before calling start
+    f.reject_transaction()
+
     f.start_transaction()
     f.add_rule_exactly(KILL, 1000)
     f.commit_transaction()

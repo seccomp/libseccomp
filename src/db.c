@@ -2531,6 +2531,9 @@ void db_col_transaction_abort(struct db_filter_col *col, bool user)
 	if (snap->shadow) {
 		struct db_filter_snap *tmp = snap;
 		snap = snap->next;
+		/* keep one shadow on the stack if we can */
+		if (snap == NULL)
+			return;
 		_db_snap_release(tmp);
 	}
 
