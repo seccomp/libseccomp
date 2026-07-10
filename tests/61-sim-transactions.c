@@ -41,6 +41,12 @@ int main(int argc, char *argv[])
 	if (ctx == NULL)
 		return ENOMEM;
 
+	rc = seccomp_rule_add_exact(ctx, SCMP_ACT_KILL, 1000, 0);
+	if (rc != 0)
+		goto out;
+	/* Intentionally call reject before calling start */
+	seccomp_transaction_reject(ctx);
+
 	rc = seccomp_transaction_start(ctx);
 	if (rc != 0)
 		goto out;
