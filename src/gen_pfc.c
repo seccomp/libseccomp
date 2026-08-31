@@ -480,7 +480,7 @@ arch_return:
  */
 int gen_pfc_generate(const struct db_filter_col *col, int fd)
 {
-	int newfd;
+	int newfd, rc = 0;
 	unsigned int iter;
 	FILE *fds;
 
@@ -508,8 +508,10 @@ int gen_pfc_generate(const struct db_filter_col *col, int fd)
 	fprintf(fds, "# pseudo filter code end\n");
 	fprintf(fds, "#\n");
 
-	fflush(fds);
-	fclose(fds);
+	if (fflush(fds) < 0)
+		rc = -errno;
+	if (fclose(fds) < 0 && rc == 0)
+		rc = -errno;
 
-	return 0;
+	return rc;
 }
