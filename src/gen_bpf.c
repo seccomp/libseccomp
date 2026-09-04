@@ -414,34 +414,6 @@ static struct bpf_blk *_blk_append(struct bpf_state *state,
 }
 
 /**
- * Prepend a new BPF instruction to an instruction block
- * @param state the BPF state
- * @param blk the existing instruction block, or NULL
- * @param instr the new instruction
- *
- * Add the new BPF instruction to the start of the given instruction block.
- * If the given instruction block is NULL, a new block will be allocated.
- * Returns a pointer to the block on success, NULL on failure, and in the case
- * of failure the instruction block is free'd.
- *
- */
-static struct bpf_blk *_blk_prepend(struct bpf_state *state,
-				    struct bpf_blk *blk,
-				    const struct bpf_instr *instr)
-{
-	/* empty - we can treat this like a normal append operation */
-	if (blk == NULL || blk->blk_cnt == 0)
-		return _blk_append(state, blk, instr);
-
-	if (_blk_resize(state, blk, 1) == NULL)
-		return NULL;
-	memmove(&blk->blks[1], &blk->blks[0], blk->blk_cnt++ * sizeof(*instr));
-	memcpy(&blk->blks[0], instr, sizeof(*instr));
-
-	return blk;
-}
-
-/**
  * Append a block of BPF instructions to the final BPF program
  * @param prg the BPF program
  * @param blk the BPF instruction block
@@ -579,16 +551,19 @@ static void _state_release(struct bpf_state *state)
  * Add an instruction block to the BPF state hash table
  * @param state the BPF state
  * @param blk_p pointer to the BPF instruction block
+ * @param bkt_p pointer to the associated hash bucket pointer
  * @param found initial found value (see _hsh_find_once() for description)
  *
- * This function adds an instruction block to the hash table, and frees the
- * block if an identical instruction block already exists, returning a pointer
- * to the original block in place of the given block.  Returns zero on success
- * and negative values on failure.
+ * This function adds an instruction block to the hash table.  If an identical
+ * block already exists, the block in @blk_p is freed and the existing block
+ * is returned in it's place.  In either case, the hash bucket associated with
+ * the block is returned via @bkt_p if @bkt_p is non-NULL.  Returns zero on
+ * success and negative values on failure.
  *
  */
-static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
-		    unsigned int found)
+static int _hsh_add_bkt(struct bpf_state *state, struct bpf_blk **blk_p,
+			struct bpf_hash_bkt **bkt_p,
+			unsigned int found)
 {
 	uint64_t h_val, h_val_tmp[3];
 	struct bpf_hash_bkt *h_new, *h_iter, *h_prev = NULL;
@@ -652,6 +627,8 @@ hsh_add_restart:
 				blk->flag_unique = false;
 
 				*blk_p = h_iter->blk;
+				if (bkt_p)
+					*bkt_p = h_iter;
 				return 0;
 			} else if (h_iter->blk->hash == h_val) {
 				/* hash collision */
@@ -677,7 +654,27 @@ hsh_add_restart:
 	} else
 		state->htbl[h_val & _BPF_HASH_MASK] = h_new;
 
+	if (bkt_p)
+		*bkt_p = h_new;
 	return 0;
+}
+
+/**
+ * Add an instruction block to the BPF state hash table
+ * @param state the BPF state
+ * @param blk_p pointer to the BPF instruction block
+ * @param found initial found value (see _hsh_find_once() for description)
+ *
+ * This function adds an instruction block to the hash table, and frees the
+ * block if an identical instruction block already exists, returning a pointer
+ * to the original block in place of the given block.  Returns zero on success
+ * and negative values on failure.
+ *
+ */
+static int _hsh_add(struct bpf_state *state, struct bpf_blk **blk_p,
+		    unsigned int found)
+{
+	return _hsh_add_bkt(state, blk_p, NULL, found);
 }
 
 /**
@@ -1999,6 +1996,108 @@ static int _gen_bpf_build_jmp(struct bpf_state *state,
 }
 
 /**
+ * Generate an accumulator reload instruction block if needed across jumps
+ * @param state the BPF state
+ * @param blk the originating instruction block
+ * @param blk_tgt the target instruction block
+ * @param blk_reload the new accumulator reload instruction block
+ *
+ * Check to see if the expected accumulator state for @blk_tgt is the same as
+ * at the end of @blk.  If the two expected states are different, add an
+ * explicit accumulator reload as an intermediate jump state between the two
+ * instruction blocks.  @blk_reload is set to the new accumulator reload
+ * instruction block if one is added, it is set to NULL otherwise.  Returns
+ * zero on success, negative values on error.
+ *
+ */
+static int _gen_bpf_acc_cond_reload(struct bpf_state *state,
+				    struct bpf_blk *blk,
+				    struct bpf_blk *blk_tgt,
+				    struct bpf_blk **blk_reload)
+{
+	struct bpf_instr instr;
+	struct bpf_blk *reload;
+	struct bpf_hash_bkt *bkt;
+
+	*blk_reload = NULL;
+
+	/* do we need to reload the accumulator? */
+	if ((blk_tgt->acc_start.offset != -1) &&
+	    !_ACC_CMP_EQ(blk->acc_end, blk_tgt->acc_start)) {
+		/* create a new instruction block for the acc reload */
+		reload = _blk_alloc();
+		if (!reload)
+			return -ENOMEM;
+
+		/* reload accumulator and apply a mask if needed */
+		_BPF_INSTR(instr,
+			   _BPF_OP(state->arch, BPF_LD + BPF_ABS),
+			   _BPF_JMP_NO,
+			   _BPF_JMP_NO,
+			   _BPF_K(state->arch, blk_tgt->acc_start.offset));
+		reload = _blk_append(state, reload, &instr);
+		if (!reload)
+			return -ENOMEM;
+		if (blk_tgt->acc_start.mask != ARG_MASK_MAX) {
+			_BPF_INSTR(instr,
+				   _BPF_OP(state->arch, BPF_ALU + BPF_AND),
+				   _BPF_JMP_NO,
+				   _BPF_JMP_NO,
+				   _BPF_K(state->arch, blk_tgt->acc_start.mask));
+			reload = _blk_append(state, reload, &instr);
+			if (reload == NULL)
+				return -ENOMEM;
+		}
+
+		/* XXX: we don't always need this jump (cases where the target
+		 *      block happens to fall immediately after the reload
+		 *      block, try to optimize this later, although it will
+		 *      need to happen at a higher level than this */
+
+		/* unconditionally jump to the target block */
+		_BPF_INSTR(instr,
+			   _BPF_OP(state->arch, BPF_JMP + BPF_JA),
+			   _BPF_JMP_NO,
+			   _BPF_JMP_NO,
+			   _BPF_JMP_HSH(blk_tgt->hash));
+		reload = _blk_append(state, reload, &instr);
+		if (!reload)
+			return -ENOMEM;
+
+		/* set acc state */
+		reload->acc_start = _ACC_STATE_UNDEF;
+		reload->acc_end = _ACC_STATE(blk_tgt->acc_start.offset,
+					     blk_tgt->acc_start.mask);
+
+		/* check for existing hash/block, add if missing */
+		if (_hsh_add_bkt(state, &reload, &bkt, 0) < 0) {
+			_blk_free(state, reload);
+			return -ENOMEM;
+		}
+
+		/* has the block been found yet? */
+		if (!bkt->found) {
+			/* add the reload block after blk */
+			reload->next = blk->next;
+			reload->prev = blk;
+			blk->next = reload;
+			if (reload->next)
+				reload->next->prev = reload;
+
+			/* reload is now "found" */
+			bkt->found = 1;
+		}
+
+		/* return the new reload instruction block */
+		*blk_reload = reload;
+
+		return 0;
+	}
+
+	return -ENOENT;
+}
+
+/**
  * Generate the BPF program for the given filter collection
  * @param state the BPF state
  * @param col the filter collection
@@ -2147,42 +2246,8 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 			if (b_jmp == NULL && i_iter->k.type == TGT_PTR_HSH)
 				b_jmp = _hsh_find_once(state,
 						       i_iter->k.tgt.hash);
+
 			if (b_jmp != NULL) {
-				/* do we need to reload the accumulator? */
-				if ((b_jmp->acc_start.offset != -1) &&
-				    !_ACC_CMP_EQ(b_iter->acc_end,
-						 b_jmp->acc_start)) {
-					if (b_jmp->acc_start.mask != ARG_MASK_MAX) {
-						_BPF_INSTR(instr,
-							   _BPF_OP(state->arch,
-								   BPF_ALU + BPF_AND),
-							   _BPF_JMP_NO,
-							   _BPF_JMP_NO,
-							   _BPF_K(state->arch,
-								  b_jmp->acc_start.mask));
-						b_jmp = _blk_prepend(state,
-								     b_jmp,
-								     &instr);
-						if (b_jmp == NULL) {
-							rc = -EFAULT;
-							goto state_reset;
-						}
-					}
-					_BPF_INSTR(instr,
-						   _BPF_OP(state->arch,
-							   BPF_LD + BPF_ABS),
-						   _BPF_JMP_NO, _BPF_JMP_NO,
-						   _BPF_K(state->arch,
-							  b_jmp->acc_start.offset));
-					b_jmp = _blk_prepend(state,
-							     b_jmp, &instr);
-					if (b_jmp == NULL) {
-						rc = -EFAULT;
-						goto state_reset;
-					}
-					/* not reliant on the accumulator */
-					b_jmp->acc_start = _ACC_STATE_UNDEF;
-				}
 				/* insert the new block after this block */
 				b_jmp->prev = b_iter;
 				b_jmp->next = b_iter->next;
@@ -2200,9 +2265,61 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 	} while (b_iter != NULL);
 
 
-	/* NOTE - from here to the end of the function we need to fail via the
-	 *	  the build_bpf_free_blks label, not just return an error; see
-	 *	  the _gen_bpf_build_jmp() function for details */
+	/* NOTE: 1) from here to the end of the function we need to fail via
+	 *       the build_bpf_free_blks label, not just return an error; see
+	 *       the _gen_bpf_build_jmp() function for details
+	 *
+	 *       2) at this point the only jumps between instruction blocks
+	 *       should be TGT_PTR_HSH jumps so we *can* add blocks between
+	 *       others so long as we don't update hash values */
+
+	b_iter = b_tail;
+	do {
+		for (iter = b_iter->blk_cnt - 1; iter >= 0; iter--) {
+			i_iter = &b_iter->blks[iter];
+			switch (i_iter->jt.type) {
+			case TGT_NONE:
+			case TGT_IMM:
+				break;
+			case TGT_PTR_HSH:
+				b_jmp = _hsh_find(state, i_iter->jt.tgt.hash);
+				if (!b_jmp) {
+					rc = -EFAULT;
+					goto build_bpf_free_blks;
+				}
+				rc = _gen_bpf_acc_cond_reload(state, b_iter,
+							      b_jmp, &b_new);
+				if (rc == 0)
+					i_iter->jt.tgt.hash = b_new->hash;
+				else if (rc < 0 && rc != -ENOENT)
+					goto build_bpf_free_blks;
+				break;
+			default:
+				break;
+			}
+			switch (i_iter->jf.type) {
+			case TGT_NONE:
+			case TGT_IMM:
+				break;
+			case TGT_PTR_HSH:
+				b_jmp = _hsh_find(state, i_iter->jf.tgt.hash);
+				if (!b_jmp) {
+					rc = -EFAULT;
+					goto build_bpf_free_blks;
+				}
+				rc = _gen_bpf_acc_cond_reload(state, b_iter,
+							      b_jmp, &b_new);
+				if (rc == 0)
+					i_iter->jf.tgt.hash = b_new->hash;
+				else if (rc < 0 && rc != -ENOENT)
+					goto build_bpf_free_blks;
+				break;
+			default:
+				break;
+			}
+		}
+		b_iter = b_iter->prev;
+	} while (b_iter != NULL);
 
 	/* check for long jumps and insert if necessary, we also verify that
 	 * all our jump targets are valid at this point in the process */
