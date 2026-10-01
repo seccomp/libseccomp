@@ -1583,7 +1583,7 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 			     unsigned int *blks_added, uint32_t optimize,
 			     unsigned int *bintree_levels)
 {
-	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter;
+	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter, *s_first = NULL;
 	unsigned int syscall_cnt, empty_cnt = 0;
 	uint64_t *bintree_hashes = NULL, nxt_hsh;
 	unsigned int *bintree_syscalls = NULL;
@@ -1623,6 +1623,18 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 		 */
 		acc_reset = false;
 
+	/* the first syscall in the filter loads the syscall number for the
+	 * ones that follow, so it must be the first syscall that is not
+	 * omitted below; the head of the sorted list may be a pseudo-syscall
+	 * or an entry that only carries a priority, and if we used it, no
+	 * syscall would load the number */
+	for (s_iter = s_head; s_iter != NULL; s_iter = s_iter->pri_nxt) {
+		if (!_skip_syscall(state, s_iter)) {
+			s_first = s_iter;
+			break;
+		}
+	}
+
 	syscall_cnt = 0;
 
 	/* create the syscall filters and add them to block list group */
@@ -1641,7 +1653,7 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 
 		/* build the syscall filter */
 		state->b_new = _gen_bpf_syscall(state, s_iter, nxt_hsh,
-						(s_iter == s_head ?
+						(s_iter == s_first ?
 						 acc_reset : false));
 		if (state->b_new == NULL)
 			goto out;

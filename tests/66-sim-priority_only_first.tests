@@ -1,0 +1,29 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2026 Sascha Grunert <sgrunert@redhat.com>
+# Author: Sascha Grunert <sgrunert@redhat.com>
+#
+
+test type: bpf-sim
+
+# Testname			Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+66-sim-priority_only_first	+x86	read	1	N	N	N	N	N	KILL
+66-sim-priority_only_first	+x86	read	0	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+x86	read	2-10	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+x86	write	1	N	N	N	N	N	KILL
+66-sim-priority_only_first	+x86	write	0	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+x86	getpid	N	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+x86	open	1	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+aarch64	read	1	N	N	N	N	N	KILL
+66-sim-priority_only_first	+aarch64	read	0	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+aarch64	read	2-10	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+aarch64	write	1	N	N	N	N	N	KILL
+66-sim-priority_only_first	+aarch64	write	0	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+aarch64	getpid	N	N	N	N	N	N	ALLOW
+66-sim-priority_only_first	+aarch64	openat	1	N	N	N	N	N	ALLOW
+
+test type: bpf-valgrind
+
+# Testname
+66-sim-priority_only_first
