@@ -1581,7 +1581,7 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 			     unsigned int *bintree_levels)
 {
 	struct db_sys_list *s_head = NULL, *s_tail = NULL, *s_iter;
-	unsigned int syscall_cnt, empty_cnt = 0;
+	unsigned int syscall_cnt, max_cnt, empty_cnt = 0;
 	uint64_t *bintree_hashes = NULL, nxt_hsh;
 	unsigned int *bintree_syscalls = NULL;
 	bool acc_reset;
@@ -1599,11 +1599,10 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 	if (db_secondary != NULL)
 		_sys_sort(db_secondary->syscalls, &s_head, &s_tail, optimize);
 
+	max_cnt = _get_syscall_cnt(state, s_tail);
 	if (optimize == 2) {
-		syscall_cnt = _get_syscall_cnt(state, s_tail);
 		rc = _gen_bpf_init_bintree(&bintree_hashes, &bintree_syscalls,
-					   bintree_levels, syscall_cnt,
-					   &empty_cnt);
+					   bintree_levels, max_cnt, &empty_cnt);
 		if (rc < 0)
 			goto out;
 	}
@@ -1638,7 +1637,7 @@ static int _gen_bpf_syscalls(struct bpf_state *state,
 
 		/* build the syscall filter */
 		state->b_new = _gen_bpf_syscall(state, s_iter, nxt_hsh,
-						(s_iter == s_head ?
+						(syscall_cnt == (max_cnt - 1) ?
 						 acc_reset : false));
 		if (state->b_new == NULL)
 			goto out;
