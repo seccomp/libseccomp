@@ -167,6 +167,11 @@ cdef extern from "seccomp.h":
         SCMP_KV_6_15
         SCMP_KV_6_16
         SCMP_KV_6_17
+        SCMP_KV_6_18
+        SCMP_KV_6_19
+        SCMP_KV_7_0
+        SCMP_KV_7_1
+        SCMP_KV_7_2
 
     ctypedef uint64_t scmp_datum_t
 

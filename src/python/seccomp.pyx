@@ -1368,6 +1368,11 @@ cdef class Kver:
     v6_15 = libseccomp.SCMP_KV_6_15
     v6_16 = libseccomp.SCMP_KV_6_16
     v6_17 = libseccomp.SCMP_KV_6_17
+    v6_18 = libseccomp.SCMP_KV_6_18
+    v6_19 = libseccomp.SCMP_KV_6_19
+    v7_0 = libseccomp.SCMP_KV_7_0
+    v7_1 = libseccomp.SCMP_KV_7_1
+    v7_2 = libseccomp.SCMP_KV_7_2
 
 # kate: syntax python;
 # kate: indent-mode python; space-indent on; indent-width 4; mixedindent off;
