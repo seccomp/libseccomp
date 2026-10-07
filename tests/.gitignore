@@ -74,3 +74,4 @@ util.pyc
 64-live-trapx
 65-sim-db_tree_args
 66-sim-acc_reload
+67-sim-arch_syscall_load
