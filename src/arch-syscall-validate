@@ -163,6 +163,19 @@ function mangle_lib_syscall() {
 }
 
 #
+# Get the syscall ABIs enabled by the given Makefile.syscalls file
+#
+# Arguments:
+#     1    path to the arch/<arch>/kernel/Makefile.syscalls file
+#     2    the ABI bitness (32 or 64)
+#
+#  Print the additional syscall.tbl tags enabled for the architecture.
+#
+function syscall_abis() {
+	sed -n "s/^syscall_abis_$2[[:space:]]*+=//p" "$1"
+}
+
+#
 # Dump syscalls matching specified tags from the given syscall.tbl file
 #
 # Arguments:
@@ -289,8 +302,8 @@ function dump_lib_arm() {
 function dump_sys_aarch64() {
 	local syscall_tbl_file="$1/arch/arm64/tools/syscall_64.tbl"
 	if [[ -e $syscall_tbl_file ]]; then
-		dump_from_syscall_tbl "$syscall_tbl_file" \
-			64 renameat rlimit memfd_secret
+		dump_from_syscall_tbl "$syscall_tbl_file" 64 \
+			$(syscall_abis "$1/arch/arm64/kernel/Makefile.syscalls" 64)
 		return
 	fi
 
@@ -339,8 +352,10 @@ function dump_lib_aarch64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_loongarch64() {
-	if [[ -e $1/arch/loongarch/kernel/Makefile.syscalls ]]; then
-		dump_from_syscall_tbl "$1/scripts/syscall.tbl" 64
+	local makefile_syscalls="$1/arch/loongarch/kernel/Makefile.syscalls"
+	if [[ -e $makefile_syscalls ]]; then
+		dump_from_syscall_tbl "$1/scripts/syscall.tbl" 64 \
+			$(syscall_abis "$makefile_syscalls" 64)
 		return
 	fi
 
@@ -555,9 +570,10 @@ function dump_lib_ppc64() {
 #  Dump the architecture's syscall table to stdout.
 #
 function dump_sys_riscv64() {
-	if [[ -e $1/arch/riscv/kernel/Makefile.syscalls ]]; then
-		dump_from_syscall_tbl "$1/scripts/syscall.tbl" \
-			64 riscv rlimit memfd_secret
+	local makefile_syscalls="$1/arch/riscv/kernel/Makefile.syscalls"
+	if [[ -e $makefile_syscalls ]]; then
+		dump_from_syscall_tbl "$1/scripts/syscall.tbl" 64 \
+			$(syscall_abis "$makefile_syscalls" 64)
 		return
 	fi
 
