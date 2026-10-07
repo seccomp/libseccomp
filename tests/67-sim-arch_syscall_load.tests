@@ -1,0 +1,22 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2026 Microsoft Corporation <paulmoore@microsoft.com>
+# Author: Paul Moore <paul@paul-moore.com>
+#
+
+test type: bpf-sim
+
+# Testname			Arch	Syscall	Arg0	Arg1	Arg2	Arg3	Arg4	Arg5	Result
+67-sim-arch_syscall_load	+x86_64	read	N	N	N	N	N	N	ALLOW
+67-sim-arch_syscall_load	+x86_64	getppid	7	N	N	N	N	N	ERRNO(3999)
+
+test type: bpf-sim-fuzz
+
+# Testname			StressCount
+67-sim-arch_syscall_load	5
+
+test type: bpf-valgrind
+
+# Testname
+67-sim-arch_syscall_load
