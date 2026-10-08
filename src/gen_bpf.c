@@ -2030,32 +2030,44 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 
 	/* generate the badarch action */
 	b_badarch = _gen_bpf_action(state, NULL, state->attr->act_badarch);
-	if (b_badarch == NULL)
+	if (b_badarch == NULL) {
+		state->arch = NULL;
 		return -ENOMEM;
+	}
 	rc = _hsh_add(state, &b_badarch, 1);
-	if (rc < 0)
+	if (rc < 0) {
+		state->arch = NULL;
 		return rc;
+	}
 	state->bad_arch_hsh = b_badarch->hash;
 
 	/* generate the default action */
 	b_default = _gen_bpf_action(state, NULL, state->attr->act_default);
-	if (b_default == NULL)
+	if (b_default == NULL) {
+		state->arch = NULL;
 		return -ENOMEM;
+	}
 	rc = _hsh_add(state, &b_default, 0);
-	if (rc < 0)
+	if (rc < 0) {
+		state->arch = NULL;
 		return rc;
+	}
 	state->def_hsh = b_default->hash;
 
 	/* load the architecture token/number */
 	_BPF_INSTR(instr, _BPF_OP(state->arch, BPF_LD + BPF_ABS),
 		   _BPF_JMP_NO, _BPF_JMP_NO, _BPF_ARCH(state->arch));
 	b_head = _blk_append(state, NULL, &instr);
-	if (b_head == NULL)
+	if (b_head == NULL) {
+		state->arch = NULL;
 		return -ENOMEM;
+	}
 	b_head->acc_end = _ACC_STATE_OFFSET(_BPF_OFFSET_ARCH);
 	rc = _hsh_add(state, &b_head, 1);
-	if (rc < 0)
+	if (rc < 0) {
+		state->arch = NULL;
 		return rc;
+	}
 	b_tail = b_head;
 
 	/* generate the per-architecture filters */
