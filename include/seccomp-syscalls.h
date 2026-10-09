@@ -286,6 +286,7 @@
 #define __PNR_listns				-10252
 #define __PNR_rseq_slice_yield			-10253
 #define __PNR_uprobe				-10254
+#define __PNR_open_tree_attr			-10255
 
 /*
  * libseccomp syscall definitions
@@ -1369,7 +1370,11 @@
 #define __SNR_open_tree			__PNR_open_tree
 #endif
 
+#ifdef __NR_open_tree_attr
 #define __SNR_open_tree_attr		__NR_open_tree_attr
+#else
+#define __SNR_open_tree_attr		__PNR_open_tree_attr
+#endif
 
 #define __SNR_openat			__NR_openat
 
