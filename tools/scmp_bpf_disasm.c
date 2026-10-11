@@ -46,7 +46,7 @@
  */
 static void exit_usage(const char *program)
 {
-	fprintf(stderr, "usage: %s -a <arch> [-d] [-h]\n", program);
+	fprintf(stderr, "usage: %s -a <arch> [-d] [-h] [bpf_file]\n", program);
 	exit(EINVAL);
 }
 
@@ -522,8 +522,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if ((optind > 1) && (optind < argc)) {
-		int opt_file = optind - 1 ;
+	if (optind < argc) {
+		int opt_file = optind;
 		file = fopen(argv[opt_file], "r");
 		if (file == NULL) {
 			fprintf(stderr, "error: unable to open \"%s\" (%s)\n",
