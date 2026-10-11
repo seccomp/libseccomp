@@ -49,7 +49,8 @@ SOURCES_ALL = \
 
 EXTRA_DIST = \
 	arch-syscall-validate arch-syscall-check \
-	arch-gperf-generate syscalls.csv syscalls.perf.template
+	arch-gperf-generate syscalls.csv syscalls.perf.template \
+	libseccomp.map
 
 TESTS = arch-syscall-check
 
@@ -65,6 +66,7 @@ libseccomp_la_CFLAGS = ${AM_CFLAGS} ${CODE_COVERAGE_CFLAGS} ${CFLAGS} \
 	-fPIC -DPIC -fvisibility=hidden
 libseccomp_la_LDFLAGS = ${AM_LDFLAGS} ${CODE_COVERAGE_LDFLAGS} ${LDFLAGS} \
 	-version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
+libseccomp_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libseccomp.map
 
 EXTRA_DIST += syscalls.perf.c syscalls.perf
 CLEANFILES = syscalls.perf.c syscalls.perf

@@ -1,0 +1,44 @@
+/* Avoid modifying a symbol set after it has been released
+   When adding features in a new release, add a new set
+   Removing features is a breaking change */
+LIBSECCOMP_2.7 {
+  global:
+    seccomp_api_get;
+    seccomp_api_set;
+    seccomp_arch_add;
+    seccomp_arch_exist;
+    seccomp_arch_native;
+    seccomp_arch_remove;
+    seccomp_arch_resolve_name;
+    seccomp_attr_get;
+    seccomp_attr_set;
+    seccomp_export_bpf;
+    seccomp_export_bpf_mem;
+    seccomp_export_pfc;
+    seccomp_init;
+    seccomp_load;
+    seccomp_merge;
+    seccomp_notify_alloc;
+    seccomp_notify_addfd;
+    seccomp_notify_fd;
+    seccomp_notify_free;
+    seccomp_notify_id_valid;
+    seccomp_notify_receive;
+    seccomp_notify_respond;
+    seccomp_precompute;
+    seccomp_release;
+    seccomp_reset;
+    seccomp_rule_add;
+    seccomp_rule_add_array;
+    seccomp_rule_add_exact;
+    seccomp_rule_add_exact_array;
+    seccomp_syscall_priority;
+    seccomp_syscall_resolve_name;
+    seccomp_syscall_resolve_name_arch;
+    seccomp_syscall_resolve_name_rewrite;
+    seccomp_syscall_resolve_num_arch;
+    seccomp_transaction_commit;
+    seccomp_transaction_reject;
+    seccomp_transaction_start;
+    seccomp_version;
+};
