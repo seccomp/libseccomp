@@ -20,13 +20,14 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include <seccomp.h>
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	int fd, rc;
 	scmp_filter_ctx ctx;
 	uint32_t attr;
 	unsigned int api;
@@ -158,6 +159,16 @@ int main(int argc, char *argv[])
 	else {
 		rc = seccomp_export_pfc(ctx, sysconf(_SC_OPEN_MAX) - 1);
 		if (rc != -ECANCELED)
+			return -1;
+		rc = seccomp_attr_set(ctx, SCMP_FLTATR_API_SYSRAWRC, 1);
+		if (rc != 0)
+			return -1;
+		fd = open("/dev/full", O_WRONLY);
+		if (fd < 0)
+			return -1;
+		rc = seccomp_export_pfc(ctx, fd);
+		close(fd);
+		if (rc != -ENOSPC)
 			return -1;
 	}
 	seccomp_release(ctx);
