@@ -1,2 +1,9 @@
-build
+build/
+dist/
+libseccomp.a
 seccomp.c
+seccomp.h
+seccomp-syscalls.h
+seccomp.egg-info/
+setup.py
+wheelhouse/
