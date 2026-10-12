@@ -131,6 +131,39 @@ macros and use the variants which are explicitly 32 or 64-bit.  This should
 help eliminate problems caused by an unwanted sign extension of negative datum
 values.
 .P
+Note that none of the variants, 32-bit or 64-bit, ignore the upper 32 bits of
+a syscall argument.  The 32-bit variants only truncate the mask and datum
+values, and all of the generated comparisons are still performed against the
+full 64-bit syscall argument as seen by the kernel.  Many syscall arguments are
+declared as 32-bit types (e.g. the
+.I domain
+argument of
+.BR socket (2)),
+and the kernel ignores the upper 32 bits of such arguments.  The upper 32 bits
+of the register are nevertheless not guaranteed to be zero, and a caller can set
+them to arbitrary values.  A rule such as
+.sp
+SCMP_A0(SCMP_CMP_EQ, AF_NETLINK)
+.sp
+(or the equivalent
+.BR SCMP_A0_64 ()
+or
+.BR SCMP_A0_32 ()
+forms) will therefore not match
+.BR socket (2)
+being called with 0x100000000|AF_NETLINK, which the kernel treats the same as
+AF_NETLINK, and a filter relying on it to deny the syscall can be bypassed.
+When filtering on an argument that is a 32-bit type in the kernel,
+use
+.B SCMP_CMP_MASKED_EQ
+with a mask of 0xffffffff instead of
+.BR SCMP_CMP_EQ ,
+example:
+.sp
+SCMP_CMP32(0, SCMP_CMP_MASKED_EQ, 0xffffffff, AF_NETLINK)
+.sp
+The same consideration applies to the other comparison operators.
+.P
 If syscall argument comparisons are included in the filter rule, all of the
 comparisons must be true for the rule to match.
 .P
