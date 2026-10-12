@@ -273,6 +273,12 @@ struct scmp_arg_cmp {
 
 /**
  * Specify a 32-bit argument comparison struct for use in declaring rules
+ *
+ * Note that this only truncates the datum values; the comparison is still done
+ * against the full 64-bit argument, as with SCMP_CMP64.  To ignore the upper 32
+ * bits of an argument the kernel treats as 32-bit, use SCMP_CMP_MASKED_EQ with
+ * a mask of 0xffffffff.
+ *
  * @param arg the argument number, starting at 0
  * @param op the comparison operator, e.g. SCMP_CMP_*
  * @param datum_a dependent on comparison (32-bits)
