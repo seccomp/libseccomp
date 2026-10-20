@@ -22,6 +22,7 @@
 #
 
 import argparse
+import errno
 import sys
 
 import util
@@ -72,6 +73,33 @@ def test():
         f.add_rule(KILL, -1001)
     except RuntimeError:
         pass
+
+    # Conflicting unconditional and conditional rules must not be silently
+    # discarded.
+    f = SyscallFilter(ERRNO(errno.EPERM))
+    f.add_rule(KILL, "getpid", Arg(0, EQ, 1))
+    try:
+        f.add_rule(ALLOW, "getpid")
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("expected conflicting rule to fail")
+    f.add_rule(KILL, "getpid")
+
+    f = SyscallFilter(ERRNO(errno.EPERM))
+    f.add_rule(ALLOW, "getpid")
+    try:
+        f.add_rule(KILL, "getpid", Arg(0, EQ, 1))
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("expected conflicting rule to fail")
+    try:
+        f.add_rule(KILL, "getpid")
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("expected conflicting rule to fail")
 
     f = SyscallFilter(ALLOW)
     f.remove_arch(Arch())

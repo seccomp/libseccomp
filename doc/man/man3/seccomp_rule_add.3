@@ -99,6 +99,13 @@ argument values and later a rule is added which allows the same syscall
 regardless the argument values then the first, more specific rule, is
 effectively dropped from the filter by the second more generic rule.
 .P
+When an unconditional rule conflicts with an existing rule for the same
+system call, because their actions differ, the new rule is rejected with
+.B -EEXIST
+instead of silently discarding either rule.  This applies whether the
+unconditional rule is added before or after the conditional rule.  A second
+unconditional rule with a different action is also rejected.
+.P
 The
 .BR SCMP_CMP (),
 .BR SCMP_CMP64 (),
@@ -336,7 +343,7 @@ failure:
 Architecture specific failure.
 .TP
 .B -EEXIST
-The rule already exists.
+The rule conflicts with an existing rule.
 .TP
 .B -EACCES
 The rule conflicts with the filter (for example, the rule

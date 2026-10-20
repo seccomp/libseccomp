@@ -117,6 +117,40 @@ int main(int argc, char *argv[])
 	seccomp_release(ctx);
 	ctx = NULL;
 
+	/* seccomp_rule_add conflicting actions */
+	ctx = seccomp_init(SCMP_ACT_ERRNO(EPERM));
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(getpid), 1,
+			      SCMP_A0(SCMP_CMP_EQ, 1));
+	if (rc != 0)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
+	if (rc != -EEXIST)
+		return -1;
+	/* A same-action unconditional rule can still subsume the conditional. */
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(getpid), 0);
+	if (rc != 0)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
+	ctx = seccomp_init(SCMP_ACT_ERRNO(EPERM));
+	if (ctx == NULL)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
+	if (rc != 0)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(getpid), 1,
+			      SCMP_A0(SCMP_CMP_EQ, 1));
+	if (rc != -EEXIST)
+		return -1;
+	rc = seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(getpid), 0);
+	if (rc != -EEXIST)
+		return -1;
+	seccomp_release(ctx);
+	ctx = NULL;
+
 	/* seccomp_rule_add_exact error */
 	ctx = seccomp_init(SCMP_ACT_ALLOW);
 	if (ctx == NULL)
