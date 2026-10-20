@@ -2144,6 +2144,11 @@ add_reset:
 			/* syscall exists without any chains - existing filter
 			 * is at least as large as the new entry so cleanup and
 			 * exit */
+			/* Do not silently discard a rule with a different action. */
+			if (s_iter->action != rule->action) {
+				rc = -EEXIST;
+				goto add_failure;
+			}
 			_db_tree_put(&s_new->chains);
 			free(s_new);
 			goto add_free_ok;
@@ -2151,6 +2156,10 @@ add_reset:
 	} else if (s_iter->chains != NULL && s_new->chains == NULL) {
 		/* syscall exists with chains but the new filter has no chains
 		 * so we need to clear the existing chains and exit */
+		/* Keep the existing conditional rules if an action conflicts. */
+		rc = _db_tree_act_check(s_iter->chains, rule->action);
+		if (rc < 0)
+			goto add_failure;
 		_db_tree_put(&s_iter->chains);
 		s_iter->chains = NULL;
 		s_iter->node_cnt = 0;
