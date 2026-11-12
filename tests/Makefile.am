@@ -98,7 +98,8 @@ check_PROGRAMS = \
 	60-sim-precompute \
 	61-sim-transactions \
 	62-sim-arch_transactions \
-	65-sim-db_tree_args
+	65-sim-db_tree_args \
+	66-sim-acc_reload
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -162,7 +163,8 @@ EXTRA_DIST_TESTPYTHON = \
 	60-sim-precompute.py \
 	61-sim-transactions.py \
 	62-sim-arch_transactions.py \
-	65-sim-db_tree_args.py
+	65-sim-db_tree_args.py \
+	66-sim-acc_reload.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -227,7 +229,8 @@ EXTRA_DIST_TESTCFGS = \
 	60-sim-precompute.tests \
 	61-sim-transactions.tests \
 	62-sim-arch_transactions.tests \
-	65-sim-db_tree_args.tests
+	65-sim-db_tree_args.tests \
+	66-sim-acc_reload.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \

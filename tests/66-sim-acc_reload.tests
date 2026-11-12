@@ -1,0 +1,43 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2026 Microsoft Corporation <paulmoore@microsoft.com>
+# Copyright (c) 2026 Oracle and/or its affiliates.
+# Author: Paul Moore <paul@paul-moore.com>
+# Author: Tom Hromatka (Oracle) <tom.hromatka@gmail.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0			Arg1	Arg2	Arg3	Arg4	Arg5	Result
+66-sim-acc_reload	all_64	getppid	1			N	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	getppid	5			N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	getppid	6			N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	getppid	0x100000004		N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	getppid	0x2ffffffff		N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	getppid	0x300000000		N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	getppid	0x300000001		N	N	N	N	N	ALLOW
+
+66-sim-acc_reload	all_64	read	0x0000000100000001	N	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	read	0x0000000200000002	N	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	read	0x0000010101010101	N	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	read	0x0000010201010102	N	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	read	0x0000000200000001	N	N	N	N	N	KILL
+66-sim-acc_reload	all_64	read	0x0000000100000002	N	N	N	N	N	KILL
+
+66-sim-acc_reload	all_64	write	4			4	N	N	N	N	ALLOW
+66-sim-acc_reload	all_64	write	4			5	N	N	N	N	KILL
+66-sim-acc_reload	all_64	write	5			4	N	N	N	N	KILL
+66-sim-acc_reload	all_64	write	0x100000004		4	N	N	N	N	KILL
+66-sim-acc_reload	all_64	write	0x300000000		4	N	N	N	N	KILL
+66-sim-acc_reload	all_64	write	0x300000001		4	N	N	N	N	ALLOW
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+66-sim-acc_reload	5
+
+test type: bpf-valgrind
+
+# Testname
+66-sim-acc_reload
