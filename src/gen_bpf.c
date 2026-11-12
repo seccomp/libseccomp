@@ -2049,10 +2049,12 @@ static int _gen_bpf_acc_cond_reload(struct bpf_state *state,
 				return -ENOMEM;
 		}
 
-		/* XXX: we don't always need this jump (cases where the target
-		 *      block happens to fall immediately after the reload
-		 *      block, try to optimize this later, although it will
-		 *      need to happen at a higher level than this */
+		/* in some cases the jump below is unnecessary as we are simply
+		 * jumping to next instruction block and can safely fall
+		 * through, unfortunately we don't know that until the final
+		 * stages of the bpf filter generation so go ahead and add the
+		 * jump now and if we can, we'll drop it later during the
+		 * final stages of filter generation */
 
 		/* unconditionally jump to the target block */
 		_BPF_INSTR(instr,
@@ -2365,8 +2367,32 @@ static int _gen_bpf_build_bpf(struct bpf_state *state,
 				goto build_bpf_free_blks;
 			}
 		}
-		if (res_cnt == 0)
+		if (res_cnt == 0) {
+			/* if the last instruction in the block is jumping to
+			 * the start of the next block, we can safely drop the
+			 * jump and fall through at this point in the filter
+			 * generation process
+			 *
+			 * additional notes:
+			 * 1) see the note in _gen_bpf_acc_cond_reload() for
+			 * more info on why this needs to be done here
+			 * 2) we should never see a JMP+JA as the last
+			 * instruction in a filter so we don't have to work
+			 * about the ->next->hash deref below
+			 * 3) there is a potential that removing this explicit
+			 * jump might mean we no longer need a long jump that
+			 * we just inserted, but the odds of that happening
+			 * are extremely slim and even when it does occur we
+			 * only add one additional, harmless bpf instruction
+			 * to the filter */
+			i_iter = &b_iter->blks[b_iter->blk_cnt - 1];
+			if ((i_iter->op == _BPF_OP(state->arch,
+						   BPF_JMP + BPF_JA)) &&
+			    (i_iter->k.type == TGT_PTR_HSH) &&
+			    (i_iter->k.tgt.hash == b_iter->next->hash))
+				b_iter->blk_cnt--;
 			b_iter = b_iter->prev;
+		}
 	} while (b_iter != NULL);
 
 	/* build the bpf program */
