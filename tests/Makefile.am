@@ -100,7 +100,8 @@ check_PROGRAMS = \
 	62-sim-arch_transactions \
 	63-live-notify_addfd \
 	64-live-trapx \
-	65-sim-db_tree_args
+	65-sim-db_tree_args \
+	66-sim-acc_reload
 
 EXTRA_DIST_TESTPYTHON = \
 	util.py \
@@ -166,7 +167,8 @@ EXTRA_DIST_TESTPYTHON = \
 	62-sim-arch_transactions.py \
 	63-live-notify_addfd.py \
 	64-live-trapx.py \
-	65-sim-db_tree_args.py
+	65-sim-db_tree_args.py \
+	66-sim-acc_reload.py
 
 EXTRA_DIST_TESTCFGS = \
 	01-sim-allow.tests \
@@ -233,7 +235,8 @@ EXTRA_DIST_TESTCFGS = \
 	62-sim-arch_transactions.tests \
 	63-live-notify_addfd.tests \
 	64-live-trapx.tests \
-	65-sim-db_tree_args.tests
+	65-sim-db_tree_args.tests \
+	66-sim-acc_reload.tests
 
 EXTRA_DIST_TESTSCRIPTS = \
 	38-basic-pfc_coverage.sh 38-basic-pfc_coverage.pfc \
