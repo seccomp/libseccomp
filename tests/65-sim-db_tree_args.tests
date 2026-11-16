@@ -1,0 +1,29 @@
+#
+# libseccomp regression test automation data
+#
+# Copyright (c) 2026 Oracle and/or its affiliates.
+# Author: Tom Hromatka (Oracle) <tom.hromatka@gmail.com>
+#
+
+test type: bpf-sim
+
+# Testname		Arch	Syscall	Arg0		Arg1	Arg2	Arg3	Arg4	Arg5	Result
+65-sim-db_tree_args	all	getppid	6		7	0	N	N	N	ALLOW
+65-sim-db_tree_args	all	getppid	6		0	9	N	N	N	ALLOW
+65-sim-db_tree_args	all	getppid	6		7	9	N	N	N	ALLOW
+65-sim-db_tree_args	all	getppid	6		8	8	N	N	N	KILL
+65-sim-db_tree_args	all	getppid	5		7	9	N	N	N	KILL
+65-sim-db_tree_args	all	getppid	0		7	9	N	N	N	KILL
+65-sim-db_tree_args	all_64	getppid	0x200000000	7	0	N	N	N	ALLOW
+65-sim-db_tree_args	all_64	getppid	0x200000000	0	9	N	N	N	ALLOW
+65-sim-db_tree_args	all_64	getppid	0x200000000	8	8	N	N	N	KILL
+
+test type: bpf-sim-fuzz
+
+# Testname		StressCount
+65-sim-db_tree_args	5
+
+test type: bpf-valgrind
+
+# Testname
+65-sim-db_tree_args
