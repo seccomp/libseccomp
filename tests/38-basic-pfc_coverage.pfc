@@ -18,7 +18,35 @@ if ($arch == 3221225534)
   # filter for syscall "open" (2) [priority: 65535]
   if ($syscall == 2)
     action KILL;
-  # filter for syscall "write" (1) [priority: 65527]
+  # filter for syscall "read" (0) [priority: 65516]
+  if ($syscall == 0)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (1) [priority: 65515]
   if ($syscall == 1)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -68,34 +96,6 @@ if ($arch == 3221225534)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (0) [priority: 65525]
-  if ($syscall == 0)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # filter for arch x86 (1073741827)
@@ -220,7 +220,35 @@ if ($arch == 3221225655)
   # filter for syscall "close" (57) [priority: 65535]
   if ($syscall == 57)
     action ERRNO(1);
-  # filter for syscall "write" (64) [priority: 65527]
+  # filter for syscall "read" (63) [priority: 65516]
+  if ($syscall == 63)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (64) [priority: 65515]
   if ($syscall == 64)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -270,34 +298,6 @@ if ($arch == 3221225655)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (63) [priority: 65525]
-  if ($syscall == 63)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # filter for arch loongarch64 (3221225730)
@@ -317,7 +317,35 @@ if ($arch == 3221225730)
   # filter for syscall "close" (57) [priority: 65535]
   if ($syscall == 57)
     action ERRNO(1);
-  # filter for syscall "write" (64) [priority: 65527]
+  # filter for syscall "read" (63) [priority: 65516]
+  if ($syscall == 63)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (64) [priority: 65515]
   if ($syscall == 64)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -367,34 +395,6 @@ if ($arch == 3221225730)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (63) [priority: 65525]
-  if ($syscall == 63)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # filter for arch mipsel (1073741832)
@@ -449,7 +449,35 @@ if ($arch == 3221225480)
   # filter for syscall "open" (5002) [priority: 65535]
   if ($syscall == 5002)
     action KILL;
-  # filter for syscall "write" (5001) [priority: 65527]
+  # filter for syscall "read" (5000) [priority: 65516]
+  if ($syscall == 5000)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (5001) [priority: 65515]
   if ($syscall == 5001)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -499,34 +527,6 @@ if ($arch == 3221225480)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (5000) [priority: 65525]
-  if ($syscall == 5000)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # filter for arch mipsel64n32 (3758096392)
@@ -581,7 +581,35 @@ if ($arch == 3221225493)
   # filter for syscall "exit" (1) [priority: 65535]
   if ($syscall == 1)
     action TRACE(1);
-  # filter for syscall "write" (4) [priority: 65527]
+  # filter for syscall "read" (3) [priority: 65516]
+  if ($syscall == 3)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (4) [priority: 65515]
   if ($syscall == 4)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -631,34 +659,6 @@ if ($arch == 3221225493)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (3) [priority: 65525]
-  if ($syscall == 3)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # filter for arch sh (1073741866)
@@ -713,7 +713,35 @@ if ($arch == 3221225715)
   # filter for syscall "close" (57) [priority: 65535]
   if ($syscall == 57)
     action ERRNO(1);
-  # filter for syscall "write" (64) [priority: 65527]
+  # filter for syscall "read" (63) [priority: 65516]
+  if ($syscall == 63)
+    if ($a0.hi32 == 0)
+      if ($a0.lo32 == 0)
+        if ($a1.hi32 > 0)
+          if ($a2.hi32 > 0)
+            if ($a3.hi32 & 0x00000000 == 0)
+              if ($a3.lo32 & 0x0000000f == 3)
+                action KILL;
+          else
+            if ($a2.hi32 == 0)
+              if ($a2.lo32 > 2)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+        else
+          if ($a1.hi32 == 0)
+            if ($a1.lo32 >= 1)
+              if ($a2.hi32 > 0)
+                if ($a3.hi32 & 0x00000000 == 0)
+                  if ($a3.lo32 & 0x0000000f == 3)
+                    action KILL;
+              else
+                if ($a2.hi32 == 0)
+                  if ($a2.lo32 > 2)
+                    if ($a3.hi32 & 0x00000000 == 0)
+                      if ($a3.lo32 & 0x0000000f == 3)
+                        action KILL;
+  # filter for syscall "write" (64) [priority: 65515]
   if ($syscall == 64)
     if ($a0.hi32 == 0)
       if ($a0.lo32 == 0)
@@ -763,34 +791,6 @@ if ($arch == 3221225715)
                 action TRAP;
             else
               action TRAP;
-  # filter for syscall "read" (63) [priority: 65525]
-  if ($syscall == 63)
-    if ($a0.hi32 == 0)
-      if ($a0.lo32 == 0)
-        if ($a1.hi32 > 0)
-          if ($a2.hi32 > 0)
-            if ($a3.hi32 & 0x00000000 == 0)
-              if ($a3.lo32 & 0x0000000f == 3)
-                action KILL;
-          else
-            if ($a2.hi32 == 0)
-              if ($a2.lo32 > 2)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-        else
-          if ($a1.hi32 == 0)
-            if ($a1.lo32 >= 1)
-              if ($a2.hi32 > 0)
-                if ($a3.hi32 & 0x00000000 == 0)
-                  if ($a3.lo32 & 0x0000000f == 3)
-                    action KILL;
-              else
-                if ($a2.hi32 == 0)
-                  if ($a2.lo32 > 2)
-                    if ($a3.hi32 & 0x00000000 == 0)
-                      if ($a3.lo32 & 0x0000000f == 3)
-                        action KILL;
   # default action
   action ALLOW;
 # invalid architecture action
