@@ -280,6 +280,73 @@ static unsigned int _db_tree_put(struct db_arg_chain_tree **tree)
 }
 
 /**
+ * Duplicate a syscall filter argument chain tree
+ * @param node the top of the argument chain list to duplicate
+ * @param node_cnt the number of nodes in the duplicated tree
+ *
+ * Duplicate a filter chain tree and ensure that each node in the tree is
+ * independent and not referenced anywhere else in the tree.  The head of the
+ * duplicated tree is returned with a reference count of one.  Returns a
+ * pointer to the head of duplicated tree on success, NULL on failure.  The
+ * node count is only updated on success.
+ *
+ */
+static struct db_arg_chain_tree *_db_tree_dup(
+	const struct db_arg_chain_tree *node, unsigned int *node_cnt)
+{
+	struct db_arg_chain_tree *new;
+	unsigned int cnt = 1;
+	unsigned int cnt_sub;
+
+	new = zmalloc(sizeof(*new));
+	if (new == NULL)
+		return NULL;
+
+	/* copy all of the node state except for the connections */
+	memcpy(new, node, sizeof(struct db_arg_chain_tree));
+	new->lvl_prv = NULL;
+	new->lvl_nxt = NULL;
+	new->nxt_t = NULL;
+	new->nxt_f = NULL;
+
+	/* every node in the duplicated tree is referenced only once */
+	new->refcnt = 1;
+
+	/* duplicate all the connections */
+	if (node->lvl_prv) {
+		new->lvl_prv = _db_tree_dup(node->lvl_prv, &cnt_sub);
+		if (new->lvl_prv == NULL)
+			goto err;
+		cnt += cnt_sub;
+	}
+	if (node->lvl_nxt) {
+		new->lvl_nxt = _db_tree_dup(node->lvl_nxt, &cnt_sub);
+		if (new->lvl_nxt == NULL)
+			goto err;
+		cnt += cnt_sub;
+	}
+	if (node->nxt_t) {
+		new->nxt_t = _db_tree_dup(node->nxt_t, &cnt_sub);
+		if (new->nxt_t == NULL)
+			goto err;
+		cnt += cnt_sub;
+	}
+	if (node->nxt_f) {
+		new->nxt_f = _db_tree_dup(node->nxt_f, &cnt_sub);
+		if (new->nxt_f == NULL)
+			goto err;
+		cnt += cnt_sub;
+	}
+
+	*node_cnt = cnt;
+	return new;
+
+err:
+	_db_tree_put(&new);
+	return NULL;
+}
+
+/**
  * Release a node reference
  * @param node pointer to a node
  *
@@ -1960,6 +2027,21 @@ static struct db_sys_list *_db_rule_gen_64(const struct arch_def *arch,
 		}
 	} else
 		s_new->action = rule->action;
+
+	/* things can get very complex when adding non-trivial rules to
+	 * existing trees, especially given the linkages in 64-bit filters,
+	 * in order to solve problems relating to excessive node linking,
+	 * "dup" the new rule to ensure that all of the nodes are independent
+	 * and not referenced multiple times in the rule tree */
+	if (s_new->chains) {
+		struct db_arg_chain_tree *c_old;
+
+		c_old = s_new->chains;
+		s_new->chains = _db_tree_dup(c_old, &s_new->node_cnt);
+		_db_tree_put(&c_old);
+		if (s_new->chains == NULL)
+			goto gen_64_failure;
+	}
 
 	return s_new;
 
