@@ -87,7 +87,7 @@ void sys_reset_state(void)
 {
 	state.nr_seccomp = -1;
 
-	if (state.notify_fd > 0)
+	if (state.notify_fd >= 0)
 		close(state.notify_fd);
 	state.notify_fd = -1;
 
@@ -421,7 +421,7 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			flgs |= SECCOMP_FILTER_FLAG_SPEC_ALLOW;
 		rc = syscall(state.nr_seccomp,
 			     SECCOMP_SET_MODE_FILTER, flgs, prgm);
-		if (tsync_notify && rc > 0) {
+		if (listener_req && rc >= 0) {
 			/* return 0 on NEW_LISTENER success, but save the fd */
 			state.notify_fd = rc;
 			rc = 0;
@@ -429,10 +429,6 @@ int sys_filter_load(struct db_filter_col *col, bool rawrc)
 			/* always return -ESRCH if we fail to sync threads */
 			errno = ESRCH;
 			rc = -errno;
-		} else if (rc > 0 && state.sup_user_notif > 0) {
-			/* return 0 on NEW_LISTENER success, but save the fd */
-			state.notify_fd = rc;
-			rc = 0;
 		}
 	} else
 		rc = prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, prgm);
