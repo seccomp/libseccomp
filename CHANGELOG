@@ -2,6 +2,18 @@ libseccomp: Releases
 ===============================================================================
 https://github.com/seccomp/libseccomp
 
+* Version 2.6.2 - November 20, 2026
+- Fix issue where incorrect accumulator reloads can lead to erroneous actions.
+  See GitHub Advisory GHSA-35x7-vh54-jvqf
+- Fix issue where libseccomp can enter an infinite loop during the adding of
+  rules with complex arguments.  See GitHub Advisory GHSA-qxh5-4cq9-6mjx
+- Fix issue where libseccomp generates erroneous BPF where the syscall number
+  is not loaded prior to comparing against it.  See GitHub Advisory
+  GHSA-q75f-27j4-2h7j
+- Fix issue where libseccomp can crash when seccomp_transaction_reject() is
+  called without a preceding seccomp_transaction_start().  See GitHub
+  Advisory GHSA-84vx-jqqr-h4f2
+
 * Version 2.6.1 - July 1, 2026
 - Update the syscall table for Linux v7.1.0-rc4
 - Fix incorrect 64-bit comparison merge that can weaken libseccomp filters.
