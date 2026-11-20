@@ -44,6 +44,8 @@
 #define ARCH_NATIVE		AUDIT_ARCH_ARM
 #elif __aarch64__
 #define ARCH_NATIVE		AUDIT_ARCH_AARCH64
+#elif __alpha__
+#define ARCH_NATIVE		AUDIT_ARCH_ALPHA
 #elif __loongarch_lp64
 #define ARCH_NATIVE		AUDIT_ARCH_LOONGARCH64
 #elif __m68k__

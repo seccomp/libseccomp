@@ -24,6 +24,7 @@
 GLBL_ARCH_LE_SUPPORT=" \
 	x86 x86_64 x32 \
 	arm aarch64 \
+	alpha \
 	loongarch64 \
 	mipsel mipsel64 mipsel64n32 \
 	ppc64le \
@@ -50,6 +51,7 @@ GLBL_ARCH_32B_SUPPORT=" \
 GLBL_ARCH_64B_SUPPORT=" \
 	x86_64 \
 	aarch64 \
+	alpha \
 	loongarch64 \
 	mips64 \
 	parisc64 \
@@ -814,7 +816,7 @@ function run_test_live() {
 		rc_errno=163
 		rc_log=164
 		;;
-	mips|mipsel|mips64|mips64n32|mipsel64|mipsel64n32)
+	alpha|mips|mipsel|mips64|mips64n32|mipsel64|mipsel64n32)
 		rc_kill_process=140
 		rc_kill=140
 		rc_allow=160

@@ -31,6 +31,7 @@ The libseccomp library currently supports the architectures listed below:
 * 32-bit x86 (x86)
 * 64-bit x86 (x86_64)
 * 64-bit x86 x32 ABI (x32)
+* 64-bit Alpha (alpha)
 * 32-bit ARM EABI (arm)
 * 64-bit ARM (aarch64)
 * 64-bit LoongArch (loongarch64)

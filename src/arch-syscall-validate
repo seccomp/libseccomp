@@ -331,6 +331,27 @@ function dump_lib_aarch64() {
 }
 
 #
+# Dump the alpha system syscall table
+#
+# Arguments:
+#     1    path to the kernel source
+#
+#  Dump the architecture's syscall table to stdout.
+#
+function dump_sys_alpha() {
+	dump_from_syscall_tbl "$1/arch/alpha/kernel/syscalls/syscall.tbl"
+}
+
+#
+# Dump the alpha library syscall table
+#
+#  Dump the library's syscall table to stdout.
+#
+function dump_lib_alpha() {
+	dump_lib_arch alpha | mangle_lib_syscall alpha
+}
+
+#
 # Dump the loongarch64 syscall table
 #
 # Arguments:
@@ -685,6 +706,9 @@ function dump_sys() {
 	aarch64)
 		dump_sys_aarch64 "$2"
 		;;
+	alpha)
+		dump_sys_alpha "$2"
+		;;
 	loongarch64)
 		dump_sys_loongarch64 "$2"
 		;;
@@ -758,6 +782,9 @@ function dump_lib() {
 	aarch64)
 		dump_lib_aarch64
 		;;
+	alpha)
+		dump_lib_alpha
+		;;
 	loongarch64)
 		dump_lib_loongarch64
 		;;
@@ -828,6 +855,7 @@ function gen_csv() {
 	abi_list=""
 	abi_list+=" x86 x86_64 x32"
 	abi_list+=" arm aarch64"
+	abi_list+=" alpha"
 	abi_list+=" loongarch64"
 	abi_list+=" m68k"
 	abi_list+=" mips mips64 mips64n32"
@@ -941,6 +969,7 @@ if [[ $opt_arches == "" ]]; then
 	opt_arches=" \
 		x86 x86_64 x32 \
 		arm aarch64 \
+		alpha \
 		loongarch64 \
 		m68k \
 		mips mips64 mips64n32 \

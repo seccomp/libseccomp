@@ -28,9 +28,9 @@ import sys
 import os
 
 arch_list = [
-    'i386', 'x86_64', 'x32', 'arm', 'arm64', 'loongarch64', 'm68k',
-    'mipso32', 'mips64', 'mips64n32', 'parisc', 'parisc64', 'powerpc',
-    'powerpc64', 'riscv64', 's390', 's390x', 'sh'
+    'i386', 'x86_64', 'x32', 'arm', 'arm64', 'alpha', 'loongarch64',
+    'm68k', 'mipso32', 'mips64', 'mips64n32', 'parisc', 'parisc64',
+    'powerpc', 'powerpc64', 'riscv64', 's390', 's390x', 'sh'
 ]
 
 ignore_syscall_list = [

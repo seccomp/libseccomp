@@ -61,6 +61,8 @@ static const char *_pfc_arch(const struct arch_def *arch)
 		return "arm";
 	case SCMP_ARCH_AARCH64:
 		return "aarch64";
+	case SCMP_ARCH_ALPHA:
+		return "alpha";
 	case SCMP_ARCH_LOONGARCH64:
 		return "loongarch64";
 	case SCMP_ARCH_M68K:
