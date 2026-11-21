@@ -19,7 +19,9 @@
  * along with this library; if not, see <http://www.gnu.org/licenses>.
  */
 
+#define _GNU_SOURCE
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include <seccomp.h>
@@ -32,6 +34,8 @@ int main(int argc, char *argv[])
 	unsigned int api;
 	struct seccomp_notif *req = NULL;
 	struct seccomp_notif_resp *resp = NULL;
+	int pipefd[2];
+	int i;
 
 	/* get the api level */
 	api = seccomp_api_get();
@@ -176,6 +180,29 @@ int main(int argc, char *argv[])
 		if (rc != -ECANCELED)
 			return -1;
 	}
+	seccomp_release(ctx);
+	ctx = NULL;
+
+	/* seccomp_export_bpf short write */
+	ctx = seccomp_init(SCMP_ACT_ALLOW);
+	if (ctx == NULL)
+		return -1;
+	for (i = 0; i < 1024; i++) {
+		rc = seccomp_rule_add(ctx, SCMP_ACT_ERRNO(1), SCMP_SYS(write), 1,
+				      SCMP_A0(SCMP_CMP_EQ, i));
+		if (rc != 0)
+			return -1;
+	}
+	if (pipe2(pipefd, O_NONBLOCK) < 0)
+		return -1;
+	/* a pipe smaller than the filter only takes a part of it */
+	if (fcntl(pipefd[1], F_SETPIPE_SZ, getpagesize()) < 0)
+		return -1;
+	rc = seccomp_export_bpf(ctx, pipefd[1]);
+	if (rc != -ECANCELED)
+		return -1;
+	close(pipefd[0]);
+	close(pipefd[1]);
 	seccomp_release(ctx);
 	ctx = NULL;
 

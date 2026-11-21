@@ -755,6 +755,9 @@ API int seccomp_export_pfc(const scmp_filter_ctx ctx, int fd)
 API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 {
 	int rc;
+	ssize_t n;
+	size_t len;
+	const char *buf;
 	struct db_filter_col *col;
 	struct bpf_program *program;
 
@@ -766,9 +769,22 @@ API int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd)
 	if (rc < 0)
 		return _rc_filter(rc);
 	program = col->prgm_bpf;
-	rc = write(fd, program->blks, BPF_PGM_SIZE(program));
-	if (rc < 0)
-		return _rc_filter_sys(col, -errno);
+
+	/* handle short writes and EINTR */
+	buf = (const char *)program->blks;
+	len = BPF_PGM_SIZE(program);
+	while (len > 0) {
+		n = write(fd, buf, len);
+		if (n < 0) {
+			if (errno == EINTR)
+				continue;
+			return _rc_filter_sys(col, -errno);
+		}
+		if (n == 0)
+			return _rc_filter_sys(col, -EIO);
+		buf += n;
+		len -= n;
+	}
 
 	return 0;
 }
